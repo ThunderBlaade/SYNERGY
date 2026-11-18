@@ -244,6 +244,16 @@ nav{padding:4px 4px max(8px,calc(env(safe-area-inset-bottom,0px) - 6px))!importa
 #app{padding-bottom:96px}
 #app h1.tt{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #app h1.tt+p.mu{margin-top:2px}
+/* v7: one type scale, one rhythm; Gym centred on Start workout */
+#app h1{margin:8px 0 18px}
+#app h1+p.mu{font:500 10px/1.6 var(--mono)!important;letter-spacing:.22em;text-transform:uppercase;color:var(--mu);text-align:center;margin:0 0 20px!important}
+#app .card,#app .grp{margin:0 0 12px}
+#app .g2,#app .g3{gap:12px;margin:0 0 12px}#app .g2>.card,#app .g3>.card{margin:0}
+#app h2{margin:28px 0 10px}#app h2:first-child{margin-top:0}
+#app .acts{margin:12px 0 0}
+#app input,#app select,#app textarea{font-size:16px}
+.gy-hero{min-height:calc(100dvh - 230px);display:flex;flex-direction:column;justify-content:center;gap:12px}.gy-hero .card,.gy-hero .btn{margin:0}
+.gy-a{padding-bottom:8px}.gy-b{padding-top:8px;padding-bottom:12px}
 #gate .card{background:transparent}
 </style>
 </head>
@@ -422,10 +432,10 @@ const recRows=(keys,R)=>keys.map(k=>{const c=last(R[k]);return `<li><button clas
 function histList(l){if(!l.length)return '<div class="card mu sm">No workouts yet.</div>';let ld='',h='';l.forEach(w=>{const d=new Date(w.start).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();if(d!==ld){h+=`<p class="mu sm" style="margin:14px 0 6px;font-weight:600">${d}</p>`;ld=d}
  h+=swp(`<button class="card tap" data-view="${w.id}"><div class="row sp"><b>${esc(w.name||CATS[w.cat][0])}</b><span class="tag">${METH[w.method||'timer']}</span></div><div class="mu sm">${ftime(w.start)} – ${ftime(w.end)} · ${mins(w.dur)}</div><div class="mu sm">${w.exs&&w.exs.length?`${w.exs.length} exercises · ${doneSets(w)} sets `:''}${w.dist?fd(w.dist):''}</div><div class="sm" style="margin-top:4px">Completed${w.rating?' · '+esc(w.rating.phrase):''}</div></button>`,`data-del="${w.id}"`)});return h}
 function gym(){const a=S.active,R=recEvents(),hl=Object.keys(R).sort((x,y)=>last(R[y]).w.end-last(R[x]).w.end).slice(0,4),stale=a&&a.paused&&Date.now()-(a.pausedAt||Date.now())>36e5;
- return `<h1>The Gym</h1><p class="mu">Your training space.</p>${a?`<div class="card"><div class="row sp"><div><b>${esc(a.name||METH[a.method])}</b><div class="mu sm">${a.paused?'Paused':'In progress'}</div></div><div class="timer" style="font-size:28px" data-timer="a">${tmText(a)}</div></div>${stale?'<p class="sm" style="margin:8px 0 0">This workout has been paused for over an hour. Resume it or finish it.</p>':''}</div>`:''}
- <button class="btn big" data-a="${a?'resume':'start'}">${a?'Resume workout':'Start workout'}</button>
- <h2>Workout history</h2>${histList([...S.workouts].sort((x,y)=>y.start-x.start).slice(0,3))}<div class="acts"><button class="btn g" data-a="hist">View all</button></div>
- <h2>Personal records</h2>${hl.length?`<div class="card" style="padding:4px 16px"><ul class="list">${recRows(hl,R)}</ul></div>`:'<div class="card mu sm">Records appear as you log workouts. Your first log of an exercise sets the baseline.</div>'}<div class="acts"><button class="btn g" data-a="recs">View all records</button></div>`}
+  const hist=`<section class="gy-a"><h2>Workout history</h2>${histList([...S.workouts].sort((x,y)=>y.start-x.start).slice(0,3))}<div class="acts"><button class="btn g" data-a="hist">View all</button></div></section>`,
+  recs=`<section class="gy-b"><h2>Personal records</h2>${hl.length?`<div class="card" style="padding:4px 16px"><ul class="list">${recRows(hl,R)}</ul></div>`:'<div class="card mu sm">Records appear as you log workouts. Your first log of an exercise sets the baseline.</div>'}<div class="acts"><button class="btn g" data-a="recs">View all records</button></div></section>`,
+  act=a?`<div class="card"><div class="row sp"><div><b>${esc(a.name||METH[a.method])}</b><div class="mu sm">${a.paused?'Paused':'In progress'}</div></div><div class="timer" style="font-size:28px" data-timer="a">${tmText(a)}</div></div>${stale?'<p class="sm" style="margin:8px 0 0">This workout has been paused for over an hour. Resume it or finish it.</p>':''}</div>`:'';
+ return `<h1>The Gym</h1>${hist}<section class="gy-hero">${act}<button class="btn big" data-a="${a?'resume':'start'}">${a?'Resume workout':'Start workout'}</button></section>${recs}`}
 function method(){const o=[['template','strength','Create / follow workout','Build a reusable workout or follow one you’ve saved.','tpls'],['timer','timer','Timer','Train freely while SYNERGY tracks your time.','tsetup'],['countdown','hourglass','Countdown','Train against a time you choose.','csetup'],['quick','edit','Quick log','Already trained? Record it in seconds.','qcat']];
  return `<div class="hd"><button class="bk" data-a="back">Back</button></div><h1>How do you want to train?</h1>${o.map(x=>`<button class="card tap opt" data-a="${x[4]}">${ic(x[1])}<span><b>${x[2]}</b><span class="mu sm">${x[3]}</span></span><span class="ch">›</span></button>`).join('')}`}
 function tpls(){const T=S.tpl.filter(t=>t.exs.length||t.name),rows=l=>`<div class="card" style="padding:4px 16px"><ul class="list">${l.map(t=>`<li class="swp"><button class="swp-del" data-tdelid="${t.id}" aria-label="Delete">Delete</button><div class="swp-in row" style="padding:12px 0;background:var(--s1)"><button class="t" data-tpl="${t.id}" style="text-align:left"><b>${esc(t.name||'Untitled workout')}</b><span class="mu sm">${CATS[t.cat][0]} · ${t.exs.length} exercises</span></button><button class="x" data-fav="${t.id}" aria-label="Favourite ${esc(t.name)}" aria-pressed="${!!t.fav}">${t.fav?'★':'☆'}</button></div></li>`).join('')}</ul></div>`,rc=T.filter(t=>t.last).sort((a,b)=>b.last-a.last).slice(0,3),fv=T.filter(t=>t.fav);
@@ -1142,7 +1152,7 @@ locInit();render();goTop();
 /* PWA: offline shell. Only registers on https or localhost; harmless elsewhere. */
 try{if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
  window.addEventListener('load',function(){navigator.serviceWorker.register('service-worker.js').catch(function(){})})}}catch(e){}
-(function(){const a=document.getElementById('app');if(!a)return;const re=/^(Home|The Gym|Synergy|Ranked|Astral|Profile)$/i,tag=()=>a.querySelectorAll('h1').forEach(h=>{if(re.test(h.textContent.trim()))h.classList.add('tt')});tag();new MutationObserver(tag).observe(a,{childList:true,subtree:true})})();
+(function(){const a=document.getElementById('app');if(!a)return;const re=/^(Home|The Gym|Synergy|Ranked|Astral|Profile)$/i,tag=()=>a.querySelectorAll('h1').forEach(h=>{if(re.test(h.textContent.trim()))h.classList.add('tt')});let gy=false;const tag2=()=>{tag();const hr=a.querySelector('.gy-hero');if(hr){if(!gy){gy=true;hr.scrollIntoView({block:'center'})}}else gy=false};tag2();new MutationObserver(tag2).observe(a,{childList:true,subtree:true})})();
 </script>
 </body>
 </html>
