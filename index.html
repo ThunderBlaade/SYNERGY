@@ -189,7 +189,8 @@ html[data-glow=on] body::before{content:'';position:fixed;left:-25%;right:-25%;t
 :root[data-theme="dark"] body::before,html[data-glow=on][data-sky=night] body::before{opacity:.2}
 #sky .sgrad{background:var(--bg)!important}
 #sun .sg,#moon .mg{display:none}
-#sun .sd{background:var(--tx)!important;box-shadow:none!important}#sun .sd svg path{fill:var(--bg)!important}
+#sun .sd{background:var(--sd2,#FFC24A)!important;box-shadow:none!important}#sun .sd svg path{fill:rgba(255,255,255,.34)!important}
+#sun::after{content:'';position:absolute;left:-31px;top:-31px;width:62px;height:62px;border-radius:50%;padding:1.5px;box-sizing:border-box;background:var(--irid);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
 #moon svg{filter:none}
 svg circle[fill="#262B55"]{fill:var(--s2)}svg circle[stroke="rgba(220,225,255,.28)"]{stroke:var(--ln)}svg path[style*="--moonc"]{fill:var(--tx)!important}#moon svg{opacity:.8}
 
@@ -916,7 +917,7 @@ const dvEnd=()=>{if(dvD&&dvD.m)DV.moved=true;setTimeout(()=>{DV.moved=false},50)
 /* ===== Sun & moon sky: switches at 05:30 (day) and 16:30 (night); the sun or moon crosses left to right ===== */
 let DAY0=330,DAY1=990;const PHN=['New moon','Waxing crescent','First quarter','Waxing gibbous','Full moon','Waning gibbous','Last quarter','Waning crescent'];
 const THL={system:'System',light:'Light',dark:'Dark'};
-const moonPhase=d=>{const jd=(d||simDate()).getTime()/864e5+2440587.5,p=((jd-2451550.1)/29.530588853)%1;return p<0?p+1:p};
+const moonPhase=d=>{const jd=(d||simDate()).getTime()/864e5+2440587.5,T=(jd-2451545)/36525,R=Math.PI/180,sn=x=>Math.sin(x*R),Lm=218.3164477+481267.88123421*T,D=297.8501921+445267.1114034*T,M=357.5291092+35999.0502909*T,Mm=134.9633964+477198.8675055*T,F=93.272095+483202.0175233*T,lm=Lm+6.288774*sn(Mm)+1.274027*sn(2*D-Mm)+.658314*sn(2*D)+.213618*sn(2*Mm)-.185116*sn(M)-.114332*sn(2*F),ls=280.46646+36000.76983*T+(1.914602-.004817*T)*sn(M)+.019993*sn(2*M),e=(((lm-ls)%360)+360)%360;return e/360};
 const moonInfo=d=>{const p=moonPhase(d);return{p,name:PHN[Math.floor(p*8+.5)%8],lit:Math.round((1-Math.cos(2*Math.PI*p))/2*100)}};
 function moonSvg(p){const r=20,pw=p<=.5?p:1-p,k=Math.cos(2*Math.PI*pw),rx=(Math.abs(k)*r).toFixed(2),sw=k>0?0:1,lit=pw<.004?'':`<path d="M0 ${-r}A${r} ${r} 0 0 1 0 ${r}A${rx} ${r} 0 0 ${sw} 0 ${-r}Z" style="fill:var(--moonc,#F4F1E4)" stroke="none"/>`;
  return `<svg viewBox="-24 -24 48 48" aria-hidden="true"><circle r="${r}" fill="#262B55" stroke="none"/><g${p>.5?' transform="scale(-1 1)"':''}>${lit}</g><circle r="${r}" fill="none" stroke="rgba(220,225,255,.28)" stroke-width="1"/></svg>`}
