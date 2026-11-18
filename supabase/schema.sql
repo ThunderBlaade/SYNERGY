@@ -31,6 +31,8 @@ create trigger docs_touch before update on public.docs for each row execute func
 
 alter table public.docs enable row level security;
 revoke all on public.docs from anon;
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on public.docs to authenticated;
 
 drop policy if exists docs_read on public.docs;
 drop policy if exists docs_ins  on public.docs;
