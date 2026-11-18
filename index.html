@@ -219,6 +219,21 @@ nav button{font-size:8.5px;letter-spacing:.16em}
 .card::after,.grp::after,.rate::after,.cat::after{content:'';position:absolute;inset:4px;border:1px solid var(--ln);pointer-events:none;opacity:.7}
 .card::before,.grp::before,.cat::before{content:'';position:absolute;top:1px;left:50%;margin-left:-13px;width:26px;height:8px;background:var(--mu);opacity:.55;pointer-events:none;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 8'%3E%3Cpath d='M1 0.5L13 7L25 0.5M6 0.5L13 4.3L20 0.5' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 8'%3E%3Cpath d='M1 0.5L13 7L25 0.5M6 0.5L13 4.3L20 0.5' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E") center/contain no-repeat}
 .btn.big,.btn:not(.g):not(.d){box-shadow:inset 0 0 0 4px var(--tx),inset 0 0 0 5px color-mix(in srgb,var(--bg) 40%,transparent)}
+/* v4: smaller type, quiet titles, living Astral sky (day/night colour, weather, season) */
+body,#app{font-size:13px}
+html[data-tab] #app h1::before{content:none!important}
+#app h1,.prof h1,html[data-tab] #app h1{font:400 19px/1.2 var(--disp);letter-spacing:-.01em;margin:4px 0 10px}
+#app p,#app li,#app .t,#app input,#app select,#app textarea{font-size:13px}
+#app .mu,#app .sm{font-size:12px}
+#app b{font-size:13px}
+html[data-tab=astral] #sky .sgrad{background:linear-gradient(180deg,var(--sa),var(--sb))!important}
+#wx{position:absolute;inset:0;overflow:hidden;--cl:#fff;--rc:rgba(40,65,100,.3)}html[data-sky=night] #wx{--cl:#8F98C4;--rc:rgba(200,212,255,.28)}
+#wx .rn{position:absolute;top:-24px;width:1px;height:14px;background:var(--rc);animation:rfall linear infinite}
+@keyframes rfall{to{transform:translateY(calc(100vh + 48px))}}
+#wx .sn{position:absolute;top:-8px;width:4px;height:4px;border-radius:50%;background:#fff;opacity:.85;animation:sfall linear infinite}
+@keyframes sfall{to{transform:translateY(calc(100vh + 24px))}}
+@media (prefers-reduced-motion:reduce){#wx *{animation:none!important}}html[data-rm] #wx *{animation:none!important}
+.fr{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--ln);font-size:12px}.fr:last-child{border-bottom:0}.fr span{color:var(--mu);font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase}.fr b{font-weight:400;text-align:right}
 #gate .card{background:transparent}
 </style>
 </head>
@@ -333,7 +348,27 @@ function plist(){const q=(sub.q||'').toLowerCase(),m=sub.mu||'All',l=exLib().fil
 function delConfirm(){const w=S.workouts.find(x=>x.id===sub.id);return `<div class="hd"><button class="bk" data-view="${w.id}">Back</button></div><h1>Delete this workout?</h1><p>This removes it from your history and reverses the Sparks it earned (shown as a reversal in your Sparks breakdown). Records are recalculated from your remaining workouts. This can’t be undone.</p><div class="acts"><button class="btn d" data-a="delgo">Delete ${esc(w.name||CATS[w.cat][0])}</button><button class="btn g" data-view="${w.id}">Keep it</button></div>`}
 function xpView(){const now=Date.now(),I=lvl(total());return `<div class="hd"><button class="bk" data-a="back">Back</button></div><h1>Sparks breakdown</h1><div class="card"><div class="stat">${total()}</div><div class="mu sm">lifetime Sparks · level ${I.L} ${ttl(I.L)}</div>${bar(I)}</div>
  <div class="g2"><div class="card"><div class="stat">${sumWhere(e=>e.ts>=wkStart(now))}</div><div class="mu sm">this week</div></div><div class="card"><div class="stat">${sumWhere(e=>e.season===seasonNo(now))}</div><div class="mu sm">season ${seasonNo(now)}</div></div></div><h2>Transactions</h2><div class="card">${txRows(40)}</div>`}
-function astralView(){const i=moonInfo();return `<h1 style="margin:6px 0 8px">Astral</h1><p class="mu" style="margin:0 0 8px;font-size:14.5px">Your sky, tonight.</p><p class="mu sm" data-skyline style="margin:0 0 18px;font-size:12px">✦ ${skyLine()}</p><div class="card"><div class="row" style="gap:16px;align-items:center"><div style="width:64px;height:64px;flex:none">${moonSvg(i.p).replace('<svg ','<svg width="64" height="64" ')}</div><div><b>${i.name}</b><div class="mu sm">${i.lit}% lit</div></div></div></div><div class="card"><p>Optional astrology profiles, archetypes and compatibility, presented as entertainment.</p><p class="mu sm" style="margin:0">This part of SYNERGY hasn’t been specified yet, so nothing is built and nothing is simulated.</p></div>`}
+const wxKind=c=>c===0?['Clear','clear']:c===1?['Mostly clear','clear']:c===2?['Partly cloudy','cloud']:c===3?['Overcast','cloud']:(c===45||c===48)?['Fog','fog']:(c>=51&&c<=57)?['Drizzle','rain']:((c>=61&&c<=67)||(c>=80&&c<=82))?['Rain','rain']:((c>=71&&c<=77)||c===85||c===86)?['Snow','snow']:c>=95?['Thunderstorm','rain']:['Cloudy','cloud'];
+const wxCur=()=>{const w=S.wx,r=S.loc&&S.loc.region;return w&&r&&w.lat===r.lat&&w.lon===r.lon&&Date.now()-w.t<108e5?w:null};
+function seasonNow(){const r=S.loc&&S.loc.region;if(!r)return null;const q=tzParts(r.tz,new Date()),m=q?q.mo-1:new Date().getMonth();let n=(m===11||m<2)?0:m<5?1:m<8?2:3;if(r.lat<0)n=(n+2)%4;return['Winter','Spring','Summer','Autumn'][n]}
+let WXBUSY=0;
+function wxGet(){const r=S.loc&&S.loc.region;if(!r||navigator.onLine===false||WXBUSY)return;const w=S.wx;if(w&&w.lat===r.lat&&w.lon===r.lon&&Date.now()-w.t<18e5)return;WXBUSY=1;
+ fetch('https://api.open-meteo.com/v1/forecast?latitude='+r.lat+'&longitude='+r.lon+'&current=temperature_2m,weather_code,cloud_cover,wind_speed_10m&timezone=auto').then(x=>x.ok?x.json():Promise.reject()).then(j=>{const c=j&&j.current;if(!c||typeof c.weather_code!=='number')throw 0;S.wx={t:Date.now(),lat:r.lat,lon:r.lon,code:c.weather_code,temp:c.temperature_2m,cloud:c.cloud_cover,wind:c.wind_speed_10m};save();WXBUSY=0;if(tab==='astral')render()}).catch(()=>{WXBUSY=0})}
+const wr=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)};
+function wxDraw(){const sk=$('#sky');if(!sk)return;let el=$('#wx');if(!el){el=document.createElement('div');el.id='wx';el.setAttribute('aria-hidden','true');const g=sk.querySelector('.sgrad');if(g)g.after(el);else sk.prepend(el)}
+ const w=wxCur(),ss=seasonNow(),k=w?wxKind(w.code):null,key=(w?w.code+'|'+(w.temp<=1?'c':'w'):'');if(el.dataset.k===key)return;el.dataset.k=key;let h='';
+  if(w){const kind=k[1];
+  if(kind==='rain'&&w.temp>1){const n=w.code>=61||w.code>=80?34:18;for(let q=0;q<n;q++)h+=`<i class="rn" style="left:${(wr(q+20)*100).toFixed(1)}%;animation-duration:${(.8+wr(q+40)*.6).toFixed(2)}s;animation-delay:-${(wr(q+60)*2).toFixed(2)}s"></i>`}
+  if(kind==='snow'||(kind==='rain'&&w.temp<=1))for(let q=0;q<24;q++)h+=`<i class="sn" style="left:${(wr(q+80)*100).toFixed(1)}%;animation-duration:${(7+wr(q+100)*6).toFixed(1)}s;animation-delay:-${(wr(q+120)*10).toFixed(1)}s"></i>`;}
+ el.innerHTML=h}
+function astralFacts(){const r=S.loc&&S.loc.region,w=wxCur(),ss=seasonNow(),mi=moonInfo(),im=S.units!=='metric',rows=[];
+ if(r)rows.push(['Location',esc(r.name)+(r.country?', '+esc(r.country):'')],['Local time',fmt12(Math.floor(nowMin()))]);
+ if(ss)rows.push(['Season',ss]);
+ if(w){const t=im?w.temp*9/5+32:w.temp,wd=im?w.wind*.621371:w.wind;rows.push(['Weather',wxKind(w.code)[0]],['Temperature',Math.round(t)+(im?' °F':' °C')],['Wind',Math.round(wd)+(im?' mph':' km/h')])}
+ rows.push(['Daylight',fmt12(DAY0)+' – '+fmt12(DAY1)],['Moon',mi.name+' · '+mi.lit+'% lit']);
+ const note=!r?'Set your location in Profile to see weather and season.':w?'Weather from Open-Meteo, checked '+new Date(w.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'.':'Weather isn’t available right now.';
+ return `<div class="card">${rows.map(x=>`<div class="fr"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}<p class="mu sm" style="margin:10px 0 0">${note}</p></div>`}
+function astralView(){const i=moonInfo();return `<div style="height:150px" aria-hidden="true"></div><h1>Astral</h1>${astralFacts()}<div class="card"><div class="row" style="gap:16px;align-items:center"><div style="width:48px;height:48px;flex:none">${moonSvg(i.p).replace('<svg ','<svg width="48" height="48" ')}</div><div><b>${i.name}</b><div class="mu sm">${i.lit}% lit</div></div></div></div><div class="card"><p>Optional astrology profiles, archetypes and compatibility, presented as entertainment.</p><p class="mu sm" style="margin:0">This part of SYNERGY hasn’t been specified yet, so nothing is built and nothing is simulated.</p></div>`}
 function soon(t,d){return `<h1>${t}</h1><div class="card"><p>${d}</p><p class="mu sm" style="margin:0">This part of SYNERGY hasn’t been specified yet, so nothing is built and nothing is simulated.</p></div>`}
 function rank(){const I=lvl(total());return `<h1>Ranked</h1><p class="mu">Compare across categories, not just one score.</p><h2>Sparks leader</h2><div class="card"><ul class="list"><li><b class="t">1. ${esc(S.name||'You')}</b><span class="xp">${total()}</span></li></ul></div>
  <div class="card mu sm">Ranked needs other people. Until multiplayer is decided, only you appear here. Consistency, Performance, Influence and Challenge rankings follow once their calculations are specified.</div>`}
@@ -454,7 +489,7 @@ const TABS=[['home','Home','home'],['play','The Gym','strength'],['conn','Synerg
 function goTop(){try{window.scrollTo(0,0)}catch(e){}}
 try{history.scrollRestoration='manual'}catch(e){}
 function ensureHud(){if(document.getElementById('hud'))return;const d=document.createElement('div');d.id='hud';d.setAttribute('aria-hidden','true');d.innerHTML=`<svg viewBox="0 0 390 844" preserveAspectRatio="xMinYMid slice"><g class="f"><path d="M388.0 0V844"/><path d="M385.8 0V844"/><path d="M383.2 0V844"/><path d="M380.2 0V844"/><path d="M376.7 0V844"/><path d="M372.6 0V844"/><path d="M367.7 0V844"/><path d="M362.1 0V844"/><path d="M355.5 0V844"/><path d="M347.8 0V844"/><path d="M338.7 0V844"/><path d="M328.2 0V844"/><path d="M315.8 0V844"/><path d="M301.3 0V844"/><path d="M284.4 0V844"/><path d="M264.6 0V844"/></g><g class="p"><path d="M5 0V844" stroke-width="4"/><path d="M11 0V844" stroke-width="1"/></g><g class="mv"><circle class="f" cx="5" cy="150" r="150"/><circle class="f" cx="5" cy="150" r="96"/><path class="am" d="M11 90V210"/><path class="p" d="M376 70V230" stroke-width="3"/></g></svg>`;document.body.insertBefore(d,document.body.firstChild)}
-function render(){document.documentElement.setAttribute('data-tab',tab);ensureHud();applySky();document.documentElement.style.setProperty('--ac',S.accent);
+function render(){document.documentElement.setAttribute('data-tab',tab);ensureHud();applySky();if(tab==='astral'){wxGet();wxDraw()}document.documentElement.style.setProperty('--ac',S.accent);
  const V={fr:frView,g:grpView,gnew:grpForm,gedit:grpForm,enc:encView,rep:repView,set:setPage,method,tpls,tplPrev,tplEdit,tsetup,csetup,qcat,qform,active,pickex:pickEx,rate,summary,hist,detail,del:delConfirm,recs,rec:recDetail,xp:xpView};
  $('#app').innerHTML=sub?V[sub.n]():{home,play:gym,conn:connView,rank,astral:astralView,me:profile}[tab]();
  $('#nav').innerHTML=navHtml();countUp();applyLook();try{devDraw()}catch(e){}}
@@ -994,7 +1029,7 @@ function applySky(){setSun();const r=document.documentElement,m=nowMin(),vm=vmin
  if(S.theme==='system'&&SKYSIM.min==null)r.removeAttribute('data-theme');else r.setAttribute('data-theme',th);r.setAttribute('data-sky',sky);
  const span=DAY1-DAY0,nspan=1440-span;let t=.5,out=0;
  if(sky==='day'){if(m>=DAY0&&m<DAY1)t=(m-DAY0)/span}else{const n=(m-DAY1+1440)%1440,g=Math.min(GAP,nspan/4);if(n<nspan){if(n<g){t=0;out=1}else if(n>nspan-g){t=1;out=1}else t=(n-g)/(nspan-2*g)}}
- const W=innerWidth,H=innerHeight,e=Math.sin(Math.PI*t),h=Math.pow(e,.6),x=-70+(W+140)*t,y=H*(.86-.2*e),op=Math.min(1,t/.08,(1-t)/.08),el=$(sky==='day'?'#sun':'#moon');
+ const W=innerWidth,H=innerHeight,e=Math.sin(Math.PI*t),h=Math.pow(e,.6),x=-70+(W+140)*t,y=H*(.17-.065*e),op=Math.min(1,t/.08,(1-t)/.08),el=$(sky==='day'?'#sun':'#moon');
  if(el){const tr=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;if(!el.dataset.init){el.style.transition='none';el.style.transform=tr;el.getBoundingClientRect();el.style.transition='';el.dataset.init=1}else{if(el._x!=null&&Math.abs(x-el._x)>W*.5){el.style.transition='none';el.style.transform=tr;el.getBoundingClientRect();el.style.transition=''}else el.style.transform=tr}el._x=x;el.style.opacity=out?0:Math.max(0,op).toFixed(2)}
  const c=skyCol(auto?vm:(th==='dark'?1320:720));r.style.setProperty('--sa',`rgb(${c.top})`);r.style.setProperty('--sb',`rgb(${c.bot})`);r.style.setProperty('--stars',(auto?starA(vm):1).toFixed(2));
  if(sky==='day'){const d1=lerpC([255,138,74],[255,224,128],h),d2=lerpC([255,106,58],[255,184,64],h);r.style.setProperty('--sunc',`hsla(${(12+38*h).toFixed(0)},100%,${(56+10*h).toFixed(0)}%,${(.62-.2*h).toFixed(2)})`);r.style.setProperty('--sd1',`rgb(${d1})`);r.style.setProperty('--sd2',`rgb(${d2})`);const su=$('#sun .sd'),pk='s'+moonInfo().p.toFixed(3);if(su&&su.dataset.k!==pk){su.dataset.k=pk;su.innerHTML=sunPhase(moonInfo().p)}}
