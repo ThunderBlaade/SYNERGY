@@ -192,6 +192,34 @@ html[data-glow=on] body::before{content:'';position:fixed;left:-25%;right:-25%;t
 #sun .sd{background:var(--tx)!important;box-shadow:none!important}#sun .sd svg path{fill:var(--bg)!important}
 #moon svg{filter:none}
 svg circle[fill="#262B55"]{fill:var(--s2)}svg circle[stroke="rgba(220,225,255,.28)"]{stroke:var(--ln)}svg path[style*="--moonc"]{fill:var(--tx)!important}#moon svg{opacity:.8}
+
+/* ===== Arcane HUD: technical linework with a little magic. Sky only lives on Astral. ===== */
+:root{--mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace}
+html:not([data-tab=astral]) #sky,html:not([data-tab=astral]) #fx{display:none!important}
+html[data-tab=astral] #hud{display:none}
+#hud{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}#hud svg{position:absolute;inset:0;width:100%;height:100%}
+#hud .l{fill:none;stroke:var(--ln);stroke-width:.8}#hud .rg{transition:transform 1.1s cubic-bezier(.3,.7,.2,1)}
+#hud .hr{fill:none;stroke:url(#hg);stroke-width:1.3;transform-box:view-box;transform-origin:330px 120px;animation:hrot 120s linear infinite}
+@keyframes hrot{to{transform:rotate(360deg)}}
+html[data-tab=play] #hud .rg{transform:translate(-300px,560px)}
+html[data-tab=conn] #hud .rg{transform:translate(-190px,250px)}
+html[data-tab=rank] #hud .rg{transform:translate(-20px,600px)}
+html[data-tab=me] #hud .rg{transform:translate(-320px,40px)}
+#app h1::before{display:block;font:500 10.5px var(--mono);letter-spacing:.3em;text-transform:uppercase;color:var(--mu);margin:0 0 10px}
+html[data-tab=home] #app h1::before{content:'01 — Status'}html[data-tab=play] #app h1::before{content:'02 — Training'}html[data-tab=conn] #app h1::before{content:'03 — Network'}
+html[data-tab=rank] #app h1::before{content:'04 — Standing'}html[data-tab=astral] #app h1::before{content:'05 — Sky'}html[data-tab=me] #app h1::before{content:'06 — Identity'}
+h2,label,.tag,.cap2,.orbn small,nav button{font-family:var(--mono)}
+h2{display:flex;align-items:center;gap:10px}h2::before{content:'';display:block;width:16px;height:1px;background:var(--irid);flex:none}
+.card,.grp,.rate,.cat,.ach div,html[data-glass] .card,html[data-glass] .grp,html[data-glass] .rate,html[data-glass] .cat,html[data-glass] .ach div{position:relative;background:
+ linear-gradient(var(--tx),var(--tx)) 0 0/10px 1px no-repeat,linear-gradient(var(--tx),var(--tx)) 0 0/1px 10px no-repeat,
+ linear-gradient(var(--tx),var(--tx)) 100% 0/10px 1px no-repeat,linear-gradient(var(--tx),var(--tx)) 100% 0/1px 10px no-repeat,
+ linear-gradient(var(--tx),var(--tx)) 0 100%/10px 1px no-repeat,linear-gradient(var(--tx),var(--tx)) 0 100%/1px 10px no-repeat,
+ linear-gradient(var(--tx),var(--tx)) 100% 100%/10px 1px no-repeat,linear-gradient(var(--tx),var(--tx)) 100% 100%/1px 10px no-repeat;background-origin:border-box;border-radius:0}
+.btn.big{clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));border-radius:0}
+.btn{border-radius:0;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.btn.g,.btn.d{clip-path:none}
+.chips button,.seg,.seg button,.tag,input,select,textarea,.ib,.chk,.rx button,.toast,.devp,.swp{border-radius:2px}
+nav button{letter-spacing:.1em}
 #gate .card{background:transparent}
 </style>
 </head>
@@ -290,7 +318,7 @@ function setPage(){const p=sub.p,I=lvl(total()),A=achs();let b='';
  else if(p==='social')b=socSettings();else if(p==='loc')b=locPage();else if(p==='perm')b=permPage();else b=`<p class="mu sm">Everything is stored on this device only.</p>${confirmReset?`<p class="err">This deletes all workouts and Sparks.</p><div class="acts"><button class="btn d" data-a="reset2">Yes, delete everything</button><button class="btn g" data-a="reset0">Cancel</button></div>`:`<button class="btn g" data-a="reset1">Delete all my data</button>`}`;
  return `<div class="hd"><button class="bk" data-a="back">Settings</button></div><h1>${SETT[p]}</h1>${b}`}
 const orbit=I=>{const r=44,c=2*Math.PI*r,p=Math.max(.02,Math.min(1,I.pct/100)),an=(p*360-90)*Math.PI/180,px=(50+r*Math.cos(an)).toFixed(1),py=(50+r*Math.sin(an)).toFixed(1);
- return `<svg class="orbsvg" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="og" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3BFD9"/><stop offset=".35" stop-color="#CBB8F4"/><stop offset=".7" stop-color="#A8D5F1"/><stop offset="1" stop-color="#B3EFD7"/></linearGradient></defs><circle cx="50" cy="50" r="${r}" stroke="var(--ln)" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="${r}" stroke="url(#og)" stroke-width="3.5" fill="none" stroke-dasharray="${(c*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)"/><circle cx="${px}" cy="${py}" r="8" fill="var(--ac)" opacity=".25" stroke="none"/><circle cx="${px}" cy="${py}" r="4.2" fill="var(--tx)" stroke="none"/></svg>`};
+ return `<svg class="orbsvg" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="og" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3BFD9"/><stop offset=".35" stop-color="#CBB8F4"/><stop offset=".7" stop-color="#A8D5F1"/><stop offset="1" stop-color="#B3EFD7"/></linearGradient></defs><circle cx="50" cy="50" r="${r+7}" stroke="var(--ln)" stroke-width="3.2" fill="none" stroke-dasharray="0.8 ${(2*Math.PI*(r+7)/60-0.8).toFixed(2)}"/><circle cx="50" cy="50" r="${r}" stroke="var(--ln)" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="${r}" stroke="url(#og)" stroke-width="3.5" fill="none" stroke-dasharray="${(c*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)"/><circle cx="${px}" cy="${py}" r="8" fill="var(--ac)" opacity=".25" stroke="none"/><circle cx="${px}" cy="${py}" r="4.2" fill="var(--tx)" stroke="none"/></svg>`};
 function constel(){const F=friends().slice(0,9),n=F.length,cx=160,cy=76,pos=u=>{const a=-Math.PI/2+F.indexOf(u)*2*Math.PI/Math.max(n,1)+.3;return[cx+Math.cos(a)*118,cy+Math.sin(a)*52]};let l='',d='',t='';const seen=new Set();
  groupsOf(me()).forEach(g=>{const m=gMembers(g).filter(u=>F.includes(u));for(let i=0;i<m.length;i++)for(let j=i+1;j<m.length;j++){const k=[m[i],m[j]].sort().join('|');if(seen.has(k))continue;seen.add(k);const A=pos(m[i]),B=pos(m[j]);l+=`<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="var(--ac)" stroke-opacity=".3" stroke-width="1" stroke-dasharray="3 4"/>`}});
  F.forEach(u=>{const[x,y]=pos(u),c=`hsl(${hue(u)} 80% 68%)`;l+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--ac)" stroke-opacity=".5" stroke-width="1.2"/>`;d+=`<circle cx="${x}" cy="${y}" r="9" fill="${c}" opacity=".2" stroke="none"/><circle cx="${x}" cy="${y}" r="4.5" fill="${c}" stroke="none"/>`;t+=`<text x="${x}" y="${y+20}" text-anchor="middle" font-size="10" fill="var(--mu)" stroke="none">${esc(nm(u).split(' ')[0].slice(0,10))}</text>`});
@@ -426,7 +454,12 @@ function startTpl(t){if(!t.exs.length){toast('Add at least one exercise first.')
 const TABS=[['home','Home','home'],['play','The Gym','strength'],['conn','Synergy','conn'],['rank','Ranked','rank'],['astral','Astral','astral'],['me','Profile','me']];
 function goTop(){try{window.scrollTo(0,0)}catch(e){}}
 try{history.scrollRestoration='manual'}catch(e){}
-function render(){applySky();document.documentElement.style.setProperty('--ac',S.accent);
+function ensureHud(){if(document.getElementById('hud'))return;const d=document.createElement('div');d.id='hud';d.setAttribute('aria-hidden','true');let t='';for(let y=40;y<=808;y+=14){const m=((y-40)/14)%5===0;t+=`<path d="M10 ${y}h${m?9:4}"/>`}
+ d.innerHTML=`<svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3BFD9"/><stop offset=".35" stop-color="#CBB8F4"/><stop offset=".7" stop-color="#A8D5F1"/><stop offset="1" stop-color="#B3EFD7"/></linearGradient></defs>
+ <g class="l">${t}<path d="M10 40V808"/></g>
+ <g class="rg"><g class="l"><circle cx="330" cy="120" r="64"/><circle cx="330" cy="120" r="128" stroke-dasharray="1.5 6.5"/><circle cx="330" cy="120" r="198"/><circle cx="330" cy="120" r="286" stroke-dasharray="1 5"/><path d="M330 -170V410M40 120H620" stroke-dasharray="2 6"/><path d="M322 120h16M330 112v16"/></g><circle class="hr" cx="330" cy="120" r="163" stroke-dasharray="70 380 10 130"/></g></svg>`;
+ document.body.insertBefore(d,document.body.firstChild)}
+function render(){document.documentElement.setAttribute('data-tab',tab);ensureHud();applySky();document.documentElement.style.setProperty('--ac',S.accent);
  const V={fr:frView,g:grpView,gnew:grpForm,gedit:grpForm,enc:encView,rep:repView,set:setPage,method,tpls,tplPrev,tplEdit,tsetup,csetup,qcat,qform,active,pickex:pickEx,rate,summary,hist,detail,del:delConfirm,recs,rec:recDetail,xp:xpView};
  $('#app').innerHTML=sub?V[sub.n]():{home,play:gym,conn:connView,rank,astral:astralView,me:profile}[tab]();
  $('#nav').innerHTML=navHtml();countUp();applyLook();try{devDraw()}catch(e){}}
@@ -821,12 +854,12 @@ function devDraw(){let el=$('#dev');if(!el){el=document.createElement('div');el.
  const st=DV.x==null?'':`left:${DV.x}px;top:${DV.y}px;right:auto;bottom:auto`;
  el.innerHTML=`<button id="devb" class="devb" data-dv="x" style="${st}" aria-label="Editor tools" aria-expanded="${DV.open}"><svg viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/></svg></button>${DV.open?devPanel():''}`}
 async function devAct(a,x){if(['vroot','x','hide','live','setup','login','forgotp','newpwp','leave','vsky'].includes(a))devPlay(false);if(['vroot','x','hide','live','setup','login','forgotp','newpwp','leave'].includes(a))fxStop();switch(a){
- case'vsky':DV.view='sky';break;
+ case'vsky':DV.view='sky';if(tab!=='astral'){tab='astral';sub=null;render()}break;
  case'vroot':DV.view='root';break;
  case'play':devPlay(!DV.play);break;
  case'x':DV.open=!DV.open;DV.rm=null;DV.view='root';break;
  case'hide':DV.hide=true;break;
- case'fx':devPlay(false);DV.open=false;DV.rm=null;fxForce(x,()=>{DV.open=true;DV.view='sky';devDraw()});break;
+ case'fx':if(tab!=='astral'){tab='astral';sub=null;render()}devPlay(false);DV.open=false;DV.rm=null;fxForce(x,()=>{DV.open=true;DV.view='sky';devDraw()});break;
  case'star':if(!ssNow())toast('Shooting stars show at night');return;
  case'live':SKYSIM.min=null;SKYSIM.off=0;SKYSIM.mode=null;document.documentElement.removeAttribute('data-sim');applySky();break;
  case'login':case'forgotp':case'newpwp':DV.open=false;SO.prevGate=a==='login'?'in':a==='forgotp'?'forgot':'newpw';drawGate();break;
@@ -873,7 +906,7 @@ function fxRun(fn,force,cb){if(fxRM()&&!force){if(cb)cb();return}if(FX.busy&&!fo
 const realMin=()=>{const L=S.loc,d=new Date();return L&&L.mode==='auto'&&L.region?tzNowMin(L.region.tz,d):d.getHours()*60+d.getMinutes()}
 function fxTs(){let t=Date.now();if(SKYSIM.min!=null){const dl=((SKYSIM.min-realMin()+2160)%1440)-720;t+=dl*6e4+SKYSIM.off*864e5}return t}
 function fxDayOn(){const L=S.loc,q=L&&L.region?tzParts(L.region.tz,new Date()):null,n=q?Math.round(Date.UTC(q.y,q.mo-1,q.d)/864e5):Math.floor(Date.now()/864e5);return n%FXEVERY===0}
-function fxTick(){if(SKYSIM.min!=null||document.hidden||FX.busy||S.theme!=='auto')return;const g=gapAt(nowMin());if(!g||!fxDayOn()){FX.k=null;return}const k=g.id+Math.floor(g.el/3);if(k===FX.k)return;FX.k=k;fxPlay(Math.random()<.08?'hen':g.id==='dawn'?(Math.random()<.5?'ptero':'car'):(Math.random()<.5?'ship':'con'))}
+function fxTick(){if(SKYSIM.min!=null||document.hidden||FX.busy||S.theme!=='auto'||tab!=='astral')return;const g=gapAt(nowMin());if(!g||!fxDayOn()){FX.k=null;return}const k=g.id+Math.floor(g.el/3);if(k===FX.k)return;FX.k=k;fxPlay(Math.random()<.08?'hen':g.id==='dawn'?(Math.random()<.5?'ptero':'car'):(Math.random()<.5?'ship':'con'))}
 const FXF={ship:()=>fxShip(),ptero:()=>fxPtero(),con:()=>fxCon(),car:()=>fxCar(),hen:()=>fxHen()};
 function fxPlay(k,force,cb){const f=FXF[k];if(f)fxRun(f,force,cb)}
 function fxForce(k,cb){if(fxRM())toast('Reduce motion is on. Playing this preview anyway.');const dawn=k==='ptero'||k==='car',g=Math.min(GAP,(1440-(DAY1-DAY0))/4);SKYSIM.min=Math.round(dawn?(DAY0-g/2+1440)%1440:(DAY1+g/2)%1440);document.documentElement.setAttribute('data-sim','');applySky();devSync();fxPlay(k,true,cb)}
@@ -966,7 +999,7 @@ function applySky(){setSun();const r=document.documentElement,m=nowMin(),vm=vmin
  if(S.theme==='system'&&SKYSIM.min==null)r.removeAttribute('data-theme');else r.setAttribute('data-theme',th);r.setAttribute('data-sky',sky);
  const span=DAY1-DAY0,nspan=1440-span;let t=.5,out=0;
  if(sky==='day'){if(m>=DAY0&&m<DAY1)t=(m-DAY0)/span}else{const n=(m-DAY1+1440)%1440,g=Math.min(GAP,nspan/4);if(n<nspan){if(n<g){t=0;out=1}else if(n>nspan-g){t=1;out=1}else t=(n-g)/(nspan-2*g)}}
- const W=innerWidth,H=innerHeight,e=Math.sin(Math.PI*t),h=Math.pow(e,.6),x=-70+(W+140)*t,y=H*(.17-.12*e),op=Math.min(1,t/.08,(1-t)/.08),el=$(sky==='day'?'#sun':'#moon');
+ const W=innerWidth,H=innerHeight,e=Math.sin(Math.PI*t),h=Math.pow(e,.6),x=-70+(W+140)*t,y=H*(.86-.2*e),op=Math.min(1,t/.08,(1-t)/.08),el=$(sky==='day'?'#sun':'#moon');
  if(el){const tr=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;if(!el.dataset.init){el.style.transition='none';el.style.transform=tr;el.getBoundingClientRect();el.style.transition='';el.dataset.init=1}else{if(el._x!=null&&Math.abs(x-el._x)>W*.5){el.style.transition='none';el.style.transform=tr;el.getBoundingClientRect();el.style.transition=''}else el.style.transform=tr}el._x=x;el.style.opacity=out?0:Math.max(0,op).toFixed(2)}
  const c=skyCol(auto?vm:(th==='dark'?1320:720));r.style.setProperty('--sa',`rgb(${c.top})`);r.style.setProperty('--sb',`rgb(${c.bot})`);r.style.setProperty('--stars',(auto?starA(vm):1).toFixed(2));
  if(sky==='day'){const d1=lerpC([255,138,74],[255,224,128],h),d2=lerpC([255,106,58],[255,184,64],h);r.style.setProperty('--sunc',`hsla(${(12+38*h).toFixed(0)},100%,${(56+10*h).toFixed(0)}%,${(.62-.2*h).toFixed(2)})`);r.style.setProperty('--sd1',`rgb(${d1})`);r.style.setProperty('--sd2',`rgb(${d2})`);const su=$('#sun .sd'),pk='s'+moonInfo().p.toFixed(3);if(su&&su.dataset.k!==pk){su.dataset.k=pk;su.innerHTML=sunPhase(moonInfo().p)}}
