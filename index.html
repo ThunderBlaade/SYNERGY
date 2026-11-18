@@ -254,6 +254,23 @@ nav{padding:4px 4px max(8px,calc(env(safe-area-inset-bottom,0px) - 6px))!importa
 #app input,#app select,#app textarea{font-size:16px}
 .gy-hero{min-height:calc(100dvh - 230px);display:flex;flex-direction:column;justify-content:center;gap:12px}.gy-hero .card,.gy-hero .btn{margin:0}
 .gy-a{padding-bottom:8px}.gy-b{padding-top:8px;padding-bottom:12px}
+/* v8: Home feed and stories, same quiet look */
+.hm-st{display:block;width:100%;text-align:center;font:500 10px var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--mu);padding:4px 0 16px}
+.stories{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 14px;margin:0 -16px 6px;padding-left:16px;padding-right:16px;scrollbar-width:none}.stories::-webkit-scrollbar{display:none}
+.sc{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:62px;font-size:11px}
+.sc .ring{position:relative;display:grid;place-items:center;width:62px;height:62px;border-radius:50%;background:var(--irid);padding:2px}.sc .ring.sn{background:var(--ln)}
+.sc .ring .av2{border:2px solid var(--bg)}.sc .ring .pl{position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:var(--tx);color:var(--bg);font:500 14px/20px var(--body);font-style:normal;text-align:center}
+.hmbar{display:flex;gap:10px;align-items:center;margin:0 0 14px}.hmbar .seg{flex:1;margin:0}.hmnew{min-height:40px!important;padding:8px 14px!important;width:auto!important;font-size:10px!important}
+.card.post{padding:0;overflow:hidden}.card.post::before,.card.post::after{display:none}
+.pimg{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;background:var(--s2)}
+.hb{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 8px;color:var(--tx)}.hb svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.5}.hb[aria-pressed=true] svg{fill:currentColor}
+.cmf{display:flex;gap:8px;padding:10px 14px 14px}.cmf input{flex:1;padding:8px 10px;min-height:38px}.cmf button{font:500 10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--tx)}
+#hmc{position:fixed;inset:0;z-index:36;background:var(--bg);overflow:auto;-webkit-overflow-scrolling:touch}.hmin{max-width:520px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(30px + env(safe-area-inset-bottom,0px))}
+#hmv{position:fixed;inset:0;z-index:37;background:#000;color:#fff;display:flex;align-items:center;justify-content:center}#hmv>img{max-width:100%;max-height:100%;object-fit:contain}
+#hmv .bars{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;display:flex;gap:4px;z-index:3}#hmv .bars i{flex:1;height:2px;background:rgba(255,255,255,.3);position:relative;overflow:hidden}#hmv .bars i.d::after,#hmv .bars i.c::after{content:'';position:absolute;inset:0;background:#fff}#hmv .bars i.c::after{transform-origin:0 50%;animation:hmbar 5.5s linear forwards}@keyframes hmbar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+#hmv .top{position:absolute;top:calc(22px + env(safe-area-inset-top,0px));left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;z-index:3}#hmv .top .tag{color:#fff;border-color:rgba(255,255,255,.5);background:rgba(0,0,0,.3)}
+#hmv .l,#hmv .r{position:absolute;top:70px;bottom:70px;width:40%;z-index:2;background:none}#hmv .l{left:0}#hmv .r{right:0}
+#hmv .cap{position:absolute;left:16px;right:16px;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:3;text-align:center;font-size:14px;margin:0;text-shadow:0 1px 6px #000}
 #gate .card{background:transparent}
 </style>
 </head>
@@ -357,13 +374,8 @@ function constel(){const F=friends().slice(0,9),n=F.length,cx=160,cy=76,pos=u=>{
  groupsOf(me()).forEach(g=>{const m=gMembers(g).filter(u=>F.includes(u));for(let i=0;i<m.length;i++)for(let j=i+1;j<m.length;j++){const k=[m[i],m[j]].sort().join('|');if(seen.has(k))continue;seen.add(k);const A=pos(m[i]),B=pos(m[j]);l+=`<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="var(--ac)" stroke-opacity=".3" stroke-width="1" stroke-dasharray="3 4"/>`}});
  F.forEach(u=>{const[x,y]=pos(u),c=`hsl(${hue(u)} 80% 68%)`;l+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--ac)" stroke-opacity=".5" stroke-width="1.2"/>`;d+=`<circle cx="${x}" cy="${y}" r="9" fill="${c}" opacity=".2" stroke="none"/><circle cx="${x}" cy="${y}" r="4.5" fill="${c}" stroke="none"/>`;t+=`<text x="${x}" y="${y+20}" text-anchor="middle" font-size="10" fill="var(--mu)" stroke="none">${esc(nm(u).split(' ')[0].slice(0,10))}</text>`});
  return `<div class="card const" role="img" aria-label="Your constellation: you and ${n} friend${n===1?'':'s'}"><svg viewBox="0 0 320 150"><ellipse cx="160" cy="76" rx="118" ry="52" stroke="var(--ln)" stroke-width="1" stroke-dasharray="2 6" fill="none"/>${l}<circle cx="160" cy="76" r="15" fill="var(--ac)" opacity=".22" stroke="none"/><circle cx="160" cy="76" r="7" fill="var(--ac)" stroke="none"/><text x="160" y="104" text-anchor="middle" font-size="10" fill="var(--tx)" stroke="none">You</text>${d}${t}</svg>${n?'':'<p class="mu sm" style="margin:0;text-align:center">Add friends to build your constellation.</p>'}</div>`}
-function home(){const x=total(),I=lvl(x),now=Date.now(),wk=S.workouts.filter(w=>w.end>=wkStart(now)).length,today=sumWhere(e=>e.day===dk(now)),h=new Date().getHours();
- return `<h1 style="margin:6px 0 8px">${esc(S.name||'Home')}</h1><p class="mu" style="margin:0 0 18px;font-size:14.5px">${S.active?'You have a workout in progress.':'What are we doing today?'}</p>
- ${S.hide.includes('sparks')?'':`<button class="card tap" data-a="xp" aria-label="Level ${I.L}, ${x} Sparks. Open Sparks breakdown"><div class="row" style="gap:18px"><div class="orb">${orbit(I)}<div class="orbn"><small>LV</small><span>${num('lv',I.L)}</span></div></div><div style="flex:1;min-width:0"><div class="cap2">${ttl(I.L)}</div><div class="stat">${num('xp',x)}</div><div class="mu sm">total Sparks</div><div class="mu sm" style="margin-top:6px">${I.left} to level ${I.L+1}</div></div></div></button>`}
- ${S.hide.includes('stats')?'':`<div class="g2"><div class="card"><div class="stat">${wk}</div><div class="mu sm">workouts this week</div></div><div class="card"><div class="stat">${today}</div><div class="mu sm">Sparks today</div></div></div>`}
- <button class="btn big" data-a="${S.active?'resume':'start'}">${S.active?'Resume workout':'Start workout'}</button>
- ${S.hide.includes('recent')?'':`<h2>Recent Sparks</h2><div class="card">${txRows(3)}</div>`}
- ${S.hide.includes('friends')?'':`<h2>Friends</h2><div class="card mu sm">No friends yet. Friend activity appears here once multiplayer is built; nothing here is simulated.</div>`}`}
+function home(){const x=total(),I=lvl(x),wk=S.workouts.filter(w=>w.end>=wkStart(Date.now())).length;
+ return `<h1>${esc(S.name||'Home')}</h1>${S.active?'<div class="acts" style="margin:0 0 12px"><button class="btn g" data-a="resume" style="width:100%">Resume workout</button></div>':''}<button class="hm-st" data-a="xp" aria-label="Level ${I.L}, ${x} Sparks. Open Sparks breakdown">LV ${I.L} · ${x} Sparks · ${wk} this week</button>${typeof hmHome==="function"?hmHome():""}`}
 function plist(){const q=(sub.q||'').toLowerCase(),m=sub.mu||'All',l=exLib().filter(e=>(m==='All'||e.mu===m)&&e.n.toLowerCase().includes(q));return `<div class="card" style="padding:4px 16px"><ul class="list">${l.map(e=>`<li><button class="t" data-ex="${e.id}" style="text-align:left"><b>${esc(e.n)}</b><span class="mu sm">${esc(e.mu)} · ${esc(e.eq)}</span></button></li>`).join('')||'<li class="mu">No match. Create it below.</li>'}</ul></div>`}
 function delConfirm(){const w=S.workouts.find(x=>x.id===sub.id);return `<div class="hd"><button class="bk" data-view="${w.id}">Back</button></div><h1>Delete this workout?</h1><p>This removes it from your history and reverses the Sparks it earned (shown as a reversal in your Sparks breakdown). Records are recalculated from your remaining workouts. This can’t be undone.</p><div class="acts"><button class="btn d" data-a="delgo">Delete ${esc(w.name||CATS[w.cat][0])}</button><button class="btn g" data-view="${w.id}">Keep it</button></div>`}
 function xpView(){const now=Date.now(),I=lvl(total());return `<div class="hd"><button class="bk" data-a="back">Back</button></div><h1>Sparks breakdown</h1><div class="card"><div class="stat">${total()}</div><div class="mu sm">lifetime Sparks · level ${I.L} ${ttl(I.L)}</div>${bar(I)}</div>
@@ -686,7 +698,7 @@ function socWatch(u){if(SO.subs[u])return;SO.subs[u]=1;
  SO.db.collection('s/'+u+'/d').onSnapshot(sn=>{SO.D[u]={};sn.docs.forEach(d=>{if(d.exists)SO.D[u][d.id]=d.data()});socDraw()},()=>{});
  SO.db.collection('s/'+u+'/e').onSnapshot(sn=>{SO.E[u]=sn.docs.filter(d=>d.exists).map(d=>({...d.data(),id:d.id,u}));socDraw()},()=>{})}
 let socT=0;
-function socDraw(now){const go=()=>{const a=document.activeElement;if(!now&&a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.closest&&a.closest('#app'))return;if(tab==='conn'||(sub&&(sub.n==='set'&&sub.p==='social'||['fr','g','gnew','gedit','enc','rep'].includes(sub.n))))render();else{const n=$('#nav');if(n)n.innerHTML=navHtml()}};
+function socDraw(now){const go=()=>{const a=document.activeElement;if(!now&&a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.closest&&a.closest('#app'))return;if(tab==='conn'||(tab==='home'&&!sub)||(sub&&(sub.n==='set'&&sub.p==='social'||['fr','g','gnew','gedit','enc','rep'].includes(sub.n))))render();else{const n=$('#nav');if(n)n.innerHTML=navHtml()}};
  clearTimeout(socT);socT=setTimeout(go,now?0:120)}
 const err=e=>toast('Couldn’t save ('+((e&&e.code)||'error')+')');
 function put(k,obj){(SO.D[me()]=SO.D[me()]||{})[k]=obj;SO.db.doc('s/'+me()+'/d/'+k).set(obj).catch(err);socDraw(true)}
@@ -724,7 +736,7 @@ function frView(){const u=sub.id,p=SO.P[u],hd=`<div class="hd"><button class="bk
  ${mineB?'<div class="card mu sm">You blocked this person. They can’t see your activity or contact you.</div>':`<div class="card">${statVis(u)?`<div class="g2"><div><div class="stat">${p.stat.L}</div><div class="mu sm">${ttl(p.stat.L)}</div></div><div><div class="stat">${p.stat.wk}</div><div class="mu sm">workouts this week</div></div></div>`:'<p class="mu sm" style="margin:0">Their stats are private.</p>'}</div>
  ${gs.length?`<h2>Groups in common</h2><div class="card">${gs.map(g=>esc(g.name)).join(' · ')}</div>`:''}
  ${evs.length?`<h2>Recent activity</h2>${evs.map(evCard).join('')}`:''}`}
- <div class="acts">${acts}</div>`}
+ ${hmProBtn(u)}<div class="acts">${acts}</div>`}
 /* ---- groups ---- */
 const G=()=>{const out=[];Object.keys(SO.D).forEach(u=>Object.keys(SO.D[u]||{}).forEach(k=>{if(k.startsWith('g_'))out.push({...SO.D[u][k],id:k.slice(2),o:u})}));return out};
 const gById=id=>G().find(g=>g.id===id);
@@ -758,7 +770,7 @@ function grpView(){const g=gById(sub.id),hd=`<div class="hd"><button class="bk" 
  <div class="acts">${owner?`<button class="btn g" data-s="gedit:${g.id}">Edit group</button>${SO.pend.gdel===g.id?`<button class="btn d" data-s="gdel2:${g.id}">Yes, delete group</button><button class="btn g" data-s="go:g:${g.id}">Cancel</button>`:`<button class="btn d" data-s="gdel:${g.id}">Delete group</button>`}`:SO.pend.gl===g.id?`<button class="btn d" data-s="gleave2:${g.id}">Yes, leave</button><button class="btn g" data-s="go:g:${g.id}">Cancel</button>`:`<button class="btn g" data-s="gleave:${g.id}">Leave group</button>`}</div>`}
 /* ---- feed ---- */
 function evVisible(e){const v=me(),o=e.u;if(o===v)return true;if(!SO.P[o]||blockedP(o,v)||(pf().hid||{})[o+'_'+e.id])return false;return isFr(o,v)||(e.vis==='groups'&&shareGroup(o,v))}
-const visEvents=()=>Object.keys(SO.E).flatMap(u=>SO.E[u]||[]).filter(evVisible).sort((a,b)=>b.at-a.at);
+const visEvents=()=>Object.keys(SO.E).flatMap(u=>SO.E[u]||[]).filter(e=>!e.type).filter(evVisible).sort((a,b)=>b.at-a.at);
 const feedEvents=()=>visEvents().slice(0,40);
 function reactsFor(key){const c={};Object.keys(SO.D).forEach(u=>{if(blockedP(me(),u)&&u!==me())return;const t=(((dd(u,'react')||{}).x||{})[key]||{}).t;if(t)c[t]=(c[t]||0)+1});return c}
 function evCard(e){const key=e.u+'_'+e.id,mine=e.u===me(),R=reactsFor(key),my=(((dd(me(),'react')||{}).x||{})[key]||{}).t;
@@ -1153,6 +1165,80 @@ locInit();render();goTop();
 try{if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
  window.addEventListener('load',function(){navigator.serviceWorker.register('service-worker.js').catch(function(){})})}}catch(e){}
 (function(){const a=document.getElementById('app');if(!a)return;const re=/^(Home|The Gym|Synergy|Ranked|Astral|Profile)$/i,tag=()=>a.querySelectorAll('h1').forEach(h=>{if(re.test(h.textContent.trim()))h.classList.add('tt')});let gy=false;const tag2=()=>{tag();const hr=a.querySelector('.gy-hero');if(hr){if(!gy){gy=true;hr.scrollIntoView({block:'center'})}}else gy=false};tag2();new MutationObserver(tag2).observe(a,{childList:true,subtree:true})})();
+/* ---- Home: photo feed and stories. Photos live in free Supabase Storage (private bucket "media"), shrunk on the phone. ---- */
+const HM={f:{aud:'all',cap:'',blob:null,prev:null,kind:'post'},view:'all',urls:{},busy:0,compose:0,sv:null,swept:0,tm:null};
+const hmAud=[['all','All'],['friends','Friends'],['pro','Pros']];
+const hmReady=()=>!!(SO.db&&mp()&&BE&&BE.cli&&BE.cli.storage);
+function hmOk(e){const v=me(),o=e.u;if(o===v)return true;if(!SO.P[o]||blockedP(o,v))return false;const a=e.aud||'friends';return a==='all'||(a==='friends'&&isFr(o,v))||(a==='pro'&&((SO.P[o].pro||[]).includes(v)))}
+const hmEvs=t=>Object.keys(SO.E).flatMap(u=>SO.E[u]||[]).filter(e=>e.type===t&&e.img&&hmOk(e)&&!(pf().hid||{})[e.u+'_'+e.id]).sort((a,b)=>b.at-a.at);
+const hmStories=()=>hmEvs('story').filter(e=>e.exp>Date.now());
+const hmCmts=key=>{const L=[];Object.keys(SO.D).forEach(u=>{if(u!==me()&&blockedP(me(),u))return;((((dd(u,'cm')||{}).c||{})[key])||[]).forEach(c=>L.push({...c,u}))});return L.sort((a,b)=>a.at-b.at)};
+const hmSeen=e=>!!(S.seen&&S.seen[e.u+'_'+e.id]);
+function hmProBtn(u){if(!isFr(me(),u)||!mp())return'';const on=(mp().pro||[]).includes(u);return `<div class="card"><div class="row sp"><div><b>Coach or trainer</b><div class="mu sm">${on?'They can see posts you share with Pros.':'Let them see posts you share with Pros.'}</div></div><button class="btn g" data-hx="pro:${u}" style="min-height:40px;padding:8px 14px">${on?'Remove':'Add'}</button></div></div>`}
+function hmStrip(){const by={};hmStories().forEach(e=>{(by[e.u]=by[e.u]||[]).push(e)});const us=Object.keys(by).filter(u=>u!==me()).sort((a,b)=>(by[b].every(hmSeen)?0:1)-(by[a].every(hmSeen)?0:1)||by[b][0].at-by[a][0].at),mine=by[me()];
+ const c=(u,lab,seen,act,plus)=>`<button class="sc" data-hx="${act}" aria-label="${esc(lab)}"><span class="ring${seen?' sn':''}">${av(u,48)}${plus?'<i class="pl">+</i>':''}</span><span class="mu sm">${esc(lab.length>9?lab.slice(0,8)+'…':lab)}</span></button>`;
+ return `<div class="stories" role="group" aria-label="Stories">${mine?c(me(),'Your story',mine.every(hmSeen),'sv:'+me()):c(me(),'Story',true,'new:story',true)}${mine?`<button class="sc" data-hx="new:story" aria-label="Add to your story"><span class="ring sn"><span class="av2" style="width:48px;height:48px">+</span></span><span class="mu sm">Add</span></button>`:''}${us.map(u=>c(u,nm(u),by[u].every(hmSeen),'sv:'+u)).join('')}</div>`}
+function hmPost(e){const key=e.u+'_'+e.id,mine=e.u===me(),R=reactsFor(key),my=(((dd(me(),'react')||{}).x||{})[key]||{}).t==='support',cm=hmCmts(key),heart=RX.find(r=>r[0]==='support');
+ return `<article class="card post"><div class="row sp" style="padding:12px 14px">${'<div class="row" style="gap:10px">'+av(e.u,30)+'<b>'+(mine?'You':esc(nm(e.u)))+'</b>'+(e.aud==='pro'?'<span class="tag">Pros</span>':e.aud==='all'?'':'<span class="tag">Friends</span>')+'</div>'}<span class="mu sm">${ago(e.at)}</span></div>
+ <img class="pimg" data-p="${esc(e.img)}" alt="${esc(e.cap||'Photo')}" loading="lazy">
+ <div class="row" style="gap:6px;padding:8px 10px 0"><button class="hb" data-s="rx:${key}:support" aria-pressed="${my}" aria-label="Like"${mine?' disabled':''}><svg viewBox="0 0 24 24"><path d="${heart[2]}"/></svg>${R.support||''}</button><span class="mu sm" style="font-size:12px">${cm.length?cm.length+' comment'+(cm.length>1?'s':''):''}</span>${mine?`<button class="tag" data-hx="del:${e.id}" style="margin-left:auto">Delete</button>`:`<button class="tag" data-s="hide:${key}" style="margin-left:auto">Hide</button>`}</div>
+ ${e.cap?`<p style="margin:6px 14px 0"><b>${mine?'You':esc(nm(e.u))}</b> ${esc(e.cap)}</p>`:''}
+ ${cm.slice(-3).map(c=>`<p class="mu" style="margin:4px 14px 0"><b style="color:var(--tx)">${c.u===me()?'You':esc(nm(c.u))}</b> ${esc(c.t)}</p>`).join('')}
+ <div class="cmf"><input data-hmc="${key}" maxlength="200" placeholder="Add a comment" aria-label="Add a comment"><button data-hx="cm:${key}" aria-label="Send comment">Send</button></div></article>`}
+function hmHome(){if(!SO.db||!mp())return `<div class="card"><b>Your feed</b><p class="mu sm" style="margin:4px 0 12px">${SO.db?'Finish setting up in Synergy to post and see photos.':'The feed needs a connection. Everything else still works.'}</p>${SO.db?'<button class="btn g" data-hx="gosyn" style="width:100%">Open Synergy</button>':''}</div>`;
+ hmSweep();const all=hmEvs('post'),L=all.filter(e=>HM.view==='all'||(HM.view==='friends'?e.u===me()||isFr(me(),e.u):e.aud==='pro')).slice(0,30);
+ return `${hmStrip()}<div class="hmbar"><div class="seg s3" role="group" aria-label="Feed">${[['all','All'],['friends','Friends'],['pro','Pros']].map(x=>`<button data-hx="v:${x[0]}" aria-pressed="${HM.view===x[0]}">${x[1]}</button>`).join('')}</div><button class="btn hmnew" data-hx="new:post">New post</button></div>
+ ${L.length?L.map(hmPost).join(''):`<div class="card mu sm">${HM.view==='pro'?'No posts shared with Pros yet.':'No posts yet. Be the first: tap New post.'}</div>`}`}
+/* photos: shrink on the phone, then upload */
+async function hmShrink(file){let bm,w,h;try{bm=await createImageBitmap(file,{imageOrientation:'from-image'});w=bm.width;h=bm.height}catch(e){bm=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=URL.createObjectURL(file)});w=bm.naturalWidth;h=bm.naturalHeight}
+ const k=Math.min(1,1080/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);c.getContext('2d').drawImage(bm,0,0,c.width,c.height);let q=.78,b;for(let i=0;i<5;i++){b=await new Promise(r=>c.toBlob(r,'image/jpeg',q));if(!b||b.size<=160000)break;q-=.1}return b}
+async function hmSend(){const f=HM.f;if(!f.blob||HM.busy||!hmReady())return;const kind=f.kind,id=(kind==='story'?'s':'p')+Date.now().toString(36),path=me()+'/'+id+'.jpg';HM.busy=1;hmDrawC();
+ let up;try{up=await BE.cli.storage.from('media').upload(path,f.blob,{contentType:'image/jpeg',upsert:false})}catch(e){up={error:e}}
+ if(up.error){HM.busy=0;toast(/bucket|not found/i.test(String(up.error.message))?'Photo storage isn’t set up yet':'Couldn’t upload. Try again.');hmDrawC();return}
+ const ev={type:kind,at:Date.now(),img:path,cap:(f.cap||'').trim().slice(0,300),aud:f.aud};if(kind==='story')ev.exp=ev.at+864e5;
+ (SO.E[me()]=SO.E[me()]||[]).push({...ev,id,u:me()});SO.db.doc('s/'+me()+'/e/'+id).set(ev).catch(err);
+ try{if(f.prev)URL.revokeObjectURL(f.prev)}catch(e){}HM.f={aud:f.aud,cap:'',blob:null,prev:null,kind:'post'};HM.busy=0;HM.compose=0;hmDrawC();toast(kind==='story'?'Story added':'Posted');render()}
+function hmDel(id){const u=me(),e=(SO.E[u]||[]).find(x=>x.id===id);if(!e)return;SO.E[u]=SO.E[u].filter(x=>x!==e);SO.db.doc('s/'+u+'/e/'+id).delete().catch(()=>{});try{BE.cli.storage.from('media').remove([e.img])}catch(x){}HM.sv=null;hmDrawV();toast('Deleted');render()}
+function hmSweep(){const u=me();if(!u||!SO.db||HM.swept||!SO.E[u])return;HM.swept=1;const old=SO.E[u].filter(e=>e.type==='story'&&e.exp<Date.now());if(!old.length)return;old.forEach(e=>SO.db.doc('s/'+u+'/e/'+e.id).delete().catch(()=>{}));SO.E[u]=SO.E[u].filter(e=>!old.includes(e));try{BE.cli.storage.from('media').remove(old.map(e=>e.img))}catch(x){}}
+function hmComment(key,t){t=(t||'').trim().slice(0,200);if(!t||!SO.db||!mp())return;const c={...((dd(me(),'cm')||{}).c||{})};c[key]=[...(c[key]||[]),{t,at:Date.now()}];let s=JSON.stringify(c);while(s.length>15000){const ks=Object.keys(c).sort((a,b)=>c[a][0].at-c[b][0].at);if(ks.length<2)break;delete c[ks[0]];s=JSON.stringify(c)}put('cm',{c})}
+/* signed links for private photos, fetched in one batch */
+function hmImgs(){const els=[...document.querySelectorAll('img[data-p]')];if(!els.length)return;const now=Date.now(),fresh=p=>HM.urls[p]&&now-HM.urls[p].t<3e6,paint=()=>els.forEach(i=>{const p=i.dataset.p;if(fresh(p)&&i.getAttribute('src')!==HM.urls[p].u)i.src=HM.urls[p].u});paint();
+ const need=[...new Set(els.map(i=>i.dataset.p).filter(p=>!fresh(p)))];if(!need.length||!hmReady()||HM.fetching)return;HM.fetching=1;
+ BE.cli.storage.from('media').createSignedUrls(need,3600).then(r=>{(r.data||[]).forEach(d=>{if(d.signedUrl)HM.urls[d.path]={u:d.signedUrl,t:Date.now()}});HM.fetching=0;paint()}).catch(()=>{HM.fetching=0})}
+/* new post / story sheet */
+function hmDrawC(){let el=document.getElementById('hmc');if(!HM.compose){if(el)el.remove();return}if(!el){el=document.createElement('div');el.id='hmc';document.body.appendChild(el)}const f=HM.f,st=f.kind==='story';
+ el.innerHTML=`<div class="hmin"><div class="row sp" style="margin-bottom:14px"><button class="tag" data-hx="cx">Close</button><span class="mu" style="font:500 10px var(--mono);letter-spacing:.28em">${st?'NEW STORY':'NEW POST'}</span><span style="width:52px"></span></div>
+ <input id="hmfile" type="file" accept="image/*" hidden>${f.prev?`<img class="pimg" src="${f.prev}" alt="Preview" style="${st?'aspect-ratio:9/16;max-height:52vh;object-fit:contain':''}">`:'<button class="card tap" data-hx="pick" style="width:100%;text-align:center;padding:40px 16px"><b>Choose a photo</b><div class="mu sm">From your camera roll or camera</div></button>'}
+ ${f.prev?'<button class="btn g" data-hx="pick" style="width:100%;margin-top:10px">Choose a different photo</button>':''}
+ <label for="hmcap">Caption (optional)</label><input id="hmcap" maxlength="300" value="${esc(f.cap)}" placeholder="Say something" data-hmcap>
+ <label>Who can see it</label><div class="seg s3" role="group" aria-label="Audience">${hmAud.map(a=>`<button data-hx="aud:${a[0]}" aria-pressed="${f.aud===a[0]}">${a[1]}</button>`).join('')}</div>
+ <p class="mu sm" style="margin:8px 0 0">${f.aud==='all'?'Everyone in SYNERGY.':f.aud==='friends'?'Only your friends.':'Only the coaches and trainers you have added.'}${st?' Stories disappear after 24 hours.':''}</p>
+ <button class="btn big" data-hx="send" style="margin-top:18px"${f.blob&&!HM.busy?'':' disabled'}>${HM.busy?'Posting…':st?'Share story':'Post'}</button></div>`}
+/* story viewer */
+function hmStep(d){const v=HM.sv;if(!v)return;v.i+=d;if(v.i<0)v.i=0;if(v.i>=v.L.length){HM.sv=null;hmDrawV();render();return}hmDrawV()}
+function hmDrawV(){let el=document.getElementById('hmv');clearTimeout(HM.tm);if(!HM.sv){if(el)el.remove();return}if(!el){el=document.createElement('div');el.id='hmv';document.body.appendChild(el)}const v=HM.sv,e=v.L[v.i];S.seen=S.seen||{};S.seen[e.u+'_'+e.id]=1;save();
+ el.innerHTML=`<div class="bars">${v.L.map((_,k)=>`<i class="${k<v.i?'d':k===v.i?'c':''}"></i>`).join('')}</div><div class="top"><div class="row" style="gap:10px">${av(e.u,30)}<b>${e.u===me()?'You':esc(nm(e.u))}</b><span class="mu sm">${ago(e.at)}</span></div><div class="row" style="gap:8px">${e.u===me()?`<button class="tag" data-hx="del:${e.id}">Delete</button>`:''}<button class="tag" data-hx="vx" aria-label="Close">Close</button></div></div><img data-p="${esc(e.img)}" alt="${esc(e.cap||'Story')}"><button class="l" data-hx="vp" aria-label="Previous"></button><button class="r" data-hx="vn" aria-label="Next"></button>${e.cap?`<p class="cap">${esc(e.cap)}</p>`:''}`;hmImgs();HM.tm=setTimeout(()=>hmStep(1),5500)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-hx]');if(!b)return;const s=b.dataset.hx,i=s.indexOf(':'),a=i<0?s:s.slice(0,i),x=i<0?'':s.slice(i+1);
+ switch(a){
+ case'v':HM.view=x;render();break;
+ case'new':if(!hmReady())return toast('Photos need a connection');HM.f.kind=x;HM.compose=1;hmDrawC();break;
+ case'cx':HM.compose=0;hmDrawC();break;
+ case'pick':{const fi=document.getElementById('hmfile');if(fi)fi.click();break}
+ case'aud':HM.f.aud=x;hmDrawC();break;
+ case'send':hmSend();break;
+ case'sv':hmStoryOpen(x);break;
+ case'vx':HM.sv=null;hmDrawV();render();break;
+ case'vn':hmStep(1);break;case'vp':hmStep(-1);break;
+ case'del':hmDel(x);break;
+ case'cm':{const inp=document.querySelector('input[data-hmc="'+x+'"]');if(inp){hmComment(x,inp.value);inp.value=''}break}
+ case'pro':{const p=mp();if(!p)return;const l=new Set(p.pro||[]);l.has(x)?l.delete(x):l.add(x);setProfile({pro:[...l]});break}
+ case'gosyn':tab='conn';sub=null;render();break;
+ }});
+function hmStoryOpen(u){const L=hmStories().filter(e=>e.u===u).sort((a,b)=>a.at-b.at);if(!L.length)return;const first=L.findIndex(e=>!hmSeen(e));HM.sv={L,i:first<0?0:first};hmDrawV()}
+document.addEventListener('change',async e=>{const t=e.target;if(t.id!=='hmfile'||!t.files||!t.files[0])return;const file=t.files[0];t.value='';try{const b=await hmShrink(file);if(!b)throw 0;if(HM.f.prev)try{URL.revokeObjectURL(HM.f.prev)}catch(x){}HM.f.blob=b;HM.f.prev=URL.createObjectURL(b);hmDrawC()}catch(x){toast('Couldn’t read that photo')}});
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.hmcap!==undefined)HM.f.cap=t.value});
+document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t.dataset&&t.dataset.hmc){e.preventDefault();hmComment(t.dataset.hmc,t.value);t.value=''}});
+(function(){const a=document.getElementById('app');if(!a)return;let t=null;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(hmImgs,30)}).observe(a,{childList:true,subtree:true})})();
 </script>
 </body>
 </html>
