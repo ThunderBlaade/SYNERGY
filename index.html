@@ -293,7 +293,7 @@ const ic=k=>`<svg viewBox="0 0 24 24" aria-hidden="true" width="24" height="24">
 const DEF=()=>({name:'',theme:'auto',v2:1,v3:1,loc:{mode:'auto',region:null,fx:{d0:330,d1:990},share:false},accent:'#7B7EEA',units:'metric',glass:true,glow:true,size:100,reduce:false,hide:[],ledger:[],workouts:[],custom:[],tpl:[],active:null,rest:null,seq:1});
 let S=DEF();try{const r=localStorage.getItem('synergy');if(r)S={...DEF(),...JSON.parse(r)}}catch(e){}
 if(!S.v3){S.theme='system';S.v2=1;S.v3=1}if(S.theme==='auto'||!S.theme)S.theme='system';
-const save=()=>{try{localStorage.setItem('synergy',JSON.stringify(S))}catch(e){}};
+const save=()=>{try{localStorage.setItem('synergy',JSON.stringify(S))}catch(e){}if(typeof lkSync==='function'){try{lkSync()}catch(e){}}};
 let tab='home',sub=null,shown={},confirmReset=false;
 const $=s=>document.querySelector(s);
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -375,7 +375,7 @@ function constel(){const F=friends().slice(0,9),n=F.length,cx=160,cy=76,pos=u=>{
  F.forEach(u=>{const[x,y]=pos(u),c=`hsl(${hue(u)} 80% 68%)`;l+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--ac)" stroke-opacity=".5" stroke-width="1.2"/>`;d+=`<circle cx="${x}" cy="${y}" r="9" fill="${c}" opacity=".2" stroke="none"/><circle cx="${x}" cy="${y}" r="4.5" fill="${c}" stroke="none"/>`;t+=`<text x="${x}" y="${y+20}" text-anchor="middle" font-size="10" fill="var(--mu)" stroke="none">${esc(nm(u).split(' ')[0].slice(0,10))}</text>`});
  return `<div class="card const" role="img" aria-label="Your constellation: you and ${n} friend${n===1?'':'s'}"><svg viewBox="0 0 320 150"><ellipse cx="160" cy="76" rx="118" ry="52" stroke="var(--ln)" stroke-width="1" stroke-dasharray="2 6" fill="none"/>${l}<circle cx="160" cy="76" r="15" fill="var(--ac)" opacity=".22" stroke="none"/><circle cx="160" cy="76" r="7" fill="var(--ac)" stroke="none"/><text x="160" y="104" text-anchor="middle" font-size="10" fill="var(--tx)" stroke="none">You</text>${d}${t}</svg>${n?'':'<p class="mu sm" style="margin:0;text-align:center">Add friends to build your constellation.</p>'}</div>`}
 function home(){const x=total(),I=lvl(x),wk=S.workouts.filter(w=>w.end>=wkStart(Date.now())).length;
- return `<h1>${esc(S.name||'Home')}</h1>${S.active?'<div class="acts" style="margin:0 0 12px"><button class="btn g" data-a="resume" style="width:100%">Resume workout</button></div>':''}<button class="hm-st" data-a="xp" aria-label="Level ${I.L}, ${x} Sparks. Open Sparks breakdown">LV ${I.L} · ${x} Sparks · ${wk} this week</button>${typeof hmHome==="function"?hmHome():""}`}
+ return `<h1>${esc(S.name||'Home')}</h1>${S.active?'<div class="acts" style="margin:0 0 12px"><button class="btn g" data-a="resume" style="width:100%">Resume workout</button></div>':''}<button class="hm-st" data-a="xp" aria-label="Level ${I.L}, ${x} Sparks. Open Sparks breakdown">LV ${I.L} · ${x} Sparks · ${wk} this week</button>${typeof lkHome==="function"?lkHome():""}`}
 function plist(){const q=(sub.q||'').toLowerCase(),m=sub.mu||'All',l=exLib().filter(e=>(m==='All'||e.mu===m)&&e.n.toLowerCase().includes(q));return `<div class="card" style="padding:4px 16px"><ul class="list">${l.map(e=>`<li><button class="t" data-ex="${e.id}" style="text-align:left"><b>${esc(e.n)}</b><span class="mu sm">${esc(e.mu)} · ${esc(e.eq)}</span></button></li>`).join('')||'<li class="mu">No match. Create it below.</li>'}</ul></div>`}
 function delConfirm(){const w=S.workouts.find(x=>x.id===sub.id);return `<div class="hd"><button class="bk" data-view="${w.id}">Back</button></div><h1>Delete this workout?</h1><p>This removes it from your history and reverses the Sparks it earned (shown as a reversal in your Sparks breakdown). Records are recalculated from your remaining workouts. This can’t be undone.</p><div class="acts"><button class="btn d" data-a="delgo">Delete ${esc(w.name||CATS[w.cat][0])}</button><button class="btn g" data-view="${w.id}">Keep it</button></div>`}
 function xpView(){const now=Date.now(),I=lvl(total());return `<div class="hd"><button class="bk" data-a="back">Back</button></div><h1>Sparks breakdown</h1><div class="card"><div class="stat">${total()}</div><div class="mu sm">lifetime Sparks · level ${I.L} ${ttl(I.L)}</div>${bar(I)}</div>
@@ -1236,6 +1236,74 @@ document.addEventListener('change',async e=>{const t=e.target;if(t.id!=='hmfile'
 document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.hmcap!==undefined)HM.f.cap=t.value});
 document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t.dataset&&t.dataset.hmc){e.preventDefault();hmComment(t.dataset.hmc,t.value);t.value=''}});
 (function(){const a=document.getElementById('app');if(!a)return;let t=null;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(hmImgs,30)}).observe(a,{childList:true,subtree:true})})();
+/* ---- Synergy Links: train together. Invite friends, both join, train 10+ minutes at the same time, a link is made. ---- */
+const LK={MIN:6e5,WIN:216e5,HB:15e4,MAXP:5,sel:false,pick:{},seenInv:{}};
+const lkSes=()=>{const L=[];Object.keys(SO.D).forEach(u=>Object.keys(SO.D[u]||{}).forEach(k=>{if(k.startsWith('ses_')){const d=SO.D[u][k];if(d&&d.at)L.push({...d,id:k.slice(4),h:u,key:u+'_'+k.slice(4)})}}));return L};
+const lkOpen=s=>!s.end&&Date.now()<s.at+LK.WIN;
+const lkEnt=(u,key)=>(((dd(u,'part')||{}).p||{})[key])||null;
+const lkIn=(u,s)=>{const e=lkEnt(u,s.key);return !!(e&&e.j&&!e.l)&&(u===s.h||(s.inv||[]).includes(u))};
+const lkMembers=s=>[s.h,...(s.inv||[])].filter(u=>lkIn(u,s)&&SO.P[u]&&(u===me()||!blockedP(me(),u)));
+const lkInvited=s=>s.h!==me()&&(s.inv||[]).includes(me())&&!lkEnt(me(),s.key)&&lkOpen(s)&&SO.P[s.h]&&isFr(me(),s.h);
+const lkMine=()=>lkSes().filter(s=>lkOpen(s)&&lkIn(me(),s)).sort((a,b)=>b.at-a.at)[0]||null;
+function lkSegs(u,s){const e=lkEnt(u,s.key);if(!e||!e.j)return[];const cap=Math.min(Date.now(),s.end||1e18,s.at+LK.WIN,e.l||1e18);return (e.g||[]).map(([a,b])=>{const z=b==null?(u===me()?cap:Math.min(cap,(e.hb||a)+LK.HB)):Math.min(b,cap);return[Math.max(a,e.j),z]}).filter(x=>x[1]>x[0])}
+const lkOv=(A,B)=>{let t=0;A.forEach(a=>B.forEach(b=>{const x=Math.min(a[1],b[1])-Math.max(a[0],b[0]);if(x>0)t+=x}));return t};
+const lkPair=(s,a,b)=>lkOv(lkSegs(a,s),lkSegs(b,s));
+const lkRun=u=>{const s=lkMine();if(!s)return false;if(u===me())return !!(S.active&&!S.active.paused);const e=lkEnt(u,s.key),g=e&&e.g&&e.g[e.g.length-1];return !!(g&&g[1]==null&&Date.now()-(e.hb||g[0])<=LK.HB)};
+const mmss=ms=>{const t=Math.floor(ms/1e3);return p2(Math.floor(t/60))+':'+p2(t%60)};
+/* publish my training time for every session I'm in (runs whenever local state is saved) */
+function lkSync(){if(!SO.db||!mp()||!SO.D[me()])return;const ses=lkSes().filter(s=>lkOpen(s)&&lkIn(me(),s));if(!ses.length)return;const run=!!(S.active&&!S.active.paused),now=Date.now(),P=JSON.parse(JSON.stringify((dd(me(),'part')||{}).p||{}));let ch=false;
+ ses.forEach(s=>{const e=P[s.key];e.g=e.g||[];const g=e.g,op=g.length&&g[g.length-1][1]==null;
+  if(run&&!op){g.push([now,null]);e.hb=now;ch=true}else if(!run&&op){g[g.length-1][1]=now;ch=true}
+  e.q=e.q||[];S.workouts.forEach(w=>{if(w.method==='quick'&&w.end>e.j&&!e.q.includes(String(w.id))&&w.end<=now+6e4){e.q.push(String(w.id));g.push([w.start,w.end]);ch=true}})});
+ if(ch)put('part',{p:lkTrim(P)})}
+const lkTrim=P=>{const k=Object.keys(P).sort((a,b)=>(P[b].j||0)-(P[a].j||0));k.slice(24).forEach(x=>delete P[x]);return P};
+setInterval(()=>{if(document.hidden||!SO.db||!mp()||!SO.D[me()])return;const s=lkMine();if(!s||!(S.active&&!S.active.paused))return;const P=JSON.parse(JSON.stringify((dd(me(),'part')||{}).p||{})),e=P[s.key];if(!e)return;e.hb=Date.now();put('part',{p:P})},6e4);
+/* lasting tally per friend: how many sessions linked, and minutes together */
+function lkTally(){if(!SO.db||!mp()||!SO.D[me()])return;const T=JSON.parse(JSON.stringify(dd(me(),'lk')||{})),s0=T.s||{},old=T.o||{};let ch=false;
+ lkSes().forEach(s=>{if(!lkIn(me(),s))return;const done=!lkOpen(s);lkMembers(s).forEach(o=>{if(o===me())return;const ov=lkPair(s,me(),o);if(ov<LK.MIN)return;const k=s.key+'|'+o,m=Math.floor(ov/6e4),cur=s0[k];if(!cur||(done&&cur[1]!==m)){s0[k]=[o,m,s.at];ch=true}})});
+ const ks=Object.keys(s0).sort((a,b)=>s0[b][2]-s0[a][2]);ks.slice(40).forEach(k=>{const[o,m]=s0[k];(old[o]=old[o]||{n:0,m:0}).n++;old[o].m+=m;delete s0[k];ch=true});
+ Object.keys(SO.D[me()]||{}).forEach(k=>{if(k.startsWith('ses_')&&SO.D[me()][k].at<Date.now()-12096e5){SO.db.doc('s/'+me()+'/d/'+k).delete().catch(()=>{});delete SO.D[me()][k]}});
+ if(ch)put('lk',{s:s0,o:old})}
+function lkLinks(){const T=dd(me(),'lk')||{},A={};Object.keys(T.s||{}).forEach(k=>{const[o,m,at]=T.s[k];const a=A[o]=A[o]||{u:o,n:0,m:0,at:0};a.n++;a.m+=m;a.at=Math.max(a.at,at)});Object.keys(T.o||{}).forEach(o=>{const a=A[o]=A[o]||{u:o,n:0,m:0,at:0};a.n+=T.o[o].n;a.m+=T.o[o].m});return Object.values(A).filter(a=>SO.P[a.u]&&!blockedP(me(),a.u)&&isFr(me(),a.u)).sort((a,b)=>b.n-a.n||b.at-a.at)}
+/* screens */
+function lkConst(L){const W=330,H=210,cx=W/2,cy=H/2,R=78,n=Math.min(L.length,8),now=Date.now();if(!n)return'';
+ const pts=L.slice(0,n).map((a,i)=>{const t=-Math.PI/2+i*2*Math.PI/n;return{a,x:cx+R*Math.cos(t),y:cy+R*Math.sin(t)*.9}});
+ return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Your links" style="display:block;margin:4px 0 10px"><defs><linearGradient id="lkg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3BFD9"/><stop offset=".35" stop-color="#CBB8F4"/><stop offset=".7" stop-color="#A8D5F1"/><stop offset="1" stop-color="#B3EFD7"/></linearGradient></defs>
+ ${pts.map(p=>{const fresh=now-p.a.at<864e5,w=(1+Math.min(3,p.a.n/2)).toFixed(1);return `<line x1="${cx}" y1="${cy}" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" stroke="${fresh?'url(#lkg)':'var(--mu)'}" stroke-width="${w}" opacity="${fresh?1:(now-p.a.at<6048e5?.7:.35)}"/>`}).join('')}
+ <circle cx="${cx}" cy="${cy}" r="18" fill="var(--bg)" stroke="var(--tx)"/><text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="12" fill="var(--tx)" style="font-family:var(--mono)">${esc(((mp().name||'?')[0]||'?').toUpperCase())}</text>
+ ${pts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="14" fill="var(--bg)" stroke="var(--tx)" stroke-width="1"/><text x="${p.x.toFixed(1)}" y="${(p.y+4).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--tx)" style="font-family:var(--mono)">${esc(((nm(p.a.u)||'?')[0]||'?').toUpperCase())}</text>`).join('')}</svg>`}
+function lkHome(){if(!SO.db||!mp())return `<div class="card"><b>Train together</b><p class="mu sm" style="margin:4px 0 12px">${SO.db?'Finish setting up in Synergy to link up with friends.':'Links need a connection. Everything else still works.'}</p>${SO.db?'<button class="btn g" data-lkx="syn" style="width:100%">Open Synergy</button>':''}</div>`;
+ lkTally();const inv=lkSes().filter(lkInvited),ses=lkMine(),L=lkLinks(),fr=friends();let h='';
+ inv.forEach(s=>{h+=`<div class="card"><div class="row sp"><div><b>${esc(nm(s.h))}</b><div class="mu sm">invited you to train together</div></div></div><div class="acts" style="margin-top:12px"><button class="btn" data-lkx="join:${s.key}" style="min-height:40px">Join</button><button class="btn g" data-lkx="no:${s.key}" style="min-height:40px">Not now</button></div></div>`});
+ if(ses){const mem=lkMembers(ses),others=mem.filter(u=>u!==me());
+  h+=`<div class="card"><div class="row sp"><b>Training together</b><span class="tag">${mem.length} in</span></div>
+  ${others.map(o=>{const ov=lkPair(ses,me(),o),ok=ov>=LK.MIN,run=lkRun(o);return `<div style="margin-top:14px"><div class="row sp"><div class="row" style="gap:10px">${av(o,30)}<div><b>${esc(nm(o))}</b><div class="mu sm">${run?'Training now':(lkEnt(o,ses.key)&&(lkEnt(o,ses.key).g||[]).length?'Paused or finished':'Not started yet')}</div></div></div><span class="mu" style="font:500 12px var(--mono)" data-lkt="${ses.key}|${o}">${ok?'LINKED':mmss(Math.min(ov,LK.MIN))+' / 10:00'}</span></div><div class="bar" style="margin-top:8px"><i data-lkb="${ses.key}|${o}" style="width:${Math.min(100,ov/LK.MIN*100).toFixed(1)}%"></i></div></div>`}).join('')||'<p class="mu sm" style="margin:10px 0 0">Waiting for friends to join.</p>'}
+  <p class="mu sm" style="margin:14px 0 0">Start any workout from the Gym. You each need 10 minutes training at the same time.</p>
+  <div class="acts" style="margin-top:12px"><button class="btn" data-lkx="go" style="min-height:40px">${S.active?'Open workout':'Start workout'}</button>${ses.h===me()?`<button class="btn g" data-lkx="end:${ses.key}" style="min-height:40px">End session</button>`:`<button class="btn g" data-lkx="leave:${ses.key}" style="min-height:40px">Leave</button>`}</div></div>`}
+ else if(LK.sel){h+=`<div class="card"><b>Who’s training?</b><p class="mu sm" style="margin:4px 0 8px">Pick up to ${LK.MAXP-1} friends. They get an invite when they open SYNERGY.</p>${fr.length?`<div class="chips" role="group" aria-label="Friends">${fr.map(u=>`<button data-lkx="pk:${u}" aria-pressed="${!!LK.pick[u]}">${esc(nm(u))}</button>`).join('')}</div>`:'<p class="mu sm">Add a friend in Synergy first.</p>'}<div class="acts" style="margin-top:14px"><button class="btn" data-lkx="send" style="min-height:40px"${Object.keys(LK.pick).length?'':' disabled'}>Send invites</button><button class="btn g" data-lkx="cancel" style="min-height:40px">Cancel</button></div></div>`}
+ else if(!inv.length){h+=`<div class="card"><b>Train together</b><p class="mu sm" style="margin:4px 0 12px">Invite friends, train at the same time for 10 minutes, and a link is made between you.</p><button class="btn" data-lkx="new" style="width:100%"${fr.length?'':' disabled'}>${fr.length?'Start a session':'Add a friend first'}</button></div>`}
+ h+=`<h2>Links</h2><div class="card">${L.length?`${lkConst(L)}<ul class="list">${L.map(a=>`<li><div class="t"><b>${esc(nm(a.u))}</b><span class="mu sm">${a.n} session${a.n>1?'s':''} · ${a.m} min together</span></div></li>`).join('')}</ul>`:'<p class="mu sm" style="margin:0">No links yet. Train with a friend for 10 minutes and your first one appears here.</p>'}</div>`;return h}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-lkx]');if(!b)return;const s=b.dataset.lkx,i=s.indexOf(':'),a=i<0?s:s.slice(0,i),x=i<0?'':s.slice(i+1);
+ const ent=(k,o)=>{const P=JSON.parse(JSON.stringify((dd(me(),'part')||{}).p||{}));P[k]=o;put('part',{p:lkTrim(P)})};
+ switch(a){
+ case'syn':tab='conn';sub=null;render();break;
+ case'new':if(lkMine())return;LK.sel=true;LK.pick={};render();break;
+ case'cancel':LK.sel=false;render();break;
+ case'pk':{if(LK.pick[x])delete LK.pick[x];else if(Object.keys(LK.pick).length<LK.MAXP-1)LK.pick[x]=1;render();break}
+ case'send':{const inv=Object.keys(LK.pick).filter(u=>isFr(me(),u));if(!inv.length||lkMine())return;const id=Date.now().toString(36),now=Date.now();put('ses_'+id,{at:now,inv});ent(me()+'_'+id,{j:now,g:[],hb:now});LK.sel=false;toast('Invites sent');setTimeout(lkSync,400);render();break}
+ case'join':{const s0=lkSes().find(q=>q.key===x);if(!s0||!lkOpen(s0)||lkMine())return toast(lkMine()?'Leave your current session first':'That session has ended');ent(x,{j:Date.now(),g:[],hb:Date.now()});toast('Joined');setTimeout(lkSync,400);render();break}
+ case'no':ent(x,{d:1});render();break;
+ case'leave':{const P=JSON.parse(JSON.stringify((dd(me(),'part')||{}).p||{}));if(P[x]){const g=P[x].g||[];if(g.length&&g[g.length-1][1]==null)g[g.length-1][1]=Date.now();P[x].l=Date.now();put('part',{p:lkTrim(P)})}render();break}
+ case'end':{const s0=lkSes().find(q=>q.key===x);if(!s0||s0.h!==me())return;const P=JSON.parse(JSON.stringify((dd(me(),'part')||{}).p||{}));if(P[x]){const g=P[x].g||[];if(g.length&&g[g.length-1][1]==null)g[g.length-1][1]=Date.now();put('part',{p:lkTrim(P)})}put('ses_'+s0.id,{at:s0.at,inv:s0.inv||[],end:Date.now()});render();break}
+ case'go':tab='play';sub=S.active?{n:'active'}:{n:'method'};render();break;
+ }});
+/* live clock: updates the shared timer every second, announces new links and new invites */
+setInterval(()=>{if(!SO.db||!mp()||document.hidden)return;const now=Date.now();
+ lkSes().filter(lkInvited).forEach(s=>{if(!LK.seenInv[s.key]){LK.seenInv[s.key]=1;if(now-s.at<6e5){toast(nm(s.h)+' invited you to train together');if(tab==='home'&&!sub)render()}}});
+ const s=lkMine();if(!s)return;S.lkT=S.lkT||{};
+ lkMembers(s).forEach(o=>{if(o===me())return;const ov=lkPair(s,me(),o),k=s.key+'|'+o,t=document.querySelector('[data-lkt="'+k+'"]'),bar=document.querySelector('[data-lkb="'+k+'"]');
+  if(t)t.textContent=ov>=LK.MIN?'LINKED':mmss(Math.min(ov,LK.MIN))+' / 10:00';if(bar)bar.style.width=Math.min(100,ov/LK.MIN*100).toFixed(1)+'%';
+  if(ov>=LK.MIN&&!S.lkT[k]){S.lkT[k]=1;save();toast('Link made with '+nm(o));lkTally();if(tab==='home'&&!sub)render()}})},1000);
 </script>
 </body>
 </html>
