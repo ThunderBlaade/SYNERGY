@@ -8,16 +8,15 @@
 <tr><td style="padding:0 0 26px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;font-weight:500;letter-spacing:6px;color:#0C0C0D;">SYNERGY</td></tr>
 <tr><td height="1" bgcolor="#CBB8F4" style="height:1px;line-height:1px;font-size:1px;background-color:#CBB8F4;background-image:linear-gradient(90deg,#F3BFD9,#CBB8F4,#A8D5F1,#B3EFD7);">&nbsp;</td></tr>
 <tr><td bgcolor="#FFFFFF" style="background-color:#FFFFFF;border-left:1px solid #D6D3CB;border-right:1px solid #D6D3CB;border-bottom:1px solid #D6D3CB;padding:30px 28px 32px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif">
-<div style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospacefont-size:9.5px;line-height:14px;letter-spacing:3px;color:#6B6A67;margin:0 0 14px 0;">01 / INVITATION</div>
-<div style="font-size:22px;line-height:28px;font-weight:300;letter-spacing:-0.3px;color:#0C0C0D;margin:0 0 12px 0;">You’re invited to SYNERGY</div>
-<div style="font-size:14px;line-height:22px;color:#3F3E3C;margin:0 0 26px 0;">A friend has added you to SYNERGY. Tap the button to set your password and get started.</div>
+<div style="font-size:22px;line-height:28px;font-weight:300;letter-spacing:-0.3px;color:#0C0C0D;margin:0 0 12px 0;">You’re invited</div>
+<div style="font-size:14px;line-height:22px;color:#3F3E3C;margin:0 0 26px 0;">Tap below to set your password.</div>
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 26px 0;"><tr>
 <td align="center" bgcolor="#0C0C0D" style="background-color:#0C0C0D;"><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:15px 30px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:500;letter-spacing:3px;color:#FFFFFF;text-decoration:none;text-transform:uppercase;">Set my password</a></td>
 </tr></table>
-<div style="font-size:12px;line-height:19px;color:#6B6A67;margin:0;">On iPhone, open the link in <b style="color:#0C0C0D;">Safari</b>, then tap Share and <b style="color:#0C0C0D;">Add to Home Screen</b>. It then works like any other app.</div>
+<div style="font-size:12px;line-height:19px;color:#6B6A67;margin:0;">On iPhone: open in <b style="color:#0C0C0D;">Safari</b>, Share, <b style="color:#0C0C0D;">Add to Home Screen</b>.</div>
 </td></tr>
 <tr><td style="padding:20px 2px 0 2px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;line-height:17px;color:#6B6A67;">
-Button not working? Copy this link into your browser:<br><span style="word-break:break-all;color:#3F3E3C;">{{ .ConfirmationURL }}</span>
-<br><br>Sent to {{ .Email }} by SYNERGY, a private app for friends.
+<span style="word-break:break-all;color:#3F3E3C;">{{ .ConfirmationURL }}</span>
+<br><br>{{ .Email }}
 </td></tr>
 </table></td></tr></table></body></html>
