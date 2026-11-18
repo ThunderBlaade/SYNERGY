@@ -480,12 +480,13 @@ async function beStart(ss){BE.email=ss.user.email||'';let adm=false;try{const r=
  SO.owner=adm;SO.edit=adm;try{devDraw()}catch(e){}beRealtime();socGo(beDb(),ss.user.id)}
 const loginCard=()=>`<div class="card"><b>Sign in</b><p class="mu sm" style="margin:6px 0 0">SYNERGY is invite-only. Use the email and password you were given.</p>
  <label for="be-em" style="margin-top:16px">Email</label><input id="be-em" type="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
- <label for="be-pw" style="margin-top:12px">Password</label><input id="be-pw" type="password" autocomplete="current-password">
+ <label for="be-pw" style="margin-top:12px">Password</label><div style="position:relative"><input id="be-pw" type="password" autocomplete="current-password" style="padding-right:76px"><button type="button" class="tag" data-be="eye:be-pw" aria-label="Show password" style="position:absolute;right:8px;top:50%;transform:translateY(-50%)">Show</button></div>
  <button class="btn big" data-be="in" style="margin-top:16px">Sign in</button><p id="be-msg" class="mu sm" role="status"></p></div>`;
 function beAccount(){if(!BE.cli||!SO.db)return'';return `<h2>Account</h2><div class="card"><div class="mu sm">Signed in as</div><b>${esc(BE.email)}</b>
- <label for="be-np" style="margin-top:16px">New password</label><input id="be-np" type="password" autocomplete="new-password" minlength="8">
+ <label for="be-np" style="margin-top:16px">New password</label><div style="position:relative"><input id="be-np" type="password" autocomplete="new-password" minlength="8" style="padding-right:76px"><button type="button" class="tag" data-be="eye:be-np" aria-label="Show password" style="position:absolute;right:8px;top:50%;transform:translateY(-50%)">Show</button></div>
  <button class="btn" data-be="pw" style="margin-top:10px">Change password</button><p id="be-msg" class="mu sm" role="status"></p><button class="btn" data-be="out" style="margin-top:6px">Sign out</button></div>`}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-be]');if(!b||!BE.cli)return;const a=b.dataset.be,say=t=>{const m=$('#be-msg');if(m)m.textContent=t};
+ if(a.startsWith('eye:')){const inp=document.getElementById(a.slice(4));if(inp){const show=inp.type==='password';inp.type=show?'text':'password';b.textContent=show?'Hide':'Show';b.setAttribute('aria-label',show?'Hide password':'Show password')}return}
  if(a==='in'){const em=(($('#be-em')||{}).value||'').trim(),pw=($('#be-pw')||{}).value||'';if(!em||!pw){say('Enter your email and password.');return}
   b.disabled=true;say('Signing in…');
   try{const r=await BE.cli.auth.signInWithPassword({email:em,password:pw});if(r.error)throw r.error;SO.state='init';render();await beStart(r.data.session)}
