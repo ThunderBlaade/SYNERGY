@@ -19,7 +19,7 @@
 
 <style>
 :root{--bg:#E6E8F0;--s1:#F5F3F6;--s2:#E3E2EC;--ln:#CFCFE0;--tx:#16182C;--mu:#575B78;--ac:#6B4BF0;--ok:#1B8F5A;--wn:#B7791F;--onac:#fff;--disp:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',system-ui,sans-serif;--body:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',system-ui,sans-serif;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#070817;--s1:#101231;--s2:#1A1D45;--ln:#272B58;--tx:#EEF0FF;--mu:#9BA1CC;--ok:#4BE3A8;--wn:#FFC857;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#070817;--s1:#101231;--s2:#1A1D45;--ln:#272B58;--tx:#EEF0FF;--mu:#9BA1CC;--ok:#4BE3A8;--wn:#FFC857;color-scheme:dark}
 *,*::before,*::after{box-sizing:inherit}
@@ -238,6 +238,12 @@ html[data-tab=astral] #sky .sgrad{background:linear-gradient(180deg,var(--sa),va
 /* v5: Astral keeps its own sky-led theme; its muted text is stronger so it never fades at dawn or dusk */
 html[data-tab=astral][data-theme=light]{--mu:#34384A}html[data-tab=astral][data-theme=dark]{--mu:#CBD0EE}
 html[data-tab=astral] #app .mu,html[data-tab=astral] #app .fr span,html[data-tab=astral] #app h1,html[data-tab=astral] label{color:var(--mu)}html[data-tab=astral] #app h1{color:var(--tx)}
+/* v6: fit the phone screen, hide titles that repeat the bottom bar */
+html{height:100%}body{min-height:100vh;min-height:100dvh}
+nav{padding:4px 4px max(8px,calc(env(safe-area-inset-bottom,0px) - 6px))!important}nav button{min-height:44px!important}
+#app{padding-bottom:96px}
+#app h1.tt{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#app h1.tt+p.mu{margin-top:2px}
 #gate .card{background:transparent}
 </style>
 </head>
@@ -1136,6 +1142,7 @@ locInit();render();goTop();
 /* PWA: offline shell. Only registers on https or localhost; harmless elsewhere. */
 try{if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
  window.addEventListener('load',function(){navigator.serviceWorker.register('service-worker.js').catch(function(){})})}}catch(e){}
+(function(){const a=document.getElementById('app');if(!a)return;const re=/^(Home|The Gym|Synergy|Ranked|Astral|Profile)$/i,tag=()=>a.querySelectorAll('h1').forEach(h=>{if(re.test(h.textContent.trim()))h.classList.add('tt')});tag();new MutationObserver(tag).observe(a,{childList:true,subtree:true})})();
 </script>
 </body>
 </html>
