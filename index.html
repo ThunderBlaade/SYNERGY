@@ -234,6 +234,9 @@ html[data-tab=astral] #sky .sgrad{background:linear-gradient(180deg,var(--sa),va
 @keyframes sfall{to{transform:translateY(calc(100vh + 24px))}}
 @media (prefers-reduced-motion:reduce){#wx *{animation:none!important}}html[data-rm] #wx *{animation:none!important}
 .fr{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--ln);font-size:12px}.fr:last-child{border-bottom:0}.fr span{color:var(--mu);font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase}.fr b{font-weight:400;text-align:right}
+/* v5: Astral keeps its own sky-led theme; its muted text is stronger so it never fades at dawn or dusk */
+html[data-tab=astral][data-theme=light]{--mu:#34384A}html[data-tab=astral][data-theme=dark]{--mu:#CBD0EE}
+html[data-tab=astral] #app .mu,html[data-tab=astral] #app .fr span,html[data-tab=astral] #app h1,html[data-tab=astral] label{color:var(--mu)}html[data-tab=astral] #app h1{color:var(--tx)}
 #gate .card{background:transparent}
 </style>
 </head>
@@ -255,7 +258,7 @@ const ic=k=>`<svg viewBox="0 0 24 24" aria-hidden="true" width="24" height="24">
 /* ===== State (stored on this device only) ===== */
 const DEF=()=>({name:'',theme:'auto',v2:1,v3:1,loc:{mode:'auto',region:null,fx:{d0:330,d1:990},share:false},accent:'#7B7EEA',units:'metric',glass:true,glow:true,size:100,reduce:false,hide:[],ledger:[],workouts:[],custom:[],tpl:[],active:null,rest:null,seq:1});
 let S=DEF();try{const r=localStorage.getItem('synergy');if(r)S={...DEF(),...JSON.parse(r)}}catch(e){}
-if(!S.v3){S.theme='auto';S.v2=1;S.v3=1}
+if(!S.v3){S.theme='system';S.v2=1;S.v3=1}if(S.theme==='auto'||!S.theme)S.theme='system';
 const save=()=>{try{localStorage.setItem('synergy',JSON.stringify(S))}catch(e){}};
 let tab='home',sub=null,shown={},confirmReset=false;
 const $=s=>document.querySelector(s);
@@ -320,7 +323,7 @@ const irow=(p,l,v,c)=>`<button class="ir" data-set="${p}"><span class="ib" style
 const SETT={appearance:'Appearance',home:'Home screen',units:'Units',account:'Account',ach:'Achievements',scoring:'How scoring works',data:'Your data',social:'Social & privacy',loc:'Location & region',perm:'Permissions'};
 const COLS=[['#7B7EEA','Nebula'],['#6FA8E6','Ion'],['#58C2B0','Aurora'],['#E39A6E','Nova'],['#D882A8','Pulsar'],['#E3BF6C','Solar']];
 function setPage(){const p=sub.p,I=lvl(total()),A=achs();let b='';
- if(p==='appearance')b=`<h2>Theme</h2><div class="seg s4" role="group" aria-label="Theme">${['auto','system','light','dark'].map(t=>`<button data-th="${t}" aria-pressed="${S.theme===t}">${THL[t]}</button>`).join('')}</div><p class="mu sm" style="margin:8px 0 0">Sun &amp; Moon switches to day at 5:30 am and to night at 4:30 pm. The sun or moon crosses the sky left to right, and the moon shows today’s phase.</p>
+ if(p==='appearance')b=`<h2>Theme</h2><div class="seg s4" role="group" aria-label="Theme">${['system','light','dark'].map(t=>`<button data-th="${t}" aria-pressed="${S.theme===t}">${THL[t]}</button>`).join('')}</div><p class="mu sm" style="margin:8px 0 0">System follows your phone. The Astral page keeps its own look and always follows the real sky.</p>
  <h2>Look</h2><div class="grp">${tgl('glow',S.glow,'Soft colour wash')}${tgl('reduce',S.reduce,'Reduce motion')}</div>
  <h2>Text size</h2><div class="seg" role="group" aria-label="Text size">${[[90,'Small'],[100,'Default'],[112,'Large'],[125,'Larger']].map(z=>`<button data-sz="${z[0]}" aria-pressed="${S.size===z[0]}">${z[1]}</button>`).join('')}</div>
  <div style="margin-top:22px"><button class="btn g" data-a="resetlook" style="width:100%">Reset appearance</button></div>`;
@@ -912,7 +915,7 @@ document.addEventListener('pointermove',e=>{if(!dvD)return;const dx=e.clientX-dv
 const dvEnd=()=>{if(dvD&&dvD.m)DV.moved=true;setTimeout(()=>{DV.moved=false},50);dvD=null};document.addEventListener('pointerup',dvEnd);document.addEventListener('pointercancel',dvEnd);
 /* ===== Sun & moon sky: switches at 05:30 (day) and 16:30 (night); the sun or moon crosses left to right ===== */
 let DAY0=330,DAY1=990;const PHN=['New moon','Waxing crescent','First quarter','Waxing gibbous','Full moon','Waning gibbous','Last quarter','Waning crescent'];
-const THL={auto:'Sun & Moon',system:'System',light:'Light',dark:'Dark'};
+const THL={system:'System',light:'Light',dark:'Dark'};
 const moonPhase=d=>{const jd=(d||simDate()).getTime()/864e5+2440587.5,p=((jd-2451550.1)/29.530588853)%1;return p<0?p+1:p};
 const moonInfo=d=>{const p=moonPhase(d);return{p,name:PHN[Math.floor(p*8+.5)%8],lit:Math.round((1-Math.cos(2*Math.PI*p))/2*100)}};
 function moonSvg(p){const r=20,pw=p<=.5?p:1-p,k=Math.cos(2*Math.PI*pw),rx=(Math.abs(k)*r).toFixed(2),sw=k>0?0:1,lit=pw<.004?'':`<path d="M0 ${-r}A${r} ${r} 0 0 1 0 ${r}A${rx} ${r} 0 0 ${sw} 0 ${-r}Z" style="fill:var(--moonc,#F4F1E4)" stroke="none"/>`;
@@ -936,7 +939,7 @@ function fxRun(fn,force,cb){if(fxRM()&&!force){if(cb)cb();return}if(FX.busy&&!fo
 const realMin=()=>{const L=S.loc,d=new Date();return L&&L.mode==='auto'&&L.region?tzNowMin(L.region.tz,d):d.getHours()*60+d.getMinutes()}
 function fxTs(){let t=Date.now();if(SKYSIM.min!=null){const dl=((SKYSIM.min-realMin()+2160)%1440)-720;t+=dl*6e4+SKYSIM.off*864e5}return t}
 function fxDayOn(){const L=S.loc,q=L&&L.region?tzParts(L.region.tz,new Date()):null,n=q?Math.round(Date.UTC(q.y,q.mo-1,q.d)/864e5):Math.floor(Date.now()/864e5);return n%FXEVERY===0}
-function fxTick(){if(SKYSIM.min!=null||document.hidden||FX.busy||S.theme!=='auto'||tab!=='astral')return;const g=gapAt(nowMin());if(!g||!fxDayOn()){FX.k=null;return}const k=g.id+Math.floor(g.el/3);if(k===FX.k)return;FX.k=k;fxPlay(Math.random()<.08?'hen':g.id==='dawn'?(Math.random()<.5?'ptero':'car'):(Math.random()<.5?'ship':'con'))}
+function fxTick(){if(SKYSIM.min!=null||document.hidden||FX.busy||tab!=='astral')return;const g=gapAt(nowMin());if(!g||!fxDayOn()){FX.k=null;return}const k=g.id+Math.floor(g.el/3);if(k===FX.k)return;FX.k=k;fxPlay(Math.random()<.08?'hen':g.id==='dawn'?(Math.random()<.5?'ptero':'car'):(Math.random()<.5?'ship':'con'))}
 const FXF={ship:()=>fxShip(),ptero:()=>fxPtero(),con:()=>fxCon(),car:()=>fxCar(),hen:()=>fxHen()};
 function fxPlay(k,force,cb){const f=FXF[k];if(f)fxRun(f,force,cb)}
 function fxForce(k,cb){if(fxRM())toast('Reduce motion is on. Playing this preview anyway.');const dawn=k==='ptero'||k==='car',g=Math.min(GAP,(1440-(DAY1-DAY0))/4);SKYSIM.min=Math.round(dawn?(DAY0-g/2+1440)%1440:(DAY1+g/2)%1440);document.documentElement.setAttribute('data-sim','');applySky();devSync();fxPlay(k,true,cb)}
@@ -1017,7 +1020,8 @@ function sunPhase(p){const r=20,pw=p<=.5?p:1-p,k=Math.cos(2*Math.PI*pw),rx=(Math
 const SKYSIM={min:null,off:0,mode:null};
 const simDate=()=>new Date(Date.now()+SKYSIM.off*864e5);
 const nowMin=()=>{if(SKYSIM.min!=null)return SKYSIM.min;const L=S.loc,d=new Date();if(L&&L.mode==='auto'&&L.region)return tzNowMin(L.region.tz,d);return d.getHours()*60+d.getMinutes()+d.getSeconds()/60};
-function resolveSky(){if(SKYSIM.min!=null)return SKYSIM.min>=DAY0&&SKYSIM.min<DAY1?'light':'dark';let th=S.theme;if(th==='auto'){const m=nowMin();th=m>=DAY0&&m<DAY1?'light':'dark'}else if(th==='system')th=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';return th}
+function resolveSky(){const m=nowMin();return m>=DAY0&&m<DAY1?'light':'dark'}
+function resolveSkyOld(){if(SKYSIM.min!=null)return SKYSIM.min>=DAY0&&SKYSIM.min<DAY1?'light':'dark';let th=S.theme;if(th==='auto'){const m=nowMin();th=m>=DAY0&&m<DAY1?'light':'dark'}else if(th==='system')th=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';return th}
 const lerpC=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
 let skyKey='';
 const KEYS=[[0,[7,8,23],[16,20,54]],[270,[11,13,38],[26,23,64]],[315,[40,44,80],[84,70,100]],[330,[185,165,201],[255,200,170]],[390,[160,178,214],[255,214,176]],[510,[168,200,232],[246,231,207]],[720,[158,197,230],[220,235,240]],[870,[169,195,223],[239,227,207]],[960,[201,169,184],[242,191,138]],[990,[62,62,100],[100,68,96]],[1050,[26,30,66],[58,56,100]],[1140,[10,11,34],[21,24,69]],[1440,[7,8,23],[16,20,54]]];
@@ -1025,8 +1029,8 @@ function skyCol(m){let i=1;while(i<KEYS.length-1&&KEYS[i][0]<=m)i++;const a=KEYS
 const periodName=m=>m<270?'Night':m<330?'Pre-dawn':m<420?'Sunrise':m<660?'Morning':m<840?'Midday':m<960?'Afternoon':m<1050?'Sunset':m<1140?'Dusk':'Night';
 const starA=m=>m>=1140||m<270?1:m<330?1-(m-270)/60*.7:m>=990?.15+.85*(m-990)/150:0;
 const hmm=m=>String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(Math.floor(m%60)).padStart(2,'0');
-function applySky(){setSun();const r=document.documentElement,m=nowMin(),vm=vmin(m);if(!applySky.i){applySky.i=1;r.setAttribute('data-noanim','');setTimeout(()=>r.removeAttribute('data-noanim'),400)}const th=resolveSky(),sky=th==='light'?'day':'night',auto=S.theme==='auto'||SKYSIM.min!=null;
- if(S.theme==='system'&&SKYSIM.min==null)r.removeAttribute('data-theme');else r.setAttribute('data-theme',th);r.setAttribute('data-sky',sky);
+function applySky(){setSun();const r=document.documentElement,m=nowMin(),vm=vmin(m);if(!applySky.i){applySky.i=1;r.setAttribute('data-noanim','');setTimeout(()=>r.removeAttribute('data-noanim'),400)}const th=resolveSky(),sky=th==='light'?'day':'night',auto=true;
+ {let pt=S.theme==='light'||S.theme==='dark'?S.theme:null;if(tab==='astral'){const cc=skyCol(vm),lm=(.2126*(cc.top[0]*.6+cc.bot[0]*.4)+.7152*(cc.top[1]*.6+cc.bot[1]*.4)+.0722*(cc.top[2]*.6+cc.bot[2]*.4))/255;pt=lm>.5?'light':'dark'}if(pt)r.setAttribute('data-theme',pt);else r.removeAttribute('data-theme')}r.setAttribute('data-sky',sky);
  const span=DAY1-DAY0,nspan=1440-span;let t=.5,out=0;
  if(sky==='day'){if(m>=DAY0&&m<DAY1)t=(m-DAY0)/span}else{const n=(m-DAY1+1440)%1440,g=Math.min(GAP,nspan/4);if(n<nspan){if(n<g){t=0;out=1}else if(n>nspan-g){t=1;out=1}else t=(n-g)/(nspan-2*g)}}
  const W=innerWidth,H=innerHeight,e=Math.sin(Math.PI*t),h=Math.pow(e,.6),x=-70+(W+140)*t,y=H*(.17-.065*e),op=Math.min(1,t/.08,(1-t)/.08),el=$(sky==='day'?'#sun':'#moon');
