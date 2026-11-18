@@ -509,7 +509,7 @@ BE.fails=0;
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-be]');if(!b)return;const a=b.dataset.be,say=t=>{const m=document.getElementById('g-msg')||document.getElementById('be-msg');if(m)m.textContent=t},val=id=>((document.getElementById(id)||{}).value||'');
  if(a.startsWith('eye:')){const inp=document.getElementById(a.slice(4));if(inp){const show=inp.type==='password';inp.type=show?'text':'password';b.textContent=show?'Hide':'Show';b.setAttribute('aria-label',show?'Hide password':'Show password')}return}
  if(a==='gx'){SO.prevGate=null;drawGate();return}
- if(a==='gf'||a==='gi'){const m=a==='gf'?'forgot':'in';if(SO.prevGate)SO.prevGate=m;else{BE.gate=m;BE.note=''}drawGate();return}
+ if(a==='gf'||a==='gi'){const m=a==='gf'?'forgot':'in',emEl=document.getElementById('g-em');if(emEl)BE.lastEmail=emEl.value.trim();if(SO.prevGate)SO.prevGate=m;else{BE.gate=m;BE.note=''}drawGate();return}
  if(SO.prevGate){say('Preview only. Nothing was changed.');return}
  if(!BE.cli)return;
  if(a==='in'){const em=val('g-em').trim(),pw=val('g-pw');if(!em||!pw){say('Enter your email and password.');return}
