@@ -1,0 +1,10 @@
+# Never commit secrets or personal files
+.env
+.env.*
+*.pem
+*.key
+*.zip
+backups/
+node_modules/
+.DS_Store
+Thumbs.db
