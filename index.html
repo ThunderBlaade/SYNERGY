@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SYNERGY">
 <meta name="format-detection" content="telephone=no">
+<meta name="referrer" content="no-referrer">
 <link rel="manifest" href="manifest.json">
 <script src="config.js"></script>
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
@@ -112,6 +113,8 @@ nav button[aria-current=page] svg{filter:drop-shadow(0 0 7px var(--ac))}
 #sky i:nth-child(2){background-image:radial-gradient(1.6px 1.6px at 40px 60px,#fff,transparent),radial-gradient(1.2px 1.2px at 230px 120px,#ffe9c9,transparent),radial-gradient(1.3px 1.3px at 130px 250px,#d6dcff,transparent),radial-gradient(1px 1px at 330px 300px,#fff,transparent),radial-gradient(1.5px 1.5px at 300px 30px,#fff,transparent);background-size:410px 350px;animation:tw 6s ease-in-out infinite alternate}
 @keyframes tw{from{opacity:.2}to{opacity:.95}}
 #sky{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden}
+#gate{position:fixed;inset:0;z-index:35;display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px));overflow:auto;-webkit-overflow-scrolling:touch}#gate .gin{width:100%;max-width:380px;position:relative;margin:auto}
+html[data-gate] #app,html[data-gate] nav,html[data-gate] #backbtn{visibility:hidden}
 @property --sa{syntax:'<color>';inherits:true;initial-value:#9EC5E6}@property --sb{syntax:'<color>';inherits:true;initial-value:#DCEBF0}
 #sky .sgrad{position:absolute;inset:0;background:linear-gradient(180deg,var(--sa),var(--sb));transition:--sa 18s linear,--sb 18s linear}html[data-sim] #sky .sgrad,html[data-noanim] #sky .sgrad{transition:none}
 .stw{position:absolute;inset:0;opacity:var(--stars,1);display:none}html[data-sky=night] .stw{display:block}html[data-sky=day] body::before{opacity:.5}
@@ -473,33 +476,62 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&BE.cli&&S
 async function beInit(){const cfg=beCfg();
  try{if(location.hash==='#editor')localStorage.setItem('synergy_editor','1');if(location.hash==='#editor-off')localStorage.removeItem('synergy_editor');if(localStorage.getItem('synergy_editor')==='1'){SO.edit=true;devDraw()}}catch(e){}
  if(!cfg){SO.state='nodb';SO.why='cfg';socDraw(true);return}
+ const h0=location.hash,rec=/type=(recovery|invite)/.test(h0),bad=/error_code=|error=access_denied/.test(h0);
  try{await beLoad();BE.cli=window.supabase.createClient(cfg.url,cfg.key,{auth:{persistSession:true,autoRefreshToken:true}})}catch(e){SO.err=beErr(e);SO.state='nodb';SO.why='net';socDraw(true);return}
- BE.cli.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT'&&SO.db)location.reload()});
+ BE.cli.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY'){BE.gate='newpw';drawGate()}if(ev==='SIGNED_OUT'&&SO.db)location.reload()});
  let ss=null;try{ss=(await BE.cli.auth.getSession()).data.session}catch(e){}
- if(!ss){SO.state='signin';socDraw(true);return}
+ if(rec||bad){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
+ if(rec&&ss){BE.gate='newpw';SO.state='signin';drawGate();socDraw(true);return}
+ if(bad&&!ss){BE.gate='forgot';BE.note='That link has expired or has already been used. Enter your email to get a new one.'}
+ if(!ss){SO.state='signin';BE.gate=BE.gate||'in';drawGate();socDraw(true);return}
  await beStart(ss)}
-async function beStart(ss){BE.email=ss.user.email||'';let adm=false;try{const r=await BE.cli.rpc('is_admin');adm=r.data===true}catch(e){}
+async function beStart(ss){BE.email=ss.user.email||'';BE.gate=null;drawGate();let adm=false;try{const r=await BE.cli.rpc('is_admin');adm=r.data===true}catch(e){}
  SO.owner=adm;SO.edit=adm||SO.edit;try{devDraw()}catch(e){}beRealtime();socGo(beDb(),ss.user.id)}
-const loginCard=()=>`<div class="card"><b>Sign in</b><p class="mu sm" style="margin:6px 0 0">SYNERGY is invite-only. Use the email and password you were given.</p>
- <label for="be-em" style="margin-top:16px">Email</label><input id="be-em" type="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
- <label for="be-pw" style="margin-top:12px">Password</label><div style="position:relative"><input id="be-pw" type="password" autocomplete="current-password" style="padding-right:76px"><button type="button" class="tag" data-be="eye:be-pw" aria-label="Show password" style="position:absolute;right:8px;top:50%;transform:translateY(-50%)">Show</button></div>
- <button class="btn big" data-be="in" style="margin-top:16px">Sign in</button><p id="be-msg" class="mu sm" role="status"></p>${SO.prevLogin?`<p class="mu sm" style="margin:6px 0 0;text-align:center">Preview: nothing here signs you in.</p>`:''}</div>`;
+/* ---- full-screen sign-in gate (first open, signed out, reinstalled) ---- */
+const pwField=(id,label,ac)=>`<label for="${id}" style="margin-top:12px">${label}</label><div style="position:relative"><input id="${id}" type="password" autocomplete="${ac}" style="padding-right:76px"><button type="button" class="tag" data-be="eye:${id}" aria-label="Show password" style="position:absolute;right:8px;top:50%;transform:translateY(-50%)">Show</button></div>`;
+const gLink=(a,t)=>`<button type="button" data-be="${a}" style="display:block;margin:14px auto 0;color:var(--ac);font-weight:600;padding:6px 10px">${t}</button>`;
+const gMail=()=>`<label for="g-em" style="margin-top:16px">Email</label><input id="g-em" type="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" value="${esc(BE.lastEmail||'')}">`;
+function gateBody(m){
+ if(m==='forgot')return `<b style="font-size:19px">Reset your password</b><p class="mu sm" style="margin:6px 0 0">Enter your email and we’ll send you a link to choose a new password.</p>${BE.note?`<p class="sm" style="margin:10px 0 0;color:var(--wn)">${esc(BE.note)}</p>`:''}${gMail()}<button class="btn big" data-be="fs" style="margin-top:16px">Send reset link</button><p id="g-msg" class="mu sm" role="status" style="margin:10px 0 0"></p>${gLink('gi','Back to sign in')}`;
+ if(m==='newpw')return `<b style="font-size:19px">Choose a new password</b><p class="mu sm" style="margin:6px 0 0">Use at least 8 characters. A few random words is a good password.</p>${pwField('g-p1','New password','new-password')}${pwField('g-p2','Confirm password','new-password')}<button class="btn big" data-be="np2" style="margin-top:16px">Save password</button><p id="g-msg" class="mu sm" role="status" style="margin:10px 0 0"></p>`;
+ return `<b style="font-size:19px">Sign in</b>${gMail()}${pwField('g-pw','Password','current-password')}<button class="btn big" data-be="in" style="margin-top:16px">Sign in</button><p id="g-msg" class="mu sm" role="status" style="margin:10px 0 0"></p>${gLink('gf','Forgot password?')}`}
+function drawGate(){const m=SO.prevGate||BE.gate||null;let g=document.getElementById('gate');
+ if(!m){if(g)g.remove();document.documentElement.removeAttribute('data-gate');return}
+ const key=m+(SO.prevGate?'*':'');if(g&&g.dataset.m===key)return;
+ if(!g){g=document.createElement('div');g.id='gate';g.setAttribute('role','dialog');g.setAttribute('aria-modal','true');g.setAttribute('aria-label','Sign in to SYNERGY');document.body.appendChild(g)}
+ g.dataset.m=key;
+ g.innerHTML=`<div class="gin">${SO.prevGate?'<button type="button" class="tag" data-be="gx" style="position:fixed;z-index:36;top:calc(10px + env(safe-area-inset-top,0px));left:14px">Close preview</button>':''}<img src="icons/icon-192.png" alt="" width="76" height="76" style="border-radius:21px;display:block;margin:0 auto 14px"><div class="wm" style="text-align:center;margin-bottom:18px">SYNERGY</div><div class="card" style="padding:22px">${gateBody(m)}</div><p class="mu sm" style="text-align:center;margin:14px 0 0">${SO.prevGate?'Preview only. Nothing here signs you in.':'SYNERGY is invite-only. Ask the person who invited you for access.'}</p></div>`;
+ document.documentElement.setAttribute('data-gate','')}
 function beAccount(){if(!BE.cli||!SO.db)return'';return `<h2>Account</h2><div class="card"><div class="mu sm">Signed in as</div><b>${esc(BE.email)}</b>
  <label for="be-np" style="margin-top:16px">New password</label><div style="position:relative"><input id="be-np" type="password" autocomplete="new-password" minlength="8" style="padding-right:76px"><button type="button" class="tag" data-be="eye:be-np" aria-label="Show password" style="position:absolute;right:8px;top:50%;transform:translateY(-50%)">Show</button></div>
- <button class="btn" data-be="pw" style="margin-top:10px">Change password</button><p id="be-msg" class="mu sm" role="status"></p><button class="btn" data-be="out" style="margin-top:6px">Sign out</button></div>`}
-document.addEventListener('click',async e=>{const b=e.target.closest('[data-be]');if(!b)return;const a=b.dataset.be,say=t=>{const m=$('#be-msg');if(m)m.textContent=t};
+ <button class="btn" data-be="pw" style="margin-top:10px">Change password</button><p id="be-msg" class="mu sm" role="status"></p><button class="btn" data-be="out" style="margin-top:6px">Sign out</button><button class="btn" data-be="outall" style="margin-top:6px">Sign out of all devices</button><p class="mu sm" style="margin:8px 0 0">Use “all devices” if you lose a phone or think someone knows your password.</p></div>`}
+BE.fails=0;
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-be]');if(!b)return;const a=b.dataset.be,say=t=>{const m=document.getElementById('g-msg')||document.getElementById('be-msg');if(m)m.textContent=t},val=id=>((document.getElementById(id)||{}).value||'');
  if(a.startsWith('eye:')){const inp=document.getElementById(a.slice(4));if(inp){const show=inp.type==='password';inp.type=show?'text':'password';b.textContent=show?'Hide':'Show';b.setAttribute('aria-label',show?'Hide password':'Show password')}return}
- if(a==='pvx'){SO.prevLogin=false;render();return}
- if(SO.prevLogin&&a==='in'){say('Preview only. Nothing was changed.');return}
+ if(a==='gx'){SO.prevGate=null;drawGate();return}
+ if(a==='gf'||a==='gi'){const m=a==='gf'?'forgot':'in';if(SO.prevGate)SO.prevGate=m;else{BE.gate=m;BE.note=''}drawGate();return}
+ if(SO.prevGate){say('Preview only. Nothing was changed.');return}
  if(!BE.cli)return;
- if(a==='in'){const em=(($('#be-em')||{}).value||'').trim(),pw=($('#be-pw')||{}).value||'';if(!em||!pw){say('Enter your email and password.');return}
-  b.disabled=true;say('Signing in…');
-  try{const r=await BE.cli.auth.signInWithPassword({email:em,password:pw});if(r.error)throw r.error;SO.state='init';render();await beStart(r.data.session)}
-  catch(x){say(/invalid|credentials/i.test((x&&x.message)||'')?'That email or password isn’t right.':'Couldn’t sign in. Check your connection and try again.');b.disabled=false}}
+ if(a==='in'){const em=val('g-em').trim(),pw=val('g-pw');if(!em||!pw){say('Enter your email and password.');return}
+  BE.lastEmail=em;b.disabled=true;say('Signing in…');
+  try{const r=await BE.cli.auth.signInWithPassword({email:em,password:pw});if(r.error)throw r.error;BE.fails=0;SO.state='init';render();await beStart(r.data.session)}
+  catch(x){const bad=/invalid|credentials/i.test((x&&x.message)||'');if(bad)BE.fails++;say(bad?'That email or password isn’t right.':/rate|too many/i.test((x&&x.message)||'')?'Too many attempts. Wait a few minutes and try again.':'Couldn’t sign in. Check your connection and try again.');
+   if(BE.fails>=5){BE.fails=0;let n=30;const t0=b.textContent;const iv=setInterval(()=>{n--;b.textContent=n>0?'Wait '+n+'s':t0;if(n<=0){clearInterval(iv);b.disabled=false}},1000);b.textContent='Wait 30s'}else b.disabled=false}}
+ else if(a==='fs'){const em=val('g-em').trim();if(!/^\S+@\S+\.\S+$/.test(em)){say('Enter a valid email address.');return}
+  BE.lastEmail=em;b.disabled=true;let limited=false;
+  try{const r=await BE.cli.auth.resetPasswordForEmail(em,{redirectTo:location.origin+location.pathname});if(r.error){limited=r.error.status===429||/rate|too many/i.test(r.error.message||'');console.warn('reset:',r.error.message)}}catch(x){console.warn('reset failed',x)}
+  say(limited?'Too many requests. Wait a few minutes and try again.':'If that email has an account, a reset link is on its way. It can take a few minutes, so check your spam folder too.');
+  let n=60;const t0=b.textContent;b.textContent='Send again in 60s';const iv=setInterval(()=>{n--;b.textContent=n>0?'Send again in '+n+'s':t0;if(n<=0){clearInterval(iv);b.disabled=false}},1000)}
+ else if(a==='np2'){const p1=val('g-p1'),p2=val('g-p2');if(p1.length<8){say('Use at least 8 characters.');return}if(p1!==p2){say('The two passwords don’t match.');return}
+  b.disabled=true;
+  try{const r=await BE.cli.auth.updateUser({password:p1});if(r.error)throw r.error;BE.gate=null;const ss=(await BE.cli.auth.getSession()).data.session;
+   if(ss){toast('Password saved');SO.state='init';drawGate();render();await beStart(ss)}else{BE.gate='in';drawGate()}}
+  catch(x){say(/same|different/i.test((x&&x.message)||'')?'Choose a password you haven’t used before.':/weak|short|least/i.test((x&&x.message)||'')?'That password is too weak. Try a longer one.':'Couldn’t save it. The link may have expired, so request a new one.');b.disabled=false}}
  else if(a==='out'){try{await BE.cli.auth.signOut()}catch(x){}location.reload()}
- else if(a==='pw'){const n=($('#be-np')||{}).value||'';if(n.length<8){say('Use at least 8 characters.');return}
-  try{const r=await BE.cli.auth.updateUser({password:n});say(r.error?'Couldn’t change it. Try again.':'Password changed.');if(!r.error)$('#be-np').value=''}catch(x){say('Couldn’t change it. Try again.')}}});
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='be-pw'){const b=document.querySelector('[data-be="in"]');if(b)b.click()}});
+ else if(a==='outall'){try{await BE.cli.auth.signOut({scope:'global'})}catch(x){}location.reload()}
+ else if(a==='pw'){const n=val('be-np');if(n.length<8){say('Use at least 8 characters.');return}
+  try{const r=await BE.cli.auth.updateUser({password:n});say(r.error?'Couldn’t change it. Try again.':'Password changed.');if(!r.error)document.getElementById('be-np').value=''}catch(x){say('Couldn’t change it. Try again.')}}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.closest&&e.target.closest('#gate')&&e.target.tagName==='INPUT'){const bt=document.querySelector('#gate .btn');if(bt&&!bt.disabled)bt.click()}});
 /* ---- connection ---- */
 function socGo(db,uid){SO.db=db;SO.uid=uid;const t=setTimeout(()=>{if(SO.state==='init'){SO.err='Timed out after 10 seconds';SO.state='nodb';socDraw(true)}},10000);
   db.collection('s').onSnapshot(sn=>{clearTimeout(t);SO.P={};sn.docs.forEach(d=>{if(d.exists)SO.P[d.id]=d.data()});Object.keys(SO.P).forEach(socWatch);SO.state='ready';socDraw()},e=>{SO.err=beErr(e);SO.state='nodb';socDraw(true)})}
@@ -611,9 +643,8 @@ function setupForm(){const f=SO.f,sh=f.share||'manual',opt=[['auto','Automatic',
  <p class="mu sm" style="margin:0">Others can only find you with your friend code until you say otherwise.</p>
  <button class="btn big" data-s="join" style="margin-top:16px">${SO.preview?'Done (preview only)':'Join'}</button>${SO.preview?`<p class="mu sm" style="margin:10px 0 0;text-align:center">Preview: nothing here changes your account.</p>`:''}</div>`}
 function connView(){const h='<h1>Synergy</h1>';
- if(SO.prevLogin)return'<div class="hd"><button class="bk" data-be="pvx">Back</button></div>'+h+loginCard();
  if(SO.state==='init')return h+'<div class="card mu sm">Connecting…</div>';
- if(SO.state==='signin')return h+loginCard();
+ if(SO.state==='signin')return h+'<div class="card mu sm">Sign in to use friends and groups.</div>';
  if((SO.state==='nodb'||!SO.db)&&STANDALONE&&!window.claude)return h+`<div class="card"><b>Shared features aren’t available right now</b><p class="mu sm" style="margin:6px 0 0">${SO.why==='cfg'?'The shared database hasn’t been connected yet.':'Couldn’t reach the shared database. Check your internet connection and reopen the app. Everything else still works.'}</p>${SO.err?`<p class="mu sm" style="margin:10px 0 0;word-break:break-word">Details: ${esc(SO.err)}</p>`:''}</div>`;
  if(SO.state==='nodb'||!SO.db)return h+`<div class="card"><b>Shared features aren’t available here</b><p class="mu sm" style="margin:6px 0 0">Friends, groups and the feed need the shared database, which only works when SYNERGY is opened from its Claude link while signed in. Everything else works as normal.</p></div>`;
  if(!mp()||SO.preview)return(SO.preview?'<div class="hd"><button class="bk" data-s="prevx">Back</button></div>':'')+h+setupForm();socSyncStat();const t=SO.tab,nb={friends:incoming().length,groups:pendGroups().length};
@@ -699,7 +730,7 @@ function socGroupSave(){const f=SO.f.g,ed=sub.n==='gedit',name=(f.name||'').trim
  SO.f.g=null;render();goTop()}
 function socDelete(){const u=me();Object.keys(SO.D[u]||{}).forEach(k=>SO.db.doc('s/'+u+'/d/'+k).delete().catch(()=>{}));(SO.E[u]||[]).forEach(e=>SO.db.doc('s/'+u+'/e/'+e.id).delete().catch(()=>{}));SO.db.doc('s/'+u).delete().catch(()=>{});SO.D[u]={};SO.E[u]=[];delete SO.P[u];SO.pend={};sub=null;tab='conn';render();toast('Your social data was deleted')}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b||!SO.db&&!['go','tab','copy'].includes(b.dataset.s.split(':')[0]))return;const s=b.dataset.s,i=s.indexOf(':');socAct(i<0?s:s.slice(0,i),i<0?'':s.slice(i+1),b)});
-document.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b&&b.dataset.tab!=='conn'){SO.preview=false;SO.prevLogin=false}},true);
+document.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b&&b.dataset.tab!=='conn')SO.preview=false},true);
 document.addEventListener('input',e=>{const t=e.target,d=t.dataset&&t.dataset.sf;if(!d)return;const p=d.split('.');if(p.length===2){SO.f[p[0]]=SO.f[p[0]]||{};SO.f[p[0]][p[1]]=t.value}else SO.f[d]=t.value;if(d==='q'){const r=$('#fres');if(r)r.innerHTML=fres()}});
 const navHtml=()=>TABS.map(t=>`<button data-tab="${t[0]}" ${tab===t[0]?'aria-current="page"':''}>${ic(t[2])}${t[1]}${t[0]==='conn'&&socBadge()?'<i class="dot" aria-label="New"></i>':''}</button>`).join('');
 setTimeout(()=>{socInit()},0);
@@ -720,7 +751,7 @@ function devPanel(){const P=Object.keys(SO.P),rp=[];Object.keys(SO.D).forEach(u=
  <div class="dvh">Secret moments</div><div class="mu sm" style="padding:0 2px 6px">Empty sky ${fmt12((DAY0-GAP+1440)%1440)}–${fmt12(DAY0)} and ${fmt12(DAY1)}–${fmt12((DAY1+GAP)%1440)}. One every 3 minutes, every other day.</div>
  <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px">${[['ship','Spaceship'],['con','Constellation'],['ptero','Pterodactyl'],['car','Flying car'],['hen','Golden hen']].map(x=>`<button class="dvr" data-dv="fx:${x[0]}" style="justify-content:center${x[0]==='hen'?';grid-column:1/-1':''}">${x[1]}${x[0]==='hen'?' (rare)':''}</button>`).join('')}</div>
  <button class="dvr" data-dv="live" style="justify-content:center;font-weight:500">Back to live sky</button></div>`}
- return `${head}<button class="dvr" data-dv="vsky">Sky preview<span class="mu">›</span></button><button class="dvr" data-dv="setup">Synergy example<span class="mu">›</span></button><button class="dvr" data-dv="login">Sign-in page<span class="mu">›</span></button>${SO.db?`<button class="dvr" data-dv="leave">Reset my social setup<span class="mu">›</span></button>`:''}
+ return `${head}<button class="dvr" data-dv="vsky">Sky preview<span class="mu">›</span></button><button class="dvr" data-dv="setup">Synergy example<span class="mu">›</span></button><button class="dvr" data-dv="login">Sign-in page<span class="mu">›</span></button><button class="dvr" data-dv="forgotp">Forgot password page<span class="mu">›</span></button><button class="dvr" data-dv="newpwp">New password page<span class="mu">›</span></button>${SO.db?`<button class="dvr" data-dv="leave">Reset my social setup<span class="mu">›</span></button>`:''}
  ${SO.owner&&SO.db&&P.length>1?`<div class="dvh">People</div>${P.filter(u=>u!==me()).map(u=>`<div class="dvr" style="font-weight:500"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(nm(u))}</span>${DV.rm===u?`<button class="rm" data-dv="rm2:${u}">Confirm</button>`:`<button class="rm" data-dv="rm:${u}">Remove</button>`}</div>`).join('')}`:''}
  ${SO.owner&&rp.length?`<button class="dvr" data-dv="clrrep">Clear ${rp.length} report${rp.length>1?'s':''}<span class="mu">›</span></button>`:''}
  <button class="dvr mu" data-dv="hide" style="font-weight:500">Hide button</button></div>`}
@@ -733,7 +764,7 @@ function devDraw(){let el=$('#dev');if(!el){el=document.createElement('div');el.
  if(!SO.edit||DV.hide){el.innerHTML='';return}
  const st=DV.x==null?'':`left:${DV.x}px;top:${DV.y}px;right:auto;bottom:auto`;
  el.innerHTML=`<button id="devb" class="devb" data-dv="x" style="${st}" aria-label="Editor tools" aria-expanded="${DV.open}"><svg viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/></svg></button>${DV.open?devPanel():''}`}
-async function devAct(a,x){if(['vroot','x','hide','live','setup','login','leave','vsky'].includes(a))devPlay(false);if(['vroot','x','hide','live','setup','login','leave'].includes(a))fxStop();switch(a){
+async function devAct(a,x){if(['vroot','x','hide','live','setup','login','forgotp','newpwp','leave','vsky'].includes(a))devPlay(false);if(['vroot','x','hide','live','setup','login','forgotp','newpwp','leave'].includes(a))fxStop();switch(a){
  case'vsky':DV.view='sky';break;
  case'vroot':DV.view='root';break;
  case'play':devPlay(!DV.play);break;
@@ -742,7 +773,7 @@ async function devAct(a,x){if(['vroot','x','hide','live','setup','login','leave'
  case'fx':devPlay(false);DV.open=false;DV.rm=null;fxForce(x,()=>{DV.open=true;DV.view='sky';devDraw()});break;
  case'star':if(!ssNow())toast('Shooting stars show at night');return;
  case'live':SKYSIM.min=null;SKYSIM.off=0;SKYSIM.mode=null;document.documentElement.removeAttribute('data-sim');applySky();break;
- case'login':DV.open=false;tab='conn';sub=null;SO.prevLogin=true;render();goTop();break;
+ case'login':case'forgotp':case'newpwp':DV.open=false;SO.prevGate=a==='login'?'in':a==='forgotp'?'forgot':'newpw';drawGate();break;
  case'setup':DV.open=false;tab='conn';sub=null;if(mp()){SO.preview=true;SO.f={un:mp().uname,share:mp().share}}render();goTop();break;
  case'sum':case'rate':case'lvl':case'ach':devDemo(a);break;
  case'leave':DV.open=false;SO.pend={del:1};tab='me';sub={n:'set',p:'social'};render();goTop();break;
