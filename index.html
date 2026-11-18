@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SYNERGY</title>
-<meta name="theme-color" content="#070817">
+<meta name="theme-color" content="#F6F5F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0B" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -136,6 +137,62 @@ html[data-glow=on] body::before{background:radial-gradient(75% 40% at 6% 0%,colo
 :root[data-theme="dark"]{--lgt:rgba(235,240,255,.14);--lgs:rgba(200,210,255,.05);--lge:rgba(235,240,255,.5);--lgb:rgba(210,220,255,.16);--lgf:rgba(140,150,255,.005)}
 html[data-glass=on] .card,html[data-glass=on] .cat,html[data-glass=on] .grp,html[data-glass=on] .rate{background:radial-gradient(130% 80% at 8% -10%,var(--lgt),transparent 52%),radial-gradient(90% 60% at 100% 110%,var(--lgs),transparent 60%),linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,0) 40%),var(--lgf);-webkit-backdrop-filter:blur(2px) saturate(1.8) brightness(1.04);backdrop-filter:blur(2px) saturate(1.8) brightness(1.04);border:1px solid var(--lgb);box-shadow:inset 0 1.5px 0 var(--lge),inset 1px 0 0 var(--lgb),inset 0 -1px 0 var(--lgb),inset 0 0 26px rgba(255,255,255,.05),0 14px 32px -16px var(--gs)}
 html[data-glass=on] nav{background:color-mix(in srgb,var(--bg) 30%,transparent);-webkit-backdrop-filter:blur(20px) saturate(2.1) brightness(1.06);backdrop-filter:blur(20px) saturate(2.1) brightness(1.06);box-shadow:inset 0 1.5px 0 var(--lge)}
+
+/* ===== Co-Star look: black and white, hairlines, a touch of iridescence ===== */
+:root{--bg:#F6F5F1;--s1:#FFFFFF;--s2:#ECEAE4;--ln:#D6D3CB;--tx:#0C0C0D;--mu:#6B6A67;--ac:var(--tx)!important;--onac:#F6F5F1;--ok:#2F6B4F;--wn:#8A6A1F;color-scheme:light;
+ --irid:linear-gradient(115deg,#F3BFD9 0%,#CBB8F4 26%,#A8D5F1 52%,#B3EFD7 76%,#F6E5B3 100%)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A0A0B;--s1:#111113;--s2:#1A1A1D;--ln:#2C2C30;--tx:#F3F2EE;--mu:#8E8D8A;--onac:#0A0A0B;--ok:#7FD4A8;--wn:#E6C46B;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0A0A0B;--s1:#111113;--s2:#1A1A1D;--ln:#2C2C30;--tx:#F3F2EE;--mu:#8E8D8A;--onac:#0A0A0B;--ok:#7FD4A8;--wn:#E6C46B;color-scheme:dark}
+:root[data-theme="light"]{--bg:#F6F5F1;--s1:#FFFFFF;--s2:#ECEAE4;--ln:#D6D3CB;--tx:#0C0C0D;--mu:#6B6A67;--onac:#F6F5F1;color-scheme:light}
+body{font-weight:400}
+:focus-visible{outline:2px solid var(--tx);outline-offset:3px;border-radius:2px}
+h1{font:300 40px/1.04 var(--disp);letter-spacing:-.035em;margin:8px 0 16px}.prof h1{font-size:30px}
+h2{font:500 11px var(--body);letter-spacing:.2em;text-transform:uppercase;color:var(--mu);margin:34px 0 12px;padding-top:14px;border-top:1px solid var(--ln)}h2::before{content:none}
+.cap2{color:var(--mu);font:500 11px var(--body);letter-spacing:.2em}
+.wm{font:500 13px var(--disp);letter-spacing:.32em}
+.bk{color:var(--tx)}
+.lv,.stat,.timer{font-weight:300}.lv{font-size:56px}.stat{font-size:34px}
+.orbn span{font-weight:300}.orbn small{letter-spacing:.2em;font-weight:500}
+html[data-glass] .card,html[data-glass] .cat,html[data-glass] .ach div,html[data-glass] .rate,html[data-glass] .grp,html[data-glass] .chips button,.card,.cat,.ach div,.rate,.grp{background:transparent;border:1px solid var(--ln);border-radius:6px;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.card{padding:18px}.cat,.rate{border-radius:6px}.swp{border-radius:6px}
+.btn,.btn.big{background:linear-gradient(var(--tx),var(--tx)) padding-box,var(--irid) border-box;border:1px solid transparent;color:var(--bg);border-radius:4px;box-shadow:none;font:500 12.5px var(--body);letter-spacing:.2em;text-transform:uppercase;min-height:52px}
+.btn.big{padding:18px;font-size:12.5px;border-radius:4px}
+.btn.g{background:transparent;border:1px solid var(--ln);color:var(--tx)}
+.btn.d{background:none;border:1px solid currentColor;color:#B3402F}
+.btn:disabled{opacity:.35}
+input,select,textarea{background:transparent;border:1px solid var(--ln);border-radius:4px}
+input:focus,select:focus,textarea:focus{border-color:var(--tx);outline:0}
+label{font:500 11px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mu)}
+.chips button,.chips button[aria-pressed=true]{border-radius:3px;font:500 11.5px var(--body);letter-spacing:.12em;text-transform:uppercase}
+.chips button[aria-pressed=true],html[data-glass=on] .chips button[aria-pressed=true]{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.seg,html[data-glass=on] .seg{background:transparent;border:1px solid var(--ln);border-radius:4px;padding:3px}.seg button{border-radius:2px;font:500 12px var(--body);letter-spacing:.1em;text-transform:uppercase}
+.seg button[aria-pressed=true]{background:var(--tx)!important;color:var(--bg);box-shadow:none!important}
+.tag{background:transparent;border:1px solid var(--ln);color:var(--tx);border-radius:3px;text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:500;padding:3px 8px}
+.bar{height:3px;border-radius:0;background:var(--ln)}.bar i{background:var(--irid);border-radius:0}
+.tg{background:transparent;border:1px solid var(--tx)}.tg::after{background:var(--tx);box-shadow:none}.tg[aria-checked=true]{background:var(--tx);border-color:var(--tx)}.tg[aria-checked=true]::after{background:var(--bg)}
+.ib{background:transparent!important;color:var(--tx);border:1px solid var(--ln);border-radius:4px}
+.av{background:var(--irid);color:#0C0C0D;font-weight:400}.av2{background:var(--s2)!important;color:var(--tx);border:1px solid var(--ln);font-weight:500}
+.chk[aria-pressed=true]{background:var(--tx);color:var(--bg)}.chk{border-radius:4px;border:1px solid var(--ln);background:transparent}
+.rx button{background:transparent;border:1px solid var(--ln)}.rx button[aria-pressed=true]{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.bdg{background:var(--tx);color:var(--bg)}.dot{background:var(--tx)}
+.toast{border-radius:4px;font-weight:500;letter-spacing:.02em}
+.back,.devb{background:var(--bg);border:1px solid var(--ln);color:var(--tx);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+.devp{background:var(--bg);border:1px solid var(--ln);border-radius:6px;box-shadow:0 10px 30px -14px #0006;-webkit-backdrop-filter:none;backdrop-filter:none}
+nav,html[data-glass=on] nav{background:color-mix(in srgb,var(--bg) 94%,transparent);-webkit-backdrop-filter:none;backdrop-filter:none;border-top:1px solid var(--ln);box-shadow:none}
+nav button{font:500 9.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--mu)}nav button[aria-current=page]{color:var(--tx)}nav button[aria-current=page] svg{filter:none}nav svg{stroke-width:1.5}
+nav button[aria-current=page]::before{content:'';position:absolute;top:-7px;left:26%;right:26%;height:2px;background:var(--irid)}
+.list li,.row2,.ir+.ir::before{border-color:var(--ln)}
+.opt svg{color:var(--tx)}
+.sw button{box-shadow:0 0 0 1px var(--ln)}
+details summary{font-weight:500}
+html[data-glow=on] body::before{content:'';position:fixed;left:-25%;right:-25%;top:-170px;height:340px;z-index:-1;pointer-events:none;background:var(--irid);filter:blur(70px);opacity:.34;transform:none}
+:root[data-theme="dark"] body::before,html[data-glow=on][data-sky=night] body::before{opacity:.2}
+#sky .sgrad{background:var(--bg)!important}
+#sun .sg,#moon .mg{display:none}
+#sun .sd{background:var(--tx)!important;box-shadow:none!important}#sun .sd svg path{fill:var(--bg)!important}
+#moon svg{filter:none}
+svg circle[fill="#262B55"]{fill:var(--s2)}svg circle[stroke="rgba(220,225,255,.28)"]{stroke:var(--ln)}svg path[style*="--moonc"]{fill:var(--tx)!important}#moon svg{opacity:.8}
+#gate .card{background:transparent}
 </style>
 </head>
 <body>
@@ -222,8 +279,7 @@ const SETT={appearance:'Appearance',home:'Home screen',units:'Units',account:'Ac
 const COLS=[['#7B7EEA','Nebula'],['#6FA8E6','Ion'],['#58C2B0','Aurora'],['#E39A6E','Nova'],['#D882A8','Pulsar'],['#E3BF6C','Solar']];
 function setPage(){const p=sub.p,I=lvl(total()),A=achs();let b='';
  if(p==='appearance')b=`<h2>Theme</h2><div class="seg s4" role="group" aria-label="Theme">${['auto','system','light','dark'].map(t=>`<button data-th="${t}" aria-pressed="${S.theme===t}">${THL[t]}</button>`).join('')}</div><p class="mu sm" style="margin:8px 0 0">Sun &amp; Moon switches to day at 5:30 am and to night at 4:30 pm. The sun or moon crosses the sky left to right, and the moon shows today’s phase.</p>
- <h2>Accent colour</h2><div class="sw">${COLS.map(c=>`<button style="background:${c[0]}" data-ac="${c[0]}" aria-label="${c[1]}" aria-pressed="${S.accent.toLowerCase()===c[0].toLowerCase()}"></button>`).join('')}<input type="color" data-f="accc" value="${/^#[0-9a-f]{6}$/i.test(S.accent)?S.accent:'#7C5CFF'}" aria-label="Custom colour"></div>
- <h2>Look</h2><div class="grp">${tgl('glass',S.glass,'Glass effect')}${tgl('glow',S.glow,'Background glow')}${tgl('reduce',S.reduce,'Reduce motion')}</div>
+ <h2>Look</h2><div class="grp">${tgl('glow',S.glow,'Soft colour wash')}${tgl('reduce',S.reduce,'Reduce motion')}</div>
  <h2>Text size</h2><div class="seg" role="group" aria-label="Text size">${[[90,'Small'],[100,'Default'],[112,'Large'],[125,'Larger']].map(z=>`<button data-sz="${z[0]}" aria-pressed="${S.size===z[0]}">${z[1]}</button>`).join('')}</div>
  <div style="margin-top:22px"><button class="btn g" data-a="resetlook" style="width:100%">Reset appearance</button></div>`;
  else if(p==='home')b=`<p class="mu sm">Choose what appears on your Home screen.</p><div class="grp">${[['sparks','Level and Sparks'],['stats','Weekly stats'],['recent','Recent Sparks'],['friends','Friends']].map(x=>tgl('hide:'+x[0],!S.hide.includes(x[0]),x[1])).join('')}</div>`;
@@ -234,7 +290,7 @@ function setPage(){const p=sub.p,I=lvl(total()),A=achs();let b='';
  else if(p==='social')b=socSettings();else if(p==='loc')b=locPage();else if(p==='perm')b=permPage();else b=`<p class="mu sm">Everything is stored on this device only.</p>${confirmReset?`<p class="err">This deletes all workouts and Sparks.</p><div class="acts"><button class="btn d" data-a="reset2">Yes, delete everything</button><button class="btn g" data-a="reset0">Cancel</button></div>`:`<button class="btn g" data-a="reset1">Delete all my data</button>`}`;
  return `<div class="hd"><button class="bk" data-a="back">Settings</button></div><h1>${SETT[p]}</h1>${b}`}
 const orbit=I=>{const r=44,c=2*Math.PI*r,p=Math.max(.02,Math.min(1,I.pct/100)),an=(p*360-90)*Math.PI/180,px=(50+r*Math.cos(an)).toFixed(1),py=(50+r*Math.sin(an)).toFixed(1);
- return `<svg class="orbsvg" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="og" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--ac)"/><stop offset="1" stop-color="#FF7AB6"/></linearGradient></defs><circle cx="50" cy="50" r="${r}" stroke="var(--ln)" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="${r}" stroke="url(#og)" stroke-width="3.5" fill="none" stroke-dasharray="${(c*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)"/><circle cx="${px}" cy="${py}" r="8" fill="var(--ac)" opacity=".25" stroke="none"/><circle cx="${px}" cy="${py}" r="4.2" fill="#fff" stroke="none"/></svg>`};
+ return `<svg class="orbsvg" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="og" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3BFD9"/><stop offset=".35" stop-color="#CBB8F4"/><stop offset=".7" stop-color="#A8D5F1"/><stop offset="1" stop-color="#B3EFD7"/></linearGradient></defs><circle cx="50" cy="50" r="${r}" stroke="var(--ln)" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="${r}" stroke="url(#og)" stroke-width="3.5" fill="none" stroke-dasharray="${(c*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)"/><circle cx="${px}" cy="${py}" r="8" fill="var(--ac)" opacity=".25" stroke="none"/><circle cx="${px}" cy="${py}" r="4.2" fill="var(--tx)" stroke="none"/></svg>`};
 function constel(){const F=friends().slice(0,9),n=F.length,cx=160,cy=76,pos=u=>{const a=-Math.PI/2+F.indexOf(u)*2*Math.PI/Math.max(n,1)+.3;return[cx+Math.cos(a)*118,cy+Math.sin(a)*52]};let l='',d='',t='';const seen=new Set();
  groupsOf(me()).forEach(g=>{const m=gMembers(g).filter(u=>F.includes(u));for(let i=0;i<m.length;i++)for(let j=i+1;j<m.length;j++){const k=[m[i],m[j]].sort().join('|');if(seen.has(k))continue;seen.add(k);const A=pos(m[i]),B=pos(m[j]);l+=`<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="var(--ac)" stroke-opacity=".3" stroke-width="1" stroke-dasharray="3 4"/>`}});
  F.forEach(u=>{const[x,y]=pos(u),c=`hsl(${hue(u)} 80% 68%)`;l+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--ac)" stroke-opacity=".5" stroke-width="1.2"/>`;d+=`<circle cx="${x}" cy="${y}" r="9" fill="${c}" opacity=".2" stroke="none"/><circle cx="${x}" cy="${y}" r="4.5" fill="${c}" stroke="none"/>`;t+=`<text x="${x}" y="${y+20}" text-anchor="middle" font-size="10" fill="var(--mu)" stroke="none">${esc(nm(u).split(' ')[0].slice(0,10))}</text>`});
