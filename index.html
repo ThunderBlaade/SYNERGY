@@ -450,6 +450,7 @@ const BE={cli:null,email:'',CACHE:{},LIS:[],loaded:{},subbed:0};
 const STANDALONE=window.top===window.self;
 const beCfg=()=>{const c=window.SYNERGY_CONFIG;return c&&c.url&&c.key&&!/PASTE/i.test(c.key)?c:null};
 const beParent=p=>p.replace(/\/[^/]+$/,'');
+const beErr=e=>{try{return String((e&&(e.code?e.code+': ':'')+(e.message||e.details||e.hint))||e).slice(0,200)}catch(x){return 'unknown'}};
 function beLoad(){return window.supabase?Promise.resolve():new Promise((ok,no)=>{const x=document.createElement('script');x.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';x.onload=ok;x.onerror=()=>no(new Error('lib'));document.head.appendChild(x)})}
 function beSnap(c){return{docs:Object.keys(BE.CACHE).filter(q=>beParent(q)===c).map(q=>({id:q.split('/').pop(),exists:true,data:()=>BE.CACHE[q]}))}}
 function beNotify(c){BE.LIS.forEach(l=>{if(l.c===c)try{l.cb(beSnap(c))}catch(e){}})}
@@ -472,7 +473,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&BE.cli&&S
 async function beInit(){const cfg=beCfg();
  try{if(location.hash==='#editor')localStorage.setItem('synergy_editor','1');if(location.hash==='#editor-off')localStorage.removeItem('synergy_editor');if(localStorage.getItem('synergy_editor')==='1'){SO.edit=true;devDraw()}}catch(e){}
  if(!cfg){SO.state='nodb';SO.why='cfg';socDraw(true);return}
- try{await beLoad();BE.cli=window.supabase.createClient(cfg.url,cfg.key,{auth:{persistSession:true,autoRefreshToken:true}})}catch(e){SO.state='nodb';SO.why='net';socDraw(true);return}
+ try{await beLoad();BE.cli=window.supabase.createClient(cfg.url,cfg.key,{auth:{persistSession:true,autoRefreshToken:true}})}catch(e){SO.err=beErr(e);SO.state='nodb';SO.why='net';socDraw(true);return}
  BE.cli.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT'&&SO.db)location.reload()});
  let ss=null;try{ss=(await BE.cli.auth.getSession()).data.session}catch(e){}
  if(!ss){SO.state='signin';socDraw(true);return}
@@ -500,8 +501,8 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-be]'
   try{const r=await BE.cli.auth.updateUser({password:n});say(r.error?'Couldn’t change it. Try again.':'Password changed.');if(!r.error)$('#be-np').value=''}catch(x){say('Couldn’t change it. Try again.')}}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='be-pw'){const b=document.querySelector('[data-be="in"]');if(b)b.click()}});
 /* ---- connection ---- */
-function socGo(db,uid){SO.db=db;SO.uid=uid;const t=setTimeout(()=>{if(SO.state==='init'){SO.state='nodb';socDraw(true)}},10000);
-  db.collection('s').onSnapshot(sn=>{clearTimeout(t);SO.P={};sn.docs.forEach(d=>{if(d.exists)SO.P[d.id]=d.data()});Object.keys(SO.P).forEach(socWatch);SO.state='ready';socDraw()},()=>{SO.state='nodb';socDraw(true)})}
+function socGo(db,uid){SO.db=db;SO.uid=uid;const t=setTimeout(()=>{if(SO.state==='init'){SO.err='Timed out after 10 seconds';SO.state='nodb';socDraw(true)}},10000);
+  db.collection('s').onSnapshot(sn=>{clearTimeout(t);SO.P={};sn.docs.forEach(d=>{if(d.exists)SO.P[d.id]=d.data()});Object.keys(SO.P).forEach(socWatch);SO.state='ready';socDraw()},e=>{SO.err=beErr(e);SO.state='nodb';socDraw(true)})}
 async function socInit(){
  if(STANDALONE&&!window.claude)return beInit();
  for(let i=0;i<50&&!window.claude;i++)await new Promise(r=>setTimeout(r,100));
@@ -613,7 +614,7 @@ function connView(){const h='<h1>Synergy</h1>';
  if(SO.prevLogin)return'<div class="hd"><button class="bk" data-be="pvx">Back</button></div>'+h+loginCard();
  if(SO.state==='init')return h+'<div class="card mu sm">Connecting…</div>';
  if(SO.state==='signin')return h+loginCard();
- if((SO.state==='nodb'||!SO.db)&&STANDALONE&&!window.claude)return h+`<div class="card"><b>Shared features aren’t available right now</b><p class="mu sm" style="margin:6px 0 0">${SO.why==='cfg'?'The shared database hasn’t been connected yet.':'Couldn’t reach the shared database. Check your internet connection and reopen the app. Everything else still works.'}</p></div>`;
+ if((SO.state==='nodb'||!SO.db)&&STANDALONE&&!window.claude)return h+`<div class="card"><b>Shared features aren’t available right now</b><p class="mu sm" style="margin:6px 0 0">${SO.why==='cfg'?'The shared database hasn’t been connected yet.':'Couldn’t reach the shared database. Check your internet connection and reopen the app. Everything else still works.'}</p>${SO.err?`<p class="mu sm" style="margin:10px 0 0;word-break:break-word">Details: ${esc(SO.err)}</p>`:''}</div>`;
  if(SO.state==='nodb'||!SO.db)return h+`<div class="card"><b>Shared features aren’t available here</b><p class="mu sm" style="margin:6px 0 0">Friends, groups and the feed need the shared database, which only works when SYNERGY is opened from its Claude link while signed in. Everything else works as normal.</p></div>`;
  if(!mp()||SO.preview)return(SO.preview?'<div class="hd"><button class="bk" data-s="prevx">Back</button></div>':'')+h+setupForm();socSyncStat();const t=SO.tab,nb={friends:incoming().length,groups:pendGroups().length};
  return `${h}${constel()}<div class="seg" role="group" aria-label="Synergy sections">${[['feed','Feed'],['friends','Friends'],['groups','Groups']].map(x=>`<button data-s="tab:${x[0]}" aria-pressed="${t===x[0]}">${x[1]}${nb[x[0]]?`<span class="bdg">${nb[x[0]]}</span>`:''}</button>`).join('')}</div><div style="height:16px"></div>${t==='feed'?feedView():t==='friends'?friendsView():groupsView()}`}
