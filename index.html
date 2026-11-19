@@ -272,26 +272,33 @@ nav{padding:4px 4px max(8px,calc(env(safe-area-inset-bottom,0px) - 6px))!importa
 #hmv .l,#hmv .r{position:absolute;top:70px;bottom:70px;width:40%;z-index:2;background:none}#hmv .l{left:0}#hmv .r{right:0}
 #hmv .cap{position:absolute;left:16px;right:16px;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:3;text-align:center;font-size:14px;margin:0;text-shadow:0 1px 6px #000}
 
-/* Gym info boxes + wheel */
-.gy-row{display:grid;grid-template-columns:1fr 1.9fr 1fr;gap:8px;align-items:stretch}.gy-row .btn.big{min-height:92px;padding:10px 6px;line-height:1.5;margin:0;white-space:normal}
-.gbx{background:var(--s1);color:var(--tx);min-height:92px;padding:10px 8px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;border-radius:0;border:1px solid var(--ln)}
-.gbl{font:500 9.5px var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--mu)}.gbv{font:500 22px var(--disp);letter-spacing:.02em;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gbs{font:400 11px var(--body);color:var(--mu);line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.wh-box{position:relative;display:flex;align-items:center;gap:6px;margin:6px 0 14px}
-.wh{position:relative;flex:1;height:min(42dvh,320px);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;outline:none;cursor:grab}
+/* Gym widgets + wheel */
+.gy-top{display:flex;justify-content:flex-end;margin:-4px 0 4px}.gy-top .wed{background:none}
+.gy-a,.gy-b{padding:0}.gp{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;min-height:calc((100dvh - 370px)/2)}
+.gy-hero{min-height:0;padding:12px 0}.gy-hero .btn.big{min-height:64px}
+.gw{background:var(--s1);color:var(--tx);border:1px solid var(--ln);border-radius:0;padding:10px 12px;min-height:92px;display:flex;flex-direction:column;justify-content:space-between;gap:3px;text-align:left;font:inherit;position:relative}
+.gw.w2{grid-column:span 2}.gw.add{align-items:center;justify-content:center;background:none;border-style:dashed;color:var(--mu);font:500 10.5px var(--body);letter-spacing:.16em;text-transform:uppercase;min-height:56px}
+.gbl{font:500 9.5px var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--mu)}.gbv{font:500 22px var(--disp);letter-spacing:.02em;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}.gbs{font:400 11px var(--body);color:var(--mu);line-height:1.25;display:block}
+.gbr{display:flex;justify-content:space-between;gap:10px;font:400 12.5px var(--body);padding:3px 0;border-top:1px solid var(--ln)}.gbr>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gbr .mu{flex:none;color:var(--mu)}
+.gbars{display:flex;align-items:flex-end;gap:6px;height:44px}.gbars i{flex:1;background:var(--tx);opacity:.75;display:block}.gbd{display:flex;gap:6px}.gbd b{flex:1;text-align:center;font:500 9.5px var(--body);letter-spacing:.1em;color:var(--mu)}
+.gw.ed{padding:0}.gpick{background:none;color:inherit;text-align:left;font:inherit;padding:10px 12px 6px;display:flex;flex-direction:column;gap:3px;flex:1;border:0;width:100%;border-radius:0}.gcs{display:flex;border-top:1px solid var(--ln)}.gc{flex:1;min-height:40px;background:none;color:var(--tx);font:500 16px var(--body);border-radius:0}.gc:disabled{opacity:.25}.gc+.gc{border-left:1px solid var(--ln)}
+.wpg{display:flex;flex-direction:column;justify-content:center;min-height:calc(100dvh - 240px)}
+.wh{position:relative;height:min(52dvh,420px);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;outline:none;cursor:pointer}
 .wh:focus-visible{outline:1px solid var(--ac);outline-offset:2px}
-.wi{position:absolute;left:0;right:22px;top:0;text-align:center;font:400 15px var(--disp);letter-spacing:.2em;text-transform:uppercase;color:var(--mu);white-space:nowrap;will-change:transform,opacity;visibility:hidden}
-.wi.sel{color:var(--tx);font-weight:600}
-.wi{height:28px;line-height:28px}
+.wi{position:absolute;left:0;right:22px;top:0;height:28px;line-height:28px;text-align:center;font:400 15px var(--disp);letter-spacing:.2em;text-transform:uppercase;color:var(--mu);white-space:nowrap;will-change:transform,opacity;visibility:hidden}
+.wi.sel{color:var(--tx);font-weight:600}.wi.sp{font-style:normal;letter-spacing:.3em}
+.wi.pin,.pin{background:var(--irid);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
 .wp{position:absolute;right:6px;top:0;width:4px;height:4px;border-radius:50%;background:var(--mu);visibility:hidden}
 .wl{position:absolute;left:0;right:14px;height:1px;background:var(--ln);top:calc(50% - 26px)}.wl2{top:calc(50% + 26px)}
 .wptr{position:absolute;right:0;top:calc(50% - 5px);width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:8px solid var(--ac)}
-.lv{width:56px;flex:none;background:none;border:0;padding:0;touch-action:none;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--mu);min-height:44px;--d:0px}
-.lv svg{width:56px;height:150px;display:block;overflow:visible}.lv .lvk{transform:translateY(var(--d));transition:transform .28s cubic-bezier(.3,.7,.3,1)}.lv.on .lvk{transition:none}
-.lvl{font:500 9.5px var(--body);letter-spacing:.18em;text-transform:uppercase}
-.wlk{display:flex;justify-content:center;gap:2px;flex-wrap:wrap;margin-top:8px}.wlk .bk,.wed{font:500 10.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mu);padding:12px 8px;min-height:44px}.wedr{display:flex;justify-content:flex-end;margin-top:-6px}.wed{background:none}
-.we{display:flex;align-items:center;gap:2px}.chips-b{background:var(--s2);color:var(--tx);min-height:36px;min-width:48px;padding:0 10px;font:500 11px var(--body);letter-spacing:.12em;text-transform:uppercase;border-radius:0}.chips-b[aria-pressed="false"]{background:none;color:var(--mu);border:1px solid var(--ln)}
+.whint{text-align:center;font:500 10px var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--mu);margin:8px 0 0;min-height:16px}
+.wlk{display:flex;justify-content:center;gap:2px;flex-wrap:wrap;margin-top:8px}.wlk .bk,.wed{font:500 10.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mu);padding:12px 8px;min-height:44px}
+.wsw{position:relative;overflow:hidden;display:block;padding:0}.wsw-in{position:relative;display:flex;align-items:center;justify-content:space-between;width:100%;background:transparent;padding:8px 0;touch-action:pan-y;transition:transform .28s cubic-bezier(.2,.8,.2,1);-webkit-user-select:none;user-select:none}.wsw.drag .wsw-in{transition:none}
+.wsw.open .wsw-in{transform:translateX(-96px)}.wsw.openr .wsw-in{transform:translateX(96px)}
+.wsw-del,.wsw-pin{position:absolute;top:0;bottom:0;width:96px;font:600 11px var(--body);letter-spacing:.14em;text-transform:uppercase;visibility:hidden;border-radius:0}
+.wsw-del{right:0;background:#D64545;color:#fff}.wsw-pin{left:0;background:var(--s2);color:var(--tx)}
+.wsw.open .wsw-del,.wsw.drag[data-side="l"] .wsw-del,.wsw.openr .wsw-pin,.wsw.drag[data-side="r"] .wsw-pin{visibility:visible}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-@media (prefers-reduced-motion:reduce){.lv .lvk{transition:none}}
 #gate .card{background:transparent}
 </style>
 </head>
@@ -468,7 +475,7 @@ function gym(){const a=S.active,R=recEvents(),hl=Object.keys(R).sort((x,y)=>last
   const hist=`<section class="gy-a"><h2>Workout history</h2>${histList([...S.workouts].sort((x,y)=>y.start-x.start).slice(0,3))}<div class="acts"><button class="btn g" data-a="hist">View all</button></div></section>`,
   recs=`<section class="gy-b"><h2>Personal records</h2>${hl.length?`<div class="card" style="padding:4px 16px"><ul class="list">${recRows(hl,R)}</ul></div>`:'<div class="card mu sm">Records appear as you log workouts. Your first log of an exercise sets the baseline.</div>'}<div class="acts"><button class="btn g" data-a="recs">View all records</button></div></section>`,
   act=a?`<div class="card"><div class="row sp"><div><b>${esc(a.name||METH[a.method])}</b><div class="mu sm">${a.paused?'Paused':'In progress'}</div></div><div class="timer" style="font-size:28px" data-timer="a">${tmText(a)}</div></div>${stale?'<p class="sm" style="margin:8px 0 0">This workout has been paused for over an hour. Resume it or finish it.</p>':''}</div>`:'';
- return `<h1>The Gym</h1>${hist}<section class="gy-hero">${act}<div class="gy-row">${typeof gyBoxes==="function"?gyBoxes(0):'<span></span>'}<button class="btn big" data-a="${a?'resume':'start'}">${a?'Resume workout':'Start workout'}</button>${typeof gyBoxes==="function"?gyBoxes(1):'<span></span>'}</div></section>${recs}`}
+ return `<h1>The Gym</h1><div class="gy-top"><button class="wed" data-wx="ge">${typeof GE!=="undefined"&&GE?'Done':'Edit'}</button></div><section class="gy-a">${typeof gyWidgets==="function"?gyWidgets('t'):''}</section><section class="gy-hero">${act}<button class="btn big" data-a="${a?'resume':'start'}">${a?'Resume':'Start'}</button></section><section class="gy-b">${typeof gyWidgets==="function"?gyWidgets('b'):''}</section>`}
 function method(){const o=[['template','strength','Create / follow workout','Build a reusable workout or follow one you’ve saved.','tpls'],['timer','timer','Timer','Train freely while SYNERGY tracks your time.','tsetup'],['countdown','hourglass','Countdown','Train against a time you choose.','csetup'],['quick','edit','Quick log','Already trained? Record it in seconds.','qcat']];
  return `<div class="hd"><button class="bk" data-a="back">Back</button></div><h1>How do you want to train?</h1>${o.map(x=>`<button class="card tap opt" data-a="${x[4]}">${ic(x[1])}<span><b>${x[2]}</b><span class="mu sm">${x[3]}</span></span><span class="ch">›</span></button>`).join('')}`}
 function tpls(){const T=S.tpl.filter(t=>t.exs.length||t.name),rows=l=>`<div class="card" style="padding:4px 16px"><ul class="list">${l.map(t=>`<li class="swp"><button class="swp-del" data-tdelid="${t.id}" aria-label="Delete">Delete</button><div class="swp-in row" style="padding:12px 0;background:var(--s1)"><button class="t" data-tpl="${t.id}" style="text-align:left"><b>${esc(t.name||'Untitled workout')}</b><span class="mu sm">${CATS[t.cat][0]} · ${t.exs.length} exercises</span></button><button class="x" data-fav="${t.id}" aria-label="Favourite ${esc(t.name)}" aria-pressed="${!!t.fav}">${t.fav?'★':'☆'}</button></div></li>`).join('')}</ul></div>`,rc=T.filter(t=>t.last).sort((a,b)=>b.last-a.last).slice(0,3),fv=T.filter(t=>t.fav);
@@ -543,7 +550,7 @@ function goTop(){try{window.scrollTo(0,0)}catch(e){}}
 try{history.scrollRestoration='manual'}catch(e){}
 function ensureHud(){if(document.getElementById('hud'))return;const d=document.createElement('div');d.id='hud';d.setAttribute('aria-hidden','true');d.innerHTML=`<svg viewBox="0 0 390 844" preserveAspectRatio="xMinYMid slice"><g class="f"><path d="M388.0 0V844"/><path d="M385.8 0V844"/><path d="M383.2 0V844"/><path d="M380.2 0V844"/><path d="M376.7 0V844"/><path d="M372.6 0V844"/><path d="M367.7 0V844"/><path d="M362.1 0V844"/><path d="M355.5 0V844"/><path d="M347.8 0V844"/><path d="M338.7 0V844"/><path d="M328.2 0V844"/><path d="M315.8 0V844"/><path d="M301.3 0V844"/><path d="M284.4 0V844"/><path d="M264.6 0V844"/></g><g class="p"><path d="M5 0V844" stroke-width="4"/><path d="M11 0V844" stroke-width="1"/></g><g class="mv"><circle class="f" cx="5" cy="150" r="150"/><circle class="f" cx="5" cy="150" r="96"/><path class="am" d="M11 90V210"/><path class="p" d="M376 70V230" stroke-width="3"/></g></svg>`;document.body.insertBefore(d,document.body.firstChild)}
 function render(){document.documentElement.setAttribute('data-tab',tab);ensureHud();applySky();if(tab==='astral'){wxGet();wxDraw()}document.documentElement.style.setProperty('--ac',S.accent);
- const V={fr:frView,g:grpView,gnew:grpForm,gedit:grpForm,enc:encView,rep:repView,set:setPage,wheel:()=>window.wheel(),wedit:()=>window.wedit(),gbox:()=>window.gbox(),method,tpls,tplPrev,tplEdit,tsetup,csetup,qcat,qform,active,pickex:pickEx,rate,summary,hist,detail,del:delConfirm,recs,rec:recDetail,xp:xpView};
+ const V={fr:frView,g:grpView,gnew:grpForm,gedit:grpForm,enc:encView,rep:repView,set:setPage,wheel:()=>window.wheel(),wedit:()=>window.wedit(),wcus:()=>window.wcus(),gbox:()=>window.gbox(),method,tpls,tplPrev,tplEdit,tsetup,csetup,qcat,qform,active,pickex:pickEx,rate,summary,hist,detail,del:delConfirm,recs,rec:recDetail,xp:xpView};
  $('#app').innerHTML=sub?V[sub.n]():{home,play:gym,conn:connView,rank,astral:astralView,me:profile}[tab]();
  $('#nav').innerHTML=navHtml();countUp();applyLook();try{devDraw()}catch(e){}}
 setInterval(()=>{const a=S.active;if(a&&a.method==='countdown'&&!a.paused&&elapsed(a)>=a.target*1000){a.acc=a.target*1000;a.paused=true;a.pausedAt=Date.now();save();toast('Countdown complete');finish(true);return}
@@ -1327,84 +1334,121 @@ setInterval(()=>{if(!SO.db||!mp()||document.hidden)return;const now=Date.now();
   if(ov>=LK.MIN&&!S.lkT[k]){S.lkT[k]=1;save();toast('Link made with '+nm(o));lkTally();if(tab==='home'&&!sub)render()}})},1000);
 
 /* ===== Gym: info boxes + activity wheel ===== */
-const WDEF=()=>[['swim','Swimming','swimming'],['cl','Climbing','other'],['walk','Walking','walking'],['run','Running','running'],['str','Strength training','strength'],['cyc','Cycling','cycling'],['mob','Mobility','mobility'],['flex','Flexibility','mobility'],['spo','Sports','sports'],['hiit','HIIT','cardio'],['cus','Custom','other']].map(x=>({id:x[0],n:x[1],c:x[2],on:true}));
-const WCAN={strength:'str',running:'run',walking:'walk',cycling:'cyc',swimming:'swim',mobility:'mob',sports:'spo',cardio:'hiit',other:'cus'};
-function whS(){if(!S.wh||!Array.isArray(S.wh.list)||!S.wh.list.length)S.wh={list:WDEF(),last:null,t:{}};if(!S.wh.t)S.wh.t={};return S.wh}
-function whStat(it){let n=0,r=whS().t[it.id]||0;const nn=it.n.toLowerCase();S.workouts.forEach(w=>{const nm2=(w.name||'').trim().toLowerCase(),hit=nm2?nm2===nn:(!it.cu&&WCAN[w.cat]===it.id);if(hit){n++;r=Math.max(r,w.end||0)}});return{n,r}}
-function whOrder(){const W=whS(),L=W.list.map((x,i)=>({x,i,s:whStat(x)})).filter(o=>o.x.on);L.sort((a,b)=>(b.x.id===W.last)-(a.x.id===W.last)||b.s.n-a.s.n||b.s.r-a.s.r||a.i-b.i);return L.map(o=>o.x)}
-const WH={items:[],pos:0,vel:0,drag:null,spin:null,raf:0,t0:0,tgt:null,lastIdx:-1,STEP:54,TH:.52,R:128};
+const WCAP=10;
+const WDEF=()=>[['swim','Swimming','swimming'],['cl','Climbing','other'],['walk','Walking','walking'],['run','Running','running'],['str','Strength training','strength'],['cyc','Cycling','cycling'],['mob','Mobility','mobility'],['flex','Flexibility','mobility'],['spo','Sports','sports'],['hiit','HIIT','cardio']].map(x=>({id:x[0],n:x[1],c:x[2]}));
+const WCAN={strength:'str',running:'run',walking:'walk',cycling:'cycling',swimming:'swim',mobility:'mob',sports:'spo',cardio:'hiit'};WCAN.cycling='cyc';
+function whS(){let W=S.wh;if(!W||!Array.isArray(W.list))W=S.wh={list:WDEF(),last:null,t:{}};
+ if(W.list.some(x=>'on' in x||x.id==='cus')){W.list=W.list.filter(x=>x.on!==false&&x.id!=='cus');W.list.forEach(x=>{delete x.on})}
+ if(!W.list.length)W.list=WDEF();if(!W.t)W.t={};return W}
+function whStat(it){let n=0,r=whS().t[it.id]||0;const nn=it.n.toLowerCase();S.workouts.forEach(w=>{const m=(w.name||'').trim().toLowerCase(),hit=m?m===nn:(!it.cu&&WCAN[w.cat]===it.id);if(hit){n++;r=Math.max(r,w.end||0)}});return{n,r}}
+function whRank(){const W=whS();return W.list.map((x,i)=>({x,i,s:whStat(x)})).sort((a,b)=>(b.x.id===W.last)-(a.x.id===W.last)||b.s.n-a.s.n||b.s.r-a.s.r||a.i-b.i).map(o=>o.x)}
+function whShown(){const R=whRank(),pin=R.filter(x=>x.pin).slice(0,WCAP),rest=R.filter(x=>!x.pin),ids=new Set(pin.map(x=>x.id));for(const x of rest){if(ids.size>=WCAP)break;ids.add(x.id)}return R.filter(x=>ids.has(x.id))}
+const WSP=[{id:'~cus',n:'Custom',sp:'custom'},{id:'~rnd',n:'Random',sp:'random'}];
+const WH={items:[],pos:0,vel:0,drag:null,spin:null,raf:0,t0:0,tgt:null,lastIdx:0,STEP:54,TH:.52,R:132};
 const whSel=()=>{const n=WH.items.length;return n?WH.items[((Math.round(WH.pos)%n)+n)%n]:null};
 const whRM=()=>S.reduce||matchMedia('(prefers-reduced-motion:reduce)').matches;
-function wheel(){const W=whS();WH.items=whOrder();WH.pos=0;WH.vel=0;WH.spin=null;WH.tgt=null;WH.drag=null;WH.lastIdx=0;
+function wheel(){WH.items=[...whShown(),...WSP];WH.pos=0;WH.vel=0;WH.spin=null;WH.tgt=null;WH.drag=null;WH.lastIdx=0;
  const pegs=Array.from({length:24},(_,k)=>`<i class="wp" data-k="${k}"></i>`).join('');
- return `<div class="hd"><button class="bk" data-a="back">Back</button></div><h1>Choose</h1><div class="wedr"><button class="wed" data-wx="edit">Edit wheel</button></div>
- <div class="wh-box"><button class="lv" id="lv" aria-label="Random activity. Pull the lever."><svg viewBox="0 0 56 150" aria-hidden="true"><rect x="19" y="6" width="18" height="108" rx="9" fill="var(--s2)"/><rect x="25" y="14" width="6" height="92" rx="3" fill="var(--bg)"/><g class="lvk"><rect x="25" y="14" width="6" height="40" fill="var(--tx)"/><circle cx="28" cy="14" r="13" fill="var(--ac)"/><circle cx="23.5" cy="9.5" r="3.2" fill="#fff" opacity=".55"/></g><rect x="10" y="114" width="36" height="8" rx="4" fill="var(--s2)"/></svg><span class="lvl" id="lvl">Random</span></button>
- <div class="wh" id="wh" tabindex="0" role="spinbutton" aria-label="Activity wheel. Swipe up or down, or use the arrow keys." aria-valuetext="">${W.list.length?'':''}${WH.items.map((it,i)=>`<div class="wi" data-i="${i}">${esc(it.n)}</div>`).join('')}${pegs}<div class="wl wl1"></div><div class="wl wl2"></div><div class="wptr"></div></div></div>
- <div class="sr" id="wsr" role="status" aria-live="polite"></div>
- <div class="acts"><button class="btn big" data-wx="go">Start</button></div>
- <div class="wlk"><button class="bk" data-a="tpls">My workouts</button><button class="bk" data-a="csetup">Countdown</button><button class="bk" data-a="qcat">Quick log</button></div>`}
+ return `<div class="hd"><button class="bk" data-a="back">Back</button></div><h1>Choose</h1>
+ <div class="wpg"><div class="wh" id="wh" tabindex="0" role="spinbutton" aria-label="Activity wheel. Swipe up or down. Tap the highlighted activity to start." aria-valuetext="">${WH.items.map((it,i)=>`<div class="wi${it.pin?' pin':''}${it.sp?' sp':''}" data-i="${i}">${esc(it.n)}</div>`).join('')}${pegs}<div class="wl wl1"></div><div class="wl wl2"></div><div class="wptr"></div></div>
+ <p class="whint" id="whint">Tap the highlighted one to start</p>
+ <div class="wlk"><button class="bk" data-a="tpls">My workouts</button><button class="bk" data-a="csetup">Countdown</button><button class="bk" data-a="qcat">Quick log</button><button class="bk" data-wx="edit">Edit wheel</button></div></div><div class="sr" id="wsr" role="status" aria-live="polite"></div>`}
 function whDraw(){const el=document.getElementById('wh');if(!el)return;const n=WH.items.length,{TH,R}=WH,pos=WH.pos,cy=el.clientHeight/2;
- el.querySelectorAll('.wi').forEach(e=>{const i=+e.dataset.i;let d=i-pos;if(n>1){d=((d+n/2)%n+n)%n-n/2}const a=d*TH;if(Math.abs(a)>1.5){e.style.visibility='hidden';return}const c=Math.cos(a),y=cy+R*Math.sin(a);e.style.visibility='visible';e.style.opacity=(Math.pow(c,2.2)*(Math.abs(d)<.5?1:.9)).toFixed(3);e.style.transform=`translateY(${(y-14).toFixed(1)}px) scale(${(.58+.42*c+(Math.abs(d)<1?.22*(1-Math.abs(d)):0)).toFixed(3)})`;e.classList.toggle('sel',Math.abs(d)<.5)});
+ el.querySelectorAll('.wi').forEach(e=>{const i=+e.dataset.i;let d=i-pos;if(n>1)d=((d+n/2)%n+n)%n-n/2;const a=d*TH;if(Math.abs(a)>1.5){e.style.visibility='hidden';return}const c=Math.cos(a),y=cy+R*Math.sin(a);e.style.visibility='visible';e.style.opacity=(Math.pow(c,2.2)*(Math.abs(d)<.5?1:.9)).toFixed(3);e.style.transform=`translateY(${(y-14).toFixed(1)}px) scale(${(.58+.42*c+(Math.abs(d)<1?.22*(1-Math.abs(d)):0)).toFixed(3)})`;e.classList.toggle('sel',Math.abs(d)<.5)});
  el.querySelectorAll('.wp').forEach(e=>{const k=+e.dataset.k;let d=((k/3-pos)%8+8)%8;if(d>4)d-=8;const a=d*TH;if(Math.abs(a)>1.5){e.style.visibility='hidden';return}e.style.visibility='visible';e.style.opacity=(Math.pow(Math.cos(a),2)*.9).toFixed(3);e.style.transform=`translateY(${(cy+R*Math.sin(a)-2).toFixed(1)}px)`});
  const idx=Math.round(pos);if(idx!==WH.lastIdx){WH.lastIdx=idx;try{navigator.vibrate&&navigator.vibrate(5)}catch(e){}}}
-function whSettled(){const s=whSel(),sr=document.getElementById('wsr'),el=document.getElementById('wh');if(s){if(sr)sr.textContent=s.n;if(el)el.setAttribute('aria-valuetext',s.n)}const l=document.getElementById('lvl');if(l)l.textContent='Random';WH.spin=null}
-function whLoop(t){if(!document.getElementById('wh')){WH.raf=0;return}const dt=Math.min(40,t-WH.t0);WH.t0=t;let go=true;
- if(WH.spin){const S2=WH.spin,k=Math.min(1,(t-S2.t0)/S2.dur),g=Math.pow(k,.55),f=g*g*(3-2*g);WH.pos=S2.p0+S2.D*f;if(k>=1){WH.pos=S2.p0+S2.D;whDraw();whSettled();WH.raf=0;return}}
- else if(WH.drag){go=true}
+function whSettled(){WH.spin=null;const s=whSel(),sr=document.getElementById('wsr'),el=document.getElementById('wh'),h=document.getElementById('whint');if(s){if(sr)sr.textContent=s.n;if(el)el.setAttribute('aria-valuetext',s.n);if(h)h.textContent=s.sp==='random'?'Tap Random to spin':s.sp==='custom'?'Tap Custom to make your own':'Tap to start '+s.n}}
+function whLoop(t){if(!document.getElementById('wh')){WH.raf=0;return}const dt=Math.min(40,t-WH.t0);WH.t0=t;
+ if(WH.spin){const q=WH.spin,k=Math.min(1,(t-q.t0)/q.dur),g=Math.pow(k,.55),f=g*g*(3-2*g);WH.pos=q.p0+q.D*f;if(k>=1){WH.pos=q.p0+q.D;whDraw();whSettled();WH.raf=0;return}}
+ else if(WH.drag){}
  else if(Math.abs(WH.vel)>.0009){WH.pos+=WH.vel*dt;WH.vel*=Math.exp(-dt/300);WH.tgt=null}
  else{if(WH.tgt==null){WH.tgt=Math.round(WH.pos);WH.vel=0}const df=WH.tgt-WH.pos;WH.pos+=df*(1-Math.exp(-dt/85));if(Math.abs(df)<.003){WH.pos=WH.tgt;whDraw();whSettled();WH.raf=0;return}}
  whDraw();WH.raf=requestAnimationFrame(whLoop)}
 const whGo=()=>{if(!WH.raf){WH.t0=performance.now();WH.raf=requestAnimationFrame(whLoop)}};
-function whSpin(){const n=WH.items.length;const l=document.getElementById('lvl');
- if(WH.spin){const p=WH.pos;WH.spin=null;WH.vel=0;WH.tgt=Math.round(p);if(l)l.textContent='Random';whGo();return}
- const cur=Math.round(WH.pos),tg=Math.floor(Math.random()*n);let D=(((tg-cur)%n)+n)%n;if(n>1)while(D<12)D+=n;else D=0;
- const sr=document.getElementById('wsr');if(sr)sr.textContent='Spinning';
- if(whRM()||n<2){WH.pos=cur+D;WH.vel=0;WH.tgt=null;WH.spin={p0:cur+D,D:0,t0:performance.now(),dur:1};if(l)l.textContent='Stop';whGo();return}
- WH.vel=0;WH.tgt=null;WH.spin={p0:WH.pos,D:cur+D-WH.pos,t0:performance.now(),dur:2200+n*90+Math.random()*500};if(l)l.textContent='Stop';whGo()}
+function whSpin(){const n=WH.items.length,ok=WH.items.map((x,i)=>x.sp?-1:i).filter(i=>i>=0);if(!ok.length)return;
+ const cur=Math.round(WH.pos),tg=ok[Math.floor(Math.random()*ok.length)];let D=(((tg-cur)%n)+n)%n;while(D<14)D+=n;
+ const sr=document.getElementById('wsr'),h=document.getElementById('whint');if(sr)sr.textContent='Spinning';if(h)h.textContent='Tap to stop';
+ WH.vel=0;WH.tgt=null;
+ if(whRM()){WH.spin={p0:cur+D,D:0,t0:performance.now(),dur:1}}else WH.spin={p0:WH.pos,D:cur+D-WH.pos,t0:performance.now(),dur:2300+n*80+Math.random()*500};whGo()}
+function whAct(){const it=whSel();if(!it)return;if(it.sp==='random')return whSpin();if(it.sp==='custom'){sub={n:'wcus'};render();return}whStart(it)}
+function whStart(it){if(!it||S.active)return;const W=whS();W.last=it.id;W.t[it.id]=Date.now();S.active=newActive({method:'timer',cat:it.c,name:it.n});save();sub={n:'active'};render()}
 function whBind(){const el=document.getElementById('wh');if(!el||el.dataset.b)return;el.dataset.b=1;whDraw();whSettled();
- const stop=e=>e.stopPropagation();['touchstart','touchmove'].forEach(ev=>{el.addEventListener(ev,stop,{passive:true});const lv=document.getElementById('lv');lv&&lv.addEventListener(ev,stop,{passive:true})});
- let hist=[];el.addEventListener('pointerdown',e=>{if(WH.items.length<2)return;try{el.setPointerCapture(e.pointerId)}catch(x){}if(WH.spin){WH.spin=null;const l=document.getElementById('lvl');if(l)l.textContent='Random'}WH.drag={y:e.clientY};WH.vel=0;WH.tgt=null;hist=[[performance.now(),e.clientY]];whGo()});
- el.addEventListener('pointermove',e=>{if(!WH.drag)return;const dy=e.clientY-WH.drag.y;WH.drag.y=e.clientY;WH.pos-=dy/WH.STEP;hist.push([performance.now(),e.clientY]);if(hist.length>6)hist.shift()});
- const up=()=>{if(!WH.drag)return;WH.drag=null;const a=hist[0],b=hist[hist.length-1];WH.vel=a&&b&&b[0]>a[0]&&performance.now()-b[0]<90?-((b[1]-a[1])/(b[0]-a[0]))/WH.STEP:0;if(Math.abs(WH.vel)>.012)WH.vel=Math.sign(WH.vel)*.012;whGo()};
+ ['touchstart','touchmove'].forEach(ev=>el.addEventListener(ev,e=>e.stopPropagation(),{passive:true}));
+ let hist=[],y0=0,t0=0,mv=0,wasSpin=false;
+ el.addEventListener('pointerdown',e=>{try{el.setPointerCapture(e.pointerId)}catch(x){}wasSpin=!!WH.spin;if(WH.spin)WH.spin=null;WH.drag={y:e.clientY};WH.vel=0;WH.tgt=null;hist=[[performance.now(),e.clientY]];y0=e.clientY;t0=performance.now();mv=0;whGo()});
+ el.addEventListener('pointermove',e=>{if(!WH.drag)return;const dy=e.clientY-WH.drag.y;WH.drag.y=e.clientY;mv=Math.max(mv,Math.abs(e.clientY-y0));WH.pos-=dy/WH.STEP;hist.push([performance.now(),e.clientY]);if(hist.length>6)hist.shift()});
+ const up=e=>{if(!WH.drag)return;WH.drag=null;
+  if(mv<8&&performance.now()-t0<600&&e.type==='pointerup'){WH.vel=0;if(wasSpin){WH.tgt=Math.round(WH.pos);whGo();return}
+   const r=el.getBoundingClientRect(),dy=e.clientY-(r.top+r.height/2);if(Math.abs(dy)<30){WH.tgt=Math.round(WH.pos);whAct()}else{const s=Math.max(-1,Math.min(1,dy/WH.R)),d=Math.asin(s)/WH.TH;WH.tgt=Math.round(WH.pos+d)}whGo();return}
+  const a=hist[0],b=hist[hist.length-1];WH.vel=a&&b&&b[0]>a[0]&&performance.now()-b[0]<90?-((b[1]-a[1])/(b[0]-a[0]))/WH.STEP:0;if(Math.abs(WH.vel)>.012)WH.vel=Math.sign(WH.vel)*.012;whGo()};
  el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
- el.addEventListener('keydown',e=>{const k=e.key;if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();WH.spin=null;WH.vel=0;WH.tgt=Math.round(WH.pos)+(k==='ArrowDown'?1:-1);whGo()}});
- const lv=document.getElementById('lv');if(lv){let y0=null,dy=0,mv=0;const set=v=>lv.style.setProperty('--d',v+'px');
-  lv.addEventListener('pointerdown',e=>{try{lv.setPointerCapture(e.pointerId)}catch(x){}y0=e.clientY;dy=0;mv=0;lv.classList.add('on')});
-  lv.addEventListener('pointermove',e=>{if(y0==null)return;dy=Math.max(0,Math.min(46,e.clientY-y0));mv=Math.max(mv,Math.abs(e.clientY-y0));set(dy)});
-  const end=()=>{if(y0==null)return;const pull=dy>18||mv<8;y0=null;if(pull){set(46);setTimeout(()=>{set(0);lv.classList.remove('on')},320);whSpin()}else{set(0);lv.classList.remove('on')}};
-  lv.addEventListener('pointerup',end);lv.addEventListener('pointercancel',()=>{y0=null;set(0);lv.classList.remove('on')});
-  lv.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();whSpin()}})}}
-function whStart(){const it=whSel();if(!it||S.active)return;const W=whS();W.last=it.id;W.t[it.id]=Date.now();S.active=newActive({method:'timer',cat:it.c,name:it.id==='cus'?'':it.n});save();sub={n:'active'};render()}
-/* manage */
+ el.addEventListener('keydown',e=>{const k=e.key;if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();WH.spin=null;WH.vel=0;WH.tgt=Math.round(WH.pos)+(k==='ArrowDown'?1:-1);whGo()}else if(k==='Enter'||k===' '){e.preventDefault();if(!WH.spin)whAct()}})}
+/* custom + manage */
 const whMsg=m=>{const e=document.getElementById('werr');if(e)e.textContent=m;else toast(m)};
-function wedit(){const W=whS(),q=(sub.q||'').toLowerCase(),on=W.list.filter(x=>x.on).length,L=W.list.map((x,i)=>[x,i]).filter(o=>!q||o[0].n.toLowerCase().includes(q));
- return `<div class="hd"><button class="bk" data-wx="done">Done</button></div><h1>Your wheel</h1><p class="mu sm" style="margin:0 0 10px">${on} on the wheel. Switch activities off to remove them from the wheel and the random lever. Your past workouts are never deleted. Order on the wheel follows what you did last and most; the arrows set the order when things are equal.</p>
+function wcus(){return `<div class="hd"><button class="bk" data-wx="done">Back</button></div><h1>Custom</h1><label for="cn">Name</label><input id="cn" maxlength="24" placeholder="Boxing" autocomplete="off"><label for="cc">Counts as</label>${catSel('cc','other')}<p class="err" id="werr" role="alert"></p><div class="acts"><button class="btn big" data-wx="cgo">Start</button></div><p class="mu sm" style="text-align:center">It also joins your wheel so you can pick it again.</p>`}
+function whAddCustom(n,c){const W=whS();n=(n||'').trim().slice(0,24);if(!n){whMsg('Type a name first.');return null}let it=W.list.find(z=>z.n.toLowerCase()===n.toLowerCase());if(it)return it;if(W.list.length>=40){whMsg('That’s plenty. Delete one first.');return null}it={id:'u'+Date.now().toString(36),n,c:CATS[c]?c:'other',cu:true};W.list.push(it);save();return it}
+function wedit(){const W=whS(),q=(sub.q||'').toLowerCase(),sh=new Set(whShown().map(x=>x.id)),L=W.list.map((x,i)=>[x,i]).filter(o=>!q||o[0].n.toLowerCase().includes(q));
+ return `<div class="hd"><button class="bk" data-wx="done">Done</button></div><h1>Your wheel</h1><p class="mu sm" style="margin:0 0 10px">The wheel holds ${WCAP}. <b>Swipe right to pin</b> the ones you always want, <b>swipe left to delete</b>. Past workouts are never deleted.</p>
  <input id="wq" data-wx="q" placeholder="Search" value="${esc(sub.q||'')}" aria-label="Search activities"><p class="err" id="werr" role="alert"></p>
- <div class="card" style="padding:4px 16px"><ul class="list">${L.map(([x,i])=>`<li class="row"><div class="t"><b>${esc(x.n)}</b><span class="mu sm">${CATS[x.c][0].toLowerCase()===x.n.toLowerCase()?(x.cu?'yours':'\u00a0'):CATS[x.c][0]+(x.cu?' · yours':'')}</span></div><span class="we"><button class="x" data-wx="mv:${i}:-1" aria-label="Move ${esc(x.n)} up">↑</button><button class="x" data-wx="mv:${i}:1" aria-label="Move ${esc(x.n)} down">↓</button>${x.cu?`<button class="x" data-wx="del:${i}" aria-label="Delete ${esc(x.n)}">×</button>`:''}<button class="chips-b" data-wx="tg:${i}" aria-pressed="${x.on}" aria-label="${esc(x.n)} ${x.on?'on':'off'}">${x.on?'On':'Off'}</button></span></li>`).join('')||'<li class="mu">Nothing found.</li>'}</ul></div>
- <h2>Add your own</h2><label for="wn">Name</label><input id="wn" maxlength="24" placeholder="Boxing"><label for="wc">Counts as</label>${catSel('wc','other')}<div class="acts"><button class="btn" data-wx="add">Add to wheel</button><button class="btn g" data-wx="reset">Restore defaults</button></div><div class="acts"><button class="btn big" data-wx="done">Done</button></div>`}
-/* info boxes */
-const GB={last:['Last workout',()=>{const w=[...S.workouts].sort((a,b)=>b.end-a.end)[0];return w?[mins(w.dur),(w.name||CATS[w.cat][0])+' · '+ago(w.end)]:null}],
- week:['This week',()=>{const t=S.workouts.filter(w=>w.end>=wkStart(Date.now())).reduce((s,w)=>s+w.dur,0);return t?[t>=3600?(t/3600).toFixed(1)+' h':mins(t),'time trained']:null}],
- count:['Workouts',()=>{const n=S.workouts.filter(w=>w.end>=wkStart(Date.now())).length;return n?[String(n),'this week']:null}],
- streak:['Streak',()=>{const ds=new Set(S.workouts.map(w=>new Date(w.start).toDateString()));let n=0,d=new Date();if(!ds.has(d.toDateString()))d.setDate(d.getDate()-1);while(ds.has(d.toDateString())){n++;d.setDate(d.getDate()-1)}return n?[String(n),n===1?'day':'days']:null}],
- sparks:['Sparks',()=>{const x=total();return x?[String(x),'LV '+lvl(x).L]:null}],
- pr:['Latest record',()=>{try{const R=recEvents(),k=Object.keys(R).sort((x,y)=>last(R[y]).w.end-last(R[x]).w.end)[0];if(!k)return null;return[recVal(k,last(R[k]).val),recName(k)]}catch(e){return null}}],
- links:['Links',()=>{try{const o=((dd(me(),'lk')||{}).o)||{};const n=Object.values(o).reduce((s,x)=>s+(x.n||0),0);return n?[String(n),n===1?'link made':'links made']:null}catch(e){return null}}]};
-const gbSel=()=>{const g=(S.gb||[]).filter(k=>GB[k]);return[g[0]||'last',g[1]&&g[1]!==g[0]?g[1]:(g[0]==='week'?'last':'week')]};
-function gyBoxes(i){const k=gbSel()[i],v=GB[k][1]();return `<button class="gbx" data-wx="gb:${i}" aria-label="${GB[k][0]}: ${v?v[0]+' '+v[1]:'nothing yet'}. Tap to change."><span class="gbl">${GB[k][0]}</span><span class="gbv">${v?esc(v[0]):'·'}</span><span class="gbs">${v?esc(v[1]):'Nothing yet'}</span></button>`}
-function gbox(){const cur=gbSel()[sub.i];return `<div class="hd"><button class="bk" data-wx="done">Back</button></div><h1>Show here</h1>${Object.keys(GB).map(k=>{const v=GB[k][1]();return `<button class="card tap opt" data-wx="gp:${k}" aria-pressed="${k===cur}"><span><b>${GB[k][0]}</b><span class="mu sm">${v?esc(v[0]+' · '+v[1]):'Nothing yet'}</span></span><span class="ch">${k===cur?'✓':''}</span></button>`}).join('')}`}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!b)return;const [a,x,y]=b.dataset.wx.split(':'),W=whS();
+ <div class="card" style="padding:4px 16px"><ul class="list">${L.map(([x,i])=>`<li class="wsw"><button class="wsw-pin" data-wx="pin:${i}">${x.pin?'Unpin':'Pin'}</button><button class="wsw-del" data-wx="del:${i}">Delete</button><div class="wsw-in row"><div class="t"><b class="${x.pin?'pin':''}">${esc(x.n)}</b><span class="mu sm">${x.pin?'Pinned · ':''}${sh.has(x.id)?CATS[x.c][0]:'Not on the wheel · '+CATS[x.c][0]}</span></div></div></li>`).join('')||'<li class="mu">Nothing found.</li>'}</ul></div>
+ <h2>Add your own</h2><label for="wn">Name</label><input id="wn" maxlength="24" placeholder="Boxing" autocomplete="off"><label for="wc">Counts as</label>${catSel('wc','other')}<div class="acts"><button class="btn" data-wx="add">Add to wheel</button><button class="btn g" data-wx="reset">Restore defaults</button></div><div class="acts"><button class="btn big" data-wx="done">Done</button></div>`}
+/* swipe rows in the wheel editor */
+(function(){let d=null;const W=96;
+ document.addEventListener('pointerdown',e=>{const r=e.target.closest('.wsw'),i=e.target.closest('.wsw-in');document.querySelectorAll('.wsw.open,.wsw.openr').forEach(p=>{if(p!==r)p.classList.remove('open','openr')});if(!i){d=null;return}d={r,i,x:e.clientX,y:e.clientY,o:r.classList.contains('open')?-W:r.classList.contains('openr')?W:0,on:false,dx:0}});
+ document.addEventListener('pointermove',e=>{if(!d)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;if(!d.on){if(Math.abs(dx)>10&&Math.abs(dx)>Math.abs(dy)*1.5){d.on=true;d.r.classList.add('drag');try{d.i.setPointerCapture(e.pointerId)}catch(_){}}else if(Math.abs(dy)>10){d=null;return}else return}
+  d.dx=Math.max(-W-30,Math.min(W+30,d.o+dx));d.i.style.transform='translateX('+d.dx+'px)';d.r.dataset.side=d.dx>0?'r':'l'});
+ const end=()=>{if(!d)return;const q=d;d=null;if(!q.on)return;q.r.classList.remove('drag');q.i.style.transform='';q.r.classList.remove('open','openr');if(q.dx<-48)q.r.classList.add('open');else if(q.dx>48)q.r.classList.add('openr');window.__wsup=Date.now()};
+ document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
+ document.addEventListener('click',e=>{if(Date.now()-(window.__wsup||0)<350){e.stopPropagation();e.preventDefault()}},true)})();
+/* gym widgets */
+let GE=false;
+const wkBars=()=>{const s=wkStart(Date.now()),m=Array(7).fill(0);S.workouts.forEach(w=>{const k=Math.floor((w.end-s)/864e5);if(k>=0&&k<7)m[k]+=w.dur/60});return m};
+const GW={
+ last:{t:'Last workout',z:[1,2],tap:'hist',r:()=>{const w=[...S.workouts].sort((a,b)=>b.end-a.end)[0];return w?[mins(w.dur),(w.name||CATS[w.cat][0])+' · '+ago(w.end)]:null}},
+ week:{t:'This week',z:[1,2],tap:'hist',r:()=>{const t=S.workouts.filter(w=>w.end>=wkStart(Date.now())).reduce((s,w)=>s+w.dur,0);return t?[t>=3600?(t/3600).toFixed(1)+' h':mins(t),'time trained']:null}},
+ count:{t:'Workouts',z:[1,2],tap:'hist',r:()=>{const n=S.workouts.filter(w=>w.end>=wkStart(Date.now())).length;return n?[String(n),'this week']:null}},
+ month:{t:'This month',z:[1,2],tap:'hist',r:()=>{const d=new Date();d.setDate(1);d.setHours(0,0,0,0);const t=S.workouts.filter(w=>w.end>=d.getTime()).reduce((s,w)=>s+w.dur,0);return t?[t>=3600?(t/3600).toFixed(1)+' h':mins(t),'time trained']:null}},
+ streak:{t:'Streak',z:[1,2],r:()=>{const ds=new Set(S.workouts.map(w=>new Date(w.start).toDateString()));let n=0,d=new Date();if(!ds.has(d.toDateString()))d.setDate(d.getDate()-1);while(ds.has(d.toDateString())){n++;d.setDate(d.getDate()-1)}return n?[String(n),n===1?'day in a row':'days in a row']:null}},
+ fav:{t:'Most done',z:[1,2],r:()=>{const c={};S.workouts.forEach(w=>{const k=(w.name||'').trim()||CATS[w.cat][0];c[k]=(c[k]||0)+1});const k=Object.keys(c).sort((a,b)=>c[b]-c[a])[0];return k?[k,c[k]+(c[k]===1?' time':' times')]:null}},
+ sparks:{t:'Sparks',z:[1,2],tap:'xp',r:()=>{const x=total();return x?[String(x),'LV '+lvl(x).L]:null}},
+ pr:{t:'Latest record',z:[1,2],tap:'recs',r:()=>{try{const R=recEvents(),k=Object.keys(R).sort((x,y)=>last(R[y]).w.end-last(R[x]).w.end)[0];return k?[recVal(k,last(R[k]).val),recName(k)]:null}catch(e){return null}}},
+ links:{t:'Links',z:[1,2],r:()=>{try{const o=((dd(me(),'lk')||{}).o)||{};const n=Object.values(o).reduce((s,x)=>s+(x.n||0),0);return n?[String(n),n===1?'link made':'links made']:null}catch(e){return null}}},
+ bars:{t:'Week at a glance',z:[2],tap:'hist',r:()=>{const m=wkBars(),mx=Math.max(...m);return mx?m:null}},
+ hist:{t:'History',z:[2],tap:'hist',r:()=>{const l=[...S.workouts].sort((a,b)=>b.start-a.start).slice(0,3);return l.length?l:null}},
+ recs:{t:'Records',z:[2],tap:'recs',r:()=>{try{const R=recEvents(),k=Object.keys(R).sort((x,y)=>last(R[y]).w.end-last(R[x]).w.end).slice(0,3);return k.length?k.map(x=>[recName(x)+' · '+recSub(x),recVal(x,last(R[x]).val)]):null}catch(e){return null}}}};
+const GWD=()=>({t:[{k:'hist',w:2},{k:'last',w:1},{k:'week',w:1}],b:[{k:'recs',w:2},{k:'streak',w:1},{k:'count',w:1}]});
+function gwS(){let g=S.gw;if(!g||!Array.isArray(g.t)||!Array.isArray(g.b))g=S.gw=GWD();['t','b'].forEach(p=>{g[p]=g[p].filter(x=>GW[x.k]);g[p].forEach(x=>{if(!GW[x.k].z.includes(x.w))x.w=GW[x.k].z[0]})});return g}
+function gwBody(x){const d=GW[x.k],v=d.r();
+ if(x.k==='bars'){const L='MTWTFSS';return `<span class="gbl">${d.t}</span>${v?`<span class="gbars">${v.map((m,i)=>`<i style="height:${Math.max(4,Math.round(m/Math.max(...v)*100))}%" title="${Math.round(m)} min"></i>`).join('')}</span><span class="gbd">${[...L].map(c=>`<b>${c}</b>`).join('')}</span>`:'<span class="gbs">Nothing yet</span>'}`}
+ if(x.k==='hist')return `<span class="gbl">${d.t}</span>${v?v.map(w=>`<span class="gbr"><span>${esc(w.name||CATS[w.cat][0])} · ${mins(w.dur)}</span><span class="mu">${ago(w.end)}</span></span>`).join(''):'<span class="gbs">No workouts yet</span>'}`;
+ if(x.k==='recs')return `<span class="gbl">${d.t}</span>${v?v.map(r=>`<span class="gbr"><span>${esc(r[0])}</span><span class="mu">${esc(r[1])}</span></span>`).join(''):'<span class="gbs">Records appear as you log workouts</span>'}`;
+ return `<span class="gbl">${d.t}</span><span class="gbv">${v?esc(v[0]):'·'}</span><span class="gbs">${v?esc(v[1]):'Nothing yet'}</span>`}
+function gwTile(p,i,n){const x=gwS()[p][i],d=GW[x.k],cl='gw w'+x.w;
+ if(!GE)return d.tap?`<button class="${cl}" data-a="${d.tap}">${gwBody(x)}</button>`:`<div class="${cl}">${gwBody(x)}</div>`;
+ const b=(a,l,t,dis)=>`<button class="gc" data-wx="${a}" aria-label="${t}" ${dis?'disabled':''}>${l}</button>`;
+ return `<div class="${cl} ed"><button class="gpick" data-wx="gp:${p}:${i}" aria-label="Change ${d.t}">${gwBody(x)}</button><span class="gcs">${b(`gm:${p}:${i}:-1`,'‹','Move earlier',i===0)}${b(`gm:${p}:${i}:1`,'›','Move later',i===n-1)}${b(`gx:${p}:${i}`,p==='t'?'↓':'↑','Move to the '+(p==='t'?'bottom':'top')+' area')}${d.z.length>1?b(`gz:${p}:${i}`,x.w===2?'▫':'▭','Change size'):''}${b(`gr:${p}:${i}`,'×','Remove')}</span></div>`}
+function gwPanel(p){const L=gwS()[p];return `<div class="gp">${L.map((x,i)=>gwTile(p,i,L.length)).join('')}${GE?`<button class="gw w2 add" data-wx="ga:${p}">+ Add widget</button>`:''}</div>`}
+function gyWidgets(part){return part==='t'?gwPanel('t'):gwPanel('b')}
+function gbox(){const g=gwS(),used=new Set([...g.t,...g.b].map(x=>x.k)),cur=sub.i>=0?g[sub.p][sub.i].k:null;
+ return `<div class="hd"><button class="bk" data-wx="done">Back</button></div><h1>Widget</h1>${Object.keys(GW).filter(k=>k===cur||!used.has(k)).map(k=>{const d=GW[k],v=d.r();const pv=Array.isArray(v)&&typeof v[0]==='string'&&k!=='recs'?v.join(' · '):v?'Showing your data':'Nothing yet';return `<button class="card tap opt" data-wx="gs:${k}" aria-pressed="${k===cur}"><span><b>${d.t}</b><span class="mu sm">${esc(pv)}</span></span><span class="ch">${k===cur?'✓':''}</span></button>`}).join('')}`}
+/* clicks */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!b)return;const [a,x,y,z]=b.dataset.wx.split(':'),W=whS();
  switch(a){
-  case'go':whStart();break;
   case'edit':sub={n:'wedit',q:''};render();break;
-  case'done':sub=sub&&sub.n==='gbox'?null:{n:'wheel'};if(S.wh&&S.wh.list.every(z=>!z.on)){S.wh.list[0].on=true}render();break;
-  case'gb':sub={n:'gbox',i:+x};render();break;
-  case'gp':{const g=gbSel();g[sub.i]=x;if(g[0]===g[1])g[1-sub.i]=Object.keys(GB).find(k=>!g.includes(k));S.gb=g;save();sub=null;render();break}
-  case'tg':{const it=W.list[+x];if(it.on&&W.list.filter(z=>z.on).length<2){whMsg('Keep at least one activity on your wheel.');break}it.on=!it.on;save();render();break}
-  case'mv':{const i=+x,j=i+ +y;if(j<0||j>=W.list.length)break;[W.list[i],W.list[j]]=[W.list[j],W.list[i]];save();render();break}
-  case'del':{const it=W.list[+x];if(it.on&&W.list.filter(z=>z.on).length<2){whMsg('Keep at least one activity on your wheel.');break}W.list.splice(+x,1);save();render();break}
-  case'add':{const n=(document.getElementById('wn').value||'').trim().slice(0,24),c=document.getElementById('wc').value;if(!n){whMsg('Type a name first.');break}if(W.list.some(z=>z.n.toLowerCase()===n.toLowerCase())){whMsg('That one is already on your list.');break}if(W.list.length>=40){whMsg('That’s plenty. Remove one first.');break}W.list.push({id:'u'+Date.now().toString(36),n,c:CATS[c]?c:'other',on:true,cu:true});save();render();break}
-  case'reset':if(confirm('Restore the default activities? Your own activities stay on the list.')){const own=W.list.filter(z=>z.cu);S.wh={list:[...WDEF(),...own],last:W.last,t:W.t};save();render()}break}});
+  case'done':sub=sub&&sub.n==='gbox'?null:{n:'wheel'};render();break;
+  case'cgo':{const it=whAddCustom(document.getElementById('cn').value,document.getElementById('cc').value);if(it)whStart(it);break}
+  case'pin':{const it=W.list[+x];it.pin=!it.pin;if(!it.pin)delete it.pin;save();render();break}
+  case'del':{if(W.list.length<2){whMsg('Keep at least one activity on your wheel.');break}W.list.splice(+x,1);save();render();break}
+  case'add':{const n=document.getElementById('wn').value;if(!n.trim()){whMsg('Type a name first.');break}if(W.list.some(z=>z.n.toLowerCase()===n.trim().toLowerCase())){whMsg('That one is already on your list.');break}if(whAddCustom(n,document.getElementById('wc').value))render();break}
+  case'reset':if(confirm('Restore the default activities? Your own activities and pins stay.')){const have=new Set(W.list.map(z=>z.id));WDEF().forEach(z=>{if(!have.has(z.id))W.list.push(z)});save();render()}break;
+  case'ge':GE=!GE;render();break;
+  case'gm':{const L=gwS()[x],i=+y,j=i+ +z;if(j<0||j>=L.length)break;[L[i],L[j]]=[L[j],L[i]];save();render();break}
+  case'gx':{const g=gwS(),o=x==='t'?'b':'t',it=g[x].splice(+y,1)[0];g[o].push(it);save();render();break}
+  case'gz':{const it=gwS()[x][+y];it.w=it.w===2?1:2;save();render();break}
+  case'gr':{gwS()[x].splice(+y,1);save();render();break}
+  case'ga':sub={n:'gbox',p:x,i:-1};render();break;
+  case'gp':sub={n:'gbox',p:x,i:+y};render();break;
+  case'gs':{const g=gwS(),k=x,sz=GW[k].z;if(sub.i>=0)g[sub.p][sub.i]={k,w:sz.includes(g[sub.p][sub.i].w)?g[sub.p][sub.i].w:sz[0]};else g[sub.p].push({k,w:sz[0]});save();sub=null;render();break}}});
 document.addEventListener('input',e=>{if(e.target.id==='wq'){sub.q=e.target.value;const p=e.target.selectionStart;render();const q=document.getElementById('wq');if(q){q.focus();try{q.setSelectionRange(p,p)}catch(x){}}}});
 new MutationObserver(()=>{if(document.querySelector('#wh:not([data-b])'))whBind()}).observe(document.getElementById('app'),{childList:true});
 </script>
