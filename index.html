@@ -1496,7 +1496,7 @@ const gyPanel=(p,id,pp)=>{const L=gdS()[p],ho=pp===p?gdHole(L.concat([{s:'t'}]).
 function gyDash(){gdNorm();const g=gdS();window.__pp=GE?null:gdPlus();return `<div class="gy-bar"><button class="wed rma" data-wx="gall">Remove all</button><button class="wed" data-wx="ge">${GE?'Done':'Edit'}</button></div>${gyPanel('L','gd',window.__pp)}`}
 function gyDash2(){return gyPanel('B','gd2',window.__pp)}
 function gbox(must){const g0=gdS(),used=new Set([...g0.L,...g0.B].map(x=>x.k)),ks=Object.keys(GW).filter(k=>GW[k].p&&(k==='empty'?!must:!used.has(k))),fr=gdFree();
- return `${must?'':'<div class="hd"><button class="bk" data-wx="done">Back</button></div>'}<h1>Add</h1>${must?'<p class="gy-must">You must select one goal</p>':`<p class="gy-must">Space left: ${fr}</p>`}${ks.length?`<div class="gpk">${ks.map(k=>{const ok=gdCan(k);return `<button class="gpo" data-wx="gs:${k}" ${ok?'':'disabled'} aria-label="${GW[k].t}${ok?'':'. No space left'}">${gi(GW[k].i)}<b>${GW[k].t}</b><span>${ok?GW[k].d:'No space left'}</span></button>`}).join('')}</div>`:'<p class="mu sm" style="text-align:center">Everything is already on your dashboard.</p>'}`}
+ return `${must?'':'<div class="hd"><button class="bk" data-wx="done">Back</button></div>'}<h1>Add</h1>${must?'<p class="gy-must">You must select one goal</p>':''}${ks.length?`<div class="gpk">${ks.map(k=>{const ok=gdCan(k);return `<button class="gpo" data-wx="gs:${k}" ${ok?'':'disabled'} aria-label="${GW[k].t}${ok?'':'. No space left'}">${gi(GW[k].i)}<b>${GW[k].t}</b><span>${ok?GW[k].d:'No space left'}</span></button>`}).join('')}</div>`:'<p class="mu sm" style="text-align:center">Everything is already on your dashboard.</p>'}`}
 /* clicks */
 document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!b)return;const [a,x,y,z]=b.dataset.wx.split(':'),W=whS();
  switch(a){
@@ -1513,7 +1513,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!
   case'gr':{if(gdS()[x==='B'?'B':'L'][+y].k!=='empty'&&gdCount()<2)break;gdS()[x==='B'?'B':'L'].splice(+y,1);save();render();break}
   case'gz':{const g=gdS(),pp=x==='B'?'B':'L',it=g[pp][+y],z=GW[it.k].z.split('').sort((a,b)=>'tsml'.indexOf(a)-'tsml'.indexOf(b)),R=gyRows();for(let n=1;n<=z.length;n++){const s=z[(z.indexOf(it.s)+n)%z.length],t=g[pp].map(q=>q===it?{...q,s}:q);if(gdPack(t,R)){it.s=s;break}}save();render();break}
   case'ga':sub={n:'gbox'};render();break;
-  case'gs':{const k=x;const g1=gdS();if(GW[k]&&(k==='empty'||![...g1.L,...g1.B].some(z=>z.k===k))){if(gdTry(g1,k))save();else toast('No space left')}sub={n:'gbox'};render();break}}});
+  case'gs':{const k=x;const g1=gdS();if(GW[k]&&(k==='empty'||![...g1.L,...g1.B].some(z=>z.k===k))){if(gdTry(g1,k))save();else toast('No space left')}sub=null;render();break}}});
 document.addEventListener('input',e=>{if(e.target.id==='wq'){sub.q=e.target.value;const p=e.target.selectionStart;render();const q=document.getElementById('wq');if(q){q.focus();try{q.setSelectionRange(p,p)}catch(x){}}}});
 new MutationObserver(()=>{if(document.querySelector('#wh:not([data-b])'))whBind()}).observe(document.getElementById('app'),{childList:true});
 /* drag and drop for dashboard tiles + swipe back */
