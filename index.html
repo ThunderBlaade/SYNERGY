@@ -292,7 +292,7 @@ nav{padding:4px 4px max(8px,calc(env(safe-area-inset-bottom,0px) - 6px))!importa
 .gbr{display:flex;justify-content:space-between;gap:10px;font:400 12.5px var(--body);padding:3px 0;border-top:1px solid var(--ln)}.gbr>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gbr .mu{flex:none;color:var(--mu)}
 .gbars{display:flex;flex:1;min-height:0}.gbars>span{display:flex;align-items:flex-end;gap:6px;width:100%}.gbars i{flex:1;background:var(--tx);opacity:.75;display:block}.gbd{display:flex;gap:6px}.gbd b{flex:1;text-align:center;font:500 9px var(--body);letter-spacing:.1em;color:var(--mu)}
 .gc2{display:none;position:absolute;z-index:3;border-radius:0}.ge .gc2{display:grid;place-items:center}
-.gx{top:-8px;right:-8px;width:28px;height:28px;border-radius:50%;background:var(--tx);color:var(--bg);font:500 17px var(--body);line-height:1}
+.gx{top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--tx);color:var(--bg);font:500 13px var(--body);line-height:1}.gy-bar .rma{display:none;margin-right:auto}.gy-bar:has(+ .gy-pn .ge) .rma{display:inline-block}.gw.gem{background:transparent}
 .grs{right:0;bottom:0;width:46px;height:46px;touch-action:none;background:none;border:0;z-index:16}.grs::after{content:'';position:absolute;right:7px;bottom:7px;width:18px;height:18px;border-right:4px solid var(--tx);border-bottom:4px solid var(--tx);animation:grp 1.5s ease-in-out 3}@keyframes grp{0%,100%{transform:translate(0,0)}25%{transform:translate(1.5px,1.5px)}50%{transform:translate(4px,4px)}75%{transform:translate(1.5px,1.5px)}}@media (prefers-reduced-motion:reduce){.grs::after{animation:none}}.gsz{right:6px;bottom:6px;min-width:32px;height:26px;background:var(--s2);color:var(--tx);border:1px solid var(--ln);font:500 10px var(--body);letter-spacing:.1em}
 .ge .gw{pointer-events:none}.ge .gwr:not(.lift):not(.ph){cursor:grab}
 .gwr.lift{box-shadow:0 12px 32px -12px rgba(0,0,0,.4);opacity:.96}.gwr.lift .gwi{transform:scale(1.03);display:block}
@@ -1461,9 +1461,10 @@ const GW={
  sparks:{c:'Other',t:'Sparks',i:'spark',z:'tsm',tap:'xp',src:'SYNERGY',m:'Your Sparks total and level.',e:'Save a workout to earn your first Sparks.',r:()=>{const x=total();return x?[String(x),'LV '+lvl(x).L]:null}},
  level:{p:1,d:'Progress to your next level',c:'Other',t:'Level progress',i:'up',z:'tsm',tap:'xp',src:'SYNERGY',m:'How many Sparks until your next level.',e:'Save a workout to earn your first Sparks.',r:()=>{const x=total(),I=lvl(x);return x?['LV '+I.L,I.left+' Sparks to LV '+(I.L+1),null,I.pct]:null}},
  links:{c:'Other',t:'Synergy Links',i:'link',z:'tsm',src:'SYNERGY',m:'Links you have made with friends by training at the same time.',e:'Your first Synergy Link will appear here.',r:()=>{try{const o=((dd(me(),'lk')||{}).o)||{};const n=Object.values(o).reduce((s,x)=>s+(x.n||0),0);return n?[String(n),n===1?'link made':'links made']:null}catch(e){return null}}}};
-const dz=k=>GW[k].z.includes('s')?'s':GW[k].z[0];
+GW.empty={p:1,d:'A blank space to fill later',c:'Other',t:'Empty slot',i:'list',z:'tsml',m:'A blank space.',e:'',r:()=>null};
+const dz=k=>k==='empty'?'t':GW[k].z.includes('s')?'s':GW[k].z[0];
 function gdS(){let g=S.gd;if(!g||!Array.isArray(g.L))g=S.gd={L:[],B:[]};if(!Array.isArray(g.B))g.B=[];['L','B'].forEach(p=>{g[p]=g[p].filter(x=>GW[x.k]);g[p].forEach(x=>{if(!GW[x.k].z.includes(x.s))x.s=GW[x.k].z[0]})});return g}
-function gwBody(x){const d=GW[x.k],v=d.r();if(x.s==='t')return `<span class="gti">${gi(d.i)}</span><span class="gtv">${v?esc(v[0]):'–'}</span>`;const n=x.s==='l'?5:2,hd=`<span class="gbl">${gi(d.i)}<span class="gbt">${d.t}</span>${x.s!=='s'&&d.src?`<em class="gsrc">${d.src}</em>`:''}</span>`;
+function gwBody(x){if(x.k==='empty')return '';const d=GW[x.k],v=d.r();if(x.s==='t')return `<span class="gti">${gi(d.i)}</span><span class="gtv">${v?esc(v[0]):'–'}</span>`;const n=x.s==='l'?5:2,hd=`<span class="gbl">${gi(d.i)}<span class="gbt">${d.t}</span>${x.s!=='s'&&d.src?`<em class="gsrc">${d.src}</em>`:''}</span>`;
  if(!v)return `${hd}<span class="gbe">${esc(d.e)}</span>`;
  if(x.k==='bars'){const L='MTWTFSS';return `${hd}<span class="gbars"><span>${v.map(m=>`<i style="height:${Math.max(4,Math.round(m/Math.max(...v)*100))}%"></i>`).join('')}</span></span><span class="gbd">${[...L].map(c=>`<b>${c}</b>`).join('')}</span>`}
  if(x.k==='hist')return `${hd}${v.slice(0,n).map(w=>`<span class="gbr"><span>${esc(w.name||CATS[w.cat][0])} · ${mins(w.dur)}</span><span class="mu">${ago(w.end)}</span></span>`).join('')}`;
@@ -1475,8 +1476,9 @@ const GDIM={t:[1,1],s:[2,1],m:[3,1],l:[3,2]};
 function gyRows(){const st=parseFloat(getComputedStyle(document.body).paddingTop)||0,H=(innerHeight-164-st-64-32-30)/2-16-6;return Math.max(1,Math.floor((H+8)/112))}
 function gdPack(items,R){const occ=Array.from({length:R},()=>[0,0,0]);for(const it of items){const [w,hh]=GDIM[it.s];let ok=false;out:for(let r=0;r+hh<=R;r++)for(let c=0;c+w<=3;c++){let f=true;for(let i=0;i<hh&&f;i++)for(let j=0;j<w;j++)if(occ[r+i][c+j]){f=false;break}if(f){for(let i=0;i<hh;i++)for(let j=0;j<w;j++)occ[r+i][c+j]=1;ok=true;break out}}if(!ok)return false}return true}
 const gdArea=it=>GDIM[it.s][0]*GDIM[it.s][1];
-const gdCount=()=>{const g=gdS();return g.L.length+g.B.length};
+const gdCount=()=>{const g=gdS();return [...g.L,...g.B].filter(x=>x.k!=='empty').length};
 const gdNone=()=>gdCount()===0;
+function gdHole(items,R){const o=Array.from({length:R},()=>[0,0,0]);for(const it of items){const [w,hh]=GDIM[it.s];out:for(let r=0;r+hh<=R;r++)for(let c=0;c+w<=3;c++){let f=true;for(let i=0;i<hh&&f;i++)for(let j=0;j<w;j++)if(o[r+i][c+j]){f=false;break}if(f){for(let i=0;i<hh;i++)for(let j=0;j<w;j++)o[r+i][c+j]=1;break out}}}for(let r=0;r<R;r++)for(let c=0;c<3;c++)if(!o[r][c]){let n=0;while(c+n<3&&!o[r][c+n])n++;return{r,c,n}}return null}
 const gdFree=()=>{const g=gdS();return Math.max(0,6*gyRows()-[...g.L,...g.B].reduce((s,x)=>s+gdArea(x),0))};
 function gdTry(g,k){const z=GW[k].z,ord=['l','m','s','t'].filter(s=>z.includes(s)),R=gyRows(),st=Math.max(0,ord.indexOf(dz(k)));
  for(const s of ord.slice(st)){const c=JSON.parse(JSON.stringify(g)),put=()=>{for(const p of['L','B'])if(gdPack([...c[p],{k,s}],R)){c[p].push({k,s});return true}return false};
@@ -1486,12 +1488,12 @@ function gdTry(g,k){const z=GW[k].z,ord=['l','m','s','t'].filter(s=>z.includes(s
 const gdCan=k=>{const g=gdS();return gdTry({L:g.L.map(x=>({...x})),B:g.B.map(x=>({...x}))},k)};
 function gdNorm(){const g=gdS(),R=gyRows();let ch=false;for(let n=0;n<30;n++){let bad=null;for(const p of['L','B'])if(!gdPack(g[p],R)){bad=p;break}if(!bad)break;const o=bad==='L'?'B':'L',it=g[bad][g[bad].length-1];if(it&&gdPack([...g[o],it],R)){g[bad].pop();g[o].push(it);ch=true;continue}const cand=g[bad].filter(x=>x.s!=='t'&&GW[x.k].z.includes('t')).sort((a,b)=>gdArea(b)-gdArea(a));if(cand.length){cand[0].s='t';ch=true;continue}break}if(ch)save()}
 const gdPlus=()=>{const g=gdS(),R=gyRows();return gdPack([...g.L,{s:'t'}],R)?'L':gdPack([...g.B,{s:'t'}],R)?'B':null};
-function gwTile(x,i,p){const d=GW[x.k],inner=d.tap?`<button class="gw" data-a="${d.tap}">${gwBody(x)}</button>`:`<div class="gw">${gwBody(x)}</div>`;
- return `<div class="gwr z${x.s}" data-i="${i}" data-p="${p}"><span class="gwi">${inner}</span>${gdCount()>1?`<button class="gc2 gx" data-wx="gr:${p}:${i}" aria-label="Remove ${d.t}">×</button>`:''}${d.z.length>1?`<button class="gc2 grs" data-nosw="1" data-wx="gz:${p}:${i}" aria-label="Resize ${d.t}. Drag the corner, or tap to change size. Now ${GS[x.s]}."></button>`:''}</div>`}
-const gyPanel=(p,id,pp)=>{const L=gdS()[p],pl=pp===p?`<button class="gnx" data-wx="ga" aria-label="Add a widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>`:'';return `<section class="gy-pn"><div id="${id}" class="gp${GE?' ge':''}" data-p="${p}">${L.map((x,i)=>gwTile(x,i,p)).join('')}${pl}</div></section>`};
-function gyDash(){gdNorm();const g=gdS();window.__pp=GE?null:gdPlus();return `<div class="gy-bar">${window.__pp||GE?'':'<button class="wed" data-wx="ga" style="margin-right:auto">Add</button>'}<button class="wed" data-wx="ge">${GE?'Done':'Edit'}</button></div>${gyPanel('L','gd',window.__pp)}`}
+function gwTile(x,i,p){const d=GW[x.k],inner=d.tap?`<button class="gw" data-a="${d.tap}">${gwBody(x)}</button>`:`<div class="gw${x.k==='empty'?' gem':''}">${gwBody(x)}</div>`;
+ return `<div class="gwr z${x.s}" data-i="${i}" data-p="${p}"><span class="gwi">${inner}</span>${x.k==='empty'||gdCount()>1?`<button class="gc2 gx" data-wx="gr:${p}:${i}" aria-label="Remove ${d.t}">×</button>`:''}${d.z.length>1?`<button class="gc2 grs" data-nosw="1" data-wx="gz:${p}:${i}" aria-label="Resize ${d.t}. Drag the corner, or tap to change size. Now ${GS[x.s]}."></button>`:''}</div>`}
+const gyPanel=(p,id,pp)=>{const L=gdS()[p],ho=pp===p?gdHole(L.concat([{s:'t'}]).slice(0,-1),gyRows()):null,pl=pp===p?`<button class="gnx" style="${ho?`grid-column:${ho.c+1}/span ${ho.n};grid-row:${ho.r+1}`:''}" data-wx="ga" aria-label="Add a widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>`:'';return `<section class="gy-pn"><div id="${id}" class="gp${GE?' ge':''}" data-p="${p}">${L.map((x,i)=>gwTile(x,i,p)).join('')}${pl}</div></section>`};
+function gyDash(){gdNorm();const g=gdS();window.__pp=GE?null:gdPlus();return `<div class="gy-bar">${window.__pp||GE?'':'<button class="wed" data-wx="ga" style="margin-right:auto">Add</button>'}<button class="wed rma" data-wx="gall">Remove all</button><button class="wed" data-wx="ge">${GE?'Done':'Edit'}</button></div>${gyPanel('L','gd',window.__pp)}`}
 function gyDash2(){return gyPanel('B','gd2',window.__pp)}
-function gbox(must){const g0=gdS(),used=new Set([...g0.L,...g0.B].map(x=>x.k)),ks=Object.keys(GW).filter(k=>GW[k].p&&!used.has(k)),fr=gdFree();
+function gbox(must){const g0=gdS(),used=new Set([...g0.L,...g0.B].map(x=>x.k)),ks=Object.keys(GW).filter(k=>GW[k].p&&(k==='empty'?!must:!used.has(k))),fr=gdFree();
  return `${must?'':'<div class="hd"><button class="bk" data-wx="done">Back</button></div>'}<h1>Add</h1>${must?'<p class="gy-must">You must select one goal</p>':`<p class="gy-must">Space left: ${fr}</p>`}${ks.length?`<div class="gpk">${ks.map(k=>{const ok=gdCan(k);return `<button class="gpo" data-wx="gs:${k}" ${ok?'':'disabled'} aria-label="${GW[k].t}${ok?'':'. No space left'}">${gi(GW[k].i)}<b>${GW[k].t}</b><span>${ok?GW[k].d:'No space left'}</span></button>`}).join('')}</div>`:'<p class="mu sm" style="text-align:center">Everything is already on your dashboard.</p>'}`}
 /* clicks */
 document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!b)return;const [a,x,y,z]=b.dataset.wx.split(':'),W=whS();
@@ -1505,10 +1507,11 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!
   case'add':{const n=document.getElementById('wn').value;if(!n.trim()){whMsg('Type a name first.');break}if(W.list.some(z=>z.n.toLowerCase()===n.trim().toLowerCase())){whMsg('That one is already on your list.');break}if(whAddCustom(n,document.getElementById('wc').value))render();break}
   case'reset':if(confirm('Restore the default activities? Your own activities and pins stay.')){const have=new Set(W.list.map(z=>z.id));WDEF().forEach(z=>{if(!have.has(z.id))W.list.push(z)});save();render()}break;
   case'ge':GE=!GE;render();break;
-  case'gr':{if(gdCount()<2)break;gdS()[x==='B'?'B':'L'].splice(+y,1);save();render();break}
+  case'gall':if(confirm('Remove all your widgets?')){const g=gdS();g.L=[];g.B=[];save();GE=false;render()}break;
+  case'gr':{if(gdS()[x==='B'?'B':'L'][+y].k!=='empty'&&gdCount()<2)break;gdS()[x==='B'?'B':'L'].splice(+y,1);save();render();break}
   case'gz':{const g=gdS(),pp=x==='B'?'B':'L',it=g[pp][+y],z=GW[it.k].z.split('').sort((a,b)=>'tsml'.indexOf(a)-'tsml'.indexOf(b)),R=gyRows();for(let n=1;n<=z.length;n++){const s=z[(z.indexOf(it.s)+n)%z.length],t=g[pp].map(q=>q===it?{...q,s}:q);if(gdPack(t,R)){it.s=s;break}}save();render();break}
   case'ga':sub={n:'gbox'};render();break;
-  case'gs':{const k=x;const g1=gdS();if(GW[k]&&![...g1.L,...g1.B].some(z=>z.k===k)){if(gdTry(g1,k))save();else toast('No space left')}sub=null;render();break}}});
+  case'gs':{const k=x;const g1=gdS();if(GW[k]&&(k==='empty'||![...g1.L,...g1.B].some(z=>z.k===k))){if(gdTry(g1,k))save();else toast('No space left')}sub=null;render();break}}});
 document.addEventListener('input',e=>{if(e.target.id==='wq'){sub.q=e.target.value;const p=e.target.selectionStart;render();const q=document.getElementById('wq');if(q){q.focus();try{q.setSelectionRange(p,p)}catch(x){}}}});
 new MutationObserver(()=>{if(document.querySelector('#wh:not([data-b])'))whBind()}).observe(document.getElementById('app'),{childList:true});
 /* drag and drop for dashboard tiles + swipe back */
@@ -1562,6 +1565,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-pm]');if(!
  else if(k==='area'){S.loc.share=!S.loc.share;save();if(SO.db&&mp())setProfile({region:S.loc.share&&S.loc.region?regionLabel(S.loc.region):null});permDraw()}
  else if(k.startsWith('sh:')){if(SO.db&&mp())setProfile({share:k.slice(3)});permDraw()}
  else if(k==='done'){if(!S.perm)S.perm={};S.perm[SO.uid]=1;save();const el=document.getElementById('perm');if(el)el.remove()}});
+document.addEventListener('click',e=>{if(!GE||window.__gdrag||e.target.closest('.gy-pn,.gy-bar,[data-wx],#perm'))return;GE=false;render()});
 </script>
 </body>
 </html>
