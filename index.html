@@ -369,6 +369,7 @@ html:has(.gbd),html:has(.gbd) body{overflow:hidden!important;overscroll-behavior
 .gbh{background:color-mix(in srgb,var(--bg) 92%,#7B7EEA)!important;background:transparent!important}
 .gsr{height:34px;margin:0 0 16px;padding:0 10px}.gsr input{font-size:13px}.gsr svg{width:16px;height:16px}
 .gcg{gap:20px 10px}
+@media (min-width:900px) and (hover:hover){#app{max-width:720px}nav{padding-left:calc(50% - 360px)!important;padding-right:calc(50% - 360px)!important}.gbb{max-width:720px;margin:0 auto;border-left:1px solid var(--ln);border-right:1px solid var(--ln)}.gbd{justify-content:center}#tbar span{font-size:11.5px}}
 </style>
 </head>
 <body>
@@ -1765,6 +1766,11 @@ function psEnd(g){const s=g.x<0?1:-1,fast=Math.abs(g.vx)>.4,flick=fast&&Math.sig
   e.preventDefault();psPlace(g,t.clientX-g.x0)},{passive:false});
  const end=e=>{const g=PS.g;if(!g||g.settling)return;g.mode==='h'?psEnd(g):PS.g=null};
  document.addEventListener('touchend',end,{passive:true});document.addEventListener('touchcancel',end,{passive:true})})();
+/* keyboard: left and right arrows switch pages (PC) */
+document.addEventListener('keydown',e=>{if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;if(e.altKey||e.ctrlKey||e.metaKey||e.shiftKey)return;const t=e.target;if(t&&t.closest&&t.closest('input,textarea,select,[contenteditable],#sheet,#perm,#ask,#gate,.devp'))return;
+ if(sub||GE||window.__pswipe||PS.g||window.__gdrag||document.documentElement.hasAttribute('data-gate')||document.querySelector('.gbd,#ask,#perm'))return;
+ const d=e.key==='ArrowRight'?1:-1,me=TORD.indexOf(tab),nt=TORD[me+d];if(!nt)return;e.preventDefault();
+ try{const g={mode:'h',x:0,vx:0};PS.g=g;window.__pswipe=true;psBegin(g);if(!g.side[d]){psClean(g);return}g.x=-d;g.vx=-d*1.2;psEnd(g)}catch(x){PS.g=null;window.__pswipe=false;tab=nt;sub=null;render();goTop()}});
 /* compass: window light follows where the sun really is */
 const CP={on:false,h:null,t:0,last:0};
 function sunPos(lat,lon,ms){const r=Math.PI/180,d=ms/864e5-10957.5,M=r*(357.5291+.98560028*d),C=r*(1.9148*Math.sin(M)+.02*Math.sin(2*M)+.0003*Math.sin(3*M)),L=M+C+r*102.9372+Math.PI,e=r*23.4397,dec=Math.asin(Math.sin(L)*Math.sin(e)),ra=Math.atan2(Math.sin(L)*Math.cos(e),Math.cos(L)),H=r*(280.16+360.9856235*d)+r*lon-ra,ph=r*lat,az=Math.atan2(Math.sin(H),Math.cos(H)*Math.sin(ph)-Math.tan(dec)*Math.cos(ph))+Math.PI,alt=Math.asin(Math.sin(ph)*Math.sin(dec)+Math.cos(ph)*Math.cos(dec)*Math.cos(H));return{az:(az/r+360)%360,alt:alt/r}}
@@ -1795,15 +1801,17 @@ function gbgCracks(){let s=9;const R=()=>{s=(s*16807)%2147483647;return s/214748
  const L=out.join('');return `<g class="cks" stroke="#000" stroke-opacity=".05" stroke-linecap="round" transform="translate(-.8 -.9)">${L}</g><g class="ckc" stroke="#000" stroke-opacity=".19" stroke-linecap="round">${L}</g><g class="ckh" stroke="#fff" stroke-linecap="round" transform="translate(.9 1.1)">${L}</g>`}
 function gbgGrazes(){const G=[[[214,330],[236,322],[262,318],[284,306]],[[70,452],[92,458],[118,456],[140,466]],[[250,618],[270,626],[296,624],[316,634]]];
  const d=G.map(p=>'M'+p.map(q=>q.join(' ')).join(' L')).join(' ');return `<g class="gzs" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="${d}" stroke="#000" stroke-opacity=".09" stroke-width="1.1"/><path d="${d}" stroke="#fff" stroke-opacity=".2" stroke-width=".6" transform="translate(.5 .8)"/></g>`}
+function gbgVB(){const s=document.querySelector('#gbg svg');if(!s)return;const a=innerWidth/Math.max(1,innerHeight),w=Math.max(390,844*a);s.setAttribute('viewBox',((390-w)/2).toFixed(1)+' 0 '+w.toFixed(1)+' 844')}
+window.addEventListener('resize',()=>{try{gbgVB()}catch(e){}});
 function gbgDraw(){let el=document.getElementById('gbg');if(!el){el=document.createElement('div');el.id='gbg';el.setAttribute('aria-hidden','true');
  
- el.innerHTML=`<svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="gv" cx=".5" cy=".42" r=".8"><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop id="gvs" offset="1" stop-color="#000" stop-opacity=".62"/></radialGradient><linearGradient id="gl" gradientUnits="userSpaceOnUse" id="gl" x1="0" y1="0" x2="0" y2="800"><stop offset="0" stop-color="currentColor" stop-opacity="1"/><stop offset=".55" stop-color="currentColor" stop-opacity=".5"/><stop offset="1" stop-color="currentColor" stop-opacity=".08"/></linearGradient><filter id="gb2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter><filter id="gb" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur id="gbl" stdDeviation="3"/></filter></defs>
- <rect width="390" height="844" fill="url(#gv)"/>
- <rect id="gam" width="390" height="844" fill="#000" opacity="0"/>
+ el.innerHTML=`<svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="gv" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1" gradientTransform="translate(195 354.5) scale(312 675)"><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop id="gvs" offset="1" stop-color="#000" stop-opacity=".62"/></radialGradient><linearGradient id="gl" gradientUnits="userSpaceOnUse" id="gl" x1="0" y1="0" x2="0" y2="800"><stop offset="0" stop-color="currentColor" stop-opacity="1"/><stop offset=".55" stop-color="currentColor" stop-opacity=".5"/><stop offset="1" stop-color="currentColor" stop-opacity=".08"/></linearGradient><filter id="gb2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter><filter id="gb" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur id="gbl" stdDeviation="3"/></filter></defs>
+ <rect x="-6000" width="12390" height="844" fill="url(#gv)"/>
+ <rect id="gam" x="-6000" width="12390" height="844" fill="#000" opacity="0"/>
  ${gbgCracks()}${gbgGrazes()}
  <g id="gsh" filter="url(#gb2)"><g id="gshp" fill="#000"></g></g>
  <g id="gwin" filter="url(#gb)" style="color:#FFF3DC"><g id="gwp" fill="url(#gl)"></g></g></svg>`;document.body.insertBefore(el,document.body.firstChild)}
- const LT=gbgLight();document.documentElement.setAttribute('data-fl',LT?'light':'dark');el.style.backgroundImage=`url(${gbgFine(LT)}),url(${gbgTex(LT)})`;document.getElementById('gvs').setAttribute('stop-opacity',LT?'.26':'.62');
+ gbgVB();const LT=gbgLight();document.documentElement.setAttribute('data-fl',LT?'light':'dark');el.style.backgroundImage=`url(${gbgFine(LT)}),url(${gbgTex(LT)})`;document.getElementById('gvs').setAttribute('stop-opacity',LT?'.26':'.62');
  const m=nowMin(),sp=DAY1-DAY0,day=m>=DAY0&&m<DAY1;let t,a,col,sh,cx,wd;
  const stops=(arr,u)=>{const n=arr.length-1,f=Math.max(0,Math.min(1,u))*n,k=Math.min(n-1,Math.floor(f)),q=f-k,A=arr[k],B=arr[k+1];return`rgb(${A.map((v,z)=>Math.round(v+(B[z]-v)*q)).join(',')})`};
  let Y;
