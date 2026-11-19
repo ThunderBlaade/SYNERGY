@@ -293,14 +293,14 @@ html:has(#gtb) #app{padding-bottom:190px}
 .wpg{display:flex;flex-direction:column;justify-content:center;min-height:calc(100dvh - 240px)}
 .wh{position:relative;height:min(52dvh,420px);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;outline:none;cursor:pointer}
 .wh:focus-visible{outline:1px solid var(--ac);outline-offset:2px}
-.wi{position:absolute;left:0;right:22px;top:0;height:28px;line-height:28px;text-align:center;font:400 15px var(--disp);letter-spacing:.2em;text-transform:uppercase;color:var(--mu);white-space:nowrap;will-change:transform,opacity;visibility:hidden}
+.wi{position:absolute;left:0;right:0;top:0;height:28px;line-height:28px;text-align:center;font:400 15px var(--disp);letter-spacing:.2em;text-transform:uppercase;color:var(--mu);white-space:nowrap;will-change:transform,opacity;visibility:hidden}
 .wi.sel{color:var(--tx);font-weight:600}.wi.sp{font-style:normal;letter-spacing:.3em}
 .wi.pin,.pin{background:var(--irid);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
 .wp{position:absolute;right:6px;top:0;width:4px;height:4px;border-radius:50%;background:var(--mu);visibility:hidden}
 .wl{position:absolute;left:0;right:14px;height:1px;background:var(--ln);top:calc(50% - 26px)}.wl2{top:calc(50% + 26px)}
 .wptr{position:absolute;right:0;top:calc(50% - 5px);width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:8px solid var(--ac)}
 .whint{text-align:center;font:500 10px var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--mu);margin:8px 0 0;min-height:16px}
-.wlk{display:flex;justify-content:center;gap:2px;flex-wrap:wrap;margin-top:8px}.wlk .bk,.wed{font:500 10.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mu);padding:12px 8px;min-height:44px}
+.wbt{display:flex;justify-content:space-evenly;margin-top:10px}.wlk{display:flex;justify-content:center;gap:2px;flex-wrap:wrap;margin-top:8px}.wlk .bk,.wed{font:500 10.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mu);padding:12px 8px;min-height:44px}
 .wsw{position:relative;overflow:hidden;display:block;padding:0}.wsw-in{position:relative;display:flex;align-items:center;justify-content:space-between;width:100%;background:transparent;padding:8px 0;touch-action:pan-y;transition:transform .28s cubic-bezier(.2,.8,.2,1);-webkit-user-select:none;user-select:none}.wsw.drag .wsw-in{transition:none}
 .wsw.open .wsw-in{transform:translateX(-96px)}.wsw.openr .wsw-in{transform:translateX(96px)}
 .wsw-del,.wsw-pin{position:absolute;top:0;bottom:0;width:96px;font:600 11px var(--body);letter-spacing:.14em;text-transform:uppercase;visibility:hidden;border-radius:0}
@@ -1355,7 +1355,7 @@ function whS(){let W=S.wh;if(!W||!Array.isArray(W.list))W=S.wh={list:WDEF(),last
 function whStat(it){let n=0,r=whS().t[it.id]||0;const nn=it.n.toLowerCase();S.workouts.forEach(w=>{const m=(w.name||'').trim().toLowerCase(),hit=m?m===nn:(!it.cu&&WCAN[w.cat]===it.id);if(hit){n++;r=Math.max(r,w.end||0)}});return{n,r}}
 function whRank(){const W=whS();return W.list.map((x,i)=>({x,i,s:whStat(x)})).sort((a,b)=>(b.x.id===W.last)-(a.x.id===W.last)||b.s.n-a.s.n||b.s.r-a.s.r||a.i-b.i).map(o=>o.x)}
 function whShown(){const R=whRank(),pin=R.filter(x=>x.pin).slice(0,WCAP),rest=R.filter(x=>!x.pin),ids=new Set(pin.map(x=>x.id));for(const x of rest){if(ids.size>=WCAP)break;ids.add(x.id)}return R.filter(x=>ids.has(x.id))}
-const WSP=[{id:'~cus',n:'Custom',sp:'custom'},{id:'~rnd',n:'Random',sp:'random'}];
+const WSP=[{id:'~cus',n:'Custom',sp:'custom'}];
 const WH={items:[],pos:0,vel:0,drag:null,spin:null,raf:0,t0:0,tgt:null,lastIdx:0,STEP:54,TH:.52,R:132};
 const whSel=()=>{const n=WH.items.length;return n?WH.items[((Math.round(WH.pos)%n)+n)%n]:null};
 const whRM=()=>S.reduce||matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -1363,13 +1363,12 @@ function wheel(){WH.items=[...whShown(),...WSP];WH.pos=0;WH.vel=0;WH.spin=null;W
  const pegs=Array.from({length:24},(_,k)=>`<i class="wp" data-k="${k}"></i>`).join('');
  return `<div class="hd"><button class="bk" data-a="back">Back</button></div><h1>Choose</h1>
  <div class="wpg"><div class="wh" id="wh" tabindex="0" role="spinbutton" aria-label="Activity wheel. Swipe up or down. Tap the highlighted activity to start." aria-valuetext="">${WH.items.map((it,i)=>`<div class="wi${it.pin?' pin':''}${it.sp?' sp':''}" data-i="${i}">${esc(it.n)}</div>`).join('')}${pegs}<div class="wl wl1"></div><div class="wl wl2"></div><div class="wptr"></div></div>
- <p class="whint" id="whint">Tap the highlighted one to start</p>
- <div class="wlk"><button class="bk" data-a="tpls">My workouts</button><button class="bk" data-a="csetup">Countdown</button><button class="bk" data-a="qcat">Quick log</button><button class="bk" data-wx="edit">Edit wheel</button></div></div><div class="sr" id="wsr" role="status" aria-live="polite"></div>`}
+ <div class="wbt"><button class="wed" id="wrnd" data-wx="rnd">Random</button><button class="wed" data-wx="edit">Edit wheel</button></div></div><div class="sr" id="wsr" role="status" aria-live="polite"></div>`}
 function whDraw(){const el=document.getElementById('wh');if(!el)return;const n=WH.items.length,{TH,R}=WH,pos=WH.pos,cy=el.clientHeight/2;
- el.querySelectorAll('.wi').forEach(e=>{const i=+e.dataset.i;let d=i-pos;if(n>1)d=((d+n/2)%n+n)%n-n/2;const a=d*TH;if(Math.abs(a)>1.5){e.style.visibility='hidden';return}const c=Math.cos(a),y=cy+R*Math.sin(a);e.style.visibility='visible';e.style.opacity=(Math.pow(c,2.2)*(Math.abs(d)<.5?1:.9)).toFixed(3);e.style.transform=`translateY(${(y-14).toFixed(1)}px) scale(${(.58+.42*c+(Math.abs(d)<1?.22*(1-Math.abs(d)):0)).toFixed(3)})`;e.classList.toggle('sel',Math.abs(d)<.5)});
+ el.querySelectorAll('.wi').forEach(e=>{const i=+e.dataset.i;let d=i-pos;if(n>1)d=((d+n/2)%n+n)%n-n/2;const a=d*TH;if(Math.abs(a)>1.5){e.style.visibility='hidden';return}const c=Math.cos(a),y=cy+R*Math.sin(a);e.style.visibility='visible';e.style.opacity=(Math.pow(c,2.2)*(Math.abs(d)<.5?1:.9)).toFixed(3);e.style.transform=`translate(${(Math.sign(d)*(1-c)*26).toFixed(1)}px,${(y-14).toFixed(1)}px) rotate(${(d*1.6).toFixed(2)}deg) scale(${(.58+.42*c+(Math.abs(d)<1?.22*(1-Math.abs(d)):0)).toFixed(3)})`;e.classList.toggle('sel',Math.abs(d)<.5)});
  el.querySelectorAll('.wp').forEach(e=>{const k=+e.dataset.k;let d=((k/3-pos)%8+8)%8;if(d>4)d-=8;const a=d*TH;if(Math.abs(a)>1.5){e.style.visibility='hidden';return}e.style.visibility='visible';e.style.opacity=(Math.pow(Math.cos(a),2)*.9).toFixed(3);e.style.transform=`translateY(${(cy+R*Math.sin(a)-2).toFixed(1)}px)`});
  const idx=Math.round(pos);if(idx!==WH.lastIdx){WH.lastIdx=idx;try{navigator.vibrate&&navigator.vibrate(5)}catch(e){}}}
-function whSettled(){WH.spin=null;const s=whSel(),sr=document.getElementById('wsr'),el=document.getElementById('wh'),h=document.getElementById('whint');if(s){if(sr)sr.textContent=s.n;if(el)el.setAttribute('aria-valuetext',s.n);if(h)h.textContent=s.sp==='random'?'Tap Random to spin':s.sp==='custom'?'Tap Custom to make your own':'Tap to start '+s.n}}
+function whSettled(){WH.spin=null;const s=whSel(),sr=document.getElementById('wsr'),el=document.getElementById('wh'),h=document.getElementById('whint');if(s){if(sr)sr.textContent=s.n;if(el)el.setAttribute('aria-valuetext',s.n);const r=document.getElementById('wrnd');if(r)r.textContent='Random'}}
 function whLoop(t){if(!document.getElementById('wh')){WH.raf=0;return}const dt=Math.min(40,t-WH.t0);WH.t0=t;
  if(WH.spin){const q=WH.spin,k=Math.min(1,(t-q.t0)/q.dur),g=Math.pow(k,.55),f=g*g*(3-2*g);WH.pos=q.p0+q.D*f;if(k>=1){WH.pos=q.p0+q.D;whDraw();whSettled();WH.raf=0;return}}
  else if(WH.drag){}
@@ -1379,10 +1378,11 @@ function whLoop(t){if(!document.getElementById('wh')){WH.raf=0;return}const dt=M
 const whGo=()=>{if(!WH.raf){WH.t0=performance.now();WH.raf=requestAnimationFrame(whLoop)}};
 function whSpin(){const n=WH.items.length,ok=WH.items.map((x,i)=>x.sp?-1:i).filter(i=>i>=0);if(!ok.length)return;
  const cur=Math.round(WH.pos),tg=ok[Math.floor(Math.random()*ok.length)];let D=(((tg-cur)%n)+n)%n;while(D<14)D+=n;
- const sr=document.getElementById('wsr'),h=document.getElementById('whint');if(sr)sr.textContent='Spinning';if(h)h.textContent='Tap to stop';
+ const sr=document.getElementById('wsr'),rb=document.getElementById('wrnd');if(sr)sr.textContent='Spinning';if(rb)rb.textContent='Stop';
  WH.vel=0;WH.tgt=null;
  if(whRM()){WH.spin={p0:cur+D,D:0,t0:performance.now(),dur:1}}else WH.spin={p0:WH.pos,D:cur+D-WH.pos,t0:performance.now(),dur:2300+n*80+Math.random()*500};whGo()}
-function whAct(){const it=whSel();if(!it)return;if(it.sp==='random')return whSpin();if(it.sp==='custom'){sub={n:'wcus'};render();return}whStart(it)}
+function whRnd(){if(WH.spin){const p=WH.pos;WH.spin=null;WH.vel=0;WH.tgt=Math.round(p);whGo();return}whSpin()}
+function whAct(){const it=whSel();if(!it)return;if(it.sp==='custom'){sub={n:'wcus'};render();return}whStart(it)}
 function whStart(it){if(!it||S.active)return;const W=whS();W.last=it.id;W.t[it.id]=Date.now();S.active=newActive({method:'timer',cat:it.c,name:it.n});save();sub={n:'active'};render()}
 function whBind(){const el=document.getElementById('wh');if(!el||el.dataset.b)return;el.dataset.b=1;whDraw();whSettled();
  ['touchstart','touchmove'].forEach(ev=>el.addEventListener(ev,e=>e.stopPropagation(),{passive:true}));
@@ -1403,7 +1403,7 @@ function wedit(){const W=whS(),q=(sub.q||'').toLowerCase(),sh=new Set(whShown().
  return `<div class="hd"><button class="bk" data-wx="done">Done</button></div><h1>Your wheel</h1><p class="mu sm" style="margin:0 0 10px">The wheel holds ${WCAP}. <b>Swipe right to pin</b> the ones you always want, <b>swipe left to delete</b>. Past workouts are never deleted.</p>
  <input id="wq" data-wx="q" placeholder="Search" value="${esc(sub.q||'')}" aria-label="Search activities"><p class="err" id="werr" role="alert"></p>
  <div class="card" style="padding:4px 16px"><ul class="list">${L.map(([x,i])=>`<li class="wsw"><button class="wsw-pin" data-wx="pin:${i}">${x.pin?'Unpin':'Pin'}</button><button class="wsw-del" data-wx="del:${i}">Delete</button><div class="wsw-in row"><div class="t"><b class="${x.pin?'pin':''}">${esc(x.n)}</b><span class="mu sm">${x.pin?'Pinned · ':''}${sh.has(x.id)?CATS[x.c][0]:'Not on the wheel · '+CATS[x.c][0]}</span></div></div></li>`).join('')||'<li class="mu">Nothing found.</li>'}</ul></div>
- <h2>Add your own</h2><label for="wn">Name</label><input id="wn" maxlength="24" placeholder="Boxing" autocomplete="off"><label for="wc">Counts as</label>${catSel('wc','other')}<div class="acts"><button class="btn" data-wx="add">Add to wheel</button><button class="btn g" data-wx="reset">Restore defaults</button></div><div class="acts"><button class="btn big" data-wx="done">Done</button></div>`}
+ <h2>Add your own</h2><label for="wn">Name</label><input id="wn" maxlength="24" placeholder="Boxing" autocomplete="off"><label for="wc">Counts as</label>${catSel('wc','other')}<div class="acts"><button class="btn" data-wx="add">Add to wheel</button><button class="btn g" data-wx="reset">Restore defaults</button></div><h2>Other ways to train</h2><div class="acts"><button class="btn g" data-a="tpls">My workouts</button><button class="btn g" data-a="csetup">Countdown</button><button class="btn g" data-a="qcat">Quick log</button></div><div class="acts"><button class="btn big" data-wx="done">Done</button></div>`}
 /* swipe rows in the wheel editor */
 (function(){let d=null;const W=96;
  document.addEventListener('pointerdown',e=>{const r=e.target.closest('.wsw'),i=e.target.closest('.wsw-in');document.querySelectorAll('.wsw.open,.wsw.openr').forEach(p=>{if(p!==r)p.classList.remove('open','openr')});if(!i){d=null;return}d={r,i,x:e.clientX,y:e.clientY,o:r.classList.contains('open')?-W:r.classList.contains('openr')?W:0,on:false,dx:0}});
@@ -1462,6 +1462,7 @@ function gbox(){const g=gwS(),used=new Set([...g.t,...g.b].map(x=>x.k)),cur=sub.
 document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!b)return;const [a,x,y,z]=b.dataset.wx.split(':'),W=whS();
  switch(a){
   case'edit':sub={n:'wedit',q:''};render();break;
+  case'rnd':whRnd();break;
   case'done':sub=sub&&sub.n==='gbox'?null:{n:'wheel'};render();break;
   case'cgo':{const it=whAddCustom(document.getElementById('cn').value,document.getElementById('cc').value);if(it)whStart(it);break}
   case'pin':{const it=W.list[+x];it.pin=!it.pin;if(!it.pin)delete it.pin;save();render();break}
