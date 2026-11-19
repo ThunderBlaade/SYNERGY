@@ -1707,7 +1707,7 @@ function ask(msg,yes,label){const o=document.createElement('div');o.id='ask';o.s
 document.addEventListener('touchmove',e=>{if(document.documentElement.getAttribute('data-gy')==='1'&&!e.target.closest('input,textarea,select,#sheet,#ask'))e.preventDefault()},{passive:false});
 /* swipe between pages, iridescent line under-dims on each change */
 const TORD=TABS.map(t=>t[0]);let LASTTAB=null;
-function navLine(){const nav=document.getElementById('nav');if(!nav)return;const b=nav.querySelector('button[aria-current=page]'),s=b&&b.querySelector('.nl');if(!s)return;const ls=parseFloat(getComputedStyle(s).letterSpacing)||0,w=Math.max(10,s.offsetWidth-2*ls),i=document.createElement('i');i.className='nvl';i.style.width=w+'px';i.style.marginLeft=(-w/2)+'px';b.appendChild(i);if(LASTTAB!==null&&LASTTAB!==tab&&i.animate)i.animate([{opacity:1},{opacity:.05,offset:.4},{opacity:1}],{duration:750,easing:'ease-in-out'});LASTTAB=tab}
+function navLine(){const nav=document.getElementById('nav');if(!nav)return;const b=nav.querySelector('button[aria-current=page]'),s=b&&b.querySelector('.nl');if(!s)return;const w=32,i=document.createElement('i');i.className='nvl';i.style.width=w+'px';i.style.marginLeft=(-w/2)+'px';b.appendChild(i);if(LASTTAB!==null&&LASTTAB!==tab&&i.animate)i.animate([{opacity:1},{opacity:.05,offset:.4},{opacity:1}],{duration:750,easing:'ease-in-out'});LASTTAB=tab}
 {const _n=render;render=function(){const o=_n.apply(this,arguments);try{navLine()}catch(e){}return o}}
 /* ===== Page swipe =====
    The pages sit side by side like one long strip. A sideways drag slides the strip with
@@ -1723,7 +1723,7 @@ const PSIDS=['gv','gl','gb','gb2','gvs','gwin','gwp','gam','gsh','gshp','gbl'];
 function psBackdrop(t){if(t!=='play')return null;if(!document.getElementById('gbg'))gbgDraw();const o=document.getElementById('gbg');if(!o)return null;
  const c=o.cloneNode(false);c.innerHTML=o.innerHTML.replace(new RegExp('id="('+PSIDS.join('|')+')"','g'),'id="$1x"').replace(new RegExp('url\\(#('+PSIDS.join('|')+')\\)','g'),'url(#$1x)');
  c.style.cssText+=';position:absolute;inset:0;display:block;z-index:0';const n=document.createElement('div');n.className='psn';c.after&&0;return (function(){const w=document.createElement('div');w.style.cssText='position:absolute;inset:0';w.append(c,n);return w})()}
-const psGeo=b=>{const r=b.getBoundingClientRect(),s=b.querySelector('.nl'),ls=parseFloat(getComputedStyle(s).letterSpacing)||0;return{c:r.left+r.width/2,w:s.offsetWidth-2*ls}};
+const psGeo=b=>{const r=b.getBoundingClientRect(),s=b.querySelector('.nl'),ls=parseFloat(getComputedStyle(s).letterSpacing)||0;return{c:r.left+r.width/2,w:32}};
 function psBegin(g){const app=document.getElementById('app'),r=app.getBoundingClientRect(),nav=document.getElementById('nav'),btn=[...nav.querySelectorAll('button')],me=TORD.indexOf(tab);
  Object.assign(g,{app,W:app.offsetWidth,left:r.left,top:app.offsetTop,side:{},x:0,vx:0,lx:0,lt:performance.now(),line:nav.querySelector('.nvl'),geo:{0:psGeo(btn[me])},
   live:['gbg','sky'].map(id=>document.getElementById(id)).filter(e=>e&&getComputedStyle(e).display!=='none')});
