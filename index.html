@@ -1464,7 +1464,7 @@ const GW={
  links:{c:'Other',t:'Synergy Links',i:'link',z:'tsm',src:'SYNERGY',m:'Links you have made with friends by training at the same time.',e:'Your first Synergy Link will appear here.',r:()=>{try{const o=((dd(me(),'lk')||{}).o)||{};const n=Object.values(o).reduce((s,x)=>s+(x.n||0),0);return n?[String(n),n===1?'link made':'links made']:null}catch(e){return null}}}};
 GW.empty={p:1,d:'A blank space to fill later',c:'Other',t:'Empty slot',i:'list',z:'tsml',m:'A blank space.',e:'',r:()=>null};
 const dz=k=>k==='empty'?'t':GW[k].z.includes('s')?'s':GW[k].z[0];
-function gdS(){let g=S.gd;if(!g||!Array.isArray(g.L))g=S.gd={L:[],B:[]};if(!Array.isArray(g.B))g.B=[];['L','B'].forEach(p=>{g[p]=g[p].filter(x=>GW[x.k]);g[p].forEach(x=>{if(!GW[x.k].z.includes(x.s))x.s=GW[x.k].z[0]})});return g}
+function gdS(){let g=S.gd;if(!g)g=S.gd={L:[{k:'freq',s:'s'}],B:[]};else if(!Array.isArray(g.L))g=S.gd={L:[],B:[]};if(!Array.isArray(g.B))g.B=[];['L','B'].forEach(p=>{g[p]=g[p].filter(x=>GW[x.k]);g[p].forEach(x=>{if(!GW[x.k].z.includes(x.s))x.s=GW[x.k].z[0]})});return g}
 function gwBody(x){if(x.k==='empty')return '';const d=GW[x.k],v=d.r();if(x.s==='t')return `<span class="gti">${gi(d.i)}</span><span class="gtv">${v?esc(v[0]):'–'}</span>`;const n=x.s==='l'?5:2,hd=`<span class="gbl">${gi(d.i)}<span class="gbt">${d.t}</span>${x.s!=='s'&&d.src?`<em class="gsrc">${d.src}</em>`:''}</span>`;
  if(!v)return `${hd}<span class="gbe">${esc(d.e)}</span>`;
  if(x.k==='bars'){const L='MTWTFSS';return `${hd}<span class="gbars"><span>${v.map(m=>`<i style="height:${Math.max(4,Math.round(m/Math.max(...v)*100))}%"></i>`).join('')}</span></span><span class="gbd">${[...L].map(c=>`<b>${c}</b>`).join('')}</span>`}
