@@ -272,24 +272,29 @@ nav{padding:4px 4px max(8px,calc(env(safe-area-inset-bottom,0px) - 6px))!importa
 #hmv .l,#hmv .r{position:absolute;top:70px;bottom:70px;width:40%;z-index:2;background:none}#hmv .l{left:0}#hmv .r{right:0}
 #hmv .cap{position:absolute;left:16px;right:16px;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:3;text-align:center;font-size:14px;margin:0;text-shadow:0 1px 6px #000}
 
-/* Gym widgets + wheel */
-.gy-top{display:flex;justify-content:flex-end;margin:-4px 0 4px}.gy-top .wed{background:none}
-.gy-a,.gy-b{padding:0}.gp{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:86px;grid-auto-flow:dense;gap:8px}
-.gy-hero{min-height:0;padding:12px 0}.gy-hero .btn.big{min-height:64px}
-.gw{background:var(--s1);color:var(--tx);border:1px solid var(--ln);border-radius:0;padding:9px 11px;display:flex;flex-direction:column;justify-content:space-between;gap:2px;text-align:left;font:inherit;position:relative;overflow:hidden;min-width:0}
-.gw.zt{grid-column:span 1}.gw.zs{grid-column:span 2}.gw.zw{grid-column:span 4}.gw.zb{grid-column:span 4;grid-row:span 2}
-.gw.add{align-items:center;justify-content:center;background:none;border-style:dashed;color:var(--mu);font:500 10.5px var(--body);letter-spacing:.16em;text-transform:uppercase}
-.gw.ed.sel{outline:1.5px solid var(--tx);outline-offset:-1.5px}
-.gi{width:16px;height:16px;flex:none;color:var(--mu)}.gw.zt>.gi{width:18px;height:18px}
-.gbl{display:flex;align-items:center;gap:6px;font:500 9.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mu)}
-.gbv{font:500 22px var(--disp);letter-spacing:.02em;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}.gw.zt .gbv{font-size:18px}.gw.zw .gbv,.gw.zb .gbv{font-size:26px}
+/* Gym dashboard + wheel */
+.gy-bar{display:flex;justify-content:space-between;align-items:center;min-height:44px;margin:-4px 0 6px}.gy-bar .wed{background:none}
+.gy-plus{width:44px;height:44px;display:grid;place-items:center;background:none;color:var(--mu);margin-left:-10px}.gy-plus svg{width:24px;height:24px}
+.gy-intro{text-align:center;color:var(--mu);font:400 13px var(--body);letter-spacing:.04em;margin:40px 0}
+.gy-a,.gy-b{padding:0}.gp{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:92px;grid-auto-flow:dense;gap:8px}
+.gy-hero{min-height:0;padding:14px 0}.gy-hero .btn.big{min-height:64px}
+.gwr{position:relative;min-width:0;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}.gwr.zs{grid-column:span 2}.gwr.zm{grid-column:span 4}.gwr.zl{grid-column:span 4;grid-row:span 2}
+.gwi{display:block;height:100%}.gw{background:var(--s1);color:var(--tx);border:1px solid var(--ln);border-radius:0;padding:9px 11px;display:flex;flex-direction:column;justify-content:space-between;gap:2px;text-align:left;font:inherit;overflow:hidden;min-width:0;height:100%;width:100%}
+.gnx{grid-column:span 2;display:grid;place-items:center;background:none;border:1px dashed var(--ln);color:var(--mu);border-radius:0}.gnx svg{width:22px;height:22px}
+.gi{width:15px;height:15px;flex:none;color:var(--mu)}
+.gbl{display:flex;align-items:center;gap:6px;font:500 9.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mu)}.gbt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.gsrc{margin-left:auto;font-style:normal;font-size:8px;letter-spacing:.14em;opacity:.8}
+.gbv{font:500 24px var(--disp);letter-spacing:.02em;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .gbs{font:400 11px var(--body);color:var(--mu);line-height:1.25;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gbe{font:400 11.5px var(--body);color:var(--mu);line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .gpr{height:3px;background:var(--ln);display:block}.gpr i{display:block;height:100%;background:var(--irid)}
 .gbr{display:flex;justify-content:space-between;gap:10px;font:400 12.5px var(--body);padding:3px 0;border-top:1px solid var(--ln)}.gbr>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gbr .mu{flex:none;color:var(--mu)}
 .gbars{display:flex;flex:1;min-height:0}.gbars>span{display:flex;align-items:flex-end;gap:6px;width:100%}.gbars i{flex:1;background:var(--tx);opacity:.75;display:block}.gbd{display:flex;gap:6px}.gbd b{flex:1;text-align:center;font:500 9px var(--body);letter-spacing:.1em;color:var(--mu)}
-#gtb{position:fixed;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom,0px));z-index:6;background:color-mix(in srgb,var(--bg) 96%,transparent);border-top:1px solid var(--ln);padding:8px 10px;display:flex;flex-direction:column;gap:6px}
-.gtr{display:flex;gap:4px;max-width:520px;margin:0 auto;width:100%}.gtr .gc{flex:1;min-height:40px;background:none;color:var(--tx);border:1px solid var(--ln);font:500 10.5px var(--body);letter-spacing:.1em;text-transform:uppercase;border-radius:0;padding:0 4px}.gtr .gc:disabled{opacity:.3}.gtr .gc.on{background:var(--tx);color:var(--bg)}
-html:has(#gtb) #app{padding-bottom:190px}
+.gc2{display:none;position:absolute;z-index:3;border-radius:0}.ge .gc2{display:grid;place-items:center}
+.gx{top:-8px;left:-8px;width:28px;height:28px;border-radius:50%;background:var(--tx);color:var(--bg);font:500 17px var(--body);line-height:1}
+.gsz{right:6px;bottom:6px;min-width:32px;height:26px;background:var(--s2);color:var(--tx);border:1px solid var(--ln);font:500 10px var(--body);letter-spacing:.1em}
+.ge .gw{pointer-events:none}.ge .gwr:not(.lift):not(.ph){cursor:grab}
+.gwr.lift{box-shadow:0 12px 32px -12px rgba(0,0,0,.4);opacity:.96}.gwr.lift .gwi{transform:scale(1.03);display:block}
+@media (prefers-reduced-motion:reduce){.gwr{transition:none!important}}
 .wpg{display:flex;flex-direction:column;justify-content:center;align-items:stretch;min-height:calc(100dvh - 190px - env(safe-area-inset-top,0px))}
 .wh{position:relative;height:300px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;outline:none;cursor:pointer}
 .wh:focus-visible{outline:1px solid var(--ac);outline-offset:2px}
@@ -487,7 +492,7 @@ function gym(){const a=S.active,R=recEvents(),hl=Object.keys(R).sort((x,y)=>last
   const hist=`<section class="gy-a"><h2>Workout history</h2>${histList([...S.workouts].sort((x,y)=>y.start-x.start).slice(0,3))}<div class="acts"><button class="btn g" data-a="hist">View all</button></div></section>`,
   recs=`<section class="gy-b"><h2>Personal records</h2>${hl.length?`<div class="card" style="padding:4px 16px"><ul class="list">${recRows(hl,R)}</ul></div>`:'<div class="card mu sm">Records appear as you log workouts. Your first log of an exercise sets the baseline.</div>'}<div class="acts"><button class="btn g" data-a="recs">View all records</button></div></section>`,
   act=a?`<div class="card"><div class="row sp"><div><b>${esc(a.name||METH[a.method])}</b><div class="mu sm">${a.paused?'Paused':'In progress'}</div></div><div class="timer" style="font-size:28px" data-timer="a">${tmText(a)}</div></div>${stale?'<p class="sm" style="margin:8px 0 0">This workout has been paused for over an hour. Resume it or finish it.</p>':''}</div>`:'';
- return `<h1>The Gym</h1><div class="gy-top"><button class="wed" data-wx="ge">${typeof GE!=="undefined"&&GE?'Done':'Edit'}</button></div><section class="gy-a">${typeof gyWidgets==="function"?gyWidgets('t'):''}</section><section class="gy-hero">${act}<button class="btn big" data-a="${a?'resume':'start'}">${a?'Resume':'Start'}</button></section><section class="gy-b">${typeof gyWidgets==="function"?gyWidgets('b'):''}</section>${typeof gyBar==="function"?gyBar():''}`}
+ return `<h1>The Gym</h1>${typeof gyDash==="function"?gyDash():''}<section class="gy-hero">${act}<button class="btn big" data-a="${a?'resume':'start'}">${a?'Resume':'Start'}</button></section>`}
 function method(){const o=[['template','strength','Create / follow workout','Build a reusable workout or follow one you’ve saved.','tpls'],['timer','timer','Timer','Train freely while SYNERGY tracks your time.','tsetup'],['countdown','hourglass','Countdown','Train against a time you choose.','csetup'],['quick','edit','Quick log','Already trained? Record it in seconds.','qcat']];
  return `<div class="hd"><button class="bk" data-a="back">Back</button></div><h1>How do you want to train?</h1>${o.map(x=>`<button class="card tap opt" data-a="${x[4]}">${ic(x[1])}<span><b>${x[2]}</b><span class="mu sm">${x[3]}</span></span><span class="ch">›</span></button>`).join('')}`}
 function tpls(){const T=S.tpl.filter(t=>t.exs.length||t.name),rows=l=>`<div class="card" style="padding:4px 16px"><ul class="list">${l.map(t=>`<li class="swp"><button class="swp-del" data-tdelid="${t.id}" aria-label="Delete">Delete</button><div class="swp-in row" style="padding:12px 0;background:var(--s1)"><button class="t" data-tpl="${t.id}" style="text-align:left"><b>${esc(t.name||'Untitled workout')}</b><span class="mu sm">${CATS[t.cat][0]} · ${t.exs.length} exercises</span></button><button class="x" data-fav="${t.id}" aria-label="Favourite ${esc(t.name)}" aria-pressed="${!!t.fav}">${t.fav?'★':'☆'}</button></div></li>`).join('')}</ul></div>`,rc=T.filter(t=>t.last).sort((a,b)=>b.last-a.last).slice(0,3),fv=T.filter(t=>t.fav);
@@ -1412,52 +1417,48 @@ function wedit(){const W=whS(),q=(sub.q||'').toLowerCase(),sh=new Set(whShown().
  const end=()=>{if(!d)return;const q=d;d=null;if(!q.on)return;q.r.classList.remove('drag');q.i.style.transform='';q.r.classList.remove('open','openr');if(q.dx<-48)q.r.classList.add('open');else if(q.dx>48)q.r.classList.add('openr');window.__wsup=Date.now()};
  document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
  document.addEventListener('click',e=>{if(Date.now()-(window.__wsup||0)<350){e.stopPropagation();e.preventDefault()}},true)})();
-/* gym widgets */
-let GE=false,GSEL=null;
-const GIC={flame:'<path d="M12 2.5c.6 3.2 4.5 5 4.5 10a4.5 4.5 0 0 1-9 0c0-2 .9-3.4 2-4.4.2 1.6.9 2.5 1.9 2.8C11 8.6 11 5 12 2.5z"/>',spark:'<path d="M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9z"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',dumb:'<path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/>',star:'<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/>',link:'<circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/>',cal:'<rect x="4" y="5" width="16" height="15"/><path d="M4 10h16M8 3v4M16 3v4"/>',route:'<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/>',bolt:'<path d="M13 3L5 13h6l-1 8 8-10h-6z"/>',kb:'<path d="M8.5 8.5a3.5 3.5 0 0 1 7 0M5 20h14l-1.5-9h-11z"/>',goal:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',check:'<path d="M5 12.5l4.5 4.5L19 7"/>',bars:'<path d="M5 20V12M10 20V6M15 20V10M20 20V4"/>',list:'<path d="M5 7h14M5 12h14M5 17h9"/>',up:'<path d="M12 19V6M6 11l6-6 6 6"/>'};
+/* gym dashboard */
+let GE=false;
+const GIC={flame:'<path d="M12 2.5c.6 3.2 4.5 5 4.5 10a4.5 4.5 0 0 1-9 0c0-2 .9-3.4 2-4.4.2 1.6.9 2.5 1.9 2.8C11 8.6 11 5 12 2.5z"/>',spark:'<path d="M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9z"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',dumb:'<path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/>',star:'<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/>',link:'<circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/>',cal:'<rect x="4" y="5" width="16" height="15"/><path d="M4 10h16M8 3v4M16 3v4"/>',route:'<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/>',bolt:'<path d="M13 3L5 13h6l-1 8 8-10h-6z"/>',kb:'<path d="M8.5 8.5a3.5 3.5 0 0 1 7 0M5 20h14l-1.5-9h-11z"/>',check:'<path d="M5 12.5l4.5 4.5L19 7"/>',bars:'<path d="M5 20V12M10 20V6M15 20V10M20 20V4"/>',list:'<path d="M5 7h14M5 12h14M5 17h9"/>',up:'<path d="M12 19V6M6 11l6-6 6 6"/>'};
 const gi=k=>`<svg class="gi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GIC[k]||''}</svg>`;
-const wkW=()=>S.workouts.filter(w=>w.end>=wkStart(Date.now()));
-const hm=t=>t>=3600?(t/3600).toFixed(1)+' h':mins(t);
-const wkBars=()=>{const s=wkStart(Date.now()),m=Array(7).fill(0);S.workouts.forEach(w=>{const k=Math.floor((w.end-s)/864e5);if(k>=0&&k<7)m[k]+=w.dur/60});return m};
-const GS={t:'Tiny',s:'Small',w:'Wide',b:'Big'};
+const DAY=864e5,hm=t=>t>=3600?(Math.floor(t/360)/10)+' h':mins(t);
+const inR=(a,b)=>S.workouts.filter(w=>w.end>=a&&w.end<b);
+const wkNow=()=>{const n=Date.now(),s=wkStart(n);return{n,s,p0:s-7*DAY,p1:n-7*DAY}};
+const cmpTxt=(c,p,f)=>p>0?(c===p?'Same as last week at this point':f(Math.abs(c-p))+(c>p?' more':' less')+' than last week at this point'):null;
+const sumSets=(l,f)=>{let v=0;l.forEach(w=>(w.exs||[]).forEach(x=>x.sets.forEach(s=>{if(s.done)v+=f(s)})));return v};
+const volF=s=>(s.w>0&&s.r>0&&!s.t)?s.w*s.r:0;
+const wkBars=()=>{const s=wkStart(Date.now()),m=Array(7).fill(0);S.workouts.forEach(w=>{const k=Math.floor((w.end-s)/DAY);if(k>=0&&k<7)m[k]+=w.dur/60});return m};
+const actDays=(a,b)=>{const m={};S.workouts.forEach(w=>{if(w.end>=a&&w.end<b){const k=new Date(w.end).toDateString();m[k]=(m[k]||0)+w.dur}});return Object.keys(m).filter(k=>m[k]>=600).length};
+const GS={s:'Small',m:'Medium',l:'Large'};
 const GW={
- week:{t:'Time this week',i:'clock',z:'tsw',tap:'hist',r:()=>{const t=wkW().reduce((s,w)=>s+w.dur,0);return t?[hm(t),'time trained']:null}},
- today:{t:'Today',i:'clock',z:'tsw',tap:'hist',r:()=>{const d=new Date();d.setHours(0,0,0,0);const t=S.workouts.filter(w=>w.end>=d.getTime()).reduce((s,w)=>s+w.dur,0);return t?[hm(t),'trained today']:null}},
- month:{t:'This month',i:'cal',z:'tsw',tap:'hist',r:()=>{const d=new Date();d.setDate(1);d.setHours(0,0,0,0);const t=S.workouts.filter(w=>w.end>=d.getTime()).reduce((s,w)=>s+w.dur,0);return t?[hm(t),'time trained']:null}},
- count:{t:'Workouts',i:'dumb',z:'tsw',tap:'hist',r:()=>{const n=wkW().length;return n?[String(n),'this week']:null}},
- streak:{t:'Streak',i:'bolt',z:'tsw',r:()=>{const ds=new Set(S.workouts.map(w=>new Date(w.start).toDateString()));let n=0,d=new Date();if(!ds.has(d.toDateString()))d.setDate(d.getDate()-1);while(ds.has(d.toDateString())){n++;d.setDate(d.getDate()-1)}return n?[String(n),n===1?'day':'days in a row']:null}},
- cal:{t:'Calories',i:'flame',z:'tsw',r:()=>{const k=wkW().reduce((s,w)=>s+((w.cal&&w.cal.kcal)||0),0);return k?[String(k),'kcal']:null}},
- dist:{t:'Distance',i:'route',z:'tsw',r:()=>{const m=wkW().reduce((s,w)=>s+(w.dist||0),0);return m?[fd(m),'this week']:null}},
- lift:{t:'Weight lifted',i:'kb',z:'tsw',r:()=>{let v=0;wkW().forEach(w=>(w.exs||[]).forEach(x=>x.sets.forEach(s=>{if(s.done&&s.w>0&&s.r>0)v+=s.w*s.r})));return v?[fw(v),'this week']:null}},
- sets:{t:'Sets done',i:'check',z:'tsw',r:()=>{let n=0;wkW().forEach(w=>(w.exs||[]).forEach(x=>{n+=x.sets.filter(s=>s.done).length}));return n?[String(n),'this week']:null}},
- avg:{t:'Average length',i:'clock',z:'tsw',r:()=>{const l=S.workouts;return l.length?[mins(l.reduce((s,w)=>s+w.dur,0)/l.length),'per workout']:null}},
- last:{t:'Last workout',i:'dumb',z:'tsw',tap:'hist',r:()=>{const w=[...S.workouts].sort((a,b)=>b.end-a.end)[0];return w?[mins(w.dur),(w.name||CATS[w.cat][0])+' · '+ago(w.end)]:null}},
- fav:{t:'Most done',i:'star',z:'tsw',r:()=>{const c={};S.workouts.forEach(w=>{const k=(w.name||'').trim()||CATS[w.cat][0];c[k]=(c[k]||0)+1});const k=Object.keys(c).sort((a,b)=>c[b]-c[a])[0];return k?[k,c[k]+(c[k]===1?' time':' times')]:null}},
- sparks:{t:'Sparks',i:'spark',z:'tsw',tap:'xp',r:()=>{const x=total();return x?[String(x),'LV '+lvl(x).L]:null}},
- level:{t:'Level',i:'up',z:'sw',tap:'xp',r:()=>{const x=total(),I=lvl(x);return x?[`LV ${I.L}`,`${I.left} Sparks to LV ${I.L+1}`,I.pct]:null}},
- pr:{t:'Latest record',i:'star',z:'tsw',tap:'recs',r:()=>{try{const R=recEvents(),k=Object.keys(R).sort((x,y)=>last(R[y]).w.end-last(R[x]).w.end)[0];return k?[recVal(k,last(R[k]).val),recName(k)]:null}catch(e){return null}}},
- links:{t:'Links',i:'link',z:'tsw',r:()=>{try{const o=((dd(me(),'lk')||{}).o)||{};const n=Object.values(o).reduce((s,x)=>s+(x.n||0),0);return n?[String(n),n===1?'link made':'links made']:null}catch(e){return null}}},
- bars:{t:'Week at a glance',i:'bars',z:'wb',tap:'hist',r:()=>{const m=wkBars(),mx=Math.max(...m);return mx?m:null}},
- hist:{t:'History',i:'list',z:'wb',tap:'hist',r:()=>{const l=[...S.workouts].sort((a,b)=>b.start-a.start).slice(0,5);return l.length?l:null}},
- recs:{t:'Records',i:'star',z:'wb',tap:'recs',r:()=>{try{const R=recEvents(),k=Object.keys(R).sort((x,y)=>last(R[y]).w.end-last(R[x]).w.end).slice(0,5);return k.length?k.map(x=>[recName(x)+' · '+recSub(x),recVal(x,last(R[x]).val)]):null}catch(e){return null}}}};
-const GWD=()=>({t:[{k:'week',s:'s'},{k:'sparks',s:'s'},{k:'streak',s:'t'},{k:'count',s:'t'},{k:'cal',s:'t'},{k:'dist',s:'t'}],b:[{k:'hist',s:'w'},{k:'recs',s:'w'},{k:'bars',s:'w'}]});
-function gwS(){let g=S.gw;if(!g||!Array.isArray(g.t)||!Array.isArray(g.b))g=S.gw=GWD();['t','b'].forEach(p=>{g[p]=g[p].filter(x=>GW[x.k]);g[p].forEach(x=>{if('w' in x&&!x.s){x.s=x.w===2?'w':'s';delete x.w}if(!GW[x.k].z.includes(x.s))x.s=GW[x.k].z.includes('s')?'s':GW[x.k].z[0]})});return g}
-function gwBody(x){const d=GW[x.k],v=d.r(),n=x.s==='b'?5:x.s==='w'?2:3;
- if(x.k==='bars'){const L='MTWTFSS';return `<span class="gbl">${gi(d.i)}${d.t}</span>${v?`<span class="gbars"><span>${v.map(m=>`<i style="height:${Math.max(4,Math.round(m/Math.max(...v)*100))}%"></i>`).join('')}</span></span><span class="gbd">${[...L].map(c=>`<b>${c}</b>`).join('')}</span>`:'<span class="gbs">Nothing yet</span>'}`}
- if(x.k==='hist')return `<span class="gbl">${gi(d.i)}${d.t}</span>${v?v.slice(0,n).map(w=>`<span class="gbr"><span>${esc(w.name||CATS[w.cat][0])} · ${mins(w.dur)}</span><span class="mu">${ago(w.end)}</span></span>`).join(''):'<span class="gbs">No workouts yet</span>'}`;
- if(x.k==='recs')return `<span class="gbl">${gi(d.i)}${d.t}</span>${v?v.slice(0,n).map(r=>`<span class="gbr"><span>${esc(r[0])}</span><span class="mu">${esc(r[1])}</span></span>`).join(''):'<span class="gbs">Records appear as you log workouts</span>'}`;
- if(x.s==='t')return `${gi(d.i)}<span class="gbv">${v?esc(v[0]):'·'}</span><span class="gbs">${v?esc(v[1]):'Nothing yet'}</span>`;
- return `<span class="gbl">${gi(d.i)}${d.t}</span><span class="gbv">${v?esc(v[0]):'·'}</span><span class="gbs">${v?esc(v[1]):'Nothing yet'}</span>${v&&v[2]!=null?`<span class="gpr"><i style="width:${v[2]}%"></i></span>`:''}`}
-function gwTile(p,i){const x=gwS()[p][i],d=GW[x.k],cl=`gw z${x.s}`;
- if(!GE)return d.tap?`<button class="${cl}" data-a="${d.tap}">${gwBody(x)}</button>`:`<div class="${cl}">${gwBody(x)}</div>`;
- const sel=GSEL&&GSEL.p===p&&GSEL.i===i;return `<button class="${cl} ed${sel?' sel':''}" data-wx="gt:${p}:${i}" aria-pressed="${sel}" aria-label="${d.t}, ${GS[x.s]}. Tap to edit.">${gwBody(x)}</button>`}
-function gwPanel(p){const L=gwS()[p];return `<div class="gp">${L.map((x,i)=>gwTile(p,i)).join('')}${GE?`<button class="gw zw add" data-wx="ga:${p}">+ Add widget</button>`:''}</div>`}
-function gyWidgets(part){return gwPanel(part)}
-function gyBar(){if(!GE)return '';const g=gwS(),s=GSEL&&g[GSEL.p]&&g[GSEL.p][GSEL.i];if(!s)return `<div id="gtb" role="toolbar" aria-label="Widget tools"><p class="mu sm" style="margin:0;text-align:center">Tap a widget to edit it</p></div>`;
- const n=g[GSEL.p].length,sz=GW[s.k].z,B=(a,l,t,dis)=>`<button class="gc" data-wx="${a}" aria-label="${t}" ${dis?'disabled':''}>${l}</button>`;
- return `<div id="gtb" role="toolbar" aria-label="Widget tools"><div class="gtr">${[...sz].map(c=>`<button class="gc gcs${s.s===c?' on':''}" data-wx="gz:${c}" aria-pressed="${s.s===c}">${GS[c]}</button>`).join('')}</div><div class="gtr">${B('gm:-1','‹ Earlier','Move earlier',GSEL.i===0)}${B('gm:1','Later ›','Move later',GSEL.i===n-1)}${B('gx',GSEL.p==='t'?'↓ Lower':'↑ Upper','Move to the other area')}${B('gp','Change','Change widget')}${B('gr','Remove','Remove widget')}</div></div>`}
-function gbox(){const g=gwS(),used=new Set([...g.t,...g.b].map(x=>x.k)),cur=sub.i>=0?g[sub.p][sub.i].k:null;
- return `<div class="hd"><button class="bk" data-wx="done">Back</button></div><h1>Widget</h1>${Object.keys(GW).filter(k=>k===cur||!used.has(k)).map(k=>{const d=GW[k],v=d.r();const pv=v&&typeof v[0]==='string'&&!['hist','recs','bars'].includes(k)?v[0]+' · '+v[1]:v?'Showing your data':'Nothing yet';return `<button class="card tap opt" data-wx="gs:${k}" aria-pressed="${k===cur}">${gi(d.i)}<span><b>${d.t}</b><span class="mu sm">${esc(pv)}</span></span><span class="ch">${k===cur?'✓':''}</span></button>`}).join('')}`}
+ freq:{c:'Activity',t:'Workouts',i:'dumb',z:'sm',tap:'hist',src:'SYNERGY',m:'Workouts you completed this week, compared with last week up to the same point. From your SYNERGY workouts.',e:'Your first workout will appear here.',r:()=>{const{n,s,p0,p1}=wkNow(),c=inR(s,n+1).length,p=inR(p0,p1).length;return c?[String(c),c===1?'workout · this week':'workouts · this week',cmpTxt(c,p,x=>x)]:null}},
+ time:{c:'Activity',t:'Time trained',i:'clock',z:'sm',tap:'hist',src:'SYNERGY',m:'Active workout time this week (paused time is not counted), compared with last week up to the same point. From your SYNERGY workouts.',e:'Your first workout will appear here.',r:()=>{const{n,s,p0,p1}=wkNow(),a=inR(s,n+1),c=a.reduce((x,w)=>x+w.dur,0),p=inR(p0,p1).reduce((x,w)=>x+w.dur,0);return c?[hm(c),'this week · '+a.length+(a.length===1?' session':' sessions'),cmpTxt(c,p,x=>hm(x))]:null}},
+ month:{c:'Activity',t:'This month',i:'cal',z:'sm',tap:'hist',src:'SYNERGY',m:'Active workout time since the 1st of this month. From your SYNERGY workouts.',e:'Your first workout this month will appear here.',r:()=>{const d=new Date();d.setDate(1);d.setHours(0,0,0,0);const a=inR(d.getTime(),Date.now()+1),c=a.reduce((x,w)=>x+w.dur,0);return c?[hm(c),'this month · '+a.length+(a.length===1?' session':' sessions')]:null}},
+ bars:{c:'Activity',t:'Week at a glance',i:'bars',z:'ml',tap:'hist',src:'SYNERGY',m:'Minutes trained on each day of this week, Monday to Sunday. From your SYNERGY workouts.',e:'Your first workout this week will appear here.',r:()=>{const m=wkBars();return Math.max(...m)?m:null}},
+ cal:{c:'Activity',t:'Calories',i:'flame',z:'sm',src:'MANUAL',m:'Calories you typed in when saving workouts this week. Not measured, so it only counts what you enter.',e:'Add calories when you log a workout and they will appear here.',r:()=>{const{n,s}=wkNow(),k=inR(s,n+1).reduce((x,w)=>x+((w.cal&&w.cal.kcal)||0),0);return k?[String(k),'kcal · this week']:null}},
+ lift:{c:'Strength',t:'Training volume',i:'kb',z:'sm',tap:'hist',src:'SYNERGY',m:'Weight × reps for every completed weighted set this week. Bodyweight and timed sets are not counted. Compared with last week up to the same point.',e:'Complete a weighted set and your volume will appear here.',r:()=>{const{n,s,p0,p1}=wkNow(),c=sumSets(inR(s,n+1),volF),p=sumSets(inR(p0,p1),volF);return c?[fw(c),'this week',cmpTxt(c,p,x=>fw(x))]:null}},
+ sets:{c:'Strength',t:'Sets completed',i:'check',z:'sm',tap:'hist',src:'SYNERGY',m:'Sets you ticked off in strength workouts this week.',e:'Tick off a set in a workout and it will appear here.',r:()=>{const{n,s}=wkNow(),c=sumSets(inR(s,n+1),()=>1);return c?[String(c),c===1?'set · this week':'sets · this week']:null}},
+ pr:{c:'Strength',t:'Latest record',i:'star',z:'sm',tap:'recs',src:'SYNERGY',m:'Your most recent personal record, worked out from your saved workouts.',e:'Your first personal record will appear here.',r:()=>{try{const R=recEvents(),k=Object.keys(R).sort((x,y)=>last(R[y]).w.end-last(R[x]).w.end)[0];return k?[recVal(k,last(R[k]).val),recName(k)+' · '+recSub(k)]:null}catch(e){return null}}},
+ recs:{c:'Strength',t:'Personal records',i:'star',z:'ml',tap:'recs',src:'SYNERGY',m:'Your latest personal records, worked out from your saved workouts.',e:'Your first personal record will appear here.',r:()=>{try{const R=recEvents(),k=Object.keys(R).sort((x,y)=>last(R[y]).w.end-last(R[x]).w.end).slice(0,5);return k.length?k.map(x=>[recName(x)+' · '+recSub(x),recVal(x,last(R[x]).val)]):null}catch(e){return null}}},
+ dist:{c:'Cardio',t:'Distance',i:'route',z:'sm',tap:'hist',src:'SYNERGY',m:'Distance recorded this week for the activity you covered most. Activities are never added together.',e:'Your first workout with a distance will appear here.',r:()=>{const{n,s}=wkNow(),c={};inR(s,n+1).forEach(w=>{if(w.dist>0)c[w.cat]=(c[w.cat]||0)+w.dist});const k=Object.keys(c).sort((a,b)=>c[b]-c[a]);return k.length?[fd(c[k[0]]),CATS[k[0]][0]+' · this week'+(k.length>1?' · +'+(k.length-1)+' more':'')]:null}},
+ last:{c:'History',t:'Recent workout',i:'dumb',z:'sm',tap:'hist',src:'SYNERGY',m:'Your most recent saved workout.',e:'Your first workout will appear here.',r:()=>{const w=[...S.workouts].sort((a,b)=>b.end-a.end)[0];return w?[mins(w.dur),(w.name||CATS[w.cat][0])+' · '+ago(w.end)]:null}},
+ hist:{c:'History',t:'Training history',i:'list',z:'ml',tap:'hist',src:'SYNERGY',m:'Your latest saved workouts.',e:'Your first workout will appear here.',r:()=>{const l=[...S.workouts].sort((a,b)=>b.start-a.start).slice(0,5);return l.length?l:null}},
+ cons:{c:'History',t:'Consistency',i:'bolt',z:'sm',tap:'hist',src:'SYNERGY',m:'Days this week with at least 10 minutes of training, and weeks in the last eight with at least one such day. Rest days are part of training.',e:'Your first active day will appear here.',r:()=>{const{n,s}=wkNow(),c=actDays(s,n+1);let w=0;for(let i=0;i<8;i++)if(actDays(s-i*7*DAY,s-(i-1)*7*DAY)>0)w++;return c||w?[String(c),(c===1?'active day':'active days')+' · this week',w+' of the last 8 weeks active']:null}},
+ sparks:{c:'Other',t:'Sparks',i:'spark',z:'sm',tap:'xp',src:'SYNERGY',m:'Your Sparks total and level.',e:'Save a workout to earn your first Sparks.',r:()=>{const x=total();return x?[String(x),'LV '+lvl(x).L]:null}},
+ level:{c:'Other',t:'Level progress',i:'up',z:'sm',tap:'xp',src:'SYNERGY',m:'How many Sparks until your next level.',e:'Save a workout to earn your first Sparks.',r:()=>{const x=total(),I=lvl(x);return x?['LV '+I.L,I.left+' Sparks to LV '+(I.L+1),null,I.pct]:null}},
+ links:{c:'Other',t:'Synergy Links',i:'link',z:'sm',src:'SYNERGY',m:'Links you have made with friends by training at the same time.',e:'Your first Synergy Link will appear here.',r:()=>{try{const o=((dd(me(),'lk')||{}).o)||{};const n=Object.values(o).reduce((s,x)=>s+(x.n||0),0);return n?[String(n),n===1?'link made':'links made']:null}catch(e){return null}}}};
+function gdS(){let g=S.gd;if(!g||!Array.isArray(g.L))g=S.gd={L:[]};g.L=g.L.filter(x=>GW[x.k]);g.L.forEach(x=>{if(!GW[x.k].z.includes(x.s))x.s=GW[x.k].z[0]});return g}
+function gwBody(x){const d=GW[x.k],v=d.r(),n=x.s==='l'?5:2,hd=`<span class="gbl">${gi(d.i)}<span class="gbt">${d.t}</span>${x.s!=='s'&&d.src?`<em class="gsrc">${d.src}</em>`:''}</span>`;
+ if(!v)return `${hd}<span class="gbe">${esc(d.e)}</span>`;
+ if(x.k==='bars'){const L='MTWTFSS';return `${hd}<span class="gbars"><span>${v.map(m=>`<i style="height:${Math.max(4,Math.round(m/Math.max(...v)*100))}%"></i>`).join('')}</span></span><span class="gbd">${[...L].map(c=>`<b>${c}</b>`).join('')}</span>`}
+ if(x.k==='hist')return `${hd}${v.slice(0,n).map(w=>`<span class="gbr"><span>${esc(w.name||CATS[w.cat][0])} · ${mins(w.dur)}</span><span class="mu">${ago(w.end)}</span></span>`).join('')}`;
+ if(x.k==='recs')return `${hd}${v.slice(0,n).map(r=>`<span class="gbr"><span>${esc(r[0])}</span><span class="mu">${esc(r[1])}</span></span>`).join('')}`;
+ return `${hd}<span class="gbv">${esc(v[0])}</span><span class="gbs">${esc(v[1])}</span>${x.s==='m'&&v[2]?`<span class="gbs">${esc(v[2])}</span>`:''}${v[3]!=null?`<span class="gpr"><i style="width:${v[3]}%"></i></span>`:''}`}
+function gwTile(x,i){const d=GW[x.k],inner=d.tap?`<button class="gw" data-a="${d.tap}">${gwBody(x)}</button>`:`<div class="gw">${gwBody(x)}</div>`;
+ return `<div class="gwr z${x.s}" data-i="${i}"><span class="gwi">${inner}</span><button class="gc2 gx" data-wx="gr:${i}" aria-label="Remove ${d.t}">×</button>${d.z.length>1?`<button class="gc2 gsz" data-wx="gz:${i}" aria-label="Change size of ${d.t}. Now ${GS[x.s]}.">${x.s.toUpperCase()}</button>`:''}</div>`}
+function gyDash(){const L=gdS().L;return `<div class="gy-bar"><button class="gy-plus" data-wx="ga" aria-label="Add a widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>${L.length?`<button class="wed" data-wx="ge">${GE?'Done':'Edit'}</button>`:''}</div><section class="gy-a" style="min-height:calc(46dvh - 150px)">${L.length?`<div id="gd" class="gp${GE?' ge':''}">${L.map(gwTile).join('')}<button class="gnx" data-wx="ga" aria-label="Add another widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></button></div>`:'<p class="gy-intro">Make this space yours.</p>'}</section>`}
+function gbox(){const used=new Set(gdS().L.map(x=>x.k)),cats=[...new Set(Object.values(GW).map(d=>d.c))];
+ return `<div class="hd"><button class="bk" data-wx="done">Back</button></div><h1>Add widget</h1><p class="mu sm" style="margin:0 0 6px">Only your own recorded information is shown. Nothing is made up.</p>${cats.map(c=>`<h2>${c}</h2>${Object.keys(GW).filter(k=>GW[k].c===c&&!used.has(k)).map(k=>{const d=GW[k];return `<button class="card tap opt" data-wx="gs:${k}">${gi(d.i)}<span><b>${d.t}</b><span class="mu sm">${esc(d.m)}</span></span><span class="ch">+</span></button>`}).join('')||'<p class="mu sm">Everything here is already on your dashboard.</p>'}`).join('')}`}
 /* clicks */
 document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!b)return;const [a,x,y,z]=b.dataset.wx.split(':'),W=whS();
  switch(a){
@@ -1469,17 +1470,33 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!
   case'del':{if(W.list.length<2){whMsg('Keep at least one activity on your wheel.');break}W.list.splice(+x,1);save();render();break}
   case'add':{const n=document.getElementById('wn').value;if(!n.trim()){whMsg('Type a name first.');break}if(W.list.some(z=>z.n.toLowerCase()===n.trim().toLowerCase())){whMsg('That one is already on your list.');break}if(whAddCustom(n,document.getElementById('wc').value))render();break}
   case'reset':if(confirm('Restore the default activities? Your own activities and pins stay.')){const have=new Set(W.list.map(z=>z.id));WDEF().forEach(z=>{if(!have.has(z.id))W.list.push(z)});save();render()}break;
-  case'ge':GE=!GE;GSEL=null;render();break;
-  case'gt':GSEL=GSEL&&GSEL.p===x&&GSEL.i===+y?null:{p:x,i:+y};render();break;
-  case'gm':{if(!GSEL)break;const L=gwS()[GSEL.p],i=GSEL.i,j=i+ +x;if(j<0||j>=L.length)break;[L[i],L[j]]=[L[j],L[i]];GSEL.i=j;save();render();break}
-  case'gx':{if(!GSEL)break;const g=gwS(),o=GSEL.p==='t'?'b':'t',it=g[GSEL.p].splice(GSEL.i,1)[0];g[o].push(it);GSEL={p:o,i:g[o].length-1};save();render();break}
-  case'gz':{if(!GSEL)break;gwS()[GSEL.p][GSEL.i].s=x;save();render();break}
-  case'gr':{if(!GSEL)break;gwS()[GSEL.p].splice(GSEL.i,1);GSEL=null;save();render();break}
-  case'ga':sub={n:'gbox',p:x,i:-1};render();break;
-  case'gp':if(GSEL){sub={n:'gbox',p:GSEL.p,i:GSEL.i};render()}break;
-  case'gs':{const g=gwS(),k=x,sz=GW[k].z,pz=sub.i>=0?g[sub.p][sub.i].s:null;if(sub.i>=0)g[sub.p][sub.i]={k,s:sz.includes(pz)?pz:sz.includes('s')?'s':sz[0]};else{g[sub.p].push({k,s:sz.includes('s')?'s':sz[0]});GSEL={p:sub.p,i:g[sub.p].length-1}}save();sub=null;render();break}}});
+  case'ge':GE=!GE;render();break;
+  case'gr':{gdS().L.splice(+x,1);save();render();break}
+  case'gz':{const it=gdS().L[+x],z=GW[it.k].z,j=(z.indexOf(it.s)+1)%z.length;it.s=z[j];save();render();break}
+  case'ga':sub={n:'gbox'};render();break;
+  case'gs':{const k=x;if(GW[k]&&!gdS().L.some(z=>z.k===k)){gdS().L.push({k,s:GW[k].z[0]});save()}sub=null;render();break}}});
 document.addEventListener('input',e=>{if(e.target.id==='wq'){sub.q=e.target.value;const p=e.target.selectionStart;render();const q=document.getElementById('wq');if(q){q.focus();try{q.setSelectionRange(p,p)}catch(x){}}}});
 new MutationObserver(()=>{if(document.querySelector('#wh:not([data-b])'))whBind()}).observe(document.getElementById('app'),{childList:true});
+/* drag and drop for dashboard tiles + swipe back */
+(function(){let st=null;window.__gdrag=false;
+ const grid=()=>document.getElementById('gd'),flip=(g,fn)=>{const kids=[...g.children].filter(e=>!e.classList.contains('lift')),r0=new Map(kids.map(e=>[e,e.getBoundingClientRect()]));fn();if(whRM())return;kids.forEach(e=>{const a=r0.get(e),b=e.getBoundingClientRect(),dx=a.left-b.left,dy=a.top-b.top;if(dx||dy){e.style.transition='none';e.style.transform=`translate(${dx}px,${dy}px)`;e.getBoundingClientRect();e.style.transition='transform .24s cubic-bezier(.2,.8,.2,1)';e.style.transform='';setTimeout(()=>{e.style.transition=''},260)}})};
+ const begin=()=>{if(!st||st.on)return;const g=grid(),w=st.w;if(!g)return;st.on=true;window.__gdrag=true;if(!GE){GE=true;g.classList.add('ge');const b=document.querySelector('.gy-bar .wed');if(b)b.textContent='Done'}
+  const r=w.getBoundingClientRect(),ph=document.createElement('div');ph.className=w.className+' ph';ph.style.visibility='hidden';ph.removeAttribute&&ph.removeAttribute('data-i');w.parentNode.insertBefore(ph,w);st.ph=ph;st.gx=st.x-r.left;st.gy=st.y-r.top;
+  w.classList.add('lift');w.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:20;pointer-events:none;margin:0`;try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}};
+ document.addEventListener('pointerdown',e=>{const w=e.target.closest&&e.target.closest('.gwr:not(.ph)');if(!w||e.target.closest('.gc2')||!grid()||!grid().contains(w))return;st={w,x:e.clientX,y:e.clientY,on:false,t:setTimeout(begin,GE?110:380)}});
+ document.addEventListener('pointermove',e=>{if(!st)return;if(!st.on){if(Math.hypot(e.clientX-st.x,e.clientY-st.y)>(GE?6:9)){if(GE&&Math.hypot(e.clientX-st.x,e.clientY-st.y)>6){clearTimeout(st.t);st.x=e.clientX;st.y=e.clientY;begin()}else{clearTimeout(st.t);st=null}}return}
+  const w=st.w,x=e.clientX,y=e.clientY;w.style.left=(x-st.gx)+'px';w.style.top=(y-st.gy)+'px';
+  if(y<110)scrollBy(0,-9);else if(y>innerHeight-130)scrollBy(0,9);
+  const el=document.elementFromPoint(x,y),t=el&&el.closest&&el.closest('.gwr:not(.lift):not(.ph)');if(t&&t.parentNode===st.ph.parentNode){const g=t.parentNode;flip(g,()=>{const after=[...g.children].indexOf(st.ph)<[...g.children].indexOf(t);g.insertBefore(st.ph,after?t.nextSibling:t)})}});
+ document.addEventListener('touchmove',e=>{if(st&&st.on){e.preventDefault();e.stopPropagation()}},{passive:false});
+ const end=()=>{if(!st)return;clearTimeout(st.t);const s=st;st=null;if(!s.on)return;window.__gdrag=false;window.__gdsup=Date.now();const g=s.ph.parentNode;s.w.classList.remove('lift');s.w.style.cssText='';g.insertBefore(s.w,s.ph);s.ph.remove();const L=gdS().L,o=[...g.querySelectorAll('.gwr')].map(e=>L[+e.dataset.i]).filter(Boolean);if(o.length===L.length){S.gd.L=o;save()}render()};
+ document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
+ document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('.gwr'))e.preventDefault()});
+ document.addEventListener('click',e=>{if(Date.now()-(window.__gdsup||0)<400){e.stopPropagation();e.preventDefault()}},true);
+ /* swipe right anywhere = back */
+ let s0=null;document.addEventListener('touchstart',e=>{s0=null;if(e.touches.length!==1||window.__gdrag)return;const t=e.target;if(t.closest&&t.closest('.wh,.swp,.wsw,input,textarea,select,[data-nosw]'))return;s0={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()}},{passive:true});
+ document.addEventListener('touchend',e=>{const a=s0;s0=null;if(!a||window.__gdrag||!e.changedTouches.length)return;const c=e.changedTouches[0],dx=c.clientX-a.x,dy=c.clientY-a.y;if(dx>70&&Math.abs(dy)<45&&dx>2.2*Math.abs(dy)&&Date.now()-a.t<700){const b=document.getElementById('backbtn');if(b&&!b.hidden&&!document.documentElement.hasAttribute('data-gate'))b.click()}},{passive:true});
+})();
 </script>
 </body>
 </html>
