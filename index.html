@@ -365,7 +365,7 @@ html[data-tab=astral] #tbar{background:transparent;border-bottom-color:transpare
 .gw:not(.gem){border-color:color-mix(in srgb,var(--tx) 9%,transparent)}
 .gw .gi{stroke-width:1.76px}.gw .gti .gi{stroke-width:.943px}
 html:has(.gbd),html:has(.gbd) body{overflow:hidden!important;overscroll-behavior:none}
-.gbd{touch-action:none}.gbb{touch-action:pan-y;padding:0 14px calc(24px + env(safe-area-inset-bottom,0px));border-top:2px solid transparent;border-image:var(--irid) 1;background:linear-gradient(90deg,rgba(243,191,217,.13),rgba(203,184,244,.13),rgba(168,213,241,.13),rgba(179,239,215,.13),rgba(246,229,179,.13)) top/100% 150px no-repeat,linear-gradient(180deg,color-mix(in srgb,var(--bg) 90%,#7B7EEA) 0%,var(--bg) 45%,color-mix(in srgb,var(--bg) 92%,#CBB8F4) 100%)}
+.gbd{touch-action:none}.gbb{touch-action:pan-y;padding:0 14px calc(24px + env(safe-area-inset-bottom,0px));border-top:2px solid transparent;border-image:var(--irid) 1;background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 78%,#7B7EEA) 0%,var(--bg) 100%)}
 .gbh{background:color-mix(in srgb,var(--bg) 92%,#7B7EEA)!important;background:transparent!important}
 .gsr{height:34px;margin:0 0 16px;padding:0 10px}.gsr input{font-size:13px}.gsr svg{width:16px;height:16px}
 .gcg{gap:20px 10px}
@@ -1554,7 +1554,7 @@ const GSI={add:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',edi
 function gyDash(){gdNorm();gdFreeze();const g=gdS();window.__pp=null;return `<div class="gy-bar"><button class="gsq ed" data-wx="gall" aria-label="Remove all widgets">${GSI.del}</button><button class="gsq pl" data-wx="gp" aria-label="${GE?'Add widget':'Edit widgets'}"><span class="pa">${GSI.edit}</span><span class="pb">${GSI.add}</span></button></div>${gyPanel('L','gd',window.__pp)}`}
 function gyDash2(){return gyPanel('B','gd2',window.__pp)}
 const GSL={t:'Tiny',s:'Small',m:'Medium',l:'Big'},GBS={};
-const GPREF={hist:'l',recs:'l',bars:'m'};
+const GPREF={hist:'m',recs:'m',bars:'m'};
 function gbPick(k){const fit=gdSizes(k);if(!fit.length)return{fit,cur:GPREF[k]||dz(k)};const want=GPREF[k]||dz(k);let cur=GBS[k];if(!fit.includes(cur))cur=fit.includes(want)?want:fit.includes(dz(k))?dz(k):fit[fit.length-1];return{fit,cur}}
 function gbPrev(k,s){const C=100,G=8,cw=(innerWidth-28-10)/2,fw=innerWidth-28,sc=s==='t'?Math.min(1,cw/100):s==='s'?cw/208:fw/316,d=GDIM[s],W=d[0]*C+(d[0]-1)*G,H=d[1]*C+(d[1]-1)*G;return `<span class="gpv" style="width:${Math.round(W*sc)}px;height:${Math.round(H*sc)}px"><span class="pvi" style="width:${W}px;height:${H}px;transform:scale(${sc})"><span class="gwr z${s}" style="display:block;height:100%"><span class="gw${k==='empty'?' gem':''}" style="display:flex;height:100%">${gwBody({k,s})}</span></span></span></span>`}
 const GCH='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
