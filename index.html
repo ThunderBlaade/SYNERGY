@@ -1509,7 +1509,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!
   case'add':{const n=document.getElementById('wn').value;if(!n.trim()){whMsg('Type a name first.');break}if(W.list.some(z=>z.n.toLowerCase()===n.trim().toLowerCase())){whMsg('That one is already on your list.');break}if(whAddCustom(n,document.getElementById('wc').value))render();break}
   case'reset':if(confirm('Restore the default activities? Your own activities and pins stay.')){const have=new Set(W.list.map(z=>z.id));WDEF().forEach(z=>{if(!have.has(z.id))W.list.push(z)});save();render()}break;
   case'ge':GE=!GE;render();break;
-  case'gall':if(confirm('Remove all your widgets?')){const g=gdS();g.L=[];g.B=[];save();GE=false;render()}break;
+  case'gall':if(confirm('Remove all your widgets? Days stays so there is always one.')){const g=gdS();g.L=[{k:'cons',s:'s'}];g.B=[];save();GE=false;render()}break;
   case'gr':{if(gdS()[x==='B'?'B':'L'][+y].k!=='empty'&&gdCount()<2)break;gdS()[x==='B'?'B':'L'].splice(+y,1);save();render();break}
   case'gz':{const g=gdS(),pp=x==='B'?'B':'L',it=g[pp][+y],z=GW[it.k].z.split('').sort((a,b)=>'tsml'.indexOf(a)-'tsml'.indexOf(b)),R=gyRows();for(let n=1;n<=z.length;n++){const s=z[(z.indexOf(it.s)+n)%z.length],t=g[pp].map(q=>q===it?{...q,s}:q);if(gdPack(t,R)){it.s=s;break}}save();render();break}
   case'ga':sub={n:'gbox'};render();break;
@@ -1569,7 +1569,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-pm]');if(!
  else if(k==='done'){if(!S.perm)S.perm={};S.perm[SO.uid]=1;save();const el=document.getElementById('perm');if(el)el.remove()}});
 document.addEventListener('click',e=>{if(!GE||window.__gdrag||e.target.closest('.gwr,.gnx,.gy-bar,[data-wx],#perm'))return;GE=false;render()});
 (function(){let t=null,x0=0,y0=0;const stop=()=>{clearTimeout(t);t=null};
-document.addEventListener('pointerdown',e=>{stop();if(GE||window.__gdrag)return;const pn=e.target.closest&&e.target.closest('.gy-pn');if(!pn||e.target.closest('.gwr,.gnx'))return;x0=e.clientX;y0=e.clientY;t=setTimeout(()=>{t=null;if(GE)return;window.__gdsup=Date.now();GE=true;render()},380)},true);
+document.addEventListener('pointerdown',e=>{stop();if(GE||window.__gdrag)return;const pn=e.target.closest&&e.target.closest('.gy-pn');if(!pn||e.target.closest('.gwr'))return;x0=e.clientX;y0=e.clientY;t=setTimeout(()=>{t=null;if(GE)return;window.__gdsup=Date.now();GE=true;render()},380)},true);
 document.addEventListener('pointermove',e=>{if(t&&Math.hypot(e.clientX-x0,e.clientY-y0)>8)stop()},true);
 ['pointerup','pointercancel','scroll'].forEach(n=>document.addEventListener(n,stop,true))})();
 (function(){const bump=()=>{window.__ga=Date.now()};['pointerdown','pointermove','keydown','touchstart'].forEach(n=>document.addEventListener(n,bump,true));
