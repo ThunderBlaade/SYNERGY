@@ -292,8 +292,8 @@ nav{padding:4px 4px max(8px,calc(env(safe-area-inset-bottom,0px) - 6px))!importa
 .gbr{display:flex;justify-content:space-between;gap:10px;font:400 12.5px var(--body);padding:3px 0;border-top:1px solid var(--ln)}.gbr>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gbr .mu{flex:none;color:var(--mu)}
 .gbars{display:flex;flex:1;min-height:0}.gbars>span{display:flex;align-items:flex-end;gap:6px;width:100%}.gbars i{flex:1;background:var(--tx);opacity:.75;display:block}.gbd{display:flex;gap:6px}.gbd b{flex:1;text-align:center;font:500 9px var(--body);letter-spacing:.1em;color:var(--mu)}
 .gc2{display:none;position:absolute;z-index:3;border-radius:0}.ge .gc2{display:grid;place-items:center}
-.gx{top:-8px;left:-8px;width:28px;height:28px;border-radius:50%;background:var(--tx);color:var(--bg);font:500 17px var(--body);line-height:1}
-.gsz{right:6px;bottom:6px;min-width:32px;height:26px;background:var(--s2);color:var(--tx);border:1px solid var(--ln);font:500 10px var(--body);letter-spacing:.1em}
+.gx{top:-8px;right:-8px;width:28px;height:28px;border-radius:50%;background:var(--tx);color:var(--bg);font:500 17px var(--body);line-height:1}
+.grs{right:0;bottom:0;width:34px;height:34px;touch-action:none;background:none;border:0;z-index:16}.grs::after{content:'';position:absolute;right:6px;bottom:6px;width:14px;height:14px;border-right:3px solid var(--tx);border-bottom:3px solid var(--tx)}.gsz{right:6px;bottom:6px;min-width:32px;height:26px;background:var(--s2);color:var(--tx);border:1px solid var(--ln);font:500 10px var(--body);letter-spacing:.1em}
 .ge .gw{pointer-events:none}.ge .gwr:not(.lift):not(.ph){cursor:grab}
 .gwr.lift{box-shadow:0 12px 32px -12px rgba(0,0,0,.4);opacity:.96}.gwr.lift .gwi{transform:scale(1.03);display:block}
 @media (prefers-reduced-motion:reduce){.gwr{transition:none!important}}
@@ -1457,7 +1457,7 @@ function gwBody(x){const d=GW[x.k],v=d.r(),n=x.s==='l'?5:2,hd=`<span class="gbl"
  if(x.k==='recs')return `${hd}${v.slice(0,n).map(r=>`<span class="gbr"><span>${esc(r[0])}</span><span class="mu">${esc(r[1])}</span></span>`).join('')}`;
  return `${hd}<span class="gbv">${esc(v[0])}</span><span class="gbs">${esc(v[1])}</span>${x.s==='m'&&v[2]?`<span class="gbs">${esc(v[2])}</span>`:''}${v[3]!=null?`<span class="gpr"><i style="width:${v[3]}%"></i></span>`:''}`}
 function gwTile(x,i,p){const d=GW[x.k],inner=d.tap?`<button class="gw" data-a="${d.tap}">${gwBody(x)}</button>`:`<div class="gw">${gwBody(x)}</div>`;
- return `<div class="gwr z${x.s}" data-i="${i}" data-p="${p}"><span class="gwi">${inner}</span><button class="gc2 gx" data-wx="gr:${p}:${i}" aria-label="Remove ${d.t}">×</button>${d.z.length>1?`<button class="gc2 gsz" data-wx="gz:${p}:${i}" aria-label="Change size of ${d.t}. Now ${GS[x.s]}.">${x.s.toUpperCase()}</button>`:''}</div>`}
+ return `<div class="gwr z${x.s}" data-i="${i}" data-p="${p}"><span class="gwi">${inner}</span><button class="gc2 gx" data-wx="gr:${p}:${i}" aria-label="Remove ${d.t}">×</button>${d.z.length>1?`<button class="gc2 grs" data-nosw="1" data-wx="gz:${p}:${i}" aria-label="Resize ${d.t}. Drag the corner, or tap to change size. Now ${GS[x.s]}."></button>`:''}</div>`}
 const gyPanel=(p,id)=>{const L=gdS()[p],pl=`<button class="gnx${L.length?'':' all'}" data-wx="ga:${p}" aria-label="Add a widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>`;return `<section class="gy-pn"><div id="${id}" class="gp${GE?' ge':''}" data-p="${p}">${L.map((x,i)=>gwTile(x,i,p)).join('')}${pl}</div></section>`};
 function gyDash(){const g=gdS();return `<div class="gy-bar">${g.L.length+g.B.length?`<button class="wed" data-wx="ge">${GE?'Done':'Edit'}</button>`:''}</div>${gyPanel('L','gd')}`}
 function gyDash2(){return gyPanel('B','gd2')}
@@ -1504,6 +1504,19 @@ new MutationObserver(()=>{if(document.querySelector('#wh:not([data-b])'))whBind(
  let s0=null;document.addEventListener('touchstart',e=>{s0=null;if(e.touches.length!==1||window.__gdrag)return;const t=e.target;if(t.closest&&t.closest('.wh,.swp,.wsw,input,textarea,select,[data-nosw]'))return;s0={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()}},{passive:true});
  document.addEventListener('touchend',e=>{const a=s0;s0=null;if(!a||window.__gdrag||!e.changedTouches.length)return;const c=e.changedTouches[0],dx=c.clientX-a.x,dy=c.clientY-a.y;if(dx>70&&Math.abs(dy)<45&&dx>2.2*Math.abs(dy)&&Date.now()-a.t<700){const b=document.getElementById('backbtn');if(b&&!b.hidden&&!document.documentElement.hasAttribute('data-gate'))b.click()}},{passive:true});
 })();
+
+(function(){let r=null;const MINH=92,GAP=8;
+ document.addEventListener('pointerdown',e=>{const hd=e.target.closest&&e.target.closest('.grs');if(!hd||!hd.closest('.ge'))return;const w=hd.closest('.gwr'),g=w.closest('.gp'),gi=w.querySelector('.gwi'),R=w.getBoundingClientRect(),G=g.getBoundingClientRect();
+  r={hd,w,g,gi,x:e.clientX,y:e.clientY,w0:R.width,h0:R.height,gw:G.width,room:G.right-R.left,nw:R.width,nh:R.height,mv:0};gi.style.cssText=`position:absolute;left:0;top:0;width:${R.width}px;height:${R.height}px;z-index:15;transition:none`;w.style.zIndex=15;try{hd.setPointerCapture(e.pointerId)}catch(_){}window.__gdrag=true;e.stopPropagation()},true);
+ document.addEventListener('pointermove',e=>{if(!r)return;const dx=e.clientX-r.x,dy=e.clientY-r.y;r.mv=Math.max(r.mv,Math.hypot(dx,dy));
+  const rb=(v,lo,hi)=>v<lo?lo-(lo-v)*.25:v>hi?hi+(v-hi)*.25:v;r.nw=rb(r.w0+dx,(r.gw-GAP*3)/4*2+GAP,Math.min(r.gw,r.room));r.nh=rb(r.h0+dy,MINH,2*MINH+GAP);r.gi.style.width=r.nw+'px';r.gi.style.height=r.nh+'px';r.hd.style.transform=`translate(${r.nw-r.w0}px,${r.nh-r.h0}px)`;const xb=r.w.querySelector('.gx');if(xb)xb.style.transform=`translateX(${r.nw-r.w0}px)`});
+ const end=()=>{if(!r)return;const q=r;r=null;window.__gdrag=false;
+  if(q.mv<6){q.gi.style.cssText='';q.w.style.zIndex='';return}
+  window.__gdsup=Date.now();const p=q.w.dataset.p==='B'?'B':'L',it=gdS()[p][+q.w.dataset.i],cw=(q.gw-GAP*3)/4,dims={s:[cw*2+GAP,MINH],m:[q.gw,MINH],l:[q.gw,MINH*2+GAP]};
+  let best=it.s,bd=1e9;GW[it.k].z.split('').forEach(s=>{const d=Math.pow((q.nw-dims[s][0])/q.gw,2)+Math.pow((q.nh-dims[s][1])/(MINH*2+GAP),2);if(d<bd){bd=d;best=s}});
+  const tw=Math.min(dims[best][0],q.room),th=dims[best][1];q.gi.style.transition='width .24s cubic-bezier(.3,1.5,.5,1),height .24s cubic-bezier(.3,1.5,.5,1)';q.gi.getBoundingClientRect();q.gi.style.width=tw+'px';q.gi.style.height=th+'px';q.hd.style.transition='transform .24s cubic-bezier(.3,1.5,.5,1)';q.hd.style.transform=`translate(${tw-q.w0}px,${th-q.h0}px)`;const xb=q.w.querySelector('.gx');if(xb){xb.style.transition='transform .24s cubic-bezier(.3,1.5,.5,1)';xb.style.transform=`translateX(${tw-q.w0}px)`}
+  setTimeout(()=>{if(best!==it.s){it.s=best;save()}render()},whRM()?0:250)};
+ document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end)})();
 </script>
 </body>
 </html>
