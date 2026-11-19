@@ -372,7 +372,7 @@ const DEF=()=>({name:'',theme:'auto',v2:1,v3:1,loc:{mode:'auto',region:null,fx:{
 let S=DEF();try{const r=localStorage.getItem('synergy');if(r)S={...DEF(),...JSON.parse(r)}}catch(e){}
 if(!S.v3){S.theme='system';S.v2=1;S.v3=1}if(S.theme==='auto'||!S.theme)S.theme='system';
 const save=()=>{try{localStorage.setItem('synergy',JSON.stringify(S))}catch(e){}if(typeof lkSync==='function'){try{lkSync()}catch(e){}}};
-let tab=(!(performance.getEntriesByType&&(performance.getEntriesByType('navigation')[0]||{}).type==='reload')&&['home','play','conn','rank','astral','me'].includes(S.lastTab))?S.lastTab:'home',sub=null,shown={},confirmReset=false;
+let tab=['home','play','conn','rank','astral','me'].includes(S.lastTab)?S.lastTab:'home',sub=null,shown={},confirmReset=false;
 const $=s=>document.querySelector(s);
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dk=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -1621,6 +1621,15 @@ function gdLive(st){if(!st.orig)return;const pl=st.cand&&st.cand.plan,R=gyRows()
   q.hd.style.transition=`transform ${tr}`;q.hd.style.transform=`translate(${tw-q.w0}px,${th-q.h0}px)`;const xb=q.w.querySelector('.gx');if(xb){xb.style.transition=`transform ${tr}`;xb.style.transform=`translateX(${tw-q.w0}px)`}
   setTimeout(()=>{if(best!==it.s){const gg=gdS(),old=it.s;it.s=best;if(gdStable(gg[p],gyRows()))save();else{it.s=old;toast('No room for that size')}}render()},whRM()?0:250)};
  document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end)})();
+/* ===== remember scroll: resume where you left, refresh goes to the top of the same page ===== */
+(function(){const K='synergy_sc';let t=null;
+ const nav0=(performance.getEntriesByType&&performance.getEntriesByType('navigation')[0])||{},reloaded=nav0.type==='reload';
+ const put=()=>{try{localStorage.setItem(K,JSON.stringify({t:tab,y:Math.round(window.scrollY||document.documentElement.scrollTop||0)}))}catch(e){}};
+ window.addEventListener('scroll',()=>{clearTimeout(t);t=setTimeout(put,150)},{passive:true});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)put()});window.addEventListener('pagehide',put);
+ let v=null;try{v=JSON.parse(localStorage.getItem(K)||'null')}catch(e){}
+ if(reloaded){try{localStorage.removeItem(K)}catch(e){}}
+ else if(v&&v.t===tab&&v.y>0){const go=()=>{if(tab===v.t&&!sub)window.scrollTo(0,v.y)};[60,250,700].forEach(d=>setTimeout(go,d))}})();
 /* ===== permissions sheet after sign-in ===== */
 function permBody(){const p=mp(),sh=p&&p.share||'manual',lp=typeof LP!=="undefined"?LP:'prompt',has=!!(S.loc&&S.loc.region),sel=(k,v,t)=>`<button class="pmo" data-pm="${k}" aria-pressed="${v}">${t}</button>`;
  const loc=`<div class="pmr"><div class="pmt"><b>Location</b><span>Astral uses it for sunrise, sunset and the weather where you are. It stays on your phone unless you choose to share your area below.</span></div><div class="pmc">${lp==='granted'?`<span class="pms">Allowed</span>`:lp==='denied'?`<span class="pms">Blocked in Settings</span>`:`${sel('loc',false,'Allow')}`}</div></div>
