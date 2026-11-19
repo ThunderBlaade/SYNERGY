@@ -278,6 +278,7 @@ nav{padding:4px 4px max(8px,calc(env(safe-area-inset-bottom,0px) - 6px))!importa
 .gy-intro{text-align:center;color:var(--mu);font:400 13px var(--body);letter-spacing:.04em;margin:18px 0 0}
 .gy-a,.gy-b{padding:0}.gp{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:104px;grid-auto-flow:dense;gap:8px}
 /*fit*/.gy-fit{display:flex;flex-direction:column;gap:10px;height:calc(100dvh - 164px - env(safe-area-inset-top,0px))}.gy-pn{flex:1;min-height:0;overflow:hidden;border:1px solid color-mix(in srgb,var(--mu) 45%,transparent);padding:8px}.gy-pn::-webkit-scrollbar{display:none}
+.gy-pn{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .gy-start{padding:0}.gy-start .btn.big{min-height:64px}.gy-start .card{margin:0 0 10px}
 .gy-must{text-align:center;font:500 10.5px var(--body);letter-spacing:.22em;text-transform:uppercase;color:var(--mu);margin:0 0 6px}.gpo:disabled{opacity:.35}.gpk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.gpo{background:var(--s1);color:var(--tx);border:1px solid var(--ln);border-radius:0;padding:14px 12px;display:flex;flex-direction:column;gap:6px;text-align:left;min-height:104px}.gpo .gi{width:20px;height:20px}.gpo b{font:500 13px var(--body);letter-spacing:.06em}.gpo span{font:400 11.5px var(--body);color:var(--mu);line-height:1.3}
 .gwr{position:relative;min-width:0;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}.gwr.zt{grid-column:span 1}.gwr.zs{grid-column:span 2}.gwr.zm{grid-column:span 3}.gwr.zl{grid-column:span 3;grid-row:span 2}
@@ -1565,7 +1566,11 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-pm]');if(!
  else if(k==='area'){S.loc.share=!S.loc.share;save();if(SO.db&&mp())setProfile({region:S.loc.share&&S.loc.region?regionLabel(S.loc.region):null});permDraw()}
  else if(k.startsWith('sh:')){if(SO.db&&mp())setProfile({share:k.slice(3)});permDraw()}
  else if(k==='done'){if(!S.perm)S.perm={};S.perm[SO.uid]=1;save();const el=document.getElementById('perm');if(el)el.remove()}});
-document.addEventListener('click',e=>{if(!GE||window.__gdrag||e.target.closest('.gy-pn,.gy-bar,[data-wx],#perm'))return;GE=false;render()});
+document.addEventListener('click',e=>{if(!GE||window.__gdrag||e.target.closest('.gwr,.gnx,.gy-bar,[data-wx],#perm'))return;GE=false;render()});
+(function(){let t=null,x0=0,y0=0;const stop=()=>{clearTimeout(t);t=null};
+document.addEventListener('pointerdown',e=>{stop();if(GE||window.__gdrag)return;const pn=e.target.closest&&e.target.closest('.gy-pn');if(!pn||e.target.closest('.gwr,.gnx'))return;x0=e.clientX;y0=e.clientY;t=setTimeout(()=>{t=null;if(GE)return;window.__gdsup=Date.now();GE=true;render()},380)},true);
+document.addEventListener('pointermove',e=>{if(t&&Math.hypot(e.clientX-x0,e.clientY-y0)>8)stop()},true);
+['pointerup','pointercancel','scroll'].forEach(n=>document.addEventListener(n,stop,true))})();
 </script>
 </body>
 </html>
