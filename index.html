@@ -1694,7 +1694,10 @@ document.addEventListener('pointermove',e=>{if(t&&Math.hypot(e.clientX-x0,e.clie
 (function(){const bump=()=>{window.__ga=Date.now()};['pointerdown','pointermove','keydown','touchstart'].forEach(n=>document.addEventListener(n,bump,true));
 setInterval(()=>{if(!GE){bump();return}if(window.__gdrag)return bump();if(Date.now()-(window.__ga||0)>6000){GE=false;render()}},500)})();
 function gyFit(root){root=root||document;const ps=root.querySelectorAll('.gy-pn');if(!ps.length)return;const SP=18,cw=(ps[0].clientWidth-2*SP-3-2*SP)/3,R=gyRows(),fit=ps[0].closest('.gy-fit'),oth=fit?[...fit.children].filter(e=>!e.classList.contains('gy-pn')).reduce((s,e)=>s+e.offsetHeight,0):0,av=fit?(fit.clientHeight-oth-4*7-ps.length*(SP*(R+1)+3))/(ps.length*R):1e9,row=Math.max(52,Math.min(cw*1.7,av));if(!root.__isPeer)window.__row=row;root.querySelectorAll('.gp').forEach(g=>g.style.setProperty('--row',row+'px'))}
-{const _r=render;render=function(){const o=_r.apply(this,arguments);try{gyFit()}catch(e){}return o}}
+{const _r=render;let RO=null;const refit=()=>{try{if(tab==='play'&&!window.__pswipe)gyFit()}catch(e){}};
+ render=function(){const o=_r.apply(this,arguments);try{gyFit();const f=document.querySelector('.gy-fit');if(window.ResizeObserver){if(!RO)RO=new ResizeObserver(refit);RO.disconnect();if(f)RO.observe(f)}}catch(e){}return o};
+ ['resize','orientationchange','pageshow','focus'].forEach(ev=>window.addEventListener(ev,()=>{refit();setTimeout(refit,300)}));document.addEventListener('visibilitychange',()=>{if(!document.hidden){refit();setTimeout(refit,300);setTimeout(refit,1200)}});
+ if(window.visualViewport)visualViewport.addEventListener('resize',refit);[400,1200,2800].forEach(d=>setTimeout(refit,d))}
 addEventListener('resize',()=>{try{gyFit()}catch(e){}});
 /* ===== Gym feel: confirm box, workout bar, no scroll, concrete floor ===== */
 function ask(msg,yes,label){const o=document.createElement('div');o.id='ask';o.setAttribute('role','alertdialog');o.setAttribute('aria-modal','true');o.innerHTML=`<div class="askb"><p>${esc(msg)}</p><div><button data-ak="n">Cancel</button><button data-ak="y">${esc(label||'Yes')}</button></div></div>`;
@@ -1707,7 +1710,7 @@ function ask(msg,yes,label){const o=document.createElement('div');o.id='ask';o.s
 document.addEventListener('touchmove',e=>{if(document.documentElement.getAttribute('data-gy')==='1'&&!e.target.closest('input,textarea,select,#sheet,#ask'))e.preventDefault()},{passive:false});
 /* swipe between pages, iridescent line under-dims on each change */
 const TORD=TABS.map(t=>t[0]);let LASTTAB=null;
-function navLine(){const nav=document.getElementById('nav');if(!nav)return;const b=nav.querySelector('button[aria-current=page]'),s=b&&b.querySelector('.nl');if(!s)return;const w=22,i=document.createElement('i');i.className='nvl';i.style.width=w+'px';i.style.marginLeft=(-w/2)+'px';b.appendChild(i);if(LASTTAB!==null&&LASTTAB!==tab&&i.animate)i.animate([{opacity:1},{opacity:.05,offset:.4},{opacity:1}],{duration:750,easing:'ease-in-out'});LASTTAB=tab}
+function navLine(){const nav=document.getElementById('nav');if(!nav)return;const b=nav.querySelector('button[aria-current=page]'),s=b&&b.querySelector('.nl');if(!s)return;const w=28,i=document.createElement('i');i.className='nvl';i.style.width=w+'px';i.style.marginLeft=(-w/2)+'px';b.appendChild(i);if(LASTTAB!==null&&LASTTAB!==tab&&i.animate)i.animate([{opacity:1},{opacity:.05,offset:.4},{opacity:1}],{duration:750,easing:'ease-in-out'});LASTTAB=tab}
 {const _n=render;render=function(){const o=_n.apply(this,arguments);try{navLine()}catch(e){}return o}}
 /* ===== Page swipe =====
    The pages sit side by side like one long strip. A sideways drag slides the strip with
@@ -1723,7 +1726,7 @@ const PSIDS=['gv','gl','gb','gb2','gvs','gwin','gwp','gam','gsh','gshp','gbl'];
 function psBackdrop(t){if(t!=='play')return null;if(!document.getElementById('gbg'))gbgDraw();const o=document.getElementById('gbg');if(!o)return null;
  const c=o.cloneNode(false);c.innerHTML=o.innerHTML.replace(new RegExp('id="('+PSIDS.join('|')+')"','g'),'id="$1x"').replace(new RegExp('url\\(#('+PSIDS.join('|')+')\\)','g'),'url(#$1x)');
  c.style.cssText+=';position:absolute;inset:0;display:block;z-index:0';const n=document.createElement('div');n.className='psn';c.after&&0;return (function(){const w=document.createElement('div');w.style.cssText='position:absolute;inset:0';w.append(c,n);return w})()}
-const psGeo=b=>{const r=b.getBoundingClientRect(),s=b.querySelector('.nl'),ls=parseFloat(getComputedStyle(s).letterSpacing)||0;return{c:r.left+r.width/2,w:22}};
+const psGeo=b=>{const r=b.getBoundingClientRect(),s=b.querySelector('.nl'),ls=parseFloat(getComputedStyle(s).letterSpacing)||0;return{c:r.left+r.width/2,w:28}};
 function psBegin(g){const app=document.getElementById('app'),r=app.getBoundingClientRect(),nav=document.getElementById('nav'),btn=[...nav.querySelectorAll('button')],me=TORD.indexOf(tab);
  Object.assign(g,{app,W:app.offsetWidth,left:r.left,top:app.offsetTop,side:{},x:0,vx:0,lx:0,lt:performance.now(),line:nav.querySelector('.nvl'),geo:{0:psGeo(btn[me])},
   live:['gbg','sky'].map(id=>document.getElementById(id)).filter(e=>e&&getComputedStyle(e).display!=='none')});
