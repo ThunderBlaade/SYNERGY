@@ -318,6 +318,17 @@ nav{padding:4px 4px max(8px,calc(env(safe-area-inset-bottom,0px) - 6px))!importa
 #tbar span{font:500 10.5px var(--body);letter-spacing:.42em;text-indent:.42em;text-transform:uppercase;color:var(--mu)}
 #app{padding-top:66px}html[data-gate] #tbar{visibility:hidden}
 html[data-tab=astral] #tbar{background:transparent;border-bottom-color:transparent}html[data-tab=astral] #tbar span{opacity:0}
+/* permissions sheet */
+#perm{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;padding:0;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.pmp{width:100%;max-width:480px;max-height:92dvh;overflow-y:auto;background:var(--bg);color:var(--tx);border-top:1px solid var(--ln);padding:22px 18px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.pmh{display:flex;flex-direction:column;gap:6px;text-align:center}.pmh b{font:500 13px var(--body);letter-spacing:.3em;text-transform:uppercase}.pmh span{font:400 12.5px/1.4 var(--body);color:var(--mu)}
+.pmr{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:12px 0;border-top:1px solid var(--ln)}.pmr.col{flex-direction:column;align-items:stretch}
+.pmt{display:flex;flex-direction:column;gap:3px;min-width:0}.pmt b{font:600 14px var(--body)}.pmt span{font:400 12px/1.4 var(--body);color:var(--mu)}
+.pmc{flex:none}.pms{font:500 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--mu)}
+.pmo{min-height:44px;min-width:76px;padding:0 14px;background:none;color:var(--tx);border:1px solid var(--ln);border-radius:0;font:500 11px var(--body);letter-spacing:.14em;text-transform:uppercase}.pmo[aria-pressed="true"]{background:var(--tx);color:var(--bg)}
+.pmg{display:flex;flex-direction:column;gap:6px}.pmo.wide{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:9px 12px;text-transform:none;letter-spacing:.02em;text-align:left}.pmo.wide b{font:600 13px var(--body)}.pmo.wide span{font:400 11.5px var(--body);opacity:.8}
+@media (min-width:600px){#perm{align-items:center;padding:24px}.pmp{border:1px solid var(--ln);padding:28px 26px}}
+@media (max-height:560px){.pmp{padding-top:14px;gap:8px}.pmr{padding:8px 0}}
 #gate .card{background:transparent}
 </style>
 </head>
@@ -1537,6 +1548,20 @@ new MutationObserver(()=>{if(document.querySelector('#wh:not([data-b])'))whBind(
   q.hd.style.transition=`transform ${tr}`;q.hd.style.transform=`translate(${tw-q.w0}px,${th-q.h0}px)`;const xb=q.w.querySelector('.gx');if(xb){xb.style.transition=`transform ${tr}`;xb.style.transform=`translateX(${tw-q.w0}px)`}
   setTimeout(()=>{if(best!==it.s){const gg=gdS(),old=it.s;it.s=best;if(gdPack(gg[p],gyRows()))save();else{it.s=old;toast('No room for that size')}}render()},whRM()?0:250)};
  document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end)})();
+/* ===== permissions sheet after sign-in ===== */
+function permBody(){const p=mp(),sh=p&&p.share||'manual',lp=typeof LP!=="undefined"?LP:'prompt',has=!!(S.loc&&S.loc.region),sel=(k,v,t)=>`<button class="pmo" data-pm="${k}" aria-pressed="${v}">${t}</button>`;
+ const loc=`<div class="pmr"><div class="pmt"><b>Location</b><span>Astral uses it for sunrise, sunset and the weather where you are. It stays on your phone unless you choose to share your area below.</span></div><div class="pmc">${lp==='granted'?`<span class="pms">Allowed</span>`:lp==='denied'?`<span class="pms">Blocked in Settings</span>`:`${sel('loc',false,'Allow')}`}</div></div>
+ <div class="pmr"><div class="pmt"><b>Show my area to friends</b><span>Friends see your city on your profile. Off by default.</span></div><div class="pmc">${sel('area',!!(S.loc&&S.loc.share),S.loc&&S.loc.share?'On':'Off')}</div></div>`;
+ const wk=p?`<div class="pmr col"><div class="pmt"><b>Your workouts</b><span>Who sees them in Synergy.</span></div><div class="pmg">${[['auto','Automatic','Shared as you save them'],['manual','Ask each time','Only when you tap Share'],['private','Private','Only you']].map(o=>`<button class="pmo wide" data-pm="sh:${o[0]}" aria-pressed="${sh===o[0]}"><b>${o[1]}</b><span>${o[2]}</span></button>`).join('')}</div></div>`:'';
+ return `<div class="pmh"><b>Before you start</b><span>You choose what is shared. You can change all of this later in Profile.</span></div>${loc}${wk}<button class="btn big" data-pm="done">Continue</button>`}
+function permDraw(){let el=document.getElementById('perm');if(!el){el=document.createElement('div');el.id='perm';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Permissions');document.body.appendChild(el)}el.innerHTML=`<div class="pmp">${permBody()}</div>`}
+function permCheck(){if(typeof STANDALONE!=="undefined"&&!STANDALONE)return;const u=SO&&SO.uid;if(!u||document.documentElement.hasAttribute('data-gate')||document.getElementById('perm'))return;if(!S.perm)S.perm={};if(S.perm[u])return;permDraw()}
+setInterval(()=>{try{permCheck()}catch(e){}},1500);
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pm]');if(!b)return;const k=b.dataset.pm;
+ if(k==='loc'){try{locDevice()}catch(x){}setTimeout(permDraw,1500);setTimeout(permDraw,4000)}
+ else if(k==='area'){S.loc.share=!S.loc.share;save();if(SO.db&&mp())setProfile({region:S.loc.share&&S.loc.region?regionLabel(S.loc.region):null});permDraw()}
+ else if(k.startsWith('sh:')){if(SO.db&&mp())setProfile({share:k.slice(3)});permDraw()}
+ else if(k==='done'){if(!S.perm)S.perm={};S.perm[SO.uid]=1;save();const el=document.getElementById('perm');if(el)el.remove()}});
 </script>
 </body>
 </html>
