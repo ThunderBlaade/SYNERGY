@@ -280,7 +280,7 @@ nav{padding:4px 4px max(8px,calc(env(safe-area-inset-bottom,0px) - 6px))!importa
 /*fit*/.gy-fit{display:flex;flex-direction:column;gap:10px;height:calc(100dvh - 164px - env(safe-area-inset-top,0px))}.gy-pn{flex:1;min-height:0;overflow:hidden;border:1.5px solid color-mix(in srgb,var(--tx) 42%,transparent);padding:8px}.gy-pn::-webkit-scrollbar{display:none}
 .gy-pn{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .gy-start{padding:0;display:flex;align-items:center;gap:6px}.gsm{flex:1;min-width:0}.nl{display:block;padding-left:.16em;white-space:nowrap}nav button[aria-current=page]::before{content:none!important}.nvl{position:absolute;top:-7px;left:50%;height:2px;background:var(--irid);pointer-events:none}html{overflow-x:hidden}
-#pgdiv{position:fixed;top:0;bottom:0;left:0;width:13px;z-index:6;pointer-events:none;display:none;justify-content:center;overflow:hidden;border-left:1px solid color-mix(in srgb,var(--mu) 40%,transparent);border-right:1px solid color-mix(in srgb,var(--mu) 40%,transparent)}#pgdiv span{display:block;flex:none;writing-mode:vertical-rl;-webkit-writing-mode:vertical-rl;text-orientation:upright;-webkit-text-orientation:upright;font:500 6px/1 ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:3px;text-align:start;color:var(--mu);opacity:.24;white-space:nowrap}
+.pgdiv{position:fixed;top:0;bottom:0;left:0;width:13px;z-index:6;pointer-events:none;display:none;justify-content:center;overflow:hidden;border-left:1px solid color-mix(in srgb,var(--mu) 40%,transparent);border-right:1px solid color-mix(in srgb,var(--mu) 40%,transparent)}.pgdiv span{display:block;flex:none;writing-mode:vertical-rl;-webkit-writing-mode:vertical-rl;text-orientation:upright;-webkit-text-orientation:upright;font:500 6px/1 ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:3px;text-align:start;color:var(--mu);opacity:.24;white-space:nowrap}
 .gy-bar{justify-content:space-between}.gy-bar .pb{display:none}.gy-bar:has(+ .gy-pn .ge) .pa{display:none}.gy-bar:has(+ .gy-pn .ge) .pb{display:block}.gsq,.gsq:hover,.gsq:active,.gsq:focus,.gsq:focus-visible{background:none!important;outline:none!important;box-shadow:none!important;border:0;-webkit-tap-highlight-color:transparent}.gsq span{display:block}.gsq{flex:none;width:42px;height:36px;display:grid;place-items:center;background:none;border:0;color:var(--tx);padding:0}.gsq{color:color-mix(in srgb,var(--tx) 66%,transparent)}.gsq svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.gy-start .btn.big{min-height:64px}.gy-start .card{margin:0 0 10px}
 .gbd{position:fixed;inset:0;z-index:35;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:24px 16px}.gbb{width:100%;max-width:360px;max-height:80dvh;overflow-y:auto;background:var(--bg);color:var(--tx);border:1px solid var(--ln);padding:6px 14px 14px}.gbb h1{margin:10px 0 14px!important}.gbb .gy-must{margin-bottom:10px}
 .gpr2{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 0;border-top:1px solid var(--ln)}.gpr2.off{opacity:.4}.gpn{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}.gpn b{font:500 12px var(--body);letter-spacing:.2em;text-transform:uppercase}.gpn em{font:400 11.5px var(--body);font-style:normal;color:var(--mu)}
@@ -1648,34 +1648,37 @@ const TORD=TABS.map(t=>t[0]);let LASTTAB=null;
 function navLine(){const nav=document.getElementById('nav');if(!nav)return;const b=nav.querySelector('button[aria-current=page]'),s=b&&b.querySelector('.nl');if(!s)return;const ls=parseFloat(getComputedStyle(s).letterSpacing)||0,w=Math.max(10,s.offsetWidth-2*ls),i=document.createElement('i');i.className='nvl';i.style.width=w+'px';i.style.marginLeft=(-w/2)+'px';b.appendChild(i);if(LASTTAB!==null&&LASTTAB!==tab&&i.animate)i.animate([{opacity:1},{opacity:.05,offset:.4},{opacity:1}],{duration:750,easing:'ease-in-out'});LASTTAB=tab}
 {const _n=render;render=function(){const o=_n.apply(this,arguments);try{navLine()}catch(e){}return o}}
 /* ===== Page swipe =====
-   While a finger drags sideways, the current page and its neighbour move together
-   and a thin line marks the seam. Let go past the halfway-ish point (or flick) and
-   the neighbour settles in; otherwise everything slides back. */
-const PS={g:null,W:0};
+   The pages sit side by side like one long strip. A sideways drag slides the strip with
+   the finger, so the page on the left or right is already there as you pull, and a thin
+   line marks each seam. On release the strip settles on the nearest page, or on the next
+   one if you flick. */
+const PS={g:null};
 const psViews=()=>({home,play:gym,conn:connView,rank,astral:astralView,me:profile});
 function psHtml(t){const keep=tab;tab=t;try{return psViews()[t]()}finally{tab=keep}}
-function psSeam(){let d=document.getElementById('pgdiv');if(!d){d=document.createElement('div');d.id='pgdiv';d.setAttribute('aria-hidden','true');d.innerHTML='<span>'+'SYNERGY '.repeat(24)+'</span>';document.body.appendChild(d)}return d}
-function psBegin(g,dx){const app=document.getElementById('app'),i=TORD.indexOf(tab)+(dx<0?1:-1);g.app=app;g.dir=dx<0?-1:1;g.W=app.offsetWidth;g.left=app.getBoundingClientRect().left;g.top=app.offsetTop;
- if(i<0||i>=TORD.length)return;
- try{const p=document.createElement('div');p.id='app';p.className=app.className;p.innerHTML=psHtml(TORD[i]);
-  p.style.cssText=`position:fixed;top:${g.top}px;bottom:0;width:${g.W}px;margin:0;overflow:hidden;pointer-events:none`;
-  app.after(p);g.peer=p;g.next=TORD[i];const s=psSeam();s.style.cssText+=`;top:${g.top}px;bottom:${document.getElementById('nav').offsetHeight}px;display:flex`}catch(e){g.peer=null}}
-function psPlace(g,x){g.x=x;g.app.style.left=x+'px';if(!g.peer)return;
- g.peer.style.left=(g.left+x-g.dir*g.W)+'px';psSeam().style.left=(g.left+(g.dir<0?g.W+x:x)-6.5)+'px'}
-function psClean(g){if(g.peer)g.peer.remove();g.app.style.left='';const d=document.getElementById('pgdiv');if(d)d.style.display='none';PS.g=null}
-function psSettle(g,to,done){const from=g.x,t0=performance.now(),ms=300,ease=u=>1-Math.pow(1-u,3);
+function psSeam(){const d=document.createElement('div');d.className='pgdiv';d.setAttribute('aria-hidden','true');d.innerHTML='<span>'+'SYNERGY '.repeat(24)+'</span>';document.body.appendChild(d);return d}
+function psBegin(g){const app=document.getElementById('app'),r=app.getBoundingClientRect(),nav=document.getElementById('nav');
+ Object.assign(g,{app,W:app.offsetWidth,left:r.left,top:app.offsetTop,side:{},x:0,vx:0,lx:0,lt:performance.now()});
+ for(const s of[-1,1]){const t=TORD[TORD.indexOf(tab)+s];if(!t)continue;
+  try{const el=document.createElement('div');el.id='app';el.className=app.className;el.innerHTML=psHtml(t);
+   el.style.cssText=`position:fixed;top:${g.top}px;bottom:0;width:${g.W}px;margin:0;overflow:hidden;pointer-events:none`;app.after(el);
+   const seam=psSeam();seam.style.cssText+=`;top:${g.top}px;bottom:${nav.offsetHeight}px`;g.side[s]={el,tab:t,seam}}catch(e){}}}
+function psPlace(g,x){const s=x<0?1:-1;if(!g.side[s])x*=.25;
+ const now=performance.now();g.vx=.8*g.vx+.2*((x-g.lx)/Math.max(1,now-g.lt));g.lx=x;g.lt=now;g.x=x;g.app.style.left=x+'px';
+ for(const k in g.side){const p=g.side[k];p.el.style.left=(g.left+x+k*g.W)+'px';p.seam.style.left=(g.left+x+(k>0?g.W:0)-6.5)+'px';p.seam.style.display=(k>0?x<0:x>0)?'flex':'none'}}
+function psClean(g){for(const k in g.side){g.side[k].el.remove();g.side[k].seam.remove()}g.app.style.left='';PS.g=null}
+function psSettle(g,to,ms,done){const from=g.x,t0=performance.now(),ease=u=>1-Math.pow(1-u,3);
  const step=now=>{const u=Math.min(1,(now-t0)/ms);psPlace(g,from+(to-from)*ease(u));u<1?requestAnimationFrame(step):done()};requestAnimationFrame(step)}
-function psEnd(g,vx){
- const go=g.peer&&(Math.abs(g.x)>g.W*.33||(Math.abs(vx)>.45&&Math.sign(vx)===g.dir));g.settling=true;
- psSettle(g,go?g.dir*g.W:0,()=>{const t=go?g.next:null;psClean(g);if(t){tab=t;sub=null;render();goTop()}})}
+function psEnd(g){const s=g.x<0?1:-1,fast=Math.abs(g.vx)>.4,flick=fast&&Math.sign(g.vx)===-s,far=Math.abs(g.x)>g.W*.33&&!(fast&&!flick);
+ const go=!!g.side[s]&&(flick||far),to=go?-s*g.W:0,ms=Math.max(180,Math.min(380,Math.abs(to-g.x)/Math.max(.9,Math.abs(g.vx))));
+ g.settling=true;psSettle(g,to,ms,()=>{const t=go?g.side[s].tab:null;psClean(g);if(t){tab=t;sub=null;render();goTop()}})}
 (function(){const bad=t=>!t||!t.closest||t.closest('input,textarea,select,#sheet,#perm,#ask,#gate,.gmini,nav,#hmc,.devp,.devb,.gbd');
  const hscroll=t=>{for(let e=t;e&&e!==document.body;e=e.parentElement){if(e.scrollWidth>e.clientWidth+4){const o=getComputedStyle(e).overflowX;if(o==='auto'||o==='scroll')return true}}return false};
  const free=()=>!sub&&!GE&&!window.__gdrag&&!document.documentElement.hasAttribute('data-gate');
- document.addEventListener('touchstart',e=>{if(PS.g)return;if(e.touches.length!==1||!free()||bad(e.target)||hscroll(e.target))return;const t=e.touches[0];PS.g={x0:t.clientX,y0:t.clientY,t0:Date.now(),mode:null,x:0}},{passive:true});
+ document.addEventListener('touchstart',e=>{if(PS.g)return;if(e.touches.length!==1||!free()||bad(e.target)||hscroll(e.target))return;const t=e.touches[0];PS.g={x0:t.clientX,y0:t.clientY,mode:null}},{passive:true});
  document.addEventListener('touchmove',e=>{const g=PS.g;if(!g||g.settling)return;const t=e.touches[0],dx=t.clientX-g.x0,dy=t.clientY-g.y0;
-  if(!g.mode){if(Math.abs(dx)<8&&Math.abs(dy)<8)return;if(Math.abs(dx)<Math.abs(dy)*1.3||(g.x0<24&&dx>0)){PS.g=null;return}g.mode='h';psBegin(g,dx)}
-  e.preventDefault();psPlace(g,g.peer?(g.dir<0?Math.min(0,dx):Math.max(0,dx)):dx*.25)},{passive:false});
- const end=e=>{const g=PS.g;if(!g||g.settling)return;if(g.mode!=='h'){PS.g=null;return}psEnd(g,(e.changedTouches[0].clientX-g.x0)/Math.max(1,Date.now()-g.t0))};
+  if(!g.mode){if(Math.abs(dx)<8&&Math.abs(dy)<8)return;if(Math.abs(dx)<Math.abs(dy)*1.3||(g.x0<24&&dx>0)){PS.g=null;return}g.mode='h';g.x0=t.clientX;psBegin(g);return}
+  e.preventDefault();psPlace(g,t.clientX-g.x0)},{passive:false});
+ const end=e=>{const g=PS.g;if(!g||g.settling)return;g.mode==='h'?psEnd(g):PS.g=null};
  document.addEventListener('touchend',end,{passive:true});document.addEventListener('touchcancel',end,{passive:true})})();
 /* compass: window light follows where the sun really is */
 const CP={on:false,h:null,t:0,last:0};
