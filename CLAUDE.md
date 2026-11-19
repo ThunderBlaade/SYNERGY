@@ -42,3 +42,12 @@ Private social fitness-gaming web app for a small group of friends (about 10 peo
 - Test by serving the folder locally (`python -m http.server 8000`, then http://localhost:8000/). The service worker only registers on https or localhost.
 - Check in a mobile-sized window (390x844). WebKit/iOS behaviour is the main risk: ask Sam to check on the iPhone for anything involving scroll, touch or safe areas.
 - Commit small and often. Message style: plain English, what changed.
+
+## Gym, swipe and floor (added later)
+- **Pages swipe** like one strip (`psBegin/psPlace/psSettle/psEnd`, block starts "Page swipe"): both neighbours are rendered as `.psf` frames carrying their own backdrop (gym floor clone), the live `#gbg`/`#sky` shifts with the current page, thin `.pgdiv` seam lines, nav line `.nvl` slides and resizes. It only runs on a main tab with no sub-page, not while editing widgets. The page you were on is saved in `S.lastTab`.
+- **Gym dashboard**: `S.gd={L:[...],B:[...]}` (top and bottom boxes), items `{k,s,c,r}`; 3 columns x 2 rows per box; sizes t/s/m/l. Engine: `gdLay`, `gdPlan`, `gdCand`, `gdLive` (widgets you drag over move away at once to the nearest free cell). Hold anywhere (or the pencil) = edit mode (`GE`), 6s idle exit, tap outside exits. Top bar: minus (Remove all, keeps Days) and pencil, which becomes a plus (Add box) while editing. Add box is `gbox()` (size flipper with arrows). The last widget cannot be removed.
+- **Floor** (`gbgDraw`, `gbgTex`, `gbgFine`, `gbgCracks`, `gbgGrazes`): concrete texture, cracks, grazes, window light that follows the real sun (`sunPos`, location + time), compass heading (`CP`, `cmpAsk`, needs the Compass permission) and weather (`S.wx`, `wxKind`). Light and dark variants. Editor can simulate with `SKYSIM.min` and `window.__wxsim`.
+- **Bars**: top `#tbar` and bottom `nav` are both 46px content height. `.gy-fit` height accounts for the iPhone home-bar area.
+- **Permissions sheet** `#perm`: location, compass, city choice; each has an offline/no-permission fallback.
+- **Service worker**: `VERSION` was found stuck at v39 for a long time because sed bumps silently missed; check it with `grep VERSION service-worker.js` after every bump.
+- Not built yet: Apple Health Shortcut route, Fitbit connection, Monitor screen, goal widgets, Astral sky during swipe when Astral is the incoming page.
