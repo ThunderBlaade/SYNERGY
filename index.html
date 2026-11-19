@@ -1006,7 +1006,7 @@ function devSync(){const q=id=>document.getElementById(id),m=SKYSIM.min!=null?SK
  if(inp&&document.activeElement!==inp)inp.value=Math.floor((m-DAY0+1440)%1440);if(q('dvt'))q('dvt').textContent=hmm(m);if(q('dvp'))q('dvp').textContent=periodName(vmin(m));
  if(q('dvm'))q('dvm').textContent=SKYSIM.off===0?'Today':simDate().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});if(q('dvn'))q('dvn').textContent=mi.name+' · '+mi.lit+'% lit';
  const sl=document.querySelector('[data-skyline]');if(sl)sl.textContent='✦ '+skyLine()}
-function devPlay(on){clearInterval(DV.pt);DV.play=!!on;if(on){if(SKYSIM.min==null)SKYSIM.min=Math.round(nowMin());DV.pt=setInterval(()=>{SKYSIM.min=(SKYSIM.min+1)%1440;document.documentElement.setAttribute('data-sim','');applySky();devSync()},130)}}
+function devPlay(on){clearInterval(DV.pt);DV.play=!!on;if(on){if(SKYSIM.min==null)SKYSIM.min=Math.round(nowMin());DV.pt=setInterval(()=>{SKYSIM.min=(SKYSIM.min+1)%1440;document.documentElement.setAttribute('data-sim','');applySky();try{if(tab==='play')gbgDraw()}catch(e){}devSync()},130)}}
 function devDraw(){let el=$('#dev');if(!el){el=document.createElement('div');el.id='dev';document.body.appendChild(el)}
  if(!SO.edit||DV.hide){el.innerHTML='';return}
  const st=DV.x==null?'':`left:${DV.x}px;top:${DV.y}px;right:auto;bottom:auto`;
@@ -1034,8 +1034,8 @@ async function devAct(a,x){if(['vroot','x','hide','live','setup','login','forgot
  devDraw();if(['x','hide','rm','rm2','clrrep'].includes(a))return;}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-dv]');if(!b)return;if(DV.moved){DV.moved=false;return}const s=b.dataset.dv,i=s.indexOf(':');devAct(i<0?s:s.slice(0,i),i<0?'':s.slice(i+1))});
 document.addEventListener('input',e=>{const t=e.target,k=t.dataset&&t.dataset.dvr;if(!k)return;const v=+t.value;devPlay(false);const pb=document.getElementById('dvplay');if(pb)pb.textContent='Play';
- if(k==='g'){SKYSIM.min=(Math.round(DAY0)+v)%1440;gbgDraw();const b=document.querySelector('.devp .row b');if(b)b.textContent=hmm(SKYSIM.min);return}if(k==='t')SKYSIM.min=(Math.round(DAY0)+v)%1440;else{SKYSIM.off=v;if(SKYSIM.min==null)SKYSIM.min=Math.round(nowMin())}
- document.documentElement.setAttribute('data-sim','');applySky();devSync()});
+ if(k==='g'){SKYSIM.min=(Math.round(DAY0)+v)%1440;document.documentElement.setAttribute('data-sim','');gbgDraw();applySky();const b=document.querySelector('.devp .row b');if(b)b.textContent=hmm(SKYSIM.min);return}if(k==='t')SKYSIM.min=(Math.round(DAY0)+v)%1440;else{SKYSIM.off=v;if(SKYSIM.min==null)SKYSIM.min=Math.round(nowMin())}
+ document.documentElement.setAttribute('data-sim','');applySky();try{if(tab==='play')gbgDraw()}catch(e){}devSync()});
 document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('[data-dvr]')){const p=document.querySelector('.devp');if(p)p.classList.add('dim')}});
 const dvUn=()=>{const p=document.querySelector('.devp');if(p)p.classList.remove('dim')};document.addEventListener('pointerup',dvUn);document.addEventListener('pointercancel',dvUn);
 const dvHide=()=>{DV.hide=true;DV.open=false;try{localStorage.setItem('synergy_editor_hide','1')}catch(e){}devDraw();toast('Editor hidden. Open the site with /#editor at the end to bring it back.')};
