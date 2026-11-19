@@ -350,6 +350,18 @@ html[data-tab=astral] #tbar{background:transparent;border-bottom-color:transpare
 #gate .card{background:transparent}
 /* matte glass: same colours as before, frosted and see-through, no shine */
 .gw:not(.gem){background:color-mix(in srgb,var(--s1) 66%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.1);backdrop-filter:blur(16px) saturate(1.1)}
+
+.gbd{align-items:flex-end;justify-content:center;padding:0;background:rgba(0,0,0,.42);animation:gbfade .3s ease both}
+.gbb{max-width:none;width:100%;height:calc(100dvh - 46px - env(safe-area-inset-top,0px));max-height:none;border:0;border-top:1px solid color-mix(in srgb,var(--tx) 42%,transparent);padding:0 18px calc(24px + env(safe-area-inset-bottom,0px));animation:gbup .42s cubic-bezier(.22,.9,.28,1) both;overscroll-behavior:contain}
+.gbh{display:flex;justify-content:center;padding:10px 0 12px;position:sticky;top:0;background:var(--bg);z-index:2;touch-action:none}.gbh i{display:block;width:40px;height:3px;background:color-mix(in srgb,var(--tx) 30%,transparent)}
+.gsr{display:flex;align-items:center;gap:10px;border:1px solid color-mix(in srgb,var(--tx) 30%,transparent);padding:0 12px;height:42px;margin:0 0 22px}.gsr svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--mu);stroke-width:1.4;stroke-linecap:round}
+.gsr input{flex:1;min-width:0;height:100%;background:none;border:0;outline:0;color:var(--tx);font:400 14px ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;padding:0;border-radius:0;-webkit-appearance:none}.gsr input::placeholder{color:var(--mu)}
+.gcg{display:grid;grid-template-columns:1fr 1fr;gap:26px 14px}.gcl{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0}.gcl.wide{grid-column:1/-1}.gcl.off{opacity:.4}
+.gcl b{font:500 12px var(--body);letter-spacing:.2em;text-transform:uppercase;color:var(--tx);opacity:1}.gcl em{font:400 11.5px var(--body);font-style:normal;color:var(--mu)}
+.gcs{display:flex;align-items:center;justify-content:center;gap:2px;font:500 9.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mu)}.gcs .gch{width:32px;height:28px}.gcs span{min-width:64px}
+.gcl[hidden]{display:none}
+@keyframes gbup{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes gbfade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.gbb,.gbd{animation:none}}
 </style>
 </head>
 <body>
@@ -1534,13 +1546,19 @@ function gyDash(){gdNorm();gdFreeze();const g=gdS();window.__pp=null;return `<di
 function gyDash2(){return gyPanel('B','gd2',window.__pp)}
 const GSL={t:'Tiny',s:'Small',m:'Medium',l:'Big'},GBS={};
 function gbPick(k){const fit=gdSizes(k);if(!fit.length)return{fit,cur:dz(k)};let cur=GBS[k];if(!fit.includes(cur))cur=fit.includes(dz(k))?dz(k):fit[0];return{fit,cur}}
-function gbPrev(k,s){const C=100,G=8,sc=.62,d=GDIM[s],W=d[0]*C+(d[0]-1)*G,H=d[1]*C+(d[1]-1)*G;return `<span class="gpv" style="width:${Math.round(W*sc)}px;height:${Math.round(H*sc)}px"><span class="pvi" style="width:${W}px;height:${H}px;transform:scale(${sc})"><span class="gwr z${s}" style="display:block;height:100%"><span class="gw${k==='empty'?' gem':''}" style="display:flex;height:100%">${gwBody({k,s})}</span></span></span></span>`}
+function gbPrev(k,s){const C=100,G=8,sc=({t:.8,s:.78,m:1,l:1})[s]||.8,d=GDIM[s],W=d[0]*C+(d[0]-1)*G,H=d[1]*C+(d[1]-1)*G;return `<span class="gpv" style="width:${Math.round(W*sc)}px;height:${Math.round(H*sc)}px"><span class="pvi" style="width:${W}px;height:${H}px;transform:scale(${sc})"><span class="gwr z${s}" style="display:block;height:100%"><span class="gw${k==='empty'?' gem':''}" style="display:flex;height:100%">${gwBody({k,s})}</span></span></span></span>`}
 const GCH='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
 function gbox(must){if(!must&&gdNone())return gbox(1);const g0=gdS(),used=new Set([...g0.L,...g0.B].map(x=>x.k)),ks=Object.keys(GW).filter(k=>GW[k].p&&(k==='empty'?!must:!used.has(k)));
- const row=k=>{const {fit,cur}=gbPick(k),ok=fit.length>0||gdCan(k),sq=!fit.length&&ok;
-  return `<div class="gpr2${ok?'':' off'}"><div class="gpn"><b>${GW[k].t}</b><em>${ok?GW[k].d:'No space left'}</em></div><div class="gps"><button class="gch" data-wx="gb:${k}:-1" ${fit.length>1?'':'disabled'} aria-label="Previous size">${GCH}</button><button class="gpm" data-wx="${sq?'gs:'+k:'gs:'+k+':'+cur}" ${ok?'':'disabled'} aria-label="Add ${GW[k].t}, ${GSL[cur]}">${gbPrev(k,cur)}<span class="gpl2">${sq?'Make room':GSL[cur]}</span></button><button class="gch r" data-wx="gb:${k}:1" ${fit.length>1?'':'disabled'} aria-label="Next size">${GCH}</button></div></div>`};
- const box=`<div class="gbb"><h1>Add</h1>${must?'<p class="gy-must">You must select one goal</p>':''}${ks.length?ks.map(row).join(''):'<p class="mu sm" style="text-align:center">Everything is already on your dashboard.</p>'}</div>`;
- return `${must?'':'<div class="hd"><button class="bk" data-wx="done">Back</button></div>'}${must?'':gym()}<div class="gbd"${must?'':' data-wx="bd"'}>${box}</div>`}
+ const cell=k=>{const {fit,cur}=gbPick(k),ok=fit.length>0||gdCan(k),sq=!fit.length&&ok,wide=cur==='m'||cur==='l';
+  return `<div class="gcl${ok?'':' off'}${wide?' wide':''}" data-q="${esc((GW[k].t+' '+GW[k].d+' '+(GW[k].c||'')).toLowerCase())}"><button class="gpm" data-wx="${sq?'gs:'+k:'gs:'+k+':'+cur}" ${ok?'':'disabled'} aria-label="Add ${GW[k].t}, ${GSL[cur]}">${gbPrev(k,cur)}</button><div class="gcs"><button class="gch" data-wx="gb:${k}:-1" ${fit.length>1?'':'disabled'} aria-label="Previous size">${GCH}</button><span>${sq?'Make room':GSL[cur]}</span><button class="gch r" data-wx="gb:${k}:1" ${fit.length>1?'':'disabled'} aria-label="Next size">${GCH}</button></div><b>${GW[k].t}</b><em>${ok?GW[k].d:'No space left'}</em></div>`};
+ const box=`<div class="gbb" role="dialog" aria-label="Add widget"><div class="gbh" data-nosw="1"><i></i></div><div class="gsr"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="gbq" type="search" placeholder="Search widgets" autocomplete="off" autocapitalize="off" spellcheck="false"></div>${must?'<p class="gy-must">You must select one goal</p>':''}${ks.length?`<div class="gcg">${ks.map(cell).join('')}</div><p class="mu sm gnone" hidden>No widgets match.</p>`:'<p class="mu sm" style="text-align:center">Everything is already on your dashboard.</p>'}</div>`;
+ return `${must?'':gym()}<div class="gbd"${must?'':' data-wx="bd"'}>${box}</div>`}
+
+document.addEventListener('input',e=>{const q=e.target;if(!q||q.id!=='gbq')return;const t=q.value.trim().toLowerCase();let n=0;document.querySelectorAll('.gcl').forEach(c=>{const m=!t||c.dataset.q.includes(t);c.hidden=!m;if(m)n++});const z=document.querySelector('.gnone');if(z)z.hidden=n>0});
+(function(){let y0=null,bb=null,dy=0;document.addEventListener('touchstart',e=>{const hd=e.target.closest&&e.target.closest('.gbh');if(!hd){y0=null;return}bb=hd.closest('.gbb');y0=e.touches[0].clientY;dy=0;bb.style.animation='none'},{passive:true});
+document.addEventListener('touchmove',e=>{if(y0==null)return;dy=Math.max(0,e.touches[0].clientY-y0);bb.style.transform='translateY('+dy+'px)'},{passive:true});
+const end=()=>{if(y0==null)return;const b=bb;y0=null;if(dy>90){b.style.transition='transform .22s ease-out';b.style.transform='translateY(100%)';setTimeout(()=>{sub=null;render()},200)}else{b.style.transition='transform .2s ease-out';b.style.transform='translateY(0)'}};
+document.addEventListener('touchend',end);document.addEventListener('touchcancel',end)})();
 /* clicks */
 document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!b)return;const [a,x,y,z]=b.dataset.wx.split(':'),W=whS();
  switch(a){
