@@ -1658,16 +1658,26 @@ const PS={g:null};
 const psViews=()=>({home,play:gym,conn:connView,rank,astral:astralView,me:profile});
 function psHtml(t){const keep=tab;tab=t;try{return psViews()[t]()}finally{tab=keep}}
 function psSeam(){const d=document.createElement('div');d.className='pgdiv';d.setAttribute('aria-hidden','true');d.innerHTML='<span>'+'SYNERGY '.repeat(24)+'</span>';document.body.appendChild(d);return d}
-function psBegin(g){const app=document.getElementById('app'),r=app.getBoundingClientRect(),nav=document.getElementById('nav');
- Object.assign(g,{app,W:app.offsetWidth,left:r.left,top:app.offsetTop,side:{},x:0,vx:0,lx:0,lt:performance.now()});
- for(const s of[-1,1]){const t=TORD[TORD.indexOf(tab)+s];if(!t)continue;
-  try{const el=document.createElement('div');el.id='app';el.className=app.className;el.innerHTML=psHtml(t);
-   el.style.cssText=`position:fixed;top:${g.top}px;bottom:0;width:${g.W}px;margin:0;overflow:hidden;pointer-events:none`;app.after(el);
-   const seam=psSeam();seam.style.cssText+=`;top:${g.top}px;bottom:${nav.offsetHeight}px`;g.side[s]={el,tab:t,seam}}catch(e){}}}
+/* each page's own backdrop (the gym floor) travels with it; the live backdrop is shifted with the current page */
+const PSIDS=['gv','gl','gb','gb2','gvs','gwin','gwp','gam','gsh','gshp','gbl'];
+function psBackdrop(t){if(t!=='play')return null;if(!document.getElementById('gbg'))gbgDraw();const o=document.getElementById('gbg');if(!o)return null;
+ const c=o.cloneNode(false);c.innerHTML=o.innerHTML.replace(new RegExp('id="('+PSIDS.join('|')+')"','g'),'id="$1x"').replace(new RegExp('url\\(#('+PSIDS.join('|')+')\\)','g'),'url(#$1x)');
+ c.style.cssText+=';position:absolute;inset:0;display:block;z-index:0';return c}
+const psGeo=b=>{const r=b.getBoundingClientRect(),s=b.querySelector('.nl'),ls=parseFloat(getComputedStyle(s).letterSpacing)||0;return{c:r.left+r.width/2,w:s.offsetWidth-2*ls}};
+function psBegin(g){const app=document.getElementById('app'),r=app.getBoundingClientRect(),nav=document.getElementById('nav'),btn=[...nav.querySelectorAll('button')],me=TORD.indexOf(tab);
+ Object.assign(g,{app,W:app.offsetWidth,left:r.left,top:app.offsetTop,side:{},x:0,vx:0,lx:0,lt:performance.now(),line:nav.querySelector('.nvl'),geo:{0:psGeo(btn[me])},
+  live:['gbg','sky'].map(id=>document.getElementById(id)).filter(e=>e&&getComputedStyle(e).display!=='none')});
+ for(const s of[-1,1]){const t=TORD[me+s];if(!t)continue;
+  try{const frame=document.createElement('div'),bd=psBackdrop(t),el=document.createElement('div');frame.className='psf';
+   frame.style.cssText=`position:fixed;top:0;bottom:0;width:${g.W}px;overflow:hidden;z-index:1;pointer-events:none;background:var(--bg)`;if(bd)frame.append(bd);
+   el.id='app';el.className=app.className;el.innerHTML=psHtml(t);el.style.cssText=`position:absolute;top:${g.top}px;left:0;bottom:0;width:${g.W}px;margin:0;overflow:hidden`;frame.append(el);document.body.append(frame);
+   const seam=psSeam();seam.style.cssText+=`;top:${g.top}px;bottom:${nav.offsetHeight}px`;g.geo[s]=psGeo(btn[me+s]);g.side[s]={el:frame,tab:t,seam}}catch(e){}}}
 function psPlace(g,x){const s=x<0?1:-1;if(!g.side[s])x*=.25;
  const now=performance.now();g.vx=.8*g.vx+.2*((x-g.lx)/Math.max(1,now-g.lt));g.lx=x;g.lt=now;g.x=x;g.app.style.left=x+'px';
- for(const k in g.side){const p=g.side[k];p.el.style.left=(g.left+x+k*g.W)+'px';p.seam.style.left=(g.left+x+(k>0?g.W:0)-6.5)+'px';p.seam.style.display=(k>0?x<0:x>0)?'flex':'none'}}
-function psClean(g){for(const k in g.side){g.side[k].el.remove();g.side[k].seam.remove()}g.app.style.left='';PS.g=null}
+ g.live.forEach(e=>{e.style.left=x+'px';e.style.right=-x+'px'});
+ for(const k in g.side){const p=g.side[k];p.el.style.left=(g.left+x+k*g.W)+'px';p.seam.style.left=(g.left+x+(k>0?g.W:0)-6.5)+'px';p.seam.style.display=(k>0?x<0:x>0)?'flex':'none'}
+ if(g.line&&g.geo[s]){const u=Math.min(1,Math.abs(x)/g.W),a=g.geo[0],b=g.geo[s],w=a.w+(b.w-a.w)*u;g.line.style.transform=`translateX(${(b.c-a.c)*u}px)`;g.line.style.width=w+'px';g.line.style.marginLeft=(-w/2)+'px'}}
+function psClean(g){for(const k in g.side){g.side[k].el.remove();g.side[k].seam.remove()}g.app.style.left='';g.live.forEach(e=>{e.style.left='';e.style.right=''});PS.g=null}
 function psSettle(g,to,ms,done){const from=g.x,t0=performance.now(),ease=u=>1-Math.pow(1-u,3);
  const step=now=>{const u=Math.min(1,(now-t0)/ms);psPlace(g,from+(to-from)*ease(u));u<1?requestAnimationFrame(step):done()};requestAnimationFrame(step)}
 function psEnd(g){const s=g.x<0?1:-1,fast=Math.abs(g.vx)>.4,flick=fast&&Math.sign(g.vx)===-s,far=Math.abs(g.x)>g.W*.33&&!(fast&&!flick);
