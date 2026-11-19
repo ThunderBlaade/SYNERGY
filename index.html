@@ -374,6 +374,7 @@ html[data-fl=light] .gbb{background:radial-gradient(75% 40% at 6% 0%,color-mix(i
 html[data-fl=light] .wh{--stc:#1E1E20}html[data-fl=dark] .wh{--stc:#D0CEC9}.wh .wi,.wh .wi.sel{color:var(--stc,var(--tx))}.wh .wi.pin{color:transparent}.wh .wp{background:var(--stc,var(--mu))}.wh .wl{left:14px;right:14px;background:color-mix(in srgb,var(--stc,var(--ln)) 40%,transparent)}.wh .wptr{right:0;border-right-color:var(--stc,var(--ac))}.wh .wi{left:14px;right:14px}
 .wpg{margin-top:-12px;min-height:calc(100dvh - 92px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));padding-top:50px;box-sizing:border-box}.wbt .wed{color:var(--stc,var(--tx))!important}.wh~.wbt .wed,.wbt .wed{color:#3A3A3E!important}html[data-fl=dark] .wbt .wed{color:#B9B7B2!important}
 html[data-fl=light] .ckc{stroke-opacity:.08}
+html:has(.wpg),html:has(.wpg) body{overflow:hidden!important;overscroll-behavior:none}.wpg{touch-action:none}
 </style>
 </head>
 <body>
@@ -1274,13 +1275,13 @@ document.addEventListener('click',e=>{if(Date.now()-swSup<350){e.stopPropagation
 (function(){try{const app=document.getElementById('app');if(!app)return;const MAX=150,res=d=>MAX*(1-Math.exp(-d/(MAX*1.15))),atT=()=>(window.pageYOffset||0)<=0,atB=()=>(window.pageYOffset||0)+innerHeight>=document.documentElement.scrollHeight-1;const fits=()=>document.documentElement.getAttribute('data-gy')==='1'||document.documentElement.scrollHeight<=innerHeight+3;
  let raf=0,cur=0;const set=v=>{cur=v;app.style.top=v?v.toFixed(1)+'px':''},spring=()=>{cancelAnimationFrame(raf);let x=cur,v=0,t0=performance.now();const f=t=>{const dt=Math.min(.032,(t-t0)/1000);t0=t;v+=(-170*x-15*v)*dt;x+=v*dt;if(Math.abs(x)<.4&&Math.abs(v)<4){set(0);return}set(x);raf=requestAnimationFrame(f)};raf=requestAnimationFrame(f)};
  let py=null,dir=0;
- addEventListener('touchstart',e=>{cancelAnimationFrame(raf);if(e.touches.length!==1||fits()||(e.target.closest&&e.target.closest('.gbd,#perm,#ask'))){py=null;return}py=e.touches[0].clientY;dir=0;set(0)},{passive:true});
+ addEventListener('touchstart',e=>{cancelAnimationFrame(raf);if(e.touches.length!==1||fits()||(e.target.closest&&e.target.closest('.gbd,#perm,#ask,.wpg'))){py=null;return}py=e.touches[0].clientY;dir=0;set(0)},{passive:true});
  addEventListener('touchmove',e=>{if(py==null||e.touches.length!==1)return;const y=e.touches[0].clientY,dy=y-py;
   if(!dir){if(dy>4&&atT()){dir=1;py=y}else if(dy<-4&&atB()){dir=-1;py=y}else{if(Math.abs(dy)>4&&!(dy>0?atT():atB()))py=y;return}}
   const d=(y-py)*dir;if(d<=0){set(0);if(d<-4){dir=0;py=y}return}
   if(e.cancelable)e.preventDefault();set(dir*res(d))},{passive:false});
  const rel=()=>{if(cur)spring();py=null;dir=0};addEventListener('touchend',rel);addEventListener('touchcancel',rel);
- let wo=0,wt=null;addEventListener('wheel',e=>{if(fits()||(e.target.closest&&e.target.closest('.gbd')))return;const up=e.deltaY<0;if(wo===0&&!((up&&atT())||(!up&&atB())))return;cancelAnimationFrame(raf);wo+=-e.deltaY*.35;wo=Math.max(-MAX*.8,Math.min(MAX*.8,wo));if((wo>0&&!atT())||(wo<0&&!atB())){wo=0;spring();return}set(wo);clearTimeout(wt);wt=setTimeout(()=>{wo=0;spring()},110)},{passive:true});
+ let wo=0,wt=null;addEventListener('wheel',e=>{if(fits()||(e.target.closest&&e.target.closest('.gbd,.wpg')))return;const up=e.deltaY<0;if(wo===0&&!((up&&atT())||(!up&&atB())))return;cancelAnimationFrame(raf);wo+=-e.deltaY*.35;wo=Math.max(-MAX*.8,Math.min(MAX*.8,wo));if((wo>0&&!atT())||(wo<0&&!atB())){wo=0;spring();return}set(wo);clearTimeout(wt);wt=setTimeout(()=>{wo=0;spring()},110)},{passive:true});
 }catch(e){}})();
 locInit();render();goTop();
 </script>
