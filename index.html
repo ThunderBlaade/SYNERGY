@@ -1672,10 +1672,11 @@ function gbgGrazes(){const G=[[[214,330],[236,322],[262,318],[284,306]],[[70,452
  const d=G.map(p=>'M'+p.map(q=>q.join(' ')).join(' L')).join(' ');return `<g class="gzs" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="${d}" stroke="#000" stroke-opacity=".09" stroke-width="1.1"/><path d="${d}" stroke="#fff" stroke-opacity=".2" stroke-width=".6" transform="translate(.5 .8)"/></g>`}
 function gbgDraw(){let el=document.getElementById('gbg');if(!el){el=document.createElement('div');el.id='gbg';el.setAttribute('aria-hidden','true');
  
- el.innerHTML=`<svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="gv" cx=".5" cy=".42" r=".8"><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop id="gvs" offset="1" stop-color="#000" stop-opacity=".62"/></radialGradient><linearGradient id="gl" gradientUnits="userSpaceOnUse" id="gl" x1="0" y1="0" x2="0" y2="800"><stop offset="0" stop-color="currentColor" stop-opacity="1"/><stop offset=".55" stop-color="currentColor" stop-opacity=".5"/><stop offset="1" stop-color="currentColor" stop-opacity=".08"/></linearGradient><filter id="gb" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur id="gbl" stdDeviation="3"/></filter></defs>
+ el.innerHTML=`<svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="gv" cx=".5" cy=".42" r=".8"><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop id="gvs" offset="1" stop-color="#000" stop-opacity=".62"/></radialGradient><linearGradient id="gl" gradientUnits="userSpaceOnUse" id="gl" x1="0" y1="0" x2="0" y2="800"><stop offset="0" stop-color="currentColor" stop-opacity="1"/><stop offset=".55" stop-color="currentColor" stop-opacity=".5"/><stop offset="1" stop-color="currentColor" stop-opacity=".08"/></linearGradient><filter id="gb2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter><filter id="gb" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur id="gbl" stdDeviation="3"/></filter></defs>
  <rect width="390" height="844" fill="url(#gv)"/>
  <rect id="gam" width="390" height="844" fill="#000" opacity="0"/>
  ${gbgCracks()}${gbgGrazes()}
+ <g id="gsh" filter="url(#gb2)"><g id="gshp" fill="#000" fill-opacity=".2"></g></g>
  <g id="gwin" filter="url(#gb)" style="color:#FFF3DC"><g id="gwp" fill="url(#gl)"></g></g></svg>`;document.body.insertBefore(el,document.body.firstChild)}
  const LT=gbgLight();document.documentElement.setAttribute('data-fl',LT?'light':'dark');el.style.backgroundImage=`url(${gbgFine(LT)}),url(${gbgTex(LT)})`;document.getElementById('gvs').setAttribute('stop-opacity',LT?'.26':'.62');
  const m=nowMin(),sp=DAY1-DAY0,day=m>=DAY0&&m<DAY1;let t,a,col,sh,cx,wd;
@@ -1687,7 +1688,9 @@ function gbgDraw(){let el=document.getElementById('gbg');if(!el){el=document.cre
  pane=(u0,u1)=>`<polygon points="${P(u0,0)} ${P(u1,0)} ${P(u1,1)} ${P(u0,1)}"/>`;
  let cf=1;const hd=window.__cmph!=null?window.__cmph:CP.h,rg=S.loc&&S.loc.region;
  if(hd!=null&&rg&&day){const sp2=sunPos(rg.lat,rg.lon,fxTs());if(sp2.alt>0){const dd=((sp2.az-hd+540)%360)-180,ad=Math.abs(dd);cx+=Math.max(-170,Math.min(170,dd*1.7));cf=ad<35?1:Math.max(.28,1-(ad-35)/85*.72)}}
- document.getElementById('gwp').innerHTML=pane(-1,-gap)+pane(gap,1);const w=document.getElementById('gwin');
+ document.getElementById('gwp').innerHTML=pane(-1,-gap)+pane(gap,1);
+ const edge=(u0,u1)=>`<polygon fill="none" stroke="#000" stroke-opacity=".26" stroke-width="16" stroke-linejoin="round" points="${P(u0,0)} ${P(u1,0)} ${P(u1,1)} ${P(u0,1)}"/>`;
+ document.getElementById('gshp').innerHTML=pane(-.14,.14)+edge(-1,-gap)+edge(gap,1);const w=document.getElementById('gwin');
  const sim=window.__wxsim,wx=sim!=null?{code:sim}:wxCur(),kd=wx?wxKind(wx.code)[1]:'clear',storm=wx&&wx.code>=95;
  const al2=day?Math.sin(Math.PI*t):0;let I,bl,mix=0,amb=0;
  if(day){I=.62+.38*Math.pow(al2,.6)}else I=.34;
@@ -1699,7 +1702,7 @@ function gbgDraw(){let el=document.getElementById('gbg');if(!el){el=document.cre
  if(!day)amb=-.2;
  if(mix){const g=day?[175,192,215]:[120,140,200],m=col.match(/\d+/g).map(Number);col=`rgb(${m.map((v,z)=>Math.round(v+(g[z]-v)*mix)).join(',')})`}
  document.getElementById('gl').style.color=col;document.getElementById('gbl').setAttribute('stdDeviation',bl);
- I*=cf;w.style.opacity=Math.min(.98,I*(LT?1.35:1)).toFixed(3);
+ I*=cf;w.style.opacity=Math.min(.98,I*(LT?1.35:1)).toFixed(3);document.getElementById('gsh').style.opacity=Math.min(1,.35+I*.9).toFixed(3);
  const am=document.getElementById('gam'),k2=LT?1.5:1;am.setAttribute('fill',amb>0?'#fff':'#000');am.setAttribute('opacity',Math.min(.5,Math.abs(amb)*(amb>0?k2:(LT?1.7:1.2))).toFixed(3));
  document.getElementById('gvs').setAttribute('stop-opacity',Math.max(.1,(LT?.26:.62)+(amb<0?-amb*.6:-amb*.8)).toFixed(3))}
 setInterval(()=>{try{if(document.documentElement.getAttribute('data-tab')==='play')gbgDraw()}catch(e){}},60000);try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(document.documentElement.getAttribute('data-tab')==='play')setTimeout(gbgDraw,50)})}catch(e){}
