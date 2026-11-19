@@ -1646,7 +1646,7 @@ document.addEventListener('pointermove',e=>{if(t&&Math.hypot(e.clientX-x0,e.clie
 ['pointerup','pointercancel','scroll'].forEach(n=>document.addEventListener(n,stop,true))})();
 (function(){const bump=()=>{window.__ga=Date.now()};['pointerdown','pointermove','keydown','touchstart'].forEach(n=>document.addEventListener(n,bump,true));
 setInterval(()=>{if(!GE){bump();return}if(window.__gdrag)return bump();if(Date.now()-(window.__ga||0)>6000){GE=false;render()}},500)})();
-function gyFit(root){root=root||document;const ps=root.querySelectorAll('.gy-pn');if(!ps.length)return;const SP=18,cw=(ps[0].clientWidth-2*SP-3-2*SP)/3,R=gyRows(),fit=ps[0].closest('.gy-fit'),oth=fit?[...fit.children].filter(e=>!e.classList.contains('gy-pn')).reduce((s,e)=>s+e.offsetHeight,0):0,av=fit?(fit.clientHeight-oth-3*SP-ps.length*(SP*(R+1)+3))/(ps.length*R):1e9,row=Math.max(52,Math.min(cw*1.2,av));if(!root.__isPeer)window.__row=row;root.querySelectorAll('.gp').forEach(g=>g.style.setProperty('--row',row+'px'))}
+function gyFit(root){root=root||document;const ps=root.querySelectorAll('.gy-pn');if(!ps.length)return;const SP=18,cw=(ps[0].clientWidth-2*SP-3-2*SP)/3,R=gyRows(),fit=ps[0].closest('.gy-fit'),oth=fit?[...fit.children].filter(e=>!e.classList.contains('gy-pn')).reduce((s,e)=>s+e.offsetHeight,0):0,av=fit?(fit.clientHeight-oth-4*12-ps.length*(SP*(R+1)+3))/(ps.length*R):1e9,row=Math.max(52,Math.min(cw*1.7,av));if(!root.__isPeer)window.__row=row;root.querySelectorAll('.gp').forEach(g=>g.style.setProperty('--row',row+'px'))}
 {const _r=render;render=function(){const o=_r.apply(this,arguments);try{gyFit()}catch(e){}return o}}
 addEventListener('resize',()=>{try{gyFit()}catch(e){}});
 /* ===== Gym feel: confirm box, workout bar, no scroll, concrete floor ===== */
