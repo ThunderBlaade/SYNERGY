@@ -463,7 +463,7 @@ function astralFacts(){const r=S.loc&&S.loc.region,w=wxCur(),ss=seasonNow(),mi=m
  if(ss)rows.push(['Season',ss]);
  if(w){const t=im?w.temp*9/5+32:w.temp,wd=im?w.wind*.621371:w.wind;rows.push(['Weather',wxKind(w.code)[0]],['Temperature',Math.round(t)+(im?' °F':' °C')],['Wind',Math.round(wd)+(im?' mph':' km/h')])}
  rows.push(['Daylight',fmt12(DAY0)+' – '+fmt12(DAY1)],['Moon',mi.name+' · '+mi.lit+'% lit']);
- const note=!r?'Set your location in Profile to see weather and season.':w?'Weather from Open-Meteo, checked '+new Date(w.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'.':'Weather isn’t available right now.';
+ const note=!r?`Weather and season need a place. No location permission needed: <button class="lnk" data-loc="go" style="background:none;border:0;padding:0;color:var(--tx);text-decoration:underline;font:inherit">choose a city</button>. The moon and daylight work without one.`:w?'Weather from Open-Meteo, checked '+new Date(w.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'.':'Weather isn’t available right now.';
  return `<div class="card">${rows.map(x=>`<div class="fr"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}<p class="mu sm" style="margin:10px 0 0">${note}</p></div>`}
 function astralView(){const i=moonInfo();return `<div style="height:150px" aria-hidden="true"></div><h1>Astral</h1>${astralFacts()}<div class="card"><div class="row" style="gap:16px;align-items:center"><div style="width:48px;height:48px;flex:none">${moonSvg(i.p).replace('<svg ','<svg width="48" height="48" ')}</div><div><b>${i.name}</b><div class="mu sm">${i.lit}% lit</div></div></div></div><div class="card"><p>Optional astrology profiles, archetypes and compatibility, presented as entertainment.</p><p class="mu sm" style="margin:0">This part of SYNERGY hasn’t been specified yet, so nothing is built and nothing is simulated.</p></div>`}
 function soon(t,d){return `<h1>${t}</h1><div class="card"><p>${d}</p><p class="mu sm" style="margin:0">This part of SYNERGY hasn’t been specified yet, so nothing is built and nothing is simulated.</p></div>`}
@@ -1174,7 +1174,7 @@ const nearestCity=(lat,lon)=>{let b=null,bd=1e9;CITIES.forEach(c=>{const dx=(c[3
 let LP='unknown',LQ='';
 function locPermRefresh(){try{if(navigator.permissions&&navigator.permissions.query)navigator.permissions.query({name:'geolocation'}).then(r=>{LP=r.state==='granted'?'granted':r.state==='denied'?'denied':'prompt';r.onchange=()=>{LP=r.state==='granted'?'granted':r.state==='denied'?'denied':'prompt'};if(sub&&sub.n==='set'&&(sub.p==='loc'||sub.p==='perm'))render()}).catch(()=>{})}catch(e){}}
 function locInit(){if(S.accent==='#7C5CFF'){S.accent='#7B7EEA';save()}if(!S.loc)S.loc={mode:'auto',region:null,fx:{d0:330,d1:990},share:false};if(!S.loc.fx)S.loc.fx={d0:330,d1:990};
- if(!S.loc.region&&!S.loc.skip){try{const tz=Intl.DateTimeFormat().resolvedOptions().timeZone,c=CITIES.find(x=>x[4]===tz);if(c){S.loc.region={...cityRec(c),src:'timezone'};save()}}catch(e){}}applySky()}
+ if(!S.loc.region&&!S.loc.skip){try{const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;let c=CITIES.find(x=>x[4]===tz);if(!c){const o=-new Date().getTimezoneOffset()/60*15;c=nearestCity(40,o).c}if(c){S.loc.region={...cityRec(c),src:'timezone'};save()}}catch(e){}}applySky()}
 function locSet(region,src){S.loc.region={...region,src};S.loc.mode='auto';S.loc.skip=false;save();if(SO.db&&mp()&&S.loc.share)setProfile({region:regionLabel(S.loc.region)});applySky();render()}
 function locDevice(){if(!navigator.geolocation){LP='unavailable';toast('Location isn’t available here');render();return}
  toast('Asking for your location…');try{navigator.geolocation.getCurrentPosition(pos=>{const lat=Math.round(pos.coords.latitude*10)/10,lon=Math.round(pos.coords.longitude*10)/10,tz=Intl.DateTimeFormat().resolvedOptions().timeZone,n=nearestCity(lat,lon);LP='granted';locSet({name:n.d<300?n.c[0]+' area':'Your location',country:n.d<300?n.c[1]:'',lat,lon,tz},'device');toast('Location set')},er=>{LP=er&&er.code===1?'denied':'unavailable';toast(er&&er.code===1?'Location was blocked':'Couldn’t get your location');render()},{timeout:10000,maximumAge:36e5})}catch(e){LP='unavailable';toast('Location is blocked in this view');render()}}
@@ -1195,7 +1195,8 @@ function permPage(){locPermRefresh();const st={granted:['Allowed','Granted'],den
  ${row('Shared data','Friends, groups and the feed in Synergy.',SO.state==='ready'?'Connected':SO.state==='init'?'Connecting':'Unavailable','')}
  ${row('Storage','Your workouts and settings are saved on this device.','On this device','')}</div>`}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-loc]');if(!b)return;const s=b.dataset.loc,i=s.indexOf(':'),a=i<0?s:s.slice(0,i),x=i<0?'':s.slice(i+1);
- if(a==='mode'){S.loc.mode=x;save();applySky();render()}
+ if(a==='go'){tab='me';sub={n:'set',p:'loc'};render()}
+ else if(a==='mode'){S.loc.mode=x;save();applySky();render()}
  else if(a==='dev')locDevice();
  else if(a==='city'){const c=CITIES[+x];if(c){LQ='';locSet(cityRec(c),'manual');toast(c[0]+' set')}}
  else if(a==='clear'){S.loc.region=null;S.loc.skip=true;S.loc.share=false;save();if(SO.db&&mp())setProfile({region:null});applySky();render()}
@@ -1574,6 +1575,7 @@ function gdCand(w,left,top){const g=gdS(),p0=w.dataset.p,i0=+w.dataset.i,it=g[p0
 /* ===== permissions sheet after sign-in ===== */
 function permBody(){const p=mp(),sh=p&&p.share||'manual',lp=typeof LP!=="undefined"?LP:'prompt',has=!!(S.loc&&S.loc.region),sel=(k,v,t)=>`<button class="pmo" data-pm="${k}" aria-pressed="${v}">${t}</button>`;
  const loc=`<div class="pmr"><div class="pmt"><b>Location</b><span>Astral uses it for sunrise, sunset and the weather where you are. It stays on your phone unless you choose to share your area below.</span></div><div class="pmc">${lp==='granted'?`<span class="pms">Allowed</span>`:lp==='denied'?`<span class="pms">Blocked in Settings</span>`:`${sel('loc',false,'Allow')}`}</div></div>
+ <div class="pmr"><div class="pmt"><b>Prefer not to share location?</b><span>Pick a city instead. Weather, sunrise and sunset then work without any permission.</span></div><div class="pmc">${sel('city',false,'Choose')}</div></div>
  <div class="pmr"><div class="pmt"><b>Show my area to friends</b><span>Friends see your city on your profile. Off by default.</span></div><div class="pmc">${sel('area',!!(S.loc&&S.loc.share),S.loc&&S.loc.share?'On':'Off')}</div></div>`;
  const wk=p?`<div class="pmr col"><div class="pmt"><b>Your workouts</b><span>Who sees them in Synergy.</span></div><div class="pmg">${[['auto','Automatic','Shared as you save them'],['manual','Ask each time','Only when you tap Share'],['private','Private','Only you']].map(o=>`<button class="pmo wide" data-pm="sh:${o[0]}" aria-pressed="${sh===o[0]}"><b>${o[1]}</b><span>${o[2]}</span></button>`).join('')}</div></div>`:'';
  return `<div class="pmh"><b>Before you start</b><span>You choose what is shared. You can change all of this later in Profile.</span></div>${loc}${wk}<button class="btn big" data-pm="done">Continue</button>`}
@@ -1582,6 +1584,7 @@ function permCheck(){if(typeof STANDALONE!=="undefined"&&!STANDALONE)return;cons
 setInterval(()=>{try{permCheck()}catch(e){}},1500);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-pm]');if(!b)return;const k=b.dataset.pm;
  if(k==='loc'){try{locDevice()}catch(x){}setTimeout(permDraw,1500);setTimeout(permDraw,4000)}
+ else if(k==='city'){if(!S.perm)S.perm={};S.perm[SO.uid]=1;save();const el=document.getElementById('perm');if(el)el.remove();tab='me';sub={n:'set',p:'loc'};render()}
  else if(k==='area'){S.loc.share=!S.loc.share;save();if(SO.db&&mp())setProfile({region:S.loc.share&&S.loc.region?regionLabel(S.loc.region):null});permDraw()}
  else if(k.startsWith('sh:')){if(SO.db&&mp())setProfile({share:k.slice(3)});permDraw()}
  else if(k==='done'){if(!S.perm)S.perm={};S.perm[SO.uid]=1;save();const el=document.getElementById('perm');if(el)el.remove()}});
