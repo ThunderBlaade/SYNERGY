@@ -276,7 +276,7 @@ nav{padding:4px 4px max(8px,calc(env(safe-area-inset-bottom,0px) - 6px))!importa
 .gy-bar{display:flex;justify-content:flex-end;align-items:center;min-height:32px;margin:-10px 0 -4px}.gy-bar .wed{background:none}
 .gy-plus{width:44px;height:44px;display:grid;place-items:center;background:none;color:var(--mu);margin-left:-10px}.gy-plus svg{width:24px;height:24px}
 .gy-intro{text-align:center;color:var(--mu);font:400 13px var(--body);letter-spacing:.04em;margin:18px 0 0}
-.gy-a,.gy-b{padding:0}.gp{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:104px;grid-auto-flow:dense;gap:8px}
+.gy-a,.gy-b{padding:0}.gp{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:var(--row,104px);grid-auto-flow:dense;gap:8px}
 /*fit*/.gy-fit{display:flex;flex-direction:column;gap:10px;height:calc(100dvh - 164px - env(safe-area-inset-top,0px))}.gy-pn{flex:1;min-height:0;overflow:hidden;border:1px solid color-mix(in srgb,var(--mu) 45%,transparent);padding:8px}.gy-pn::-webkit-scrollbar{display:none}
 .gy-pn{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .gy-start{padding:0}.gy-start .btn.big{min-height:64px}.gy-start .card{margin:0 0 10px}
@@ -1480,7 +1480,7 @@ function gdPack(items,R){const occ=Array.from({length:R},()=>[0,0,0]);for(const 
 const gdArea=it=>GDIM[it.s][0]*GDIM[it.s][1];
 const gdCount=()=>{const g=gdS();return [...g.L,...g.B].filter(x=>x.k!=='empty').length};
 const gdNone=()=>gdCount()===0;
-function gdHole(items,R){const o=Array.from({length:R},()=>[0,0,0]);for(const it of items){const [w,hh]=GDIM[it.s];out:for(let r=0;r+hh<=R;r++)for(let c=0;c+w<=3;c++){let f=true;for(let i=0;i<hh&&f;i++)for(let j=0;j<w;j++)if(o[r+i][c+j]){f=false;break}if(f){for(let i=0;i<hh;i++)for(let j=0;j<w;j++)o[r+i][c+j]=1;break out}}}for(let r=0;r<R;r++)for(let c=0;c<3;c++)if(!o[r][c]){let n=0;while(c+n<3&&!o[r][c+n])n++;return{r,c,n}}return null}
+function gdHole(items,R,last){const o=Array.from({length:R},()=>[0,0,0]);for(const it of items){const [w,hh]=GDIM[it.s];out:for(let r=0;r+hh<=R;r++)for(let c=0;c+w<=3;c++){let f=true;for(let i=0;i<hh&&f;i++)for(let j=0;j<w;j++)if(o[r+i][c+j]){f=false;break}if(f){for(let i=0;i<hh;i++)for(let j=0;j<w;j++)o[r+i][c+j]=1;break out}}}if(last){for(let r=R-1;r>=0;r--)for(let c=2;c>=0;c--)if(!o[r][c])return{r,c,n:1,k:1};return null}for(let r=0;r<R;r++)for(let c=0;c<3;c++)if(!o[r][c]){let n=0;while(c+n<3&&!o[r][c+n])n++;return{r,c,n}}return null}
 const gdFree=()=>{const g=gdS();return Math.max(0,6*gyRows()-[...g.L,...g.B].reduce((s,x)=>s+gdArea(x),0))};
 function gdTry(g,k){const z=GW[k].z,ord=['l','m','s','t'].filter(s=>z.includes(s)),R=gyRows(),st=Math.max(0,ord.indexOf(dz(k)));
  for(const s of ord.slice(st)){const c=JSON.parse(JSON.stringify(g)),put=()=>{for(const p of['L','B'])if(gdPack([...c[p],{k,s}],R)){c[p].push({k,s});return true}return false};
@@ -1492,7 +1492,7 @@ function gdNorm(){const g=gdS(),R=gyRows();let ch=false;for(let n=0;n<30;n++){le
 const gdPlus=()=>{const g=gdS(),R=gyRows();return gdPack([...g.L,{s:'t'}],R)?'L':gdPack([...g.B,{s:'t'}],R)?'B':null};
 function gwTile(x,i,p){const d=GW[x.k],inner=d.tap?`<button class="gw" data-a="${d.tap}">${gwBody(x)}</button>`:`<div class="gw${x.k==='empty'?' gem':''}">${gwBody(x)}</div>`;
  return `<div class="gwr z${x.s}" data-i="${i}" data-p="${p}"><span class="gwi">${inner}</span>${x.k==='empty'||gdCount()>1?`<button class="gc2 gx" data-wx="gr:${p}:${i}" aria-label="Remove ${d.t}">×</button>`:''}${d.z.length>1?`<button class="gc2 grs" data-nosw="1" data-wx="gz:${p}:${i}" aria-label="Resize ${d.t}. Drag the corner, or tap to change size. Now ${GS[x.s]}."></button>`:''}</div>`}
-const gyPanel=(p,id,pp)=>{const L=gdS()[p],ho=pp===p?gdHole(L.concat([{s:'t'}]).slice(0,-1),gyRows()):null,pl=pp===p?`<button class="gnx" style="${ho?`grid-column:${ho.n>=3?2:ho.c+1}/span 1;grid-row:${ho.r+1}`:''}" data-wx="ga" aria-label="Add a widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>`:'';return `<section class="gy-pn"><div id="${id}" class="gp${GE?' ge':''}" data-p="${p}">${L.map((x,i)=>gwTile(x,i,p)).join('')}${pl}</div></section>`};
+const gyPanel=(p,id,pp)=>{const L=gdS()[p],ho=pp===p?gdHole(L,gyRows(),p==='L'&&!gdPack([...gdS().B,{s:'t'}],gyRows())):null,pl=pp===p?`<button class="gnx" style="${ho?`grid-column:${ho.k?ho.c+1:p==='L'&&ho.n>=3?2:ho.c+1}/span 1;grid-row:${ho.r+1}`:''}" data-wx="ga" aria-label="Add a widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>`:'';return `<section class="gy-pn"><div id="${id}" class="gp${GE?' ge':''}" data-p="${p}">${L.map((x,i)=>gwTile(x,i,p)).join('')}${pl}</div></section>`};
 function gyDash(){gdNorm();const g=gdS();window.__pp=GE?null:gdPlus();return `<div class="gy-bar"><button class="wed rma" data-wx="gall">Remove all</button><button class="wed" data-wx="ge">${GE?'Done':'Edit'}</button></div>${gyPanel('L','gd',window.__pp)}`}
 function gyDash2(){return gyPanel('B','gd2',window.__pp)}
 function gbox(must){const g0=gdS(),used=new Set([...g0.L,...g0.B].map(x=>x.k)),ks=Object.keys(GW).filter(k=>GW[k].p&&(k==='empty'?!must:!used.has(k))),fr=gdFree();
@@ -1540,9 +1540,9 @@ new MutationObserver(()=>{if(document.querySelector('#wh:not([data-b])'))whBind(
  document.addEventListener('touchend',e=>{const a=s0;s0=null;if(!a||window.__gdrag||!e.changedTouches.length)return;const c=e.changedTouches[0],dx=c.clientX-a.x,dy=c.clientY-a.y;if(dx>70&&Math.abs(dy)<45&&dx>2.2*Math.abs(dy)&&Date.now()-a.t<700){const b=document.getElementById('backbtn');if(b&&!b.hidden&&!document.documentElement.hasAttribute('data-gate'))b.click()}},{passive:true});
 })();
 
-(function(){let r=null;const ROW=104,GAP=8;
+(function(){let r=null;let ROW=104;const GAP=8;
  document.addEventListener('pointerdown',e=>{const hd=e.target.closest&&e.target.closest('.grs');if(!hd||!hd.closest('.ge'))return;const w=hd.closest('.gwr'),g=w.closest('.gp'),gi=w.querySelector('.gwi'),R=w.getBoundingClientRect(),G=g.getBoundingClientRect();
-  r={hd,w,g,gi,x:e.clientX,y:e.clientY,w0:R.width,h0:R.height,gw:G.width,room:G.right-R.left,nw:R.width,nh:R.height,mv:0};gi.style.cssText=`position:absolute;left:0;top:0;width:${R.width}px;height:${R.height}px;z-index:15;transition:none`;w.style.zIndex=15;try{hd.setPointerCapture(e.pointerId)}catch(_){}window.__gdrag=true;e.stopPropagation()},true);
+  ROW=window.__row||104;r={hd,w,g,gi,x:e.clientX,y:e.clientY,w0:R.width,h0:R.height,gw:G.width,room:G.right-R.left,nw:R.width,nh:R.height,mv:0};gi.style.cssText=`position:absolute;left:0;top:0;width:${R.width}px;height:${R.height}px;z-index:15;transition:none`;w.style.zIndex=15;try{hd.setPointerCapture(e.pointerId)}catch(_){}window.__gdrag=true;e.stopPropagation()},true);
  document.addEventListener('pointermove',e=>{if(!r)return;const dx=e.clientX-r.x,dy=e.clientY-r.y;r.mv=Math.max(r.mv,Math.hypot(dx,dy));
   const cw=(r.gw-GAP*2)/3,rb=(v,lo,hi)=>v<lo?lo-(lo-v)*.25:v>hi?hi+(v-hi)*.25:v;r.nw=rb(r.w0+dx,cw,Math.min(r.gw,r.room));r.nh=rb(r.h0+dy,ROW,2*ROW+GAP);r.gi.style.width=r.nw+'px';r.gi.style.height=r.nh+'px';r.hd.style.transform=`translate(${r.nw-r.w0}px,${r.nh-r.h0}px)`;const xb=r.w.querySelector('.gx');if(xb)xb.style.transform=`translateX(${r.nw-r.w0}px)`});
  const end=()=>{if(!r)return;const q=r;r=null;window.__gdrag=false;
@@ -1574,6 +1574,9 @@ document.addEventListener('pointermove',e=>{if(t&&Math.hypot(e.clientX-x0,e.clie
 ['pointerup','pointercancel','scroll'].forEach(n=>document.addEventListener(n,stop,true))})();
 (function(){const bump=()=>{window.__ga=Date.now()};['pointerdown','pointermove','keydown','touchstart'].forEach(n=>document.addEventListener(n,bump,true));
 setInterval(()=>{if(!GE){bump();return}if(window.__gdrag)return bump();if(Date.now()-(window.__ga||0)>6000){GE=false;render()}},500)})();
+function gyFit(){const ps=document.querySelectorAll('.gy-pn');if(!ps.length)return;const R=gyRows();let row=104;const hh=ps[0].clientHeight-16;if(hh>0)row=Math.max(80,(hh-8*(R-1))/R);window.__row=row;document.querySelectorAll('.gp').forEach(g=>g.style.setProperty('--row',row+'px'))}
+{const _r=render;render=function(){const o=_r.apply(this,arguments);try{gyFit()}catch(e){}return o}}
+addEventListener('resize',()=>{try{gyFit()}catch(e){}});
 </script>
 </body>
 </html>
