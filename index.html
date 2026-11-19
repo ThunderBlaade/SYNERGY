@@ -1647,14 +1647,36 @@ document.addEventListener('touchmove',e=>{if(document.documentElement.getAttribu
 const TORD=TABS.map(t=>t[0]);let LASTTAB=null;
 function navLine(){const nav=document.getElementById('nav');if(!nav)return;const b=nav.querySelector('button[aria-current=page]'),s=b&&b.querySelector('.nl');if(!s)return;const ls=parseFloat(getComputedStyle(s).letterSpacing)||0,w=Math.max(10,s.offsetWidth-2*ls),i=document.createElement('i');i.className='nvl';i.style.width=w+'px';i.style.marginLeft=(-w/2)+'px';b.appendChild(i);if(LASTTAB!==null&&LASTTAB!==tab&&i.animate)i.animate([{opacity:1},{opacity:.05,offset:.4},{opacity:1}],{duration:750,easing:'ease-in-out'});LASTTAB=tab}
 {const _n=render;render=function(){const o=_n.apply(this,arguments);try{navLine()}catch(e){}return o}}
-function pageSlide(dir){const app=document.getElementById('app');if(!app||!app.animate)return;let d=document.getElementById('pgdiv');if(!d){d=document.createElement('div');d.id='pgdiv';d.setAttribute('aria-hidden','true');d.innerHTML='<span>'+'SYNERGY '.repeat(24)+'</span>';document.body.appendChild(d)}
- const W=innerWidth,o=.55;app.animate([{left:dir*W*o+'px',opacity:0},{left:'0px',opacity:1}],{duration:460,easing:'cubic-bezier(.22,.8,.24,1)'});
- const a=dir>0?[W*o,0]:[W*(1-o)-13,W-13];d.style.display='flex';const an=d.animate([{left:a[0]+'px',opacity:1},{left:(a[0]+(a[1]-a[0])*.75)+'px',opacity:1,offset:.75},{left:a[1]+'px',opacity:0}],{duration:460,easing:'cubic-bezier(.22,.8,.24,1)'});an.onfinish=an.oncancel=()=>{d.style.display='none'}}
-function swipeTab(dir){const n=TORD.indexOf(tab)+dir;if(n<0||n>=TORD.length)return;tab=TORD[n];sub=null;render();goTop();pageSlide(dir)}
-(function(){let sx=0,sy=0,st=0,on=false;const bad=t=>!t||!t.closest||t.closest('input,textarea,select,#sheet,#perm,#ask,#gate,.gmini,nav,#hmc,.devp,.devb,.gbd');
- const hs=t=>{for(let e=t;e&&e!==document.body;e=e.parentElement){if(e.scrollWidth>e.clientWidth+4){const o=getComputedStyle(e).overflowX;if(o==='auto'||o==='scroll')return true}}return false};
- document.addEventListener('touchstart',e=>{on=false;if(e.touches.length!==1||sub||GE||window.__gdrag||document.documentElement.hasAttribute('data-gate')||bad(e.target)||hs(e.target))return;const t=e.touches[0];sx=t.clientX;sy=t.clientY;st=Date.now();on=true},{passive:true});
- document.addEventListener('touchend',e=>{if(!on)return;on=false;if(GE||window.__gdrag||sub)return;const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;if(Date.now()-st>800||Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(sx<24&&dx>0)return;swipeTab(dx<0?1:-1)},{passive:true})})();
+/* ===== Page swipe =====
+   While a finger drags sideways, the current page and its neighbour move together
+   and a thin line marks the seam. Let go past the halfway-ish point (or flick) and
+   the neighbour settles in; otherwise everything slides back. */
+const PS={g:null,W:0};
+const psViews=()=>({home,play:gym,conn:connView,rank,astral:astralView,me:profile});
+function psHtml(t){const keep=tab;tab=t;try{return psViews()[t]()}finally{tab=keep}}
+function psSeam(){let d=document.getElementById('pgdiv');if(!d){d=document.createElement('div');d.id='pgdiv';d.setAttribute('aria-hidden','true');d.innerHTML='<span>'+'SYNERGY '.repeat(24)+'</span>';document.body.appendChild(d)}return d}
+function psBegin(g,dx){const app=document.getElementById('app'),i=TORD.indexOf(tab)+(dx<0?1:-1);g.app=app;g.dir=dx<0?-1:1;g.W=app.offsetWidth;g.left=app.getBoundingClientRect().left;g.top=app.offsetTop;
+ if(i<0||i>=TORD.length)return;
+ try{const p=document.createElement('div');p.id='app';p.className=app.className;p.innerHTML=psHtml(TORD[i]);
+  p.style.cssText=`position:fixed;top:${g.top}px;bottom:0;width:${g.W}px;margin:0;overflow:hidden;pointer-events:none`;
+  app.after(p);g.peer=p;g.next=TORD[i];const s=psSeam();s.style.cssText+=`;top:${g.top}px;bottom:${document.getElementById('nav').offsetHeight}px;display:flex`}catch(e){g.peer=null}}
+function psPlace(g,x){g.x=x;g.app.style.left=x+'px';if(!g.peer)return;
+ g.peer.style.left=(g.left+x-g.dir*g.W)+'px';psSeam().style.left=(g.left+(g.dir<0?g.W+x:x)-6.5)+'px'}
+function psClean(g){if(g.peer)g.peer.remove();g.app.style.left='';const d=document.getElementById('pgdiv');if(d)d.style.display='none';PS.g=null}
+function psSettle(g,to,done){const from=g.x,t0=performance.now(),ms=300,ease=u=>1-Math.pow(1-u,3);
+ const step=now=>{const u=Math.min(1,(now-t0)/ms);psPlace(g,from+(to-from)*ease(u));u<1?requestAnimationFrame(step):done()};requestAnimationFrame(step)}
+function psEnd(g,vx){
+ const go=g.peer&&(Math.abs(g.x)>g.W*.33||(Math.abs(vx)>.45&&Math.sign(vx)===g.dir));g.settling=true;
+ psSettle(g,go?g.dir*g.W:0,()=>{const t=go?g.next:null;psClean(g);if(t){tab=t;sub=null;render();goTop()}})}
+(function(){const bad=t=>!t||!t.closest||t.closest('input,textarea,select,#sheet,#perm,#ask,#gate,.gmini,nav,#hmc,.devp,.devb,.gbd');
+ const hscroll=t=>{for(let e=t;e&&e!==document.body;e=e.parentElement){if(e.scrollWidth>e.clientWidth+4){const o=getComputedStyle(e).overflowX;if(o==='auto'||o==='scroll')return true}}return false};
+ const free=()=>!sub&&!GE&&!window.__gdrag&&!document.documentElement.hasAttribute('data-gate');
+ document.addEventListener('touchstart',e=>{if(PS.g)return;if(e.touches.length!==1||!free()||bad(e.target)||hscroll(e.target))return;const t=e.touches[0];PS.g={x0:t.clientX,y0:t.clientY,t0:Date.now(),mode:null,x:0}},{passive:true});
+ document.addEventListener('touchmove',e=>{const g=PS.g;if(!g||g.settling)return;const t=e.touches[0],dx=t.clientX-g.x0,dy=t.clientY-g.y0;
+  if(!g.mode){if(Math.abs(dx)<8&&Math.abs(dy)<8)return;if(Math.abs(dx)<Math.abs(dy)*1.3||(g.x0<24&&dx>0)){PS.g=null;return}g.mode='h';psBegin(g,dx)}
+  e.preventDefault();psPlace(g,g.peer?(g.dir<0?Math.min(0,dx):Math.max(0,dx)):dx*.25)},{passive:false});
+ const end=e=>{const g=PS.g;if(!g||g.settling)return;if(g.mode!=='h'){PS.g=null;return}psEnd(g,(e.changedTouches[0].clientX-g.x0)/Math.max(1,Date.now()-g.t0))};
+ document.addEventListener('touchend',end,{passive:true});document.addEventListener('touchcancel',end,{passive:true})})();
 /* compass: window light follows where the sun really is */
 const CP={on:false,h:null,t:0,last:0};
 function sunPos(lat,lon,ms){const r=Math.PI/180,d=ms/864e5-10957.5,M=r*(357.5291+.98560028*d),C=r*(1.9148*Math.sin(M)+.02*Math.sin(2*M)+.0003*Math.sin(3*M)),L=M+C+r*102.9372+Math.PI,e=r*23.4397,dec=Math.asin(Math.sin(L)*Math.sin(e)),ra=Math.atan2(Math.sin(L)*Math.cos(e),Math.cos(L)),H=r*(280.16+360.9856235*d)+r*lon-ra,ph=r*lat,az=Math.atan2(Math.sin(H),Math.cos(H)*Math.sin(ph)-Math.tan(dec)*Math.cos(ph))+Math.PI,alt=Math.asin(Math.sin(ph)*Math.sin(dec)+Math.cos(ph)*Math.cos(dec)*Math.cos(H));return{az:(az/r+360)%360,alt:alt/r}}
