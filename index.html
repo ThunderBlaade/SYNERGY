@@ -290,8 +290,8 @@ nav{padding:4px 4px max(8px,calc(env(safe-area-inset-bottom,0px) - 6px))!importa
 #gtb{position:fixed;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom,0px));z-index:6;background:color-mix(in srgb,var(--bg) 96%,transparent);border-top:1px solid var(--ln);padding:8px 10px;display:flex;flex-direction:column;gap:6px}
 .gtr{display:flex;gap:4px;max-width:520px;margin:0 auto;width:100%}.gtr .gc{flex:1;min-height:40px;background:none;color:var(--tx);border:1px solid var(--ln);font:500 10.5px var(--body);letter-spacing:.1em;text-transform:uppercase;border-radius:0;padding:0 4px}.gtr .gc:disabled{opacity:.3}.gtr .gc.on{background:var(--tx);color:var(--bg)}
 html:has(#gtb) #app{padding-bottom:190px}
-.wpg{display:flex;flex-direction:column;justify-content:center;min-height:calc(100dvh - 240px)}
-.wh{position:relative;height:min(52dvh,420px);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;outline:none;cursor:pointer}
+.wpg{display:flex;flex-direction:column;justify-content:center;align-items:stretch;min-height:calc(100dvh - 190px - env(safe-area-inset-top,0px))}
+.wh{position:relative;height:300px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;outline:none;cursor:pointer}
 .wh:focus-visible{outline:1px solid var(--ac);outline-offset:2px}
 .wi{position:absolute;left:0;right:0;top:0;height:28px;line-height:28px;text-align:center;font:400 15px var(--disp);letter-spacing:.2em;text-transform:uppercase;color:var(--mu);white-space:nowrap;will-change:transform,opacity;visibility:hidden}
 .wi.sel{color:var(--tx);font-weight:600}.wi.sp{font-style:normal;letter-spacing:.3em}
@@ -300,7 +300,7 @@ html:has(#gtb) #app{padding-bottom:190px}
 .wl{position:absolute;left:0;right:14px;height:1px;background:var(--ln);top:calc(50% - 26px)}.wl2{top:calc(50% + 26px)}
 .wptr{position:absolute;right:0;top:calc(50% - 5px);width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:8px solid var(--ac)}
 .whint{text-align:center;font:500 10px var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--mu);margin:8px 0 0;min-height:16px}
-.wbt{display:flex;justify-content:space-evenly;margin-top:10px}.wlk{display:flex;justify-content:center;gap:2px;flex-wrap:wrap;margin-top:8px}.wlk .bk,.wed{font:500 10.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mu);padding:12px 8px;min-height:44px}
+.wbt{display:flex;justify-content:space-evenly;align-items:center;margin-top:6px}.wbt .wed{flex:1;text-align:center}.wlk{display:flex;justify-content:center;gap:2px;flex-wrap:wrap;margin-top:8px}.wlk .bk,.wed{font:500 10.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mu);padding:12px 8px;min-height:44px}
 .wsw{position:relative;overflow:hidden;display:block;padding:0}.wsw-in{position:relative;display:flex;align-items:center;justify-content:space-between;width:100%;background:transparent;padding:8px 0;touch-action:pan-y;transition:transform .28s cubic-bezier(.2,.8,.2,1);-webkit-user-select:none;user-select:none}.wsw.drag .wsw-in{transition:none}
 .wsw.open .wsw-in{transform:translateX(-96px)}.wsw.openr .wsw-in{transform:translateX(96px)}
 .wsw-del,.wsw-pin{position:absolute;top:0;bottom:0;width:96px;font:600 11px var(--body);letter-spacing:.14em;text-transform:uppercase;visibility:hidden;border-radius:0}
@@ -1361,11 +1361,11 @@ const whSel=()=>{const n=WH.items.length;return n?WH.items[((Math.round(WH.pos)%
 const whRM=()=>S.reduce||matchMedia('(prefers-reduced-motion:reduce)').matches;
 function wheel(){WH.items=[...whShown(),...WSP];WH.pos=0;WH.vel=0;WH.spin=null;WH.tgt=null;WH.drag=null;WH.lastIdx=0;
  const pegs=Array.from({length:24},(_,k)=>`<i class="wp" data-k="${k}"></i>`).join('');
- return `<div class="hd"><button class="bk" data-a="back">Back</button></div><h1>Choose</h1>
+ return `<div class="hd" style="min-height:0;height:0;margin:0"><button class="bk" data-a="back">Back</button></div>
  <div class="wpg"><div class="wh" id="wh" tabindex="0" role="spinbutton" aria-label="Activity wheel. Swipe up or down. Tap the highlighted activity to start." aria-valuetext="">${WH.items.map((it,i)=>`<div class="wi${it.pin?' pin':''}${it.sp?' sp':''}" data-i="${i}">${esc(it.n)}</div>`).join('')}${pegs}<div class="wl wl1"></div><div class="wl wl2"></div><div class="wptr"></div></div>
  <div class="wbt"><button class="wed" id="wrnd" data-wx="rnd">Random</button><button class="wed" data-wx="edit">Edit wheel</button></div></div><div class="sr" id="wsr" role="status" aria-live="polite"></div>`}
 function whDraw(){const el=document.getElementById('wh');if(!el)return;const n=WH.items.length,{TH,R}=WH,pos=WH.pos,cy=el.clientHeight/2;
- el.querySelectorAll('.wi').forEach(e=>{const i=+e.dataset.i;let d=i-pos;if(n>1)d=((d+n/2)%n+n)%n-n/2;const a=d*TH;if(Math.abs(a)>1.5){e.style.visibility='hidden';return}const c=Math.cos(a),y=cy+R*Math.sin(a);e.style.visibility='visible';e.style.opacity=(Math.pow(c,2.2)*(Math.abs(d)<.5?1:.9)).toFixed(3);e.style.transform=`translate(${(Math.sign(d)*(1-c)*26).toFixed(1)}px,${(y-14).toFixed(1)}px) rotate(${(d*1.6).toFixed(2)}deg) scale(${(.58+.42*c+(Math.abs(d)<1?.22*(1-Math.abs(d)):0)).toFixed(3)})`;e.classList.toggle('sel',Math.abs(d)<.5)});
+ el.querySelectorAll('.wi').forEach(e=>{const i=+e.dataset.i;let d=i-pos;if(n>1)d=((d+n/2)%n+n)%n-n/2;const a=d*TH;if(Math.abs(a)>1.5){e.style.visibility='hidden';return}const c=Math.cos(a),y=cy+R*Math.sin(a);e.style.visibility='visible';e.style.opacity=(Math.pow(c,2.2)*(Math.abs(d)<.5?1:.9)).toFixed(3);e.style.transform=`translate(0px,${(y-14).toFixed(1)}px) rotate(${(d*1.6).toFixed(2)}deg) scale(${(.58+.42*c+(Math.abs(d)<1?.22*(1-Math.abs(d)):0)).toFixed(3)})`;e.classList.toggle('sel',Math.abs(d)<.5)});
  el.querySelectorAll('.wp').forEach(e=>{const k=+e.dataset.k;let d=((k/3-pos)%8+8)%8;if(d>4)d-=8;const a=d*TH;if(Math.abs(a)>1.5){e.style.visibility='hidden';return}e.style.visibility='visible';e.style.opacity=(Math.pow(Math.cos(a),2)*.9).toFixed(3);e.style.transform=`translateY(${(cy+R*Math.sin(a)-2).toFixed(1)}px)`});
  const idx=Math.round(pos);if(idx!==WH.lastIdx){WH.lastIdx=idx;try{navigator.vibrate&&navigator.vibrate(5)}catch(e){}}}
 function whSettled(){WH.spin=null;const s=whSel(),sr=document.getElementById('wsr'),el=document.getElementById('wh'),h=document.getElementById('whint');if(s){if(sr)sr.textContent=s.n;if(el)el.setAttribute('aria-valuetext',s.n);const r=document.getElementById('wrnd');if(r)r.textContent='Random'}}
