@@ -1198,9 +1198,11 @@ function cres(cs){return cs.length?`<ul class="list" style="margin-top:6px">${cs
 function permPage(){locPermRefresh();const st={granted:['Allowed','Granted'],denied:['Blocked','Blocked'],prompt:['Not asked yet','Ask'],unknown:['Not asked yet','Ask'],unavailable:['Not available here','']}[LP]||['Not asked yet','Ask'];
  const row=(l,d,v,b)=>`<div class="ir col"><div class="row sp"><b style="font-weight:600">${l}</b><span class="mu sm">${v}</span></div><div class="mu sm" style="margin-top:2px">${d}</div>${b||''}</div>`;
  return `<p class="mu sm">Everything is optional and off until you choose. You can change these any time.</p><div class="grp">${row('Location','Used only to work out sunrise and sunset. It never leaves this device.',st[0],LP==='denied'?'<p class="mu sm" style="margin:8px 0 0">To allow it again, open this site’s permissions in your browser and switch Location on, then come back and tap below.</p><button class="btn g" data-loc="dev" style="margin-top:10px">Try again</button>':LP==='unavailable'?'':`<button class="btn g" data-loc="dev" style="margin-top:10px">${LP==='granted'?'Update my location':'Allow location'}</button>`)}
+ ${window.DeviceOrientationEvent?row('Compass','Makes the Gym window light follow the real sun as you turn. Needs your location too.',{granted:'Allowed',waiting:'Tap to wake it',prompt:'Not asked yet',unavailable:'Not available here'}[cmpState()],cmpState()==='granted'?'':'<button class="btn g" data-cmp="go" style="margin-top:10px">Allow compass</button>'):''}
  ${row('Notifications','Needs a native app to work reliably. In-app alerts are available in Synergy.','Not available','')}
  ${row('Shared data','Friends, groups and the feed in Synergy.',SO.state==='ready'?'Connected':SO.state==='init'?'Connecting':'Unavailable','')}
  ${row('Storage','Your workouts and settings are saved on this device.','On this device','')}</div>`}
+document.addEventListener('click',e=>{const c=e.target.closest('[data-cmp]');if(c){cmpAsk().then(r=>{if(r==='denied')toast('Compass was not allowed. Check Settings, Safari, Motion and Orientation.');render()});return}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-loc]');if(!b)return;const s=b.dataset.loc,i=s.indexOf(':'),a=i<0?s:s.slice(0,i),x=i<0?'':s.slice(i+1);
  if(a==='go'){tab='me';sub={n:'set',p:'loc'};render()}
  else if(a==='mode'){S.loc.mode=x;save();applySky();render()}
@@ -1604,6 +1606,7 @@ function gdCand(w,left,top){const g=gdS(),p0=w.dataset.p,i0=+w.dataset.i,it=g[p0
 /* ===== permissions sheet after sign-in ===== */
 function permBody(){const p=mp(),sh=p&&p.share||'manual',lp=typeof LP!=="undefined"?LP:'prompt',has=!!(S.loc&&S.loc.region),sel=(k,v,t)=>`<button class="pmo" data-pm="${k}" aria-pressed="${v}">${t}</button>`;
  const loc=`<div class="pmr"><div class="pmt"><b>Location</b><span>Astral uses it for sunrise, sunset and the weather where you are. It stays on your phone unless you choose to share your area below.</span></div><div class="pmc">${lp==='granted'?`<span class="pms">Allowed</span>`:lp==='denied'?`<span class="pms">Blocked in Settings</span>`:`${sel('loc',false,'Allow')}`}</div></div>
+ ${window.DeviceOrientationEvent?`<div class="pmr"><div class="pmt"><b>Compass</b><span>The window light in The Gym follows where the sun really is as you turn. It stays on your phone.</span></div><div class="pmc">${cmpState()==='granted'?'<span class="pms">Allowed</span>':sel('cmp',false,'Allow')}</div></div>`:''}
  <div class="pmr"><div class="pmt"><b>Prefer not to share location?</b><span>Pick a city instead. Weather, sunrise and sunset then work without any permission.</span></div><div class="pmc">${sel('city',false,'Choose')}</div></div>
  <div class="pmr"><div class="pmt"><b>Show my area to friends</b><span>Friends see your city on your profile. Off by default.</span></div><div class="pmc">${sel('area',!!(S.loc&&S.loc.share),S.loc&&S.loc.share?'On':'Off')}</div></div>`;
  const wk=p?`<div class="pmr col"><div class="pmt"><b>Your workouts</b><span>Who sees them in Synergy.</span></div><div class="pmg">${[['auto','Automatic','Shared as you save them'],['manual','Ask each time','Only when you tap Share'],['private','Private','Only you']].map(o=>`<button class="pmo wide" data-pm="sh:${o[0]}" aria-pressed="${sh===o[0]}"><b>${o[1]}</b><span>${o[2]}</span></button>`).join('')}</div></div>`:'';
@@ -1612,7 +1615,8 @@ function permDraw(){let el=document.getElementById('perm');if(!el){el=document.c
 function permCheck(){if(typeof STANDALONE!=="undefined"&&!STANDALONE)return;const u=SO&&SO.uid;if(!u||document.documentElement.hasAttribute('data-gate')||document.getElementById('perm'))return;if(!S.perm)S.perm={};if(S.perm[u])return;permDraw()}
 setInterval(()=>{try{permCheck()}catch(e){}},1500);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-pm]');if(!b)return;const k=b.dataset.pm;
- if(k==='loc'){try{locDevice()}catch(x){}setTimeout(permDraw,1500);setTimeout(permDraw,4000)}
+ if(k==='cmp'){cmpAsk().then(permDraw)}
+ else if(k==='loc'){try{locDevice()}catch(x){}setTimeout(permDraw,1500);setTimeout(permDraw,4000)}
  else if(k==='city'){if(!S.perm)S.perm={};S.perm[SO.uid]=1;save();const el=document.getElementById('perm');if(el)el.remove();tab='me';sub={n:'set',p:'loc'};render()}
  else if(k==='area'){S.loc.share=!S.loc.share;save();if(SO.db&&mp())setProfile({region:S.loc.share&&S.loc.region?regionLabel(S.loc.region):null});permDraw()}
  else if(k.startsWith('sh:')){if(SO.db&&mp())setProfile({share:k.slice(3)});permDraw()}
@@ -1636,6 +1640,14 @@ function ask(msg,yes,label){const o=document.createElement('div');o.id='ask';o.s
  const end=()=>{if(!on)return;const m=on;on=null;m.style.transition='transform .22s cubic-bezier(.2,.8,.2,1)';m.style.transform='';if(dx<-70){window.__gdsup=Date.now();ask('End this workout and save it?',()=>finish(false),'End')}dx=0};
  document.addEventListener('pointerup',end,true);document.addEventListener('pointercancel',end,true)})();
 document.addEventListener('touchmove',e=>{if(document.documentElement.getAttribute('data-gy')==='1'&&!e.target.closest('input,textarea,select,#sheet,#ask'))e.preventDefault()},{passive:false});
+/* compass: window light follows where the sun really is */
+const CP={on:false,h:null,t:0,last:0};
+function sunPos(lat,lon,ms){const r=Math.PI/180,d=ms/864e5-10957.5,M=r*(357.5291+.98560028*d),C=r*(1.9148*Math.sin(M)+.02*Math.sin(2*M)+.0003*Math.sin(3*M)),L=M+C+r*102.9372+Math.PI,e=r*23.4397,dec=Math.asin(Math.sin(L)*Math.sin(e)),ra=Math.atan2(Math.sin(L)*Math.cos(e),Math.cos(L)),H=r*(280.16+360.9856235*d)+r*lon-ra,ph=r*lat,az=Math.atan2(Math.sin(H),Math.cos(H)*Math.sin(ph)-Math.tan(dec)*Math.cos(ph))+Math.PI,alt=Math.asin(Math.sin(ph)*Math.sin(dec)+Math.cos(ph)*Math.cos(dec)*Math.cos(H));return{az:(az/r+360)%360,alt:alt/r}}
+function cmpOn(){if(CP.on)return;CP.on=true;const f=e=>{let h=null;if(typeof e.webkitCompassHeading==='number'&&e.webkitCompassHeading>=0)h=e.webkitCompassHeading;else if(e.absolute&&e.alpha!=null)h=(360-e.alpha)%360;if(h==null)return;CP.h=CP.h==null?h:(CP.h+(((h-CP.h)%360+540)%360-180)*.3+360)%360;const n=Date.now();if(n-CP.last>140&&tab==='play'&&!window.__gdrag){CP.last=n;try{gbgDraw()}catch(x){}}};addEventListener('deviceorientationabsolute',f,true);addEventListener('deviceorientation',f,true)}
+async function cmpAsk(){const D=window.DeviceOrientationEvent;if(!D)return'unavailable';try{if(typeof D.requestPermission==='function'){const r=await D.requestPermission();if(r!=='granted')return'denied'}}catch(e){return'denied'}S.cmp=1;save();cmpOn();return'granted'}
+const cmpState=()=>!window.DeviceOrientationEvent?'unavailable':CP.h!=null?'granted':S.cmp?'waiting':'prompt';
+try{if(S.cmp)cmpOn()}catch(e){}
+document.addEventListener('pointerup',()=>{if(S.cmp&&CP.h==null&&window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==='function')DeviceOrientationEvent.requestPermission().then(r=>{if(r==='granted')cmpOn()}).catch(()=>{})},{capture:true});
 /* concrete floor with window light that follows the real day */
 const gbgLight=()=>{const t=document.documentElement.getAttribute('data-theme');return t?t==='light':!matchMedia('(prefers-color-scheme: dark)').matches};
 function gbgTex(lt){gbgTex.c=gbgTex.c||{};const key=lt?'l':'d';if(gbgTex.c[key])return gbgTex.c[key];const N=512,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),im=x.createImageData(N,N);let s=11;const R=()=>{s=(s*16807)%2147483647;return s/2147483647};
@@ -1673,6 +1685,8 @@ function gbgDraw(){let el=document.getElementById('gbg');if(!el){el=document.cre
  else{const ns=1440-sp,n=(m-DAY1+1440)%1440;t=Math.min(1,n/ns);a=.16;col=stops([[150,120,230],[120,150,255],[140,175,255],[150,160,225]],t);sh=(t-.5)*-1.2;Y=400;cx=195+(t-.5)*90;wd=.2}
  const Wh=135,H=300,y0=-10,gap=.03,P=(u,v)=>`${(cx+u*Wh*(1+v*wd)+v*H*sh).toFixed(1)},${(y0+v*(Y-y0)).toFixed(1)}`,
  pane=(u0,u1)=>`<polygon points="${P(u0,0)} ${P(u1,0)} ${P(u1,1)} ${P(u0,1)}"/>`;
+ let cf=1;const hd=window.__cmph!=null?window.__cmph:CP.h,rg=S.loc&&S.loc.region;
+ if(hd!=null&&rg&&day){const sp2=sunPos(rg.lat,rg.lon,fxTs());if(sp2.alt>0){const dd=((sp2.az-hd+540)%360)-180,ad=Math.abs(dd);cx+=Math.max(-170,Math.min(170,dd*1.7));cf=ad<35?1:Math.max(.28,1-(ad-35)/85*.72)}}
  document.getElementById('gwp').innerHTML=pane(-1,-gap)+pane(gap,1);const w=document.getElementById('gwin');
  const sim=window.__wxsim,wx=sim!=null?{code:sim}:wxCur(),kd=wx?wxKind(wx.code)[1]:'clear',storm=wx&&wx.code>=95;
  const al2=day?Math.sin(Math.PI*t):0;let I,bl,mix=0,amb=0;
@@ -1685,7 +1699,7 @@ function gbgDraw(){let el=document.getElementById('gbg');if(!el){el=document.cre
  if(!day)amb=-.2;
  if(mix){const g=day?[175,192,215]:[120,140,200],m=col.match(/\d+/g).map(Number);col=`rgb(${m.map((v,z)=>Math.round(v+(g[z]-v)*mix)).join(',')})`}
  document.getElementById('gl').style.color=col;document.getElementById('gbl').setAttribute('stdDeviation',bl);
- w.style.opacity=Math.min(.98,I*(LT?1.35:1)).toFixed(3);
+ I*=cf;w.style.opacity=Math.min(.98,I*(LT?1.35:1)).toFixed(3);
  const am=document.getElementById('gam'),k2=LT?1.5:1;am.setAttribute('fill',amb>0?'#fff':'#000');am.setAttribute('opacity',Math.min(.5,Math.abs(amb)*(amb>0?k2:(LT?1.7:1.2))).toFixed(3));
  document.getElementById('gvs').setAttribute('stop-opacity',Math.max(.1,(LT?.26:.62)+(amb<0?-amb*.6:-amb*.8)).toFixed(3))}
 setInterval(()=>{try{if(document.documentElement.getAttribute('data-tab')==='play')gbgDraw()}catch(e){}},60000);try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(document.documentElement.getAttribute('data-tab')==='play')setTimeout(gbgDraw,50)})}catch(e){}
