@@ -363,7 +363,7 @@ html[data-tab=astral] #tbar{background:transparent;border-bottom-color:transpare
 @keyframes gbup{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes gbfade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.gbb,.gbd{animation:none}}
 .gw:not(.gem){border-color:color-mix(in srgb,var(--tx) 9%,transparent)}
-.gw .gi,.gti .gi{stroke-width:1.1px}.gw .gi *{vector-effect:non-scaling-stroke}
+.gw .gi{stroke-width:1.76px}.gw .gti .gi{stroke-width:.943px}
 </style>
 </head>
 <body>
@@ -1639,14 +1639,13 @@ function gdGrow(items,idx,s){const R=gyRows(),cl=items.map(x=>({...x})),it=cl[id
  return gdStable(cl,R)?cl:null}
 /* corner icon and text follow the shape the widget is heading for (tiny = big icon, no text) */
 function gdIco(r,cw,ROW,fin,tr){const ic=r.w.querySelector('.gi');if(!ic)return;const cs=r.cs,G=18,At=cw*ROW,As=(cw*2+G)*ROW;let u=Math.max(0,Math.min(1,(r.nw*r.nh-At)/(As-At)));if(fin)u=fin==='t'?0:1;
- const px=28-13*u,nat=cs==='t'?28:15,d=px-nat;ic.style.transformOrigin='left top';if(tr)ic.style.transition='transform '+tr;ic.style.transform='scale('+(px/nat).toFixed(3)+')';
+ const px=28-13*u,nat=cs==='t'?28:15,d=px-nat;ic.style.width=ic.style.height=px.toFixed(2)+'px';ic.style.strokeWidth=(26.4/px).toFixed(3)+'px';if(tr)ic.style.transition='width '+tr+',height '+tr+',stroke-width '+tr;
  const p=cs==='t'?1-u:u,tx=tr?'transform '+tr+',opacity '+tr:'';
  if(!r.lc){r.lc=[];r.w.querySelectorAll(cs==='t'?'.gtv':'.gbt,.gsrc,.gbs,.gbv,.gbe,.gbr>span').forEach(el=>{const tw=document.createTreeWalker(el,NodeFilter.SHOW_TEXT),ns=[];while(tw.nextNode())ns.push(tw.currentNode);ns.forEach(n=>{const f=document.createDocumentFragment();[...n.nodeValue].forEach(ch=>{const s=document.createElement('span');s.className='lc';s.textContent=ch;f.appendChild(s);r.lc.push(s)});n.replaceWith(f)})});
   r.w.querySelectorAll('.gbars,.gbd').forEach(e=>r.lc.push(e))}
  const N=r.lc.length;r.lc.forEach((s,i)=>{s.style.opacity=Math.max(0,Math.min(1,p*(N+8)-i)).toFixed(3);if(tr)s.style.transition='opacity '+tr});
- r.w.querySelectorAll(cs==='t'?'.gtv':'.gbl .gbt,.gbl .gsrc').forEach(e=>{e.style.transform=cs==='t'?'translateY('+d.toFixed(1)+'px)':'translateX('+d.toFixed(1)+'px)';if(tr)e.style.transition=tx});
- if(cs!=='t')r.w.querySelectorAll('.gbs,.gbv,.gbe,.gbr,.gbars,.gbd').forEach(e=>{e.style.transform='translateY('+d.toFixed(1)+'px)';if(tr)e.style.transition=tx})}
-function gdIcoReset(w){w.querySelectorAll('.gi').forEach(e=>{e.style.transform='';e.style.transition=''});w.querySelectorAll('.lc,.gbt,.gsrc,.gbs,.gbv,.gbe,.gbr,.gbars,.gbd,.gtv').forEach(e=>{e.style.opacity='';e.style.transform='';e.style.transition=''})}
+ }
+function gdIcoReset(w){w.querySelectorAll('.gi').forEach(e=>{e.style.width='';e.style.height='';e.style.strokeWidth='';e.style.transition=''});w.querySelectorAll('.lc,.gbt,.gsrc,.gbs,.gbv,.gbe,.gbr,.gbars,.gbd,.gtv').forEach(e=>{e.style.opacity='';e.style.transform='';e.style.transition=''})}
 (function(){let r=null;let ROW=104;const GAP=18;
  document.addEventListener('pointerdown',e=>{const hd=e.target.closest&&e.target.closest('.grs');if(!hd||!hd.closest('.ge'))return;const w=hd.closest('.gwr'),g=w.closest('.gp'),gi=w.querySelector('.gwi'),R=w.getBoundingClientRect(),G=g.getBoundingClientRect();
   ROW=window.__row||104;g.classList.add('mv');const gd=gdS(),pp0=w.dataset.p==='B'?'B':'L',it0=gd[pp0][+w.dataset.i],fit=GW[it0.k].z.split('').filter(s=>gdStable(gd[pp0].map(q=>q===it0?{...q,s}:q),gyRows())||!!gdGrow(gd[pp0],gd[pp0].indexOf(it0),s)),cw0=(G.width-GAP*2)/3,dm={t:[cw0,ROW],s:[cw0*2+GAP,ROW],m:[G.width,ROW],l:[G.width,ROW*2+GAP]};r={cs:it0.s,fit,mw:Math.max(...fit.map(s=>dm[s][0])),mh:Math.max(...fit.map(s=>dm[s][1])),hd,w,g,gi,x:e.clientX,y:e.clientY,w0:R.width,h0:R.height,gw:G.width,room:G.right-R.left,rh:G.bottom-R.top,nw:R.width,nh:R.height,mv:0};gi.style.cssText=`position:absolute;left:0;top:0;width:${R.width}px;height:${R.height}px;z-index:15;transition:none`;w.style.zIndex=15;try{hd.setPointerCapture(e.pointerId)}catch(_){}window.__gdrag=true;e.stopPropagation()},true);
