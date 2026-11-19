@@ -1631,6 +1631,12 @@ function gdLive(st){if(!st.orig)return;const pl=st.cand&&st.cand.plan,R=gyRows()
  document.addEventListener('touchend',e=>{const a=s0;s0=null;if(!a||window.__gdrag||!e.changedTouches.length)return;const c=e.changedTouches[0],dx=c.clientX-a.x,dy=c.clientY-a.y;if(dx>70&&Math.abs(dy)<45&&dx>2.2*Math.abs(dy)&&Date.now()-a.t<700){const b=document.getElementById('backbtn');if(b&&!b.hidden&&!document.documentElement.hasAttribute('data-gate'))b.click()}},{passive:true});
 })();
 
+/* growing a widget pushes into its neighbours: they shrink to what is left (never disappear) */
+function gdGrow(items,idx,s){const R=gyRows(),cl=items.map(x=>({...x})),it=cl[idx];it.s=s;if(!Number.isInteger(it.c))return null;const rc=x=>({c:x.c,r:x.r,w:GDIM[x.s][0],h:GDIM[x.s][1]}),hit=(a,b)=>a.c<b.c+b.w&&b.c<a.c+a.w&&a.r<b.r+b.h&&b.r<a.r+a.h,G=rc(it);if(G.c+G.w>3||G.r+G.h>R)return null;
+ for(let j=0;j<cl.length;j++){if(j===idx)continue;const n=cl[j];if(!Number.isInteger(n.c))continue;const o=rc(n);if(!hit(G,o))continue;let best=null;
+  for(const z of GW[n.k].z){const d=GDIM[z];if(d[0]>o.w||d[1]>o.h)continue;for(let c=o.c;c+d[0]<=o.c+o.w;c++)for(let r=o.r;r+d[1]<=o.r+o.h;r++){const t={c,r,w:d[0],h:d[1]};if(hit(G,t))continue;if(cl.some((q,k)=>k!==j&&k!==idx&&Number.isInteger(q.c)&&hit(rc(q),t)))continue;const a=d[0]*d[1];if(!best||a>best.a)best={a,c,r,z}}}
+  if(!best)return null;n.s=best.z;n.c=best.c;n.r=best.r}
+ return gdStable(cl,R)?cl:null}
 /* corner icon and text follow the shape the widget is heading for (tiny = big icon, no text) */
 function gdIco(r,cw,ROW,fin,tr){const ic=r.w.querySelector('.gi');if(!ic)return;const cs=r.cs,G=18,At=cw*ROW,As=(cw*2+G)*ROW;let u=Math.max(0,Math.min(1,(r.nw*r.nh-At)/(As-At)));if(fin)u=fin==='t'?0:1;
  const px=28-13*u,nat=cs==='t'?28:15,d=px-nat;ic.style.transformOrigin='left top';if(tr)ic.style.transition='transform '+tr;ic.style.transform='scale('+(px/nat).toFixed(3)+')';
@@ -1643,7 +1649,7 @@ function gdIco(r,cw,ROW,fin,tr){const ic=r.w.querySelector('.gi');if(!ic)return;
 function gdIcoReset(w){w.querySelectorAll('.gi').forEach(e=>{e.style.transform='';e.style.transition=''});w.querySelectorAll('.lc,.gbt,.gsrc,.gbs,.gbv,.gbe,.gbr,.gbars,.gbd,.gtv').forEach(e=>{e.style.opacity='';e.style.transform='';e.style.transition=''})}
 (function(){let r=null;let ROW=104;const GAP=18;
  document.addEventListener('pointerdown',e=>{const hd=e.target.closest&&e.target.closest('.grs');if(!hd||!hd.closest('.ge'))return;const w=hd.closest('.gwr'),g=w.closest('.gp'),gi=w.querySelector('.gwi'),R=w.getBoundingClientRect(),G=g.getBoundingClientRect();
-  ROW=window.__row||104;g.classList.add('mv');const gd=gdS(),pp0=w.dataset.p==='B'?'B':'L',it0=gd[pp0][+w.dataset.i],fit=GW[it0.k].z.split('').filter(s=>gdStable(gd[pp0].map(q=>q===it0?{...q,s}:q),gyRows())),cw0=(G.width-GAP*2)/3,dm={t:[cw0,ROW],s:[cw0*2+GAP,ROW],m:[G.width,ROW],l:[G.width,ROW*2+GAP]};r={cs:it0.s,fit,mw:Math.max(...fit.map(s=>dm[s][0])),mh:Math.max(...fit.map(s=>dm[s][1])),hd,w,g,gi,x:e.clientX,y:e.clientY,w0:R.width,h0:R.height,gw:G.width,room:G.right-R.left,rh:G.bottom-R.top,nw:R.width,nh:R.height,mv:0};gi.style.cssText=`position:absolute;left:0;top:0;width:${R.width}px;height:${R.height}px;z-index:15;transition:none`;w.style.zIndex=15;try{hd.setPointerCapture(e.pointerId)}catch(_){}window.__gdrag=true;e.stopPropagation()},true);
+  ROW=window.__row||104;g.classList.add('mv');const gd=gdS(),pp0=w.dataset.p==='B'?'B':'L',it0=gd[pp0][+w.dataset.i],fit=GW[it0.k].z.split('').filter(s=>gdStable(gd[pp0].map(q=>q===it0?{...q,s}:q),gyRows())||!!gdGrow(gd[pp0],gd[pp0].indexOf(it0),s)),cw0=(G.width-GAP*2)/3,dm={t:[cw0,ROW],s:[cw0*2+GAP,ROW],m:[G.width,ROW],l:[G.width,ROW*2+GAP]};r={cs:it0.s,fit,mw:Math.max(...fit.map(s=>dm[s][0])),mh:Math.max(...fit.map(s=>dm[s][1])),hd,w,g,gi,x:e.clientX,y:e.clientY,w0:R.width,h0:R.height,gw:G.width,room:G.right-R.left,rh:G.bottom-R.top,nw:R.width,nh:R.height,mv:0};gi.style.cssText=`position:absolute;left:0;top:0;width:${R.width}px;height:${R.height}px;z-index:15;transition:none`;w.style.zIndex=15;try{hd.setPointerCapture(e.pointerId)}catch(_){}window.__gdrag=true;e.stopPropagation()},true);
  document.addEventListener('pointermove',e=>{if(!r)return;const dx=e.clientX-r.x,dy=e.clientY-r.y;r.mv=Math.max(r.mv,Math.hypot(dx,dy));
   const cw=(r.gw-GAP*2)/3,rb=(v,lo,hi)=>v<lo?lo-(lo-v)*.25:v>hi?hi+(v-hi)*.25:v;r.nw=rb(r.w0+dx,cw,r.mw);r.nh=rb(r.h0+dy,ROW,r.mh);r.gi.style.width=r.nw+'px';r.gi.style.height=r.nh+'px';gdIco(r,cw,ROW);r.hd.style.transform=`translate(${r.nw-r.w0}px,${r.nh-r.h0}px)`;const xb=r.w.querySelector('.gx');if(xb)xb.style.transform=`translateX(${r.nw-r.w0}px)`});
  const end=()=>{if(!r)return;const q=r;r=null;window.__gdrag=false;
@@ -1652,7 +1658,7 @@ function gdIcoReset(w){w.querySelectorAll('.gi').forEach(e=>{e.style.transform='
   let best=it.s,bd=1e9;(q.fit&&q.fit.length?q.fit:GW[it.k].z.split('')).forEach(s=>{const d=Math.pow((q.nw-dims[s][0])/q.gw,2)+Math.pow((q.nh-dims[s][1])/(ROW*2+GAP),2);if(d<bd){bd=d;best=s}});
   const tw=Math.min(dims[best][0],q.room),th=dims[best][1],tr='.24s cubic-bezier(.3,1.5,.5,1)';q.gi.style.transition=`width ${tr},height ${tr}`;gdIco(q,cw,ROW,best,tr);q.gi.getBoundingClientRect();q.gi.style.width=tw+'px';q.gi.style.height=th+'px';
   q.hd.style.transition=`transform ${tr}`;q.hd.style.transform=`translate(${tw-q.w0}px,${th-q.h0}px)`;const xb=q.w.querySelector('.gx');if(xb){xb.style.transition=`transform ${tr}`;xb.style.transform=`translateX(${tw-q.w0}px)`}
-  setTimeout(()=>{if(best!==it.s){const gg=gdS(),old=it.s;it.s=best;if(gdStable(gg[p],gyRows()))save();else{it.s=old;toast('No room for that size')}}render()},whRM()?0:250)};
+  setTimeout(()=>{if(best!==it.s){const gg=gdS(),old=it.s;it.s=best;if(gdStable(gg[p],gyRows()))save();else{it.s=old;const np=gdGrow(gg[p],+q.w.dataset.i,best);if(np){S.gd[p]=np;save()}else toast('No room for that size')}}render()},whRM()?0:250)};
  document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end)})();
 /* ===== remember scroll: resume where you left, refresh goes to the top of the same page ===== */
 (function(){const K='synergy_sc';let t=null;
