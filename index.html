@@ -1609,27 +1609,33 @@ function ask(msg,yes,label){const o=document.createElement('div');o.id='ask';o.s
 document.addEventListener('touchmove',e=>{if(document.documentElement.getAttribute('data-gy')==='1'&&!e.target.closest('input,textarea,select,#sheet,#ask'))e.preventDefault()},{passive:false});
 /* concrete floor with window light that follows the real day */
 const gbgLight=()=>{const t=document.documentElement.getAttribute('data-theme');return t?t==='light':!matchMedia('(prefers-color-scheme: dark)').matches};
-function gbgTex(lt){gbgTex.c=gbgTex.c||{};const key=lt?'l':'d';if(gbgTex.c[key])return gbgTex.c[key];const N=512,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),im=x.createImageData(N,N);let s=11;const R=()=>{s=(s*16807)%2147483647;return s/2147483647};
- for(let i=0;i<im.data.length;i+=4){const v=(lt?196:24)+R()*(lt?24:20)+(R()<.05?R()*(lt?-22:22):0)-(R()<.035?(lt?-12:12):0);im.data[i]=v;im.data[i+1]=v;im.data[i+2]=v+(lt?0:1.5);im.data[i+3]=255}x.putImageData(im,0,0);
- const W=f=>{for(const a of[-N,0,N])for(const b of[-N,0,N])f(a,b)};
- for(let i=0;i<70;i++){const px=R()*N,py=R()*N,r=25+R()*130,l=R()<.45,al=l?.03+R()*.05:.06+R()*.12;W((a,b)=>{const g=x.createRadialGradient(px+a,py+b,0,px+a,py+b,r);g.addColorStop(0,l?`rgba(255,255,255,${al})`:`rgba(0,0,0,${al})`);g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(px+a-r,py+b-r,2*r,2*r)})}
- for(let i=0;i<380;i++){const px=R()*N,py=R()*N,r=.8+R()*2.2;x.fillStyle=`rgba(0,0,0,${(.25+R()*.3)*(lt?.4:1)})`;x.beginPath();x.arc(px,py,r,0,7);x.fill()}
- for(let i=0;i<260;i++){const px=R()*N,py=R()*N,r=.6+R()*1.6;x.fillStyle=`rgba(255,255,255,${.04+R()*.09})`;x.beginPath();x.arc(px,py,r,0,7);x.fill()}
- x.lineCap='round';for(let i=0;i<90;i++){const px=R()*N,py=R()*N,a=R()*6.28,l=8+R()*40;x.strokeStyle=R()<.5?`rgba(255,255,255,${.03+R()*.05})`:`rgba(0,0,0,${.12+R()*.2})`;x.lineWidth=.6+R()*.8;x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l*.6);x.stroke()}
+function gbgTex(lt){gbgTex.c=gbgTex.c||{};const key=lt?'l':'d';if(gbgTex.c[key])return gbgTex.c[key];const N=512,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),im=x.createImageData(N,N);let s=29;const R=()=>{s=(s*16807)%2147483647;return s/2147483647};
+ const oct=(px,py,w)=>{const g=Array.from({length:px*py},()=>R()),sm=t=>t*t*(3-2*t);return{w,f(u,v){const X=u*px,Y=v*py,x0=Math.floor(X),y0=Math.floor(Y),fx=sm(X-x0),fy=sm(Y-y0),a=g[(y0%py)*px+(x0%px)],b=g[(y0%py)*px+((x0+1)%px)],c2=g[((y0+1)%py)*px+(x0%px)],d=g[((y0+1)%py)*px+((x0+1)%px)];return(a+(b-a)*fx)+((c2+(d-c2)*fx)-(a+(b-a)*fx))*fy}}};
+ const O=[oct(3,3,.34),oct(6,6,.26),oct(12,12,.2),oct(24,24,.16),oct(48,48,.12),oct(96,96,.08),oct(4,40,.07),oct(7,64,.05)],tw=O.reduce((a,o)=>a+o.w,0);
+ const base=lt?198:30,amp=lt?34:26;
+ for(let j=0;j<N;j++)for(let i=0;i<N;i++){let n=0;for(const o of O)n+=o.f(i/N,j/N)*o.w;n=n/tw-.5;const g=(R()-.5)*(lt?10:7),v=base+n*amp*2.2+g,k=(j*N+i)*4;im.data[k]=v;im.data[k+1]=v;im.data[k+2]=v+(lt?-1:1.5);im.data[k+3]=255}
+ x.putImageData(im,0,0);
+ for(let i=0;i<260;i++){const px=R()*N,py=R()*N,r=.5+R()*.9;x.fillStyle=lt?`rgba(40,40,40,${.05+R()*.1})`:`rgba(0,0,0,${.12+R()*.2})`;x.beginPath();x.arc(px,py,r,0,7);x.fill()}
+ for(let i=0;i<220;i++){const px=R()*N,py=R()*N,r=.4+R()*.8;x.fillStyle=lt?`rgba(255,255,255,${.12+R()*.2})`:`rgba(255,255,255,${.03+R()*.06})`;x.beginPath();x.arc(px,py,r,0,7);x.fill()}
  return gbgTex.c[key]=c.toDataURL('image/png')}
+function gbgCracks(){let s=5;const R=()=>{s=(s*16807)%2147483647;return s/2147483647},out=[];
+ const walk=(x,y,a,len,w0,depth)=>{let px=x,py=y,d=0,w=w0;const pts=[[x,y]];while(d<len){const st=5+R()*9;a+=(R()-.5)*.9;px+=Math.cos(a)*st;py+=Math.sin(a)*st;d+=st;pts.push([px,py]);w=Math.max(.25,w0*(1-d/len));
+   out.push(`<line x1="${pts[pts.length-2][0].toFixed(1)}" y1="${pts[pts.length-2][1].toFixed(1)}" x2="${px.toFixed(1)}" y2="${py.toFixed(1)}" stroke-width="${w.toFixed(2)}"/>`);
+   if(depth<2&&R()<.09)walk(px,py,a+(R()<.5?-1:1)*(.5+R()*.7),len*(.28+R()*.25),w*.75,depth+1)}};
+ walk(-4,150,.45,300,2.6,0);walk(394,560,Math.PI-.5,260,2.4,0);walk(150,850,-1.3,230,2.2,0);walk(-4,430,-.15,150,1.5,0);walk(394,300,Math.PI+.3,120,1.3,0);
+ const L=out.join('');return `<g stroke="#000" stroke-opacity=".8" stroke-linecap="round">${L}</g><g stroke="#fff" stroke-opacity=".07" stroke-linecap="round" transform="translate(.9 1.1)">${L}</g>`}
 function gbgDraw(){let el=document.getElementById('gbg');if(!el){el=document.createElement('div');el.id='gbg';el.setAttribute('aria-hidden','true');
- const ck='M18 118L56 148L50 192L90 232L84 266',c2='M336 520L302 548L308 592L270 640L282 694',c3='M148 764L176 742L170 710L214 690L240 700';
+ 
  el.innerHTML=`<svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="gv" cx=".5" cy=".42" r=".8"><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop id="gvs" offset="1" stop-color="#000" stop-opacity=".62"/></radialGradient><linearGradient id="gl" gradientUnits="userSpaceOnUse" id="gl" x1="0" y1="0" x2="0" y2="800"><stop offset="0" stop-color="currentColor" stop-opacity="1"/><stop offset=".55" stop-color="currentColor" stop-opacity=".5"/><stop offset="1" stop-color="currentColor" stop-opacity=".08"/></linearGradient><filter id="gb" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter></defs>
  <rect width="390" height="844" fill="url(#gv)"/>
- <g fill="none" stroke="#000" stroke-opacity=".6" stroke-width="1" stroke-linejoin="round"><path d="${ck}M50 192L22 214"/><path d="${c2}M308 592L346 612"/><path d="${c3}"/></g>
- <g fill="none" stroke="#fff" stroke-opacity=".06" stroke-width="1" transform="translate(1 1.4)"><path d="${ck}"/><path d="${c2}"/><path d="${c3}"/></g>
+ ${gbgCracks()}
  <g id="gwin" filter="url(#gb)" style="color:#FFF3DC"><g id="gwp" fill="url(#gl)"></g></g></svg>`;document.body.insertBefore(el,document.body.firstChild)}
  const LT=gbgLight();document.documentElement.setAttribute('data-fl',LT?'light':'dark');el.style.backgroundImage=`url(${gbgTex(LT)})`;document.getElementById('gvs').setAttribute('stop-opacity',LT?'.26':'.62');
  const m=nowMin(),sp=DAY1-DAY0,day=m>=DAY0&&m<DAY1;let t,a,col,sh,cx,wd;
  const stops=(arr,u)=>{const n=arr.length-1,f=Math.max(0,Math.min(1,u))*n,k=Math.min(n-1,Math.floor(f)),q=f-k,A=arr[k],B=arr[k+1];return`rgb(${A.map((v,z)=>Math.round(v+(B[z]-v)*q)).join(',')})`};
  let Y;
- if(day){t=(m-DAY0)/sp;const al=Math.sin(Math.PI*t);a=.12+.24*al;col=stops([[255,150,165],[255,196,128],[255,230,160],[255,247,235],[255,224,156],[255,164,92],[228,120,176]],t);sh=(t-.5)*-2.4;Y=370+Math.pow(1-al,1.4)*120;cx=195+(t-.5)*140;wd=.1+.3*(1-al)}
- else{const ns=1440-sp,n=(m-DAY1+1440)%1440;t=Math.min(1,n/ns);a=.13;col=stops([[150,120,230],[120,150,255],[140,175,255],[150,160,225]],t);sh=(t-.5)*-1.2;Y=400;cx=195+(t-.5)*90;wd=.2}
+ if(day){t=(m-DAY0)/sp;const al=Math.sin(Math.PI*t);a=.15+.28*al;col=stops([[255,150,165],[255,196,128],[255,230,160],[255,247,235],[255,224,156],[255,164,92],[228,120,176]],t);sh=(t-.5)*-2.4;Y=370+Math.pow(1-al,1.4)*120;cx=195+(t-.5)*140;wd=.1+.3*(1-al)}
+ else{const ns=1440-sp,n=(m-DAY1+1440)%1440;t=Math.min(1,n/ns);a=.16;col=stops([[150,120,230],[120,150,255],[140,175,255],[150,160,225]],t);sh=(t-.5)*-1.2;Y=400;cx=195+(t-.5)*90;wd=.2}
  const Wh=135,H=300,y0=-10,gap=.03,P=(u,v)=>`${(cx+u*Wh*(1+v*wd)+v*H*sh).toFixed(1)},${(y0+v*(Y-y0)).toFixed(1)}`,
  pane=(u0,u1)=>`<polygon points="${P(u0,0)} ${P(u1,0)} ${P(u1,1)} ${P(u0,1)}"/>`;
  document.getElementById('gwp').innerHTML=pane(-1,-gap)+pane(gap,1);const w=document.getElementById('gwin');document.getElementById('gl').style.color=col;w.style.opacity=Math.min(.7,a*(LT?1.9:1)).toFixed(3)}
