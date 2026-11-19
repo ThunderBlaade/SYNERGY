@@ -276,7 +276,7 @@ nav{padding:2px 4px max(2px,calc(env(safe-area-inset-bottom,0px) - 8px))!importa
 .gy-bar{display:flex;justify-content:flex-end;align-items:center;min-height:32px;margin:-10px 0 -4px}.gy-bar .wed{background:none;font:600 12px var(--body);letter-spacing:.18em;padding:8px 6px;min-height:36px}
 .gy-plus{width:44px;height:44px;display:grid;place-items:center;background:none;color:var(--mu);margin-left:-10px}.gy-plus svg{width:24px;height:24px}
 .gy-intro{text-align:center;color:var(--mu);font:400 13px var(--body);letter-spacing:.04em;margin:18px 0 0}
-.gy-a,.gy-b{padding:0}.gp{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:var(--row,104px);grid-auto-flow:dense;gap:8px}
+.gy-a,.gy-b{padding:0}.gp{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:var(--row,104px);grid-auto-flow:dense;gap:12px}
 /*fit*/.gy-fit{margin:-14px -2px 0;display:flex;flex-direction:column;gap:10px;height:calc(100dvh - 97px - env(safe-area-inset-top,0px) - max(0px,calc(env(safe-area-inset-bottom,0px) - 10px)))}.gy-pn{flex:1;min-height:0;overflow:hidden;border:1.5px solid color-mix(in srgb,var(--tx) 42%,transparent);padding:8px}.gy-pn::-webkit-scrollbar{display:none}
 .gy-pn{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .gy-start{padding:0;display:flex;align-items:center;gap:6px}.gsm{flex:1;min-width:0}.nl{display:block;padding-left:.16em;white-space:nowrap}nav button[aria-current=page]::before{content:none!important}.nvl{position:absolute;top:-7px;left:50%;height:2px;background:var(--irid);pointer-events:none}html{overflow-x:hidden}
@@ -1569,20 +1569,30 @@ function gdPlan(p0,i0,cp,c,r){const g=gdS(),R=gyRows(),it=g[p0][i0],d=GDIM[it.s]
    for(let rr=0;rr+hh<=R;rr++)for(let cc=0;cc+w<=3;cc++){let f=true;for(let y=0;y<hh&&f;y++)for(let x=0;x<w;x++)if(o[rr+y][cc+x]){f=false;break}if(!f)continue;const dd=Math.abs(cc-oc)+Math.abs(rr-orow)+(p===cp?0:8)+(p===p0&&cc===it.c&&rr===it.r?.5:0)-.05*(Math.abs(cc-c)+Math.abs(rr-r));if(dd<bd){bd=dd;best={p,c:cc,r:rr}}}}
   if(!best)return null;q.c=best.c;q.r=best.r;t[best.p].push(q)}
  return gdStable(t.L,R)&&gdStable(t.B,R)?{t,out}:null}
-function gdCand(w,left,top){const g=gdS(),p0=w.dataset.p,i0=+w.dataset.i,it=g[p0][i0],d=GDIM[it.s],R=gyRows(),row=window.__row||104,GP=8;let best=null,bd=1e9;
+function gdCand(w,left,top){const g=gdS(),p0=w.dataset.p,i0=+w.dataset.i,it=g[p0][i0],d=GDIM[it.s],R=gyRows(),row=window.__row||104,GP=12;let best=null,bd=1e9;
  for(const p of['L','B']){const gp=document.querySelector('.gp[data-p="'+p+'"]');if(!gp)continue;const rc=gp.getBoundingClientRect(),cw=(rc.width-GP*2)/3;
   for(let r=0;r+d[1]<=R;r++)for(let c=0;c+d[0]<=3;c++){const dd=Math.hypot(rc.left+c*(cw+GP)-left,rc.top+r*(row+GP)-top);if(dd>=bd)continue;const pl=gdPlan(p0,i0,p,c,r);if(pl){bd=dd;best={p,c,r,plan:pl}}}}
  return best}
+/* while a widget is dragged over others, the others move out of the way right away */
+function gdOrig(drag){const g=gdS(),R=gyRows(),m=new Map();
+ document.querySelectorAll('.gwr:not(.ph)').forEach(e=>{if(e===drag)return;const p=e.dataset.p,i=+e.dataset.i,it=g[p]&&g[p][i],l=it&&(gdLay(g[p],R)||[])[i];if(it&&l)m.set(e,{p,c:l.c,r:l.r,sz:GDIM[it.s],k:it.k})});return m}
+function gdLive(st){if(!st.orig)return;const pl=st.cand&&st.cand.plan,R=gyRows(),lay=pl?{L:gdLay(pl.t.L,R),B:gdLay(pl.t.B,R)}:null,before=new Map();
+ st.orig.forEach((o,e)=>before.set(e,e.getBoundingClientRect()));
+ st.orig.forEach((o,e)=>{let p=o.p,c=o.c,r=o.r;
+  if(pl&&o.k!=='empty'){const P=['L','B'].find(q=>pl.t[q].some(z=>z.k===o.k));if(P){const cell=lay[P]&&lay[P][pl.t[P].findIndex(z=>z.k===o.k)];if(cell){p=P;c=cell.c;r=cell.r}}}
+  const gp=document.querySelector('.gp[data-p="'+p+'"]');if(gp&&e.parentNode!==gp)gp.appendChild(e);
+  e.style.gridColumn=(c+1)+'/span '+o.sz[0];e.style.gridRow=(r+1)+'/span '+o.sz[1]});
+ if(whRM())return;st.orig.forEach((o,e)=>{const a=before.get(e),b=e.getBoundingClientRect(),dx=a.left-b.left,dy=a.top-b.top;if(dx||dy)e.animate([{translate:`${dx}px ${dy}px`},{translate:'0 0'}],{duration:220,easing:'cubic-bezier(.2,.8,.2,1)'})})}
 /* drag and drop for dashboard tiles + swipe back */
 (function(){let st=null;window.__gdrag=false;
  const grids=()=>[...document.querySelectorAll('.gp')],flip=fn=>{const kids=grids().flatMap(g=>[...g.children]).filter(e=>!e.classList.contains('lift')),r0=new Map(kids.map(e=>[e,e.getBoundingClientRect()]));fn();if(whRM())return;kids.forEach(e=>{const a=r0.get(e),b=e.getBoundingClientRect(),dx=a.left-b.left,dy=a.top-b.top;if(dx||dy){e.style.transition='none';e.style.transform=`translate(${dx}px,${dy}px)`;e.getBoundingClientRect();e.style.transition='transform .24s cubic-bezier(.2,.8,.2,1)';e.style.transform='';setTimeout(()=>{e.style.transition=''},260)}})};
- const begin=()=>{if(!st||st.on)return;const w=st.w;st.on=true;window.__gdrag=true;grids().forEach(g=>g.classList.add('mv'));if(!GE){GE=true;grids().forEach(g=>g.classList.add('ge'));}
+ const begin=()=>{if(!st||st.on)return;const w=st.w;st.on=true;st.orig=gdOrig(w);window.__gdrag=true;grids().forEach(g=>g.classList.add('mv'));if(!GE){GE=true;grids().forEach(g=>g.classList.add('ge'));}
   const r=w.getBoundingClientRect(),ph=document.createElement('div');ph.className=w.className+' ph';ph.style.gridColumn=w.style.gridColumn;ph.style.gridRow=w.style.gridRow;w.parentNode.insertBefore(ph,w);st.ph=ph;st.gx=st.x-r.left;st.gy=st.y-r.top;
   w.classList.add('lift');w.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:20;pointer-events:none;margin:0`;try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}};
  document.addEventListener('pointerdown',e=>{const w=e.target.closest&&e.target.closest('.gwr:not(.ph)');if(!w||e.target.closest('.gc2')||!w.closest('.gp'))return;st={w,x:e.clientX,y:e.clientY,on:false,t:setTimeout(begin,GE?110:380)}});
  document.addEventListener('pointermove',e=>{if(!st)return;if(!st.on){const m=Math.hypot(e.clientX-st.x,e.clientY-st.y);if(m>(GE?6:9)){clearTimeout(st.t);if(GE){st.x=e.clientX;st.y=e.clientY;begin()}else st=null}return}
   const w=st.w,x=e.clientX,y=e.clientY;w.style.left=(x-st.gx)+'px';w.style.top=(y-st.gy)+'px';
-  st.cand=gdCand(w,x-st.gx,y-st.gy);document.querySelectorAll('.gwr.sw').forEach(e=>e.classList.remove('sw'));if(st.cand&&st.cand.plan){const o=st.cand.plan.out,g0=gdS();document.querySelectorAll('.gwr:not(.lift):not(.ph)').forEach(e=>{const it0=g0[e.dataset.p][+e.dataset.i];if(it0&&o.some(q=>q.k===it0.k&&q.s===it0.s&&q.k!=='empty'))e.classList.add('sw')})}if(st.cand){const gp=document.querySelector('.gp[data-p="'+st.cand.p+'"]'),it=gdS()[w.dataset.p][+w.dataset.i],d=GDIM[it.s];if(gp){if(st.ph.parentNode!==gp)gp.appendChild(st.ph);st.ph.style.gridColumn=(st.cand.c+1)+'/span '+d[0];st.ph.style.gridRow=(st.cand.r+1)+'/span '+d[1]}}
+  st.cand=gdCand(w,x-st.gx,y-st.gy);gdLive(st);if(st.cand){const gp=document.querySelector('.gp[data-p="'+st.cand.p+'"]'),it=gdS()[w.dataset.p][+w.dataset.i],d=GDIM[it.s];if(gp){if(st.ph.parentNode!==gp)gp.appendChild(st.ph);st.ph.style.gridColumn=(st.cand.c+1)+'/span '+d[0];st.ph.style.gridRow=(st.cand.r+1)+'/span '+d[1]}}
   const pe=document.querySelector('.gy-pn .gp');if(y<110)scrollBy(0,-9);else if(y>innerHeight-130)scrollBy(0,9)});
  document.addEventListener('touchmove',e=>{if(st&&st.on){e.preventDefault();e.stopPropagation()}},{passive:false});
  const end=()=>{if(!st)return;clearTimeout(st.t);const s=st;st=null;if(!s.on)return;window.__gdrag=false;window.__gdsup=Date.now();const r0={};document.querySelectorAll('.gwr:not(.ph)').forEach(e=>{const it=gdS()[e.dataset.p][+e.dataset.i];if(it&&it.k!=='empty')r0[it.k]=e.getBoundingClientRect()});s.w.classList.remove('lift');s.w.style.cssText='';const cd=s.cand;s.ph.remove();document.querySelectorAll('.gwr.sw').forEach(e=>e.classList.remove('sw'));if(cd&&cd.plan){const g=gdS();g.L=cd.plan.t.L;g.B=cd.plan.t.B;save();s.flip=r0}else if(cd)toast('No room there')
@@ -1595,7 +1605,7 @@ function gdCand(w,left,top){const g=gdS(),p0=w.dataset.p,i0=+w.dataset.i,it=g[p0
  document.addEventListener('touchend',e=>{const a=s0;s0=null;if(!a||window.__gdrag||!e.changedTouches.length)return;const c=e.changedTouches[0],dx=c.clientX-a.x,dy=c.clientY-a.y;if(dx>70&&Math.abs(dy)<45&&dx>2.2*Math.abs(dy)&&Date.now()-a.t<700){const b=document.getElementById('backbtn');if(b&&!b.hidden&&!document.documentElement.hasAttribute('data-gate'))b.click()}},{passive:true});
 })();
 
-(function(){let r=null;let ROW=104;const GAP=8;
+(function(){let r=null;let ROW=104;const GAP=12;
  document.addEventListener('pointerdown',e=>{const hd=e.target.closest&&e.target.closest('.grs');if(!hd||!hd.closest('.ge'))return;const w=hd.closest('.gwr'),g=w.closest('.gp'),gi=w.querySelector('.gwi'),R=w.getBoundingClientRect(),G=g.getBoundingClientRect();
   ROW=window.__row||104;g.classList.add('mv');const gd=gdS(),pp0=w.dataset.p==='B'?'B':'L',it0=gd[pp0][+w.dataset.i],fit=GW[it0.k].z.split('').filter(s=>gdStable(gd[pp0].map(q=>q===it0?{...q,s}:q),gyRows())),cw0=(G.width-GAP*2)/3,dm={t:[cw0,ROW],s:[cw0*2+GAP,ROW],m:[G.width,ROW],l:[G.width,ROW*2+GAP]};r={fit,mw:Math.max(...fit.map(s=>dm[s][0])),mh:Math.max(...fit.map(s=>dm[s][1])),hd,w,g,gi,x:e.clientX,y:e.clientY,w0:R.width,h0:R.height,gw:G.width,room:G.right-R.left,rh:G.bottom-R.top,nw:R.width,nh:R.height,mv:0};gi.style.cssText=`position:absolute;left:0;top:0;width:${R.width}px;height:${R.height}px;z-index:15;transition:none`;w.style.zIndex=15;try{hd.setPointerCapture(e.pointerId)}catch(_){}window.__gdrag=true;e.stopPropagation()},true);
  document.addEventListener('pointermove',e=>{if(!r)return;const dx=e.clientX-r.x,dy=e.clientY-r.y;r.mv=Math.max(r.mv,Math.hypot(dx,dy));
@@ -1633,7 +1643,7 @@ document.addEventListener('pointermove',e=>{if(t&&Math.hypot(e.clientX-x0,e.clie
 ['pointerup','pointercancel','scroll'].forEach(n=>document.addEventListener(n,stop,true))})();
 (function(){const bump=()=>{window.__ga=Date.now()};['pointerdown','pointermove','keydown','touchstart'].forEach(n=>document.addEventListener(n,bump,true));
 setInterval(()=>{if(!GE){bump();return}if(window.__gdrag)return bump();if(Date.now()-(window.__ga||0)>6000){GE=false;render()}},500)})();
-function gyFit(){const ps=document.querySelectorAll('.gy-pn');if(!ps.length)return;const R=gyRows();let row=104;const hh=ps[0].clientHeight-16;if(hh>0)row=Math.max(52,(hh-8*(R-1))/R);window.__row=row;document.querySelectorAll('.gp').forEach(g=>g.style.setProperty('--row',row+'px'))}
+function gyFit(){const ps=document.querySelectorAll('.gy-pn');if(!ps.length)return;const R=gyRows();let row=104;const hh=ps[0].clientHeight-16;if(hh>0)row=Math.max(52,(hh-12*(R-1))/R);window.__row=row;document.querySelectorAll('.gp').forEach(g=>g.style.setProperty('--row',row+'px'))}
 {const _r=render;render=function(){const o=_r.apply(this,arguments);try{gyFit()}catch(e){}return o}}
 addEventListener('resize',()=>{try{gyFit()}catch(e){}});
 /* ===== Gym feel: confirm box, workout bar, no scroll, concrete floor ===== */
