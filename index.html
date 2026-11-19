@@ -370,7 +370,7 @@ const DEF=()=>({name:'',theme:'auto',v2:1,v3:1,loc:{mode:'auto',region:null,fx:{
 let S=DEF();try{const r=localStorage.getItem('synergy');if(r)S={...DEF(),...JSON.parse(r)}}catch(e){}
 if(!S.v3){S.theme='system';S.v2=1;S.v3=1}if(S.theme==='auto'||!S.theme)S.theme='system';
 const save=()=>{try{localStorage.setItem('synergy',JSON.stringify(S))}catch(e){}if(typeof lkSync==='function'){try{lkSync()}catch(e){}}};
-let tab='home',sub=null,shown={},confirmReset=false;
+let tab=['home','play','conn','rank','astral','me'].includes(S.lastTab)?S.lastTab:'home',sub=null,shown={},confirmReset=false;
 const $=s=>document.querySelector(s);
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dk=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -1768,7 +1768,7 @@ function gbgDraw(){let el=document.getElementById('gbg');if(!el){el=document.cre
  const am=document.getElementById('gam'),k2=LT?1.5:1;am.setAttribute('fill',amb>0?'#fff':'#000');am.setAttribute('opacity',Math.min(.5,Math.abs(amb)*(amb>0?k2:(LT?1.7:1.2))).toFixed(3));
  document.getElementById('gvs').setAttribute('stop-opacity',Math.max(.1,(LT?.26:.62)+(amb<0?-amb*.6:-amb*.8)).toFixed(3))}
 setInterval(()=>{try{if(document.documentElement.getAttribute('data-tab')==='play')gbgDraw()}catch(e){}},60000);try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(document.documentElement.getAttribute('data-tab')==='play')setTimeout(gbgDraw,50)})}catch(e){}
-{const _g=render;render=function(){const o=_g.apply(this,arguments);try{const h=document.documentElement;h.setAttribute('data-gy',tab==='play'&&!sub?'1':'0');if(tab==='play')gbgDraw()}catch(e){}return o}}
+{const _g=render;render=function(){const o=_g.apply(this,arguments);try{if(S.lastTab!==tab){S.lastTab=tab;save()}}catch(e){}try{const h=document.documentElement;h.setAttribute('data-gy',tab==='play'&&!sub?'1':'0');if(tab==='play')gbgDraw()}catch(e){}return o}}
 </script>
 </body>
 </html>
