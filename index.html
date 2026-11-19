@@ -976,7 +976,7 @@ function devPanel(){const P=Object.keys(SO.P),rp=[];Object.keys(SO.D).forEach(u=
  <div class="dvr" style="display:block"><div class="row sp"><span>Date</span><b id="dvm">${SKYSIM.off===0?'Today':dl}</b></div><input type="range" class="rg" min="-2" max="2" step="1" value="${SKYSIM.off}" data-dvr="d" aria-label="Days from today"><div class="mu sm" id="dvn" style="margin-top:2px">${mi.name} · ${mi.lit}% lit</div></div>
  <div class="row" style="gap:4px"><button class="dvr" id="dvplay" data-dv="play" style="justify-content:center">${DV.play?'Pause':'Play'}</button><button class="dvr" data-dv="star" style="justify-content:center">Shooting star</button></div>
  <div class="dvh">Secret moments</div><div class="mu sm" style="padding:0 2px 6px">Empty sky ${fmt12((DAY0-GAP+1440)%1440)}–${fmt12(DAY0)} and ${fmt12(DAY1)}–${fmt12((DAY1+GAP)%1440)}. One every 3 minutes, every other day.</div>
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px">${[['ship','Spaceship'],['con','Constellation'],['ptero','Pterodactyl'],['car','Flying car'],['hen','Golden hen']].map(x=>`<button class="dvr" data-dv="fx:${x[0]}" style="justify-content:center${x[0]==='hen'?';grid-column:1/-1':''}">${x[1]}${x[0]==='hen'?' (rare)':''}</button>`).join('')}</div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px">${[['ship','Spaceship'],['con','Constellation']].map(x=>`<button class="dvr" data-dv="fx:${x[0]}" style="justify-content:center${x[0]==='hen'?';grid-column:1/-1':''}">${x[1]}${x[0]==='hen'?' (rare)':''}</button>`).join('')}</div>
  <button class="dvr" data-dv="live" style="justify-content:center;font-weight:500">Back to live sky</button></div>`}
  const row=(a,t)=>`<button class="dvr" data-dv="${a}">${t}<span class="mu">›</span></button>`,pm=DV.view.startsWith('pg:')?DV.view.slice(3):null;
  if(pm){const T=TABS.find(t=>t[0]===pm)||TABS[0];let b='';
@@ -1050,7 +1050,7 @@ function fxRun(fn,force,cb){if(fxRM()&&!force){if(cb)cb();return}if(FX.busy&&!fo
 const realMin=()=>{const L=S.loc,d=new Date();return L&&L.mode==='auto'&&L.region?tzNowMin(L.region.tz,d):d.getHours()*60+d.getMinutes()}
 function fxTs(){let t=Date.now();if(SKYSIM.min!=null){const dl=((SKYSIM.min-realMin()+2160)%1440)-720;t+=dl*6e4+SKYSIM.off*864e5}return t}
 function fxDayOn(){const L=S.loc,q=L&&L.region?tzParts(L.region.tz,new Date()):null,n=q?Math.round(Date.UTC(q.y,q.mo-1,q.d)/864e5):Math.floor(Date.now()/864e5);return n%FXEVERY===0}
-function fxTick(){if(SKYSIM.min!=null||document.hidden||FX.busy||tab!=='astral')return;const g=gapAt(nowMin());if(!g||!fxDayOn()){FX.k=null;return}const k=g.id+Math.floor(g.el/3);if(k===FX.k)return;FX.k=k;fxPlay(Math.random()<.08?'hen':g.id==='dawn'?(Math.random()<.5?'ptero':'car'):(Math.random()<.5?'ship':'con'))}
+function fxTick(){if(SKYSIM.min!=null||document.hidden||FX.busy||tab!=='astral')return;const g=gapAt(nowMin());if(!g||!fxDayOn()){FX.k=null;return}const k=g.id+Math.floor(g.el/3);if(k===FX.k)return;FX.k=k;if(g.id==='dawn')return;fxPlay(Math.random()<.5?'ship':'con')}
 const FXF={ship:()=>fxShip(),ptero:()=>fxPtero(),con:()=>fxCon(),car:()=>fxCar(),hen:()=>fxHen()};
 function fxPlay(k,force,cb){const f=FXF[k];if(f)fxRun(f,force,cb)}
 function fxForce(k,cb){if(fxRM())toast('Reduce motion is on. Playing this preview anyway.');const dawn=k==='ptero'||k==='car',g=Math.min(GAP,(1440-(DAY1-DAY0))/4);SKYSIM.min=Math.round(dawn?(DAY0-g/2+1440)%1440:(DAY1+g/2)%1440);document.documentElement.setAttribute('data-sim','');applySky();devSync();fxPlay(k,true,cb)}
