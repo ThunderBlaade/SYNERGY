@@ -1662,6 +1662,12 @@ document.addEventListener('touchmove',e=>{if(document.documentElement.getAttribu
 const TORD=TABS.map(t=>t[0]);let LASTTAB=null;
 function navLine(){const nav=document.getElementById('nav');if(!nav)return;const b=nav.querySelector('button[aria-current=page]'),s=b&&b.querySelector('.nl');if(!s)return;const ls=parseFloat(getComputedStyle(s).letterSpacing)||0,w=Math.max(10,s.offsetWidth-2*ls),i=document.createElement('i');i.className='nvl';i.style.width=w+'px';i.style.marginLeft=(-w/2)+'px';b.appendChild(i);if(LASTTAB!==null&&LASTTAB!==tab&&i.animate)i.animate([{opacity:1},{opacity:.05,offset:.4},{opacity:1}],{duration:750,easing:'ease-in-out'});LASTTAB=tab}
 {const _n=render;render=function(){const o=_n.apply(this,arguments);try{navLine()}catch(e){}return o}}
+/* keep the nav line alive after the app is closed and reopened */
+function navLineFix(){try{const nav=document.getElementById('nav');if(!nav||window.__pswipe)return;const b=nav.querySelector('button[aria-current=page]'),s=b&&b.querySelector('.nl');if(!s)return;const l=b.querySelector('.nvl');if(!s.offsetWidth){setTimeout(navLineFix,200);return}const ls=parseFloat(getComputedStyle(s).letterSpacing)||0,w=Math.max(10,s.offsetWidth-2*ls);if(!l){navLine();return}l.style.width=w+'px';l.style.marginLeft=(-w/2)+'px';l.style.transform='';l.style.opacity=''}catch(e){}}
+['pageshow','focus','resize','orientationchange'].forEach(ev=>window.addEventListener(ev,()=>{navLineFix();setTimeout(navLineFix,250)}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){navLineFix();setTimeout(navLineFix,250);setTimeout(navLineFix,900)}});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(navLineFix);
+setInterval(navLineFix,4000);
 /* ===== Page swipe =====
    The pages sit side by side like one long strip. A sideways drag slides the strip with
    the finger, so the page on the left or right is already there as you pull, and a thin
