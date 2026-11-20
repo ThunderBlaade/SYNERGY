@@ -1920,6 +1920,8 @@ function gbgDraw(){let el=document.getElementById('gbg');if(!el){el=document.cre
  document.getElementById('gvs').setAttribute('stop-opacity',Math.max(.1,(LT?.5:.62)+(amb<0?-amb*.6:-amb*.8)).toFixed(3))}
 setInterval(()=>{try{if(document.documentElement.getAttribute('data-tab')==='play'&&SKYSIM.min==null)gbgDraw()}catch(e){}},20000);try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(document.documentElement.getAttribute('data-tab')==='play')setTimeout(gbgDraw,50)})}catch(e){}
 {const _g=render;render=function(){const o=_g.apply(this,arguments);try{if(S.lastTab!==tab){S.lastTab=tab;save()}}catch(e){}try{const h=document.documentElement;h.setAttribute('data-gy',tab==='play'&&!sub?'1':'0');if(tab==='play')gbgDraw()}catch(e){}return o}}
+/* the first draw runs before the later script blocks exist, so a refreshed page that restores a non-home tab must draw once more now that everything is defined */
+try{if(tab!=='home'||sub){render();if(typeof applySky==='function')applySky()}}catch(e){}
 </script>
 </body>
 </html>
