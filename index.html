@@ -276,7 +276,7 @@ nav{padding:2px 4px max(2px,calc(env(safe-area-inset-bottom,0px) - 8px))!importa
 .gy-bar{display:flex;justify-content:flex-end;align-items:center;min-height:32px;margin:-10px 0 -4px}.gy-bar .wed{background:none;font:600 12px var(--body);letter-spacing:.18em;padding:8px 6px;min-height:36px}
 .gy-plus{width:44px;height:44px;display:grid;place-items:center;background:none;color:var(--mu);margin-left:-10px}.gy-plus svg{width:24px;height:24px}
 .gy-intro{text-align:center;color:var(--mu);font:400 13px var(--body);letter-spacing:.04em;margin:18px 0 0}
-.gy-a,.gy-b{padding:0}.gp{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:var(--row,104px);grid-template-rows:repeat(2,var(--row,104px));grid-auto-flow:dense;gap:var(--sp,18px);align-content:center}
+.gy-a,.gy-b{padding:0}.gp[data-p=B]{grid-template-rows:repeat(2,var(--row,104px))!important}.gp{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:var(--row,104px);grid-template-rows:repeat(3,var(--row,104px));grid-auto-flow:dense;gap:var(--sp,18px);align-content:center}
 /*fit*/.gy-fit{--sp:18px;margin:-9px calc(var(--sp) - 16px) 0;display:flex;flex-direction:column;justify-content:center;gap:0;height:calc(100dvh - 107px - env(safe-area-inset-top,0px) - max(0px,calc(env(safe-area-inset-bottom,0px) - 10px)))}.gy-pn{flex:none;overflow:hidden;border:1.5px solid transparent;padding:var(--sp)}.gy-pn::-webkit-scrollbar{display:none}
 .gy-pn{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .gy-start{padding:0;display:flex;align-items:center;gap:6px}.gsm{flex:1;min-width:0}.nl{display:block;padding-left:.16em;white-space:nowrap}nav button[aria-current=page]::before{content:none!important}.nvl{position:absolute;top:-5px;left:50%;height:4px;z-index:2;border-radius:2px;background:var(--irid);pointer-events:none}html{overflow-x:hidden}
@@ -1661,32 +1661,32 @@ function gwBody(x){if(x.k==='empty')return '';if(x.k==='start')return startBody(
 
 /* room engine: 3 columns, R rows per area */
 const GDIM={t:[1,1],s:[2,1],m:[3,1],l:[3,2]};
-function gyRows(){return 2;const st=parseFloat(getComputedStyle(document.body).paddingTop)||0,H=(innerHeight-164-st-64-32-30)/2-16-6;return Math.max(1,Math.floor((H+8)/112))}
+function gyRows(p){return p==='B'?2:3;const st=parseFloat(getComputedStyle(document.body).paddingTop)||0,H=(innerHeight-164-st-64-32-30)/2-16-6;return Math.max(1,Math.floor((H+8)/112))}
 function gdLay(items,R){const occ=Array.from({length:R},()=>[0,0,0]),pos=new Array(items.length).fill(null),fits=(c,r,w,hh)=>{if(c<0||r<0||c+w>3||r+hh>R)return false;for(let i=0;i<hh;i++)for(let j=0;j<w;j++)if(occ[r+i][c+j])return false;return true},put=(c,r,w,hh)=>{for(let i=0;i<hh;i++)for(let j=0;j<w;j++)occ[r+i][c+j]=1};
  items.forEach((it,k)=>{if(Number.isInteger(it.c)&&Number.isInteger(it.r)){const [w,hh]=GDIM[it.s];if(fits(it.c,it.r,w,hh)){put(it.c,it.r,w,hh);pos[k]={c:it.c,r:it.r}}}});
  for(let k=0;k<items.length;k++){if(pos[k])continue;const [w,hh]=GDIM[items[k].s];let ok=false;out:for(let r=0;r+hh<=R;r++)for(let c=0;c+w<=3;c++)if(fits(c,r,w,hh)){put(c,r,w,hh);pos[k]={c,r};ok=true;break out}if(!ok)return null}return pos}
 const gdPack=(items,R)=>!!gdLay(items,R);
 const gdStable=(items,R)=>{const l=gdLay(items,R);return !!l&&items.every((it,k)=>!Number.isInteger(it.c)||(l[k].c===it.c&&l[k].r===it.r))};
-function gdFreeze(){const g=gdS(),R=gyRows();let ch=false;['L','B'].forEach(p=>{const l=gdLay(g[p],R);if(l)g[p].forEach((it,k)=>{if(it.c!==l[k].c||it.r!==l[k].r){it.c=l[k].c;it.r=l[k].r;ch=true}})});if(ch)save()}
+function gdFreeze(){const g=gdS();let ch=false;['L','B'].forEach(p=>{const l=gdLay(g[p],gyRows(p));if(l)g[p].forEach((it,k)=>{if(it.c!==l[k].c||it.r!==l[k].r){it.c=l[k].c;it.r=l[k].r;ch=true}})});if(ch)save()}
 const gdArea=it=>GDIM[it.s][0]*GDIM[it.s][1];
 const gdCount=()=>{const g=gdS();return [...g.L,...g.B].filter(x=>x.k!=='empty').length};
 const gdNone=()=>gdCount()===0;
 function gdHole(items,R,last){const l=gdLay(items,R);if(!l)return null;const o=Array.from({length:R},()=>[0,0,0]);items.forEach((it,k)=>{const [w,hh]=GDIM[it.s];for(let i=0;i<hh;i++)for(let j=0;j<w;j++)o[l[k].r+i][l[k].c+j]=1});if(last==='adj'){const oc=(r,c)=>r>=0&&c>=0&&r<R&&c<3&&o[r][c],fr=[];for(let r=0;r<R;r++)for(let c=0;c<3;c++)if(!o[r][c])fr.push([r,c]);const pick=f=>fr.find(([r,c])=>f(r,c));const q=pick((r,c)=>oc(r,c-1))||pick((r,c)=>oc(r-1,c))||pick((r,c)=>oc(r,c+1))||pick((r,c)=>oc(r+1,c))||fr[0];return q?{r:q[0],c:q[1],n:1,k:1}:null}if(last){for(let r=R-1;r>=0;r--)for(let c=2;c>=0;c--)if(!o[r][c])return{r,c,n:1,k:1};return null}for(let r=0;r<R;r++)for(let c=0;c<3;c++)if(!o[r][c]){let n=0;while(c+n<3&&!o[r][c+n])n++;return{r,c,n}}return null}
-const gdFree=()=>{const g=gdS();return Math.max(0,6*gyRows()-[...g.L,...g.B].reduce((s,x)=>s+gdArea(x),0))};
-function gdTry(g,k){const z=GW[k].z,ord=['l','m','s','t'].filter(s=>z.includes(s)),R=gyRows(),st=Math.max(0,ord.indexOf(dz(k)));
- for(const s of ord.slice(st)){const c=JSON.parse(JSON.stringify(g)),put=()=>{for(const p of['L','B'])if(gdPack([...c[p],{k,s}],R)){c[p].push({k,s});return true}return false};
+const gdFree=()=>{const g=gdS();return Math.max(0,15-[...g.L,...g.B].reduce((s,x)=>s+gdArea(x),0))};
+function gdTry(g,k){const z=GW[k].z,ord=['l','m','s','t'].filter(s=>z.includes(s)),st=Math.max(0,ord.indexOf(dz(k)));
+ for(const s of ord.slice(st)){const c=JSON.parse(JSON.stringify(g)),put=()=>{for(const p of['L','B'])if(gdPack([...c[p],{k,s}],gyRows(p))){c[p].push({k,s});return true}return false};
   let ok=put();for(let n=0;!ok&&n<24;n++){const cand=[...c.L,...c.B].filter(x=>x.s!=='t'&&GW[x.k].z.includes('t')).sort((a,b)=>gdArea(b)-gdArea(a));if(!cand.length)break;cand[0].s='t';ok=put()}
   if(ok){g.L=c.L;g.B=c.B;return true}}
  return false}
-function gdAddAt(k,s){const g=gdS(),R=gyRows();if(!GW[k]||!GW[k].z.includes(s))return false;for(const p of['L','B'])if(gdPack([...g[p],{k,s}],R)){g[p].push({k,s});return true}return false}
+function gdAddAt(k,s){const g=gdS();if(!GW[k]||!GW[k].z.includes(s))return false;for(const p of['L','B'])if(gdPack([...g[p],{k,s}],gyRows(p))){g[p].push({k,s});return true}return false}
 const gdSizes=k=>GW[k].z.split('').filter(s=>gdAddAtTest(k,s)).sort((a,b)=>'tsml'.indexOf(a)-'tsml'.indexOf(b));
-function gdAddAtTest(k,s){const g=gdS(),R=gyRows();return['L','B'].some(p=>gdPack([...g[p],{k,s}],R))}
+function gdAddAtTest(k,s){const g=gdS();return['L','B'].some(p=>gdPack([...g[p],{k,s}],gyRows(p)))}
 const gdCan=k=>{const g=gdS();return gdTry({L:g.L.map(x=>({...x})),B:g.B.map(x=>({...x}))},k)};
-function gdNorm(){const g=gdS(),R=gyRows();let ch=false;for(let n=0;n<30;n++){let bad=null;for(const p of['L','B'])if(!gdPack(g[p],R)){bad=p;break}if(!bad)break;const o=bad==='L'?'B':'L',it=g[bad][g[bad].length-1];if(it&&gdPack([...g[o],it],R)){g[bad].pop();delete it.c;delete it.r;g[o].push(it);ch=true;continue}const cand=g[bad].filter(x=>x.s!=='t'&&GW[x.k].z.includes('t')).sort((a,b)=>gdArea(b)-gdArea(a));if(cand.length){cand[0].s='t';ch=true;continue}break}if(ch)save()}
-const gdPlus=()=>{const g=gdS(),R=gyRows();return gdPack([...g.L,{s:'t'}],R)?'L':gdPack([...g.B,{s:'t'}],R)?'B':null};
+function gdNorm(){const g=gdS();let ch=false;for(let n=0;n<30;n++){let bad=null;for(const p of['L','B'])if(!gdPack(g[p],gyRows(p))){bad=p;break}if(!bad)break;const o=bad==='L'?'B':'L',it=g[bad][g[bad].length-1];if(it&&gdPack([...g[o],it],gyRows(o))){g[bad].pop();delete it.c;delete it.r;g[o].push(it);ch=true;continue}const cand=g[bad].filter(x=>x.s!=='t'&&GW[x.k].z.includes('t')).sort((a,b)=>gdArea(b)-gdArea(a));if(cand.length){cand[0].s='t';ch=true;continue}break}if(ch)save()}
+const gdPlus=()=>{const g=gdS();return gdPack([...g.L,{s:'t'}],gyRows('L'))?'L':gdPack([...g.B,{s:'t'}],gyRows('B'))?'B':null};
 function gwTile(x,i,p,ps){const d=GW[x.k],hn=d.hl&&!d.r(),inner=hn?`<button class="gw" data-wx="ghl">${gwBody(x)}</button>`:x.k==='start'?`<button class="gw gst" data-a="${S.active?'resume':'start'}">${gwBody(x)}</button>`:d.cyc&&!ACT.has(x.k)?`<button class="gw" data-wx="gper:${x.k}">${gwBody(x)}</button>`:d.tap?`<button class="gw" data-a="${d.tap}">${gwBody(x)}</button>`:`<div class="gw${x.k==='empty'?' gem':''}">${gwBody(x)}</div>`;
  return `<div class="gwr z${x.s}" data-i="${i}" data-p="${p}"${ps?` style="grid-column:${ps.c+1}/span ${GDIM[x.s][0]};grid-row:${ps.r+1}/span ${GDIM[x.s][1]}"`:''}><span class="gwi">${inner}</span>${(x.k==='empty'||gdCount()>1)?`<button class="gc2 gx" data-wx="gr:${p}:${i}" aria-label="Remove ${d.t}">×</button>`:''}${d.z.length>1?`<button class="gc2 grs" data-nosw="1" data-wx="gz:${p}:${i}" aria-label="Resize ${d.t}. Drag the corner, or tap to change size. Now ${GS[x.s]}."></button>`:''}</div>`}
-const gyPanel=(p,id,pp)=>{const L=gdS()[p],lay=gdLay(L,gyRows())||[],ho=pp===p?gdHole(L,gyRows(),'adj'):null,pl=pp===p?`<button class="gnx" style="${ho?`grid-column:${ho.c+1}/span 1;grid-row:${ho.r+1}`:''}" data-wx="ga" aria-label="Add a widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>`:'';return `<section class="gy-pn"><div id="${id}" class="gp${GE?' ge':''}" data-p="${p}">${L.map((x,i)=>gwTile(x,i,p,lay[i])).join('')}${pl}</div></section>`};
+const gyPanel=(p,id,pp)=>{const L=gdS()[p],lay=gdLay(L,gyRows(p))||[],ho=pp===p?gdHole(L,gyRows(p),'adj'):null,pl=pp===p?`<button class="gnx" style="${ho?`grid-column:${ho.c+1}/span 1;grid-row:${ho.r+1}`:''}" data-wx="ga" aria-label="Add a widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>`:'';return `<section class="gy-pn"><div id="${id}" class="gp${GE?' ge':''}" data-p="${p}">${L.map((x,i)=>gwTile(x,i,p,lay[i])).join('')}${pl}</div></section>`};
 const GSI={add:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',edit:'<svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/></svg>',del:'<svg viewBox="0 0 24 24"><path d="M4.5 12h15"/></svg>',tick:'<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>'};
 function gyDash(){gdStartMig();gdNorm();gdFreeze();const g=gdS();window.__pp=null;return `<div class="gy-bar"><button class="gsq ed" data-wx="gall" aria-label="Remove all widgets">${GSI.del}</button><button class="gsq pl" data-wx="gp" aria-label="${GE?'Add widget':'Edit widgets'}"><span class="pa">${GSI.edit}</span><span class="pb">${GSI.add}</span></button></div>${gyPanel('L','gd',window.__pp)}`}
 function gyDash2(){return gyPanel('B','gd2',window.__pp)}
@@ -1733,7 +1733,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!
   case'hdclr':ask('Remove all imported Apple Health and Fitbit data from this device? Your SYNERGY workouts are not touched.',()=>{if(S.hd)S.hd={days:{},src:{},goal:S.hd.goal||0,goalKcal:S.hd.goalKcal||0,goalMin:S.hd.goalMin||0,pref:S.hd.pref};save();render()},'Remove');break;
   case'gall':ask('Remove all your widgets? Days stays so there is always one.',()=>{const g=gdS();g.L=[{k:'cons',s:'s'}];g.B=[];save();GE=false;render()},'Remove');break;
   case'gr':{if(gdS()[x==='B'?'B':'L'][+y].k!=='empty'&&gdCount()<2)break;gdS()[x==='B'?'B':'L'].splice(+y,1);save();render();break}
-  case'gz':{const g=gdS(),pp=x==='B'?'B':'L',it=g[pp][+y],z=GW[it.k].z.split('').sort((a,b)=>'tsml'.indexOf(a)-'tsml'.indexOf(b)),R=gyRows();for(let n=1;n<=z.length;n++){const s=z[(z.indexOf(it.s)+n)%z.length],t=g[pp].map(q=>q===it?{...q,s}:q);if(gdStable(t,R)){it.s=s;break}}save();render();break}
+  case'gz':{const g=gdS(),pp=x==='B'?'B':'L',it=g[pp][+y],z=GW[it.k].z.split('').sort((a,b)=>'tsml'.indexOf(a)-'tsml'.indexOf(b)),R=gyRows(pp);for(let n=1;n<=z.length;n++){const s=z[(z.indexOf(it.s)+n)%z.length],t=g[pp].map(q=>q===it?{...q,s}:q);if(gdStable(t,R)){it.s=s;break}}save();render();break}
   case'bd':if(e.target===b){sub=null;render()}break;
   case'gb':{const k=x,d=+y,{fit,cur}=gbPick(k);if(fit.length>1){GBS[k]=fit[(fit.indexOf(cur)+d+fit.length)%fit.length];const bx=document.querySelector('.gbb'),t=bx?bx.scrollTop:0;render();const n=document.querySelector('.gbb');if(n)n.scrollTop=t}break}
   case'gp':if(GE){sub={n:'gbox'};GE=false;render()}else{GE=true;render()}break;
@@ -1741,23 +1741,23 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!
   case'gs':{const k=x;const g1=gdS();if(GW[k]&&(k==='empty'||![...g1.L,...g1.B].some(z=>z.k===k))){if(y?gdAddAt(k,y):gdTry(g1,k))save();else toast('No space left')}sub=null;render();break}}});
 document.addEventListener('input',e=>{if(e.target.id==='wq'){sub.q=e.target.value;const p=e.target.selectionStart;render();const q=document.getElementById('wq');if(q){q.focus();try{q.setSelectionRange(p,p)}catch(x){}}}});
 new MutationObserver(()=>{if(document.querySelector('#wh:not([data-b])'))whBind()}).observe(document.getElementById('app'),{childList:true});
-function gdPlan(p0,i0,cp,c,r){const g=gdS(),R=gyRows(),it=g[p0][i0],d=GDIM[it.s],t={L:g.L.map(x=>({...x})),B:g.B.map(x=>({...x}))};
- const lay=p=>gdLay(t[p],R);t[p0].splice(i0,1);
+function gdPlan(p0,i0,cp,c,r){const g=gdS(),it=g[p0][i0],d=GDIM[it.s],t={L:g.L.map(x=>({...x})),B:g.B.map(x=>({...x}))};
+ const lay=p=>gdLay(t[p],gyRows(p));t[p0].splice(i0,1);
  const hit=[];t[cp].forEach((q,k)=>{const l=lay(cp);if(!l)return;const [w,hh]=GDIM[q.s],qc=l[k].c,qr=l[k].r;if(qc<c+d[0]&&qc+w>c&&qr<r+d[1]&&qr+hh>r)hit.push([q,k,qc,qr,w,hh])});
  for(const [q,k,qc,qr,w,hh] of hit){const cx=qc+w/2,cy=qr+hh/2;if(!(cx>=c&&cx<=c+d[0]&&cy>r&&cy<r+d[1]))return null}
  const out=hit.map(x=>x[0]);t[cp]=t[cp].filter(q=>!out.includes(q));const mv={...it,c,r};t[cp].push(mv);
- for(const q of out){const hq=hit.find(x=>x[0]===q),oc=hq[2],orow=hq[3];let best=null,bd=1e9;for(const p of[p0,cp===p0?(p0==='L'?'B':'L'):cp]){const l=gdLay(t[p],R);if(!l)continue;const o=Array.from({length:R},()=>[0,0,0]);t[p].forEach((z,k)=>{const [a,b]=GDIM[z.s];for(let y=0;y<b;y++)for(let x=0;x<a;x++)o[l[k].r+y][l[k].c+x]=1});const [w,hh]=GDIM[q.s];
+ for(const q of out){const hq=hit.find(x=>x[0]===q),oc=hq[2],orow=hq[3];let best=null,bd=1e9;for(const p of[p0,cp===p0?(p0==='L'?'B':'L'):cp]){const R=gyRows(p),l=gdLay(t[p],R);if(!l)continue;const o=Array.from({length:R},()=>[0,0,0]);t[p].forEach((z,k)=>{const [a,b]=GDIM[z.s];for(let y=0;y<b;y++)for(let x=0;x<a;x++)o[l[k].r+y][l[k].c+x]=1});const [w,hh]=GDIM[q.s];
    for(let rr=0;rr+hh<=R;rr++)for(let cc=0;cc+w<=3;cc++){let f=true;for(let y=0;y<hh&&f;y++)for(let x=0;x<w;x++)if(o[rr+y][cc+x]){f=false;break}if(!f)continue;const dd=Math.abs(cc-oc)+Math.abs(rr-orow)+(p===cp?0:8)+(p===p0&&cc===it.c&&rr===it.r?.5:0)-.05*(Math.abs(cc-c)+Math.abs(rr-r));if(dd<bd){bd=dd;best={p,c:cc,r:rr}}}}
   if(!best)return null;q.c=best.c;q.r=best.r;t[best.p].push(q)}
- return gdStable(t.L,R)&&gdStable(t.B,R)?{t,out}:null}
-function gdCand(w,left,top){const g=gdS(),p0=w.dataset.p,i0=+w.dataset.i,it=g[p0][i0],d=GDIM[it.s],R=gyRows(),row=window.__row||104,GP=18;let best=null,bd=1e9;
- for(const p of['L','B']){const gp=document.querySelector('.gp[data-p="'+p+'"]');if(!gp)continue;const rc=gp.getBoundingClientRect(),cw=(rc.width-GP*2)/3;
+ return gdStable(t.L,gyRows('L'))&&gdStable(t.B,gyRows('B'))?{t,out}:null}
+function gdCand(w,left,top){const g=gdS(),p0=w.dataset.p,i0=+w.dataset.i,it=g[p0][i0],d=GDIM[it.s],row=window.__row||104,GP=18;let best=null,bd=1e9;
+ for(const p of['L','B']){const gp=document.querySelector('.gp[data-p="'+p+'"]');if(!gp)continue;const rc=gp.getBoundingClientRect(),cw=(rc.width-GP*2)/3,R=gyRows(p);
   for(let r=0;r+d[1]<=R;r++)for(let c=0;c+d[0]<=3;c++){const dd=Math.hypot(rc.left+c*(cw+GP)-left,rc.top+r*(row+GP)-top);if(dd>=bd)continue;const pl=gdPlan(p0,i0,p,c,r);if(pl){bd=dd;best={p,c,r,plan:pl}}}}
  return best}
 /* while a widget is dragged over others, the others move out of the way right away */
-function gdOrig(drag){const g=gdS(),R=gyRows(),m=new Map();
- document.querySelectorAll('.gwr:not(.ph)').forEach(e=>{if(e===drag)return;const p=e.dataset.p,i=+e.dataset.i,it=g[p]&&g[p][i],l=it&&(gdLay(g[p],R)||[])[i];if(it&&l)m.set(e,{p,c:l.c,r:l.r,sz:GDIM[it.s],k:it.k})});return m}
-function gdLive(st){if(!st.orig)return;const pl=st.cand&&st.cand.plan,R=gyRows(),lay=pl?{L:gdLay(pl.t.L,R),B:gdLay(pl.t.B,R)}:null,before=new Map();
+function gdOrig(drag){const g=gdS(),m=new Map();
+ document.querySelectorAll('.gwr:not(.ph)').forEach(e=>{if(e===drag)return;const p=e.dataset.p,i=+e.dataset.i,it=g[p]&&g[p][i],l=it&&(gdLay(g[p],gyRows(p))||[])[i];if(it&&l)m.set(e,{p,c:l.c,r:l.r,sz:GDIM[it.s],k:it.k})});return m}
+function gdLive(st){if(!st.orig)return;const pl=st.cand&&st.cand.plan,lay=pl?{L:gdLay(pl.t.L,gyRows('L')),B:gdLay(pl.t.B,gyRows('B'))}:null,before=new Map();
  st.orig.forEach((o,e)=>before.set(e,e.getBoundingClientRect()));
  st.orig.forEach((o,e)=>{let p=o.p,c=o.c,r=o.r;
   if(pl&&o.k!=='empty'){const P=['L','B'].find(q=>pl.t[q].some(z=>z.k===o.k));if(P){const cell=lay[P]&&lay[P][pl.t[P].findIndex(z=>z.k===o.k)];if(cell){p=P;c=cell.c;r=cell.r}}}
@@ -1788,7 +1788,7 @@ function gdLive(st){if(!st.orig)return;const pl=st.cand&&st.cand.plan,R=gyRows()
 })();
 
 /* growing a widget pushes into its neighbours: they shrink to what is left (never disappear) */
-function gdGrow(items,idx,s){const R=gyRows(),cl=items.map(x=>({...x})),it=cl[idx];it.s=s;if(!Number.isInteger(it.c))return null;const rc=x=>({c:x.c,r:x.r,w:GDIM[x.s][0],h:GDIM[x.s][1]}),hit=(a,b)=>a.c<b.c+b.w&&b.c<a.c+a.w&&a.r<b.r+b.h&&b.r<a.r+a.h,G=rc(it);if(G.c+G.w>3||G.r+G.h>R)return null;
+function gdGrow(items,idx,s,pn){const R=gyRows(pn),cl=items.map(x=>({...x})),it=cl[idx];it.s=s;if(!Number.isInteger(it.c))return null;const rc=x=>({c:x.c,r:x.r,w:GDIM[x.s][0],h:GDIM[x.s][1]}),hit=(a,b)=>a.c<b.c+b.w&&b.c<a.c+a.w&&a.r<b.r+b.h&&b.r<a.r+a.h,G=rc(it);if(G.c+G.w>3||G.r+G.h>R)return null;
  for(let j=0;j<cl.length;j++){if(j===idx)continue;const n=cl[j];if(!Number.isInteger(n.c))continue;const o=rc(n);if(!hit(G,o))continue;let best=null;
   for(const z of GW[n.k].z){const d=GDIM[z];if(d[0]>o.w||d[1]>o.h)continue;for(let c=o.c;c+d[0]<=o.c+o.w;c++)for(let r=o.r;r+d[1]<=o.r+o.h;r++){const t={c,r,w:d[0],h:d[1]};if(hit(G,t))continue;if(cl.some((q,k)=>k!==j&&k!==idx&&Number.isInteger(q.c)&&hit(rc(q),t)))continue;const a=d[0]*d[1];if(!best||a>best.a)best={a,c,r,z}}}
   if(!best)return null;n.s=best.z;n.c=best.c;n.r=best.r}
@@ -1804,7 +1804,7 @@ function gdIco(r,cw,ROW,fin,tr){const ic=r.w.querySelector('.gi');if(!ic)return;
 function gdIcoReset(w){w.querySelectorAll('.gi').forEach(e=>{e.style.width='';e.style.height='';e.style.strokeWidth='';e.style.transition=''});w.querySelectorAll('.lc,.gbt,.gsrc,.gbs,.gbv,.gbe,.gbr,.gbars,.gbd,.gtv').forEach(e=>{e.style.opacity='';e.style.transform='';e.style.transition=''})}
 (function(){let r=null;let ROW=104;const GAP=18;
  document.addEventListener('pointerdown',e=>{const hd=e.target.closest&&e.target.closest('.grs');if(!hd||!hd.closest('.ge'))return;const w=hd.closest('.gwr'),g=w.closest('.gp'),gi=w.querySelector('.gwi'),R=w.getBoundingClientRect(),G=g.getBoundingClientRect();
-  ROW=window.__row||104;g.classList.add('mv');const gd=gdS(),pp0=w.dataset.p==='B'?'B':'L',it0=gd[pp0][+w.dataset.i],fit=GW[it0.k].z.split('').filter(s=>gdStable(gd[pp0].map(q=>q===it0?{...q,s}:q),gyRows())||!!gdGrow(gd[pp0],gd[pp0].indexOf(it0),s)),cw0=(G.width-GAP*2)/3,dm={t:[cw0,ROW],s:[cw0*2+GAP,ROW],m:[G.width,ROW],l:[G.width,ROW*2+GAP]};r={cs:it0.s,fit,mw:Math.max(...fit.map(s=>dm[s][0])),mh:Math.max(...fit.map(s=>dm[s][1])),hd,w,g,gi,x:e.clientX,y:e.clientY,w0:R.width,h0:R.height,gw:G.width,room:G.right-R.left,rh:G.bottom-R.top,nw:R.width,nh:R.height,mv:0};gi.style.cssText=`position:absolute;left:0;top:0;width:${R.width}px;height:${R.height}px;z-index:15;transition:none`;w.style.zIndex=15;try{hd.setPointerCapture(e.pointerId)}catch(_){}window.__gdrag=true;e.stopPropagation()},true);
+  ROW=window.__row||104;g.classList.add('mv');const gd=gdS(),pp0=w.dataset.p==='B'?'B':'L',it0=gd[pp0][+w.dataset.i],fit=GW[it0.k].z.split('').filter(s=>gdStable(gd[pp0].map(q=>q===it0?{...q,s}:q),gyRows(pp0))||!!gdGrow(gd[pp0],gd[pp0].indexOf(it0),s,pp0)),cw0=(G.width-GAP*2)/3,dm={t:[cw0,ROW],s:[cw0*2+GAP,ROW],m:[G.width,ROW],l:[G.width,ROW*2+GAP]};r={cs:it0.s,fit,mw:Math.max(...fit.map(s=>dm[s][0])),mh:Math.max(...fit.map(s=>dm[s][1])),hd,w,g,gi,x:e.clientX,y:e.clientY,w0:R.width,h0:R.height,gw:G.width,room:G.right-R.left,rh:G.bottom-R.top,nw:R.width,nh:R.height,mv:0};gi.style.cssText=`position:absolute;left:0;top:0;width:${R.width}px;height:${R.height}px;z-index:15;transition:none`;w.style.zIndex=15;try{hd.setPointerCapture(e.pointerId)}catch(_){}window.__gdrag=true;e.stopPropagation()},true);
  document.addEventListener('pointermove',e=>{if(!r)return;const dx=e.clientX-r.x,dy=e.clientY-r.y;r.mv=Math.max(r.mv,Math.hypot(dx,dy));
   const cw=(r.gw-GAP*2)/3,rb=(v,lo,hi)=>v<lo?lo-(lo-v)*.25:v>hi?hi+(v-hi)*.25:v;if(r.cs==='t'&&!r.sw){r.sw=1;const gw=r.w.querySelector('.gw');if(gw){gw.innerHTML=gwBody({k:gdS()[r.w.dataset.p==='B'?'B':'L'][+r.w.dataset.i].k,s:'s'});r.cs='s'}}r.nw=rb(r.w0+dx,cw,r.mw);r.nh=rb(r.h0+dy,ROW,r.mh);r.gi.style.width=r.nw+'px';r.gi.style.height=r.nh+'px';gdIco(r,cw,ROW);r.hd.style.transform=`translate(${r.nw-r.w0}px,${r.nh-r.h0}px)`;const xb=r.w.querySelector('.gx');if(xb)xb.style.transform=`translateX(${r.nw-r.w0}px)`});
  const end=()=>{if(!r)return;const q=r;r=null;window.__gdrag=false;
@@ -1813,7 +1813,7 @@ function gdIcoReset(w){w.querySelectorAll('.gi').forEach(e=>{e.style.width='';e.
   let best=it.s,bd=1e9;(q.fit&&q.fit.length?q.fit:GW[it.k].z.split('')).forEach(s=>{const d=Math.pow((q.nw-dims[s][0])/q.gw,2)+Math.pow((q.nh-dims[s][1])/(ROW*2+GAP),2);if(d<bd){bd=d;best=s}});
   const tw=Math.min(dims[best][0],q.room),th=dims[best][1],tr='.24s cubic-bezier(.3,1.5,.5,1)';q.gi.style.transition=`width ${tr},height ${tr}`;gdIco(q,cw,ROW,best,tr);q.gi.getBoundingClientRect();q.gi.style.width=tw+'px';q.gi.style.height=th+'px';
   q.hd.style.transition=`transform ${tr}`;q.hd.style.transform=`translate(${tw-q.w0}px,${th-q.h0}px)`;const xb=q.w.querySelector('.gx');if(xb){xb.style.transition=`transform ${tr}`;xb.style.transform=`translateX(${tw-q.w0}px)`}
-  setTimeout(()=>{if(best!==it.s){const gg=gdS(),old=it.s;it.s=best;if(gdStable(gg[p],gyRows()))save();else{it.s=old;const np=gdGrow(gg[p],+q.w.dataset.i,best);if(np){S.gd[p]=np;save()}else toast('No room for that size')}}render()},whRM()?0:250)};
+  setTimeout(()=>{if(best!==it.s){const gg=gdS(),old=it.s;it.s=best;if(gdStable(gg[p],gyRows(p)))save();else{it.s=old;const np=gdGrow(gg[p],+q.w.dataset.i,best,p);if(np){S.gd[p]=np;save()}else toast('No room for that size')}}render()},whRM()?0:250)};
  document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end)})();
 /* ===== remember scroll: resume where you left, refresh goes to the top of the same page ===== */
 (function(){const K='synergy_sc';let t=null;
@@ -1849,7 +1849,7 @@ document.addEventListener('pointermove',e=>{if(t&&Math.hypot(e.clientX-x0,e.clie
 ['pointerup','pointercancel','scroll'].forEach(n=>document.addEventListener(n,stop,true))})();
 (function(){const bump=()=>{window.__ga=Date.now()};['pointerdown','pointermove','keydown','touchstart'].forEach(n=>document.addEventListener(n,bump,true));
 setInterval(()=>{if(!GE){bump();return}if(window.__gdrag)return bump();if(Date.now()-(window.__ga||0)>6000){GE=false;render()}},500)})();
-function gyFit(root){root=root||document;const ps=root.querySelectorAll('.gy-pn');if(!ps.length)return;const SP=18,cw=(ps[0].clientWidth-2*SP-3-2*SP)/3,R=gyRows(),fit=ps[0].closest('.gy-fit'),oth=fit?[...fit.children].filter(e=>!e.classList.contains('gy-pn')).reduce((s,e)=>s+e.offsetHeight,0):0,av=fit?(fit.clientHeight-oth-4*7-ps.length*(SP*(R+1)+3)+(ps.length-1)*SP)/(ps.length*R):1e9,row=Math.max(52,Math.min(cw*1.7,av));if(!root.__isPeer)window.__row=row;root.querySelectorAll('.gp').forEach(g=>g.style.setProperty('--row',row+'px'));}
+function gyFit(root){root=root||document;const ps=root.querySelectorAll('.gy-pn');if(!ps.length)return;const SP=18,RT=ps.length>1?gyRows('L')+gyRows('B'):gyRows('L'),cw=(ps[0].clientWidth-2*SP-3-2*SP)/3,fit=ps[0].closest('.gy-fit'),oth=fit?[...fit.children].filter(e=>!e.classList.contains('gy-pn')).reduce((s,e)=>s+e.offsetHeight,0):0,av=fit?(fit.clientHeight-oth-4*7-SP*(RT+1)-3*ps.length)/RT:1e9,row=Math.max(52,Math.min(cw*1.7,av));if(!root.__isPeer)window.__row=row;root.querySelectorAll('.gp').forEach(g=>g.style.setProperty('--row',row+'px'));}
 {const _r=render;let RO=null;const refit=()=>{try{if(tab==='play'&&!window.__pswipe)gyFit()}catch(e){}};
  render=function(){const o=_r.apply(this,arguments);try{gyFit();const f=document.querySelector('.gy-fit');if(window.ResizeObserver){if(!RO)RO=new ResizeObserver(refit);RO.disconnect();if(f)RO.observe(f)}}catch(e){}return o};
  ['resize','orientationchange','pageshow','focus'].forEach(ev=>window.addEventListener(ev,()=>{refit();setTimeout(refit,300)}));document.addEventListener('visibilitychange',()=>{if(!document.hidden){refit();setTimeout(refit,300);setTimeout(refit,1200)}});
