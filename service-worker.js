@@ -1,9 +1,5 @@
 /* SYNERGY service worker. Bump VERSION whenever you publish a new index.html. */
-<<<<<<< HEAD
-const VERSION='synergy-v144';
-=======
-const VERSION='synergy-v144';
->>>>>>> parent of f792a80 (Revert "Gym widgets: flat charcoal (dark) and light grey (light) look with muted secondary text")
+const VERSION='synergy-v145';
 const SHELL = ['./', 'index.html', 'manifest.json',
   'config.js', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
