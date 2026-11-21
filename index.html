@@ -1748,7 +1748,7 @@ new MutationObserver(()=>{if(document.querySelector('#wh:not([data-b])'))whBind(
 function gdPlan(p0,i0,cp,c,r){const g=gdS(),it=g[p0][i0],d=GDIM[it.s],t={L:g.L.map(x=>({...x})),B:g.B.map(x=>({...x}))};
  const lay=p=>gdLay(t[p],gyRows(p));t[p0].splice(i0,1);
  const hit=[];t[cp].forEach((q,k)=>{const l=lay(cp);if(!l)return;const [w,hh]=GDIM[q.s],qc=l[k].c,qr=l[k].r;if(qc<c+d[0]&&qc+w>c&&qr<r+d[1]&&qr+hh>r)hit.push([q,k,qc,qr,w,hh])});
- for(const [q,k,qc,qr,w,hh] of hit){const cx=qc+w/2,cy=qr+hh/2;if(!(cx>=c&&cx<=c+d[0]&&cy>r&&cy<r+d[1]))return null}
+ for(const [q,k,qc,qr,w,hh] of hit){const cx=qc+w/2,cy=qr+hh/2,ov=Math.max(0,Math.min(qc+w,c+d[0])-Math.max(qc,c))*Math.max(0,Math.min(qr+hh,r+d[1])-Math.max(qr,r));if(!(cx>=c&&cx<=c+d[0]&&cy>r&&cy<r+d[1])&&ov<.5*Math.min(w*hh,d[0]*d[1]))return null}
  const out=hit.map(x=>x[0]);t[cp]=t[cp].filter(q=>!out.includes(q));const mv={...it,c,r};t[cp].push(mv);
  for(const q of out){const hq=hit.find(x=>x[0]===q),oc=hq[2],orow=hq[3];let best=null,bd=1e9;for(const p of[p0,cp===p0?(p0==='L'?'B':'L'):cp]){const R=gyRows(p),l=gdLay(t[p],R);if(!l)continue;const o=Array.from({length:R},()=>[0,0,0]);t[p].forEach((z,k)=>{const [a,b]=GDIM[z.s];for(let y=0;y<b;y++)for(let x=0;x<a;x++)o[l[k].r+y][l[k].c+x]=1});const [w,hh]=GDIM[q.s];
    for(let rr=0;rr+hh<=R;rr++)for(let cc=0;cc+w<=3;cc++){let f=true;for(let y=0;y<hh&&f;y++)for(let x=0;x<w;x++)if(o[rr+y][cc+x]){f=false;break}if(!f)continue;const dd=Math.abs(cc-oc)+Math.abs(rr-orow)+(p===cp?0:8)+(p===p0&&cc===it.c&&rr===it.r?.5:0)-.05*(Math.abs(cc-c)+Math.abs(rr-r));if(dd<bd){bd=dd;best={p,c:cc,r:rr}}}}
