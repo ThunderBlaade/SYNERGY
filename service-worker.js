@@ -1,5 +1,5 @@
 /* SYNERGY service worker. Bump VERSION whenever you publish a new index.html. */
-const VERSION='synergy-v216';
+const VERSION='synergy-v217';
 const SHELL = ['./', 'index.html', 'manifest.json',
   'config.js', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
