@@ -340,7 +340,9 @@ html[data-fl=light] .gw:not(.gem){--tx:#0C0C0D;--mu:#46453F;--ln:#CFCDC7;backgro
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 #tbar{position:fixed;top:0;left:0;right:0;z-index:5;height:calc(46px + env(safe-area-inset-top,0px));background:color-mix(in srgb,var(--bg) 94%,transparent);border-bottom:1px solid var(--ln);display:flex;align-items:flex-end;justify-content:center;padding-bottom:14px;pointer-events:none}
 #tbar span{font:500 10.5px var(--body);letter-spacing:.42em;text-indent:.42em;text-transform:uppercase;color:var(--tx)}
-#app{padding-top:58px}html[data-gate] #tbar{visibility:hidden}
+#app{padding-top:58px}.back{top:env(safe-area-inset-top,0px)!important;width:46px!important;height:46px!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;left:max(6px,calc(50% - 258px))!important}.back svg{width:24px;height:24px}
+.wtb{position:fixed;z-index:30;top:env(safe-area-inset-top,0px);right:max(6px,calc(50% - 258px));height:46px;display:flex}.wti{all:unset;box-sizing:border-box;width:46px;height:46px;display:grid;place-items:center;cursor:pointer;color:var(--tx)}.wti.on{color:#7B7EEA}.wti svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+html[data-gate] #tbar{visibility:hidden}
 html[data-tab=astral] #tbar{background:transparent;border-bottom-color:transparent}html[data-tab=astral] #tbar span{opacity:0}
 /* permissions sheet */
 #perm{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;padding:0;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -1498,12 +1500,12 @@ function wheel(){WH.items=[...whShown(),...WSP];WH.pos=0;WH.vel=0;WH.spin=null;W
  const pegs=Array.from({length:24},(_,k)=>`<i class="wp" data-k="${k}"></i>`).join('');
  return `<div class="hd" style="min-height:0;height:0;margin:0"><button class="bk" data-a="back">Back</button></div>
  <div class="wpg"><div class="wh" id="wh" tabindex="0" role="spinbutton" aria-label="Activity wheel. Swipe up or down. Tap the highlighted activity to start." aria-valuetext="">${WH.items.map((it,i)=>`<div class="wi${it.pin?' pin':''}${it.sp?' sp':''}" data-i="${i}">${esc(it.n)}</div>`).join('')}${pegs}<div class="wl wl1"></div><div class="wl wl2"></div><div class="wptr"></div></div>
- <div class="wbt"><button class="wed" id="wrnd" data-wx="rnd">Random</button><button class="wed" data-wx="edit">Edit wheel</button></div></div><div class="sr" id="wsr" role="status" aria-live="polite"></div>`}
+ </div><div class="wtb"><button class="wti" id="wrnd" data-wx="rnd" aria-label="Random"><svg viewBox="0 0 24 24"><path d="M16 4h4v4M4 20L20 4M20 16v4h-4M14.5 14.5L20 20M4 4l5 5"/></svg></button><button class="wti" data-wx="edit" aria-label="Edit wheel"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button></div><div class="sr" id="wsr" role="status" aria-live="polite"></div>`}
 function whDraw(){const el=document.getElementById('wh');if(!el)return;const n=WH.items.length,{TH,R}=WH,pos=WH.pos,cy=el.clientHeight/2;
  el.querySelectorAll('.wi').forEach(e=>{const i=+e.dataset.i;let d=i-pos;if(n>1)d=((d+n/2)%n+n)%n-n/2;const a=d*TH;if(Math.abs(a)>1.5){e.style.visibility='hidden';return}const c=Math.cos(a),y=cy+R*Math.sin(a);e.style.visibility='visible';e.style.opacity=(Math.pow(c,2.2)*(Math.abs(d)<.5?1:.9)).toFixed(3);e.style.transform=`translate(0px,${(y-14).toFixed(1)}px) scale(${(.58+.42*c+(Math.abs(d)<1?.22*(1-Math.abs(d)):0)).toFixed(3)})`;e.classList.toggle('sel',Math.abs(d)<.5)});
  el.querySelectorAll('.wp').forEach(e=>{const k=+e.dataset.k;let d=((k/3-pos)%8+8)%8;if(d>4)d-=8;const a=d*TH;if(Math.abs(a)>1.5){e.style.visibility='hidden';return}e.style.visibility='visible';e.style.opacity=(Math.pow(Math.cos(a),2)*.9).toFixed(3);e.style.transform=`translateY(${(cy+R*Math.sin(a)-2).toFixed(1)}px)`});
  const idx=Math.round(pos);if(idx!==WH.lastIdx){WH.lastIdx=idx;try{navigator.vibrate&&navigator.vibrate(5)}catch(e){}}}
-function whSettled(){WH.spin=null;const s=whSel(),sr=document.getElementById('wsr'),el=document.getElementById('wh'),h=document.getElementById('whint');if(s){if(sr)sr.textContent=s.n;if(el)el.setAttribute('aria-valuetext',s.n);const r=document.getElementById('wrnd');if(r)r.textContent='Random'}}
+function whSettled(){WH.spin=null;const s=whSel(),sr=document.getElementById('wsr'),el=document.getElementById('wh'),h=document.getElementById('whint');if(s){if(sr)sr.textContent=s.n;if(el)el.setAttribute('aria-valuetext',s.n);const r=document.getElementById('wrnd');if(r){r.setAttribute('aria-label','Random');r.classList.remove('on')}}}
 function whLoop(t){if(!document.getElementById('wh')){WH.raf=0;return}const dt=Math.min(40,t-WH.t0);WH.t0=t;
  if(WH.spin){const q=WH.spin,k=Math.min(1,(t-q.t0)/q.dur),g=Math.pow(k,.55),f=g*g*(3-2*g);WH.pos=q.p0+q.D*f;if(k>=1){WH.pos=q.p0+q.D;whDraw();whSettled();WH.raf=0;return}}
  else if(WH.drag){}
@@ -1513,7 +1515,7 @@ function whLoop(t){if(!document.getElementById('wh')){WH.raf=0;return}const dt=M
 const whGo=()=>{if(!WH.raf){WH.t0=performance.now();WH.raf=requestAnimationFrame(whLoop)}};
 function whSpin(){const n=WH.items.length,ok=WH.items.map((x,i)=>x.sp?-1:i).filter(i=>i>=0);if(!ok.length)return;
  const cur=Math.round(WH.pos),tg=ok[Math.floor(Math.random()*ok.length)];let D=(((tg-cur)%n)+n)%n;while(D<14)D+=n;
- const sr=document.getElementById('wsr'),rb=document.getElementById('wrnd');if(sr)sr.textContent='Spinning';if(rb)rb.textContent='Stop';
+ const sr=document.getElementById('wsr'),rb=document.getElementById('wrnd');if(sr)sr.textContent='Spinning';if(rb){rb.setAttribute('aria-label','Stop');rb.classList.add('on')}
  WH.vel=0;WH.tgt=null;
  if(whRM()){WH.spin={p0:cur+D,D:0,t0:performance.now(),dur:1}}else WH.spin={p0:WH.pos,D:cur+D-WH.pos,t0:performance.now(),dur:2300+n*80+Math.random()*500};whGo()}
 function whRnd(){if(WH.spin){const p=WH.pos;WH.spin=null;WH.vel=0;WH.tgt=Math.round(p);whGo();return}whSpin()}
