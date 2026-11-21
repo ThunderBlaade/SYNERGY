@@ -497,7 +497,7 @@ const wxCur=()=>{const w=S.wx,r=S.loc&&S.loc.region;return w&&r&&w.lat===r.lat&&
 function seasonNow(){const r=S.loc&&S.loc.region;if(!r)return null;const q=tzParts(r.tz,new Date()),m=q?q.mo-1:new Date().getMonth();let n=(m===11||m<2)?0:m<5?1:m<8?2:3;if(r.lat<0)n=(n+2)%4;return['Winter','Spring','Summer','Autumn'][n]}
 let WXBUSY=0;
 function wxGet(){const r=S.loc&&S.loc.region;if(!r||navigator.onLine===false||WXBUSY)return;const w=S.wx;if(w&&w.lat===r.lat&&w.lon===r.lon&&Date.now()-w.t<18e5)return;WXBUSY=1;
- fetch('https://api.open-meteo.com/v1/forecast?latitude='+r.lat+'&longitude='+r.lon+'&current=temperature_2m,weather_code,cloud_cover,wind_speed_10m&timezone=auto').then(x=>x.ok?x.json():Promise.reject()).then(j=>{const c=j&&j.current;if(!c||typeof c.weather_code!=='number')throw 0;S.wx={t:Date.now(),lat:r.lat,lon:r.lon,code:c.weather_code,temp:c.temperature_2m,cloud:c.cloud_cover,wind:c.wind_speed_10m};save();WXBUSY=0;if(tab==='astral')render()}).catch(()=>{WXBUSY=0})}
+ fetch('https://api.open-meteo.com/v1/forecast?latitude='+r.lat+'&longitude='+r.lon+'&current=temperature_2m,weather_code,cloud_cover,wind_speed_10m&timezone=auto').then(x=>x.ok?x.json():Promise.reject()).then(j=>{const c=j&&j.current;if(!c||typeof c.weather_code!=='number')throw 0;S.wx={t:Date.now(),lat:r.lat,lon:r.lon,code:c.weather_code,temp:c.temperature_2m,cloud:c.cloud_cover,wind:c.wind_speed_10m};save();WXBUSY=0;if(tab==='astral')render();else if(tab==='play'){try{gbgDraw()}catch(e){}}}).catch(()=>{WXBUSY=0})}
 const wr=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)};
 function wxDraw(){const sk=$('#sky');if(!sk)return;let el=$('#wx');if(!el){el=document.createElement('div');el.id='wx';el.setAttribute('aria-hidden','true');const g=sk.querySelector('.sgrad');if(g)g.after(el);else sk.prepend(el)}
  const w=wxCur(),ss=seasonNow(),k=w?wxKind(w.code):null,key=(w?w.code+'|'+(w.temp<=1?'c':'w'):'');if(el.dataset.k===key)return;el.dataset.k=key;let h='';
@@ -650,7 +650,7 @@ const TABS=[['home','Home','home'],['play','The Gym','strength'],['conn','Synerg
 function goTop(){try{window.scrollTo(0,0)}catch(e){}}
 try{history.scrollRestoration='manual'}catch(e){}
 function ensureHud(){if(document.getElementById('hud'))return;const d=document.createElement('div');d.id='hud';d.setAttribute('aria-hidden','true');d.innerHTML=`<svg viewBox="0 0 390 844" preserveAspectRatio="xMinYMid slice"><g class="f"><path d="M388.0 0V844"/><path d="M385.8 0V844"/><path d="M383.2 0V844"/><path d="M380.2 0V844"/><path d="M376.7 0V844"/><path d="M372.6 0V844"/><path d="M367.7 0V844"/><path d="M362.1 0V844"/><path d="M355.5 0V844"/><path d="M347.8 0V844"/><path d="M338.7 0V844"/><path d="M328.2 0V844"/><path d="M315.8 0V844"/><path d="M301.3 0V844"/><path d="M284.4 0V844"/><path d="M264.6 0V844"/></g><g class="p"><path d="M5 0V844" stroke-width="4"/><path d="M11 0V844" stroke-width="1"/></g><g class="mv"><circle class="f" cx="5" cy="150" r="150"/><circle class="f" cx="5" cy="150" r="96"/><path class="am" d="M11 90V210"/><path class="p" d="M376 70V230" stroke-width="3"/></g></svg>`;document.body.insertBefore(d,document.body.firstChild)}
-function render(){document.documentElement.setAttribute('data-tab',tab);ensureHud();applySky();if(tab==='astral'){wxGet();wxDraw()}document.documentElement.style.setProperty('--ac',S.accent);
+function render(){document.documentElement.setAttribute('data-tab',tab);ensureHud();applySky();if(tab==='play')wxGet();if(tab==='astral'){wxGet();wxDraw()}document.documentElement.style.setProperty('--ac',S.accent);
  const V={fr:frView,g:grpView,gnew:grpForm,gedit:grpForm,enc:encView,rep:repView,set:setPage,wheel:()=>window.wheel(),wedit:()=>window.wedit(),wcus:()=>window.wcus(),gbox:()=>window.gbox(),method,tpls,tplPrev,tplEdit,tsetup,csetup,qcat,qform,active,pickex:pickEx,rate,summary,hist,detail,del:delConfirm,recs,rec:recDetail,xp:xpView};
  $('#app').innerHTML=sub?V[sub.n]():{home,play:gym,conn:connView,rank,astral:astralView,me:profile}[tab]();
  $('#nav').innerHTML=navHtml();countUp();applyLook();try{devDraw()}catch(e){}}
@@ -2001,7 +2001,7 @@ function gbgDraw(){let el=document.getElementById('gbg');if(!el){el=document.cre
  if(day){I=.62+.38*Math.pow(al2,.6)}else I=.34;
  if(kd==='clear'){bl=day?2:4;amb=day?.1*al2:0}
  else if(kd==='cloud'){I*=.9;bl=7;mix=.35;amb=day?-.05-.04*al2:0}
- else if(kd==='rain'){I*=storm?.95:.88;bl=11;mix=.6;amb=storm?-.2:-.12*(day?.4+al2:1)}
+ else if(kd==='rain'){I*=storm?.62:.88;bl=11;mix=.6;amb=storm?-.2:-.12*(day?.4+al2:1)}
  else if(kd==='fog'){I*=.85;bl=16;mix=.5;amb=day?.04:0}
  else{I*=1;bl=9;mix=.45;amb=day?.06:0}
  if(!day)amb=-.2;{const v=skyPh(m).vis;I*=.06+.94*v;if(day)amb=amb*v+(-.2)*(1-v)}
@@ -2010,7 +2010,7 @@ function gbgDraw(){let el=document.getElementById('gbg');if(!el){el=document.cre
  I*=cf;{const f=!w.dataset.i;w.dataset.i=1;const tr=(f||window.__gbgNT||SKYSIM.min!=null)?'none':'opacity 20s linear';w.style.transition=tr;document.getElementById('gsh').style.transition=tr}w.style.opacity=Math.min(.92,I*(LT?1.45:1.0)).toFixed(3);document.querySelectorAll('.gwx').forEach(g=>{g.style.transition=w.style.transition;g.style.opacity=w.style.opacity});document.getElementById('gsh').style.opacity=Math.min(1,.35+I*.9).toFixed(3);
  const am=document.getElementById('gam'),k2=LT?1.5:1;am.setAttribute('fill',amb>0?'#fff':'#000');am.setAttribute('opacity',Math.min(.5,Math.abs(amb)*(amb>0?k2:(LT?1.7:1.2))).toFixed(3));
  document.getElementById('gvs').setAttribute('stop-opacity',Math.max(.1,(LT?.5:.62)+(amb<0?-amb*.6:-amb*.8)).toFixed(3))}
-setInterval(()=>{try{if(document.documentElement.getAttribute('data-tab')==='play'&&SKYSIM.min==null)gbgDraw()}catch(e){}},20000);try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(document.documentElement.getAttribute('data-tab')==='play')setTimeout(gbgDraw,50)})}catch(e){}
+setInterval(()=>{try{if(document.documentElement.getAttribute('data-tab')==='play'&&SKYSIM.min==null){wxGet();gbgDraw()}}catch(e){}},20000);try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(document.documentElement.getAttribute('data-tab')==='play')setTimeout(gbgDraw,50)})}catch(e){}
 {const _g=render;render=function(){const o=_g.apply(this,arguments);try{if(S.lastTab!==tab){S.lastTab=tab;save();window.__gbgNT=1}}catch(e){}try{const h=document.documentElement;h.setAttribute('data-gy',tab==='play'&&!sub?'1':'0');if(tab==='play'){gbgDraw();if(window.__gbgNT){const w=document.getElementById('gwin');if(w)w.getBoundingClientRect();window.__gbgNT=0}}}catch(e){}return o}}
 /* the first draw runs before the later script blocks exist, so a refreshed page that restores a non-home tab must draw once more now that everything is defined */
 try{if(tab!=='home'||sub){render();if(typeof applySky==='function')applySky()}}catch(e){}
