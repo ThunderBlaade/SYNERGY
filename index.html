@@ -1732,7 +1732,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!
   case'hdpaste':{const go=t=>{const ta=document.getElementById('hdin');if(ta)ta.value=t;const r=hdImport(t);toast(r.err||('Imported '+r.n+(r.n===1?' day':' days')+' from '+HSN[r.src]));render()};try{navigator.clipboard.readText().then(go,()=>toast('Allow paste, or paste into the box'))}catch(e){toast('Paste into the box instead')}break}
   case'hdimp':{const t=(document.getElementById('hdin')||{}).value||'',r=hdImport(t);toast(r.err||('Imported '+r.n+(r.n===1?' day':' days')+' from '+HSRC[r.src]));render();break}
   case'hdclr':ask('Remove all imported Apple Health and Fitbit data from this device? Your SYNERGY workouts are not touched.',()=>{if(S.hd)S.hd={days:{},src:{},goal:S.hd.goal||0,goalKcal:S.hd.goalKcal||0,goalMin:S.hd.goalMin||0,pref:S.hd.pref};save();render()},'Remove');break;
-  case'gall':ask('Remove all your widgets? Days stays so there is always one.',()=>{const g=gdS();g.L=[{k:'cons',s:'s'}];g.B=[];save();GE=false;render()},'Remove');break;
+  case'gall':ask('Remove all your widgets? Start stays in the top left corner.',()=>{const g=gdS();g.L=[{k:'start',s:'t',c:0,r:0}];g.B=[];g.st=1;save();GE=false;render()},'Remove');break;
   case'gr':{if(gdS()[x==='B'?'B':'L'][+y].k!=='empty'&&gdCount()<2)break;gdS()[x==='B'?'B':'L'].splice(+y,1);save();render();break}
   case'gz':{const g=gdS(),pp=x==='B'?'B':'L',it=g[pp][+y],z=GW[it.k].z.split('').sort((a,b)=>'tsml'.indexOf(a)-'tsml'.indexOf(b)),R=gyRows(pp);for(let n=1;n<=z.length;n++){const s=z[(z.indexOf(it.s)+n)%z.length],t=g[pp].map(q=>q===it?{...q,s}:q);if(gdStable(t,R)){it.s=s;break}}save();render();break}
   case'bd':if(e.target===b){sub=null;render()}break;
