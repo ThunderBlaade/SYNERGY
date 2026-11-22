@@ -1,5 +1,5 @@
 /* SYNERGY service worker. Bump VERSION whenever you publish a new index.html. */
-const VERSION='synergy-v238';
+const VERSION='synergy-v239';
 const SHELL = ['./', 'index.html', 'manifest.json',
   'config.js', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
@@ -27,6 +27,7 @@ self.addEventListener('fetch', e => {
     return;
   }
   if (url.origin !== location.origin) return;          /* never cache other sites (e.g. the database itself) */
+  if (url.pathname.includes('/momentum/')) return;     /* Momentum has its own offline helper */
   if (url.pathname.endsWith('/config.js')) {            /* settings: always try the network first */
     e.respondWith(fetch(req).then(res => { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); return res; })
       .catch(() => caches.match(req)));
