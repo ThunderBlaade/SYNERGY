@@ -1527,7 +1527,7 @@ function whSpin(){const n=WH.items.length,ok=WH.items.map((x,i)=>x.sp?-1:i).filt
  if(whRM()){WH.spin={p0:cur+D,D:0,t0:performance.now(),dur:1}}else WH.spin={p0:WH.pos,D:cur+D-WH.pos,t0:performance.now(),dur:2300+n*80+Math.random()*500};whGo()}
 function whRnd(){if(WH.spin){const p=WH.pos;WH.spin=null;WH.vel=0;WH.tgt=Math.round(p);whGo();return}whSpin()}
 function whAct(){const it=whSel();if(!it)return;if(it.sp==='custom'){sub={n:'wcus'};render();return}whStart(it)}
-function whStart(it){if(!it||S.active)return;const W=whS();W.last=it.id;W.t[it.id]=Date.now();S.active=newActive({method:'timer',cat:it.c,name:it.n});save();sub={n:'active'};render()}
+function whStart(it){if(!it||S.active)return;const W=whS();W.last=it.id;W.t[it.id]=Date.now();S.active=newActive({method:'timer',cat:it.c,name:it.n});save();tab='play';sub=null;render();setTimeout(()=>{try{gsMenu()}catch(e){}},80)}
 function whBind(){const el=document.getElementById('wh');if(!el||el.dataset.b)return;el.dataset.b=1;whDraw();whSettled();
  ['touchstart','touchmove'].forEach(ev=>el.addEventListener(ev,e=>e.stopPropagation(),{passive:true}));
  let hist=[],y0=0,t0=0,mv=0,wasSpin=false;
