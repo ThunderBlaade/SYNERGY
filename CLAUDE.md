@@ -66,3 +66,8 @@ Private social fitness-gaming web app for a small group of friends (about 10 peo
 - Health import keys added: `totalKcal`, `standHours`, `swimM`, `swimLaps` (HDM `tkcal stand swim laps`).
 - GPS: workouts of running/walking/cycling record `route` ([lat,lon] points, 15 m apart) only while active, unpaused and Location already granted (`LP==='granted'`); no surprise prompt. Routes stay on the device. The map is a drawn route on a grid (no map tiles, so no network or cost).
 - Test: `node /home/claude/nw_t.js` (screenshots + tap checks; uses sample data in a throwaway context only).
+
+## Live workout view (v236)
+- Picking an exercise on the wheel, or tapping the name/time on the Start widget, opens `active()`: a glass panel over the gym page with three swipe pages (scroll-snap `#lvp`): Live numbers (big timer in #7B7EEA, then rows of big number + small caps label, Apple Watch style), Controls (Pause/Resume, Segment, Exercise, Rest 90s, Finish, Abandon), Log (name, exercises and sets, rest timer, finish form). Dots `.lvd`; the page is kept in `LV.p` across renders (`lvRestore()`).
+- Live rows only show what the app really measures (time, segment, sets, volume, exercises, GPS distance/pace). No heart rate or calories (no sensor): never fake them.
+- The old small Pause/New segment menu (`gsMenu`) was removed.
