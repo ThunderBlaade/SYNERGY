@@ -71,3 +71,10 @@ Private social fitness-gaming web app for a small group of friends (about 10 peo
 - Picking an exercise on the wheel, or tapping the name/time on the Start widget, opens `active()`: a glass panel over the gym page with three swipe pages (scroll-snap `#lvp`): Live numbers (big timer in #7B7EEA, then rows of big number + small caps label, Apple Watch style), Controls (Pause/Resume, Segment, Exercise, Rest 90s, Finish, Abandon), Log (name, exercises and sets, rest timer, finish form). Dots `.lvd`; the page is kept in `LV.p` across renders (`lvRestore()`).
 - Live rows only show what the app really measures (time, segment, sets, volume, exercises, GPS distance/pace). No heart rate or calories (no sensor): never fake them.
 - The old small Pause/New segment menu (`gsMenu`) was removed.
+
+## Workout system v238
+- Wheel: still 10 shown (ranked by last used, then use count). `WDEF()` now holds 16 activities (Running, Walking, Strength training, Cycling, Hiking, HIIT, Swimming, Rowing, Elliptical, Functional training, Pilates, Yoga, Boxing, Dance, Other cardio, Other sports); the rest live in the Edit menu. One-time migration in `whS()` (`S.wh.v=2`) drops unused Climbing/Mobility/Flexibility/Sports and appends the missing ones.
+- Each activity may carry `ic` (symbol), `tp` (template) and `m` (up to 4 metric keys, first = primary). Defaults: `whMk()`, `whIc()`, tables `MKD/MKC/MKT/ICD`.
+- Metric catalogue `MET` (kind live/gps/calc/hand/sensor). Sensor ones (heart rate, cadence, calories, elevation, strokes) are listed but locked: never fake them. Values come from `lvVals(a)`; manual counters `cnt/lens/rnd` live in `a.ct` (tap tile = +1, minus button = -1, action `ctr`).
+- ONE renderer `mGrid(keys,V,ex)` / `mTile` is used by the live screen (`lvMetrics`) and the creator preview (`cPrev`, example values `mEx`). Creator = `wcus()` + `cBody()` + `cSave()`; edit from the wheel editor (Edit tag), delete asks first. Test: `node /home/claude/cw_t.js`.
+- Not built (decided): Music page (a web app cannot read or control music), Plan page, separate Performance page (a "More numbers" list sits under the grid instead).
