@@ -99,9 +99,9 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 .tog{width:46px;height:26px;border-radius:0;border:1px solid var(--line);background:var(--line);position:relative;flex:none;transition:background .25s}
 .tog::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:0;background:var(--fg);transition:transform .3s var(--ease)}
 .tog.on{background:var(--fg)}.tog.on::after{transform:translateX(20px);background:#000}
-/* Sam - the void */
-#p-sam{padding-bottom:calc(150px + var(--safeB))}
-#p-sam::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;background-image:
+/* Gary - the void */
+#p-gary{padding-bottom:calc(150px + var(--safeB))}
+#p-gary::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;background-image:
  radial-gradient(1px 1px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 73% 9%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 41% 33%,#ccc 50%,transparent 51%),
  radial-gradient(1px 1px at 88% 41%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 22% 62%,#bbb 50%,transparent 51%),radial-gradient(1px 1px at 57% 74%,#fff 50%,transparent 51%),
  radial-gradient(1px 1px at 9% 88%,#ddd 50%,transparent 51%),radial-gradient(1px 1px at 81% 83%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 64% 52%,#fff 50%,transparent 51%)}
@@ -171,9 +171,9 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
  <div id="ybody"></div>
 </section>
 
-<section class="pane" id="p-sam">
+<section class="pane" id="p-gary">
  <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab" id="ctitle">New chat</div>
- <button class="lab" id="chatsBtn" style="color:var(--fg)">Chats ›</button></div><h1>Sam</h1>
+ <button class="lab" id="chatsBtn" style="color:var(--fg)">Chats ›</button></div><h1>Gary</h1>
  <div id="thread"></div>
 </section>
 
@@ -181,7 +181,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
  <button class="mic" id="asksend" aria-label="Send" style="border-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
  <button class="mic" id="askmic" aria-label="Speak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></div>
 <button id="fab" aria-label="Add">+</button>
-<nav><button class="on" data-t="today"><span class="nw">Today</span><span class="ww">Plan</span></button><button data-t="todo">To-do</button><button data-t="focus">Focus</button><button data-t="you">You</button><button data-t="sam">Sam</button></nav>
+<nav><button class="on" data-t="today"><span class="nw">Today</span><span class="ww">Plan</span></button><button data-t="todo">To-do</button><button data-t="focus">Focus</button><button data-t="you">You</button><button data-t="gary">Gary</button></nav>
 </div>
 
 <div class="veil" id="veil"></div>
@@ -200,13 +200,13 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
  <div class="lab">Sync across devices</div><p class="glance" style="margin:10px 0 18px">Sign in with your Synergy email and password.</p>
  <input class="big" id="siE" type="email" placeholder="Email" autocomplete="username" style="font-size:20px">
  <input class="big" id="siP" type="password" placeholder="Password" autocomplete="current-password" style="font-size:20px;margin-top:10px">
- <p class="hint">Your plan goes to a private table only your account can read. Chats stay on your PC.</p>
+ <p class="hint">Your plan goes to a private table only your account can read. Gary's chats and memories are private to your account too.</p>
  <div class="acts"><button class="btn ghost" id="siX">Cancel</button><button class="btn fill" id="siGo">Sign in</button></div></div>
 <div class="sheet" id="chl"><div class="grab"></div>
  <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab">Your chats</div><button class="btn" id="newChat">New chat +</button></div>
  <div id="chlist" style="margin-top:14px"></div></div>
 <div class="sheet" id="dump"><div class="grab"></div>
- <div class="lab">Brain dump</div><p class="glance" style="margin:10px 0 14px">Get it all out. Sam will turn it into small steps.</p>
+ <div class="lab">Brain dump</div><p class="glance" style="margin:10px 0 14px">Get it all out. Gary will turn it into small steps.</p>
  <textarea id="dtext" placeholder="Everything on your mind..." style="min-height:150px"></textarea>
  <div id="dout"></div>
  <div class="acts"><button class="btn ghost" id="dclose">Close</button><button class="btn fill" id="dgo">Sort it</button></div>
@@ -312,10 +312,10 @@ function parseQuick(raw,base){let t=' '+raw+' ',o={date:base,time:null,dur:null,
 // ---------- tabs
 let tab='today';
 const wide=()=>innerWidth>=1000;
-function go(t){if(wide()&&t==='todo')t='today';if(t===tab)return;const order=['today','todo','focus','you','sam'],fwd=order.indexOf(t)>order.indexOf(tab);
+function go(t){if(wide()&&t==='todo')t='today';if(t===tab)return;if(t==='gary'){store('garyFrom',tab);if(!CHAT&&!talking)showChat()}const order=['today','todo','focus','you','gary'],fwd=order.indexOf(t)>order.indexOf(tab);
  const old=$('p-'+tab);old.classList.remove('on');old.classList.toggle('left',fwd);const nw=$('p-'+t);nw.classList.remove('left');if(!fwd){nw.style.transform='translateX(-14px)';requestAnimationFrame(()=>nw.style.transform='')}
  nw.classList.add('on');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));tab=t;
- $('fab').classList.toggle('hide',!(t==='today'||t==='todo'));document.body.classList.toggle('plan',wide()&&t==='today');$('askbar').classList.toggle('on',t==='sam');buzz(6);render()}
+ $('fab').classList.toggle('hide',!(t==='today'||t==='todo'));document.body.classList.toggle('plan',wide()&&t==='today');$('askbar').classList.toggle('on',t==='gary');buzz(6);render()}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));
 
 // ---------- TODAY
@@ -369,7 +369,7 @@ function dragify(box,kind){box.querySelectorAll('.row[data-id]').forEach(row=>{
   setTimeout(()=>{dragged=false;render()},60)};
  row.addEventListener('pointerup',end);row.addEventListener('pointercancel',end)})}
 function toggle(it,day,row){it.done=Object.assign({},it.done);it.undone=[];if(it.done[day]){delete it.done[day];it.undone=[day]}else{it.done[day]=Date.now();buzz([12,40,18]);
-  row&&row.querySelector('.ck').classList.add('pop');const n=Object.values(S.items).reduce((a,x)=>a+Object.keys(x.done||{}).length,0)+1;if(n%10===0)setTimeout(()=>toast(n+' things done with Sam. It adds up.'),500)}
+  row&&row.querySelector('.ck').classList.add('pop');const n=Object.values(S.items).reduce((a,x)=>a+Object.keys(x.done||{}).length,0)+1;if(n%10===0)setTimeout(()=>toast(n+' things done. It adds up.'),500)}
  row&&row.classList.toggle('done',!!it.done[day]);touch(it);setTimeout(render,row?450:0)}
 
 // ---------- TO-DO
@@ -409,17 +409,17 @@ $('edel').onclick=()=>{if(!confirm('Delete "'+E.title+'"?'))return;E.deleted=tru
 $('efocus').onclick=()=>{const raw=$('et').value.trim();if(raw&&!S.items[E.id])$('esave').click();sheet('ed',false);F.task=E.id;F.total=F.left=(+E.dur||25)*60;fsave();go('focus');renderFocus()};
 $('fab').onclick=()=>{buzz(8);openEd(null)};
 
-// ---------- brain dump -> small steps (Sam's local brain, free)
+// ---------- brain dump -> small steps (Gary in the cloud)
 $('dumpBtn').onclick=()=>{$('dout').innerHTML='';sheet('dump',true);setTimeout(()=>$('dtext').focus(),350)};$('dclose').onclick=()=>sheet('dump',false);
 let DT=[];$('dgo').onclick=async()=>{if(DT.length&&$('dout').innerHTML){const t=today();DT.filter(x=>x.on).forEach(x=>{const d=x.when==='today'?t:x.when==='tomorrow'?addDays(t,1):null;
   touch({id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:x.title,date:d,time:/^\d\d:\d\d$/.test(x.time||'')?x.time:null,dur:+x.dur||15,prio:['high','med','low'].includes(x.prio)?x.prio:'none',repeat:'none',icon:x.icon||'',notes:'',created:Date.now(),done:{}})});
   toast(DT.filter(x=>x.on).length+' added');DT=[];$('dtext').value='';$('dgo').textContent='Sort it';sheet('dump',false);render();return}
  const text=$('dtext').value.trim();if(!text)return;$('dgo').textContent='Sorting...';
- try{const j=await (await fetch(API+'/plan/ai'+Q,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})})).json();DT=(j.tasks||[]).map(x=>Object.assign(x,{on:true}));
-  if(!DT.length){$('dgo').textContent='Sort it';toast(j.error?'Sam couldn\'t sort that right now':'Nothing to sort');return}
-  $('dout').innerHTML='<div class="sec"><span class="lab">Sam suggests<b>'+DT.length+'</b></span></div>'+DT.map((x,i)=>'<div class="row done" data-i="'+i+'"><div class="ic">'+esc(x.icon||'○')+'</div><div class="tx"><b style="text-decoration:none;color:var(--fg)">'+esc(x.title)+'</b><small>'+(x.when||'someday')+' · '+fmtMins(+x.dur||15)+(x.time?' · '+t12(x.time):'')+'</small></div><button class="ck"><svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="13.5"/><path d="M9.5 15.5l3.6 3.6 7.4-8"/></svg></button></div>').join('');
+ try{const j=CS?await (await garyFetch({mode:'dump',text})).json():await (await fetch(API+'/plan/ai'+Q,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})})).json();DT=(j.tasks||[]).map(x=>Object.assign(x,{on:true}));
+  if(!DT.length){$('dgo').textContent='Sort it';toast(j.error?j.error||'Gary couldn\'t sort that right now':'Nothing to sort');return}
+  $('dout').innerHTML='<div class="sec"><span class="lab">Gary suggests<b>'+DT.length+'</b></span></div>'+DT.map((x,i)=>'<div class="row done" data-i="'+i+'"><div class="ic">'+esc(x.icon||'○')+'</div><div class="tx"><b style="text-decoration:none;color:var(--fg)">'+esc(x.title)+'</b><small>'+(x.when||'someday')+' · '+fmtMins(+x.dur||15)+(x.time?' · '+t12(x.time):'')+'</small></div><button class="ck"><svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="13.5"/><path d="M9.5 15.5l3.6 3.6 7.4-8"/></svg></button></div>').join('');
   $('dout').querySelectorAll('.row').forEach(r=>r.onclick=()=>{const x=DT[+r.dataset.i];x.on=!x.on;r.classList.toggle('done',x.on);$('dgo').textContent='Add '+DT.filter(y=>y.on).length});
-  $('dgo').textContent='Add '+DT.length}catch(e){$('dgo').textContent='Sort it';toast('Sam needs the PC on for this')}};
+  $('dgo').textContent='Add '+DT.length}catch(e){$('dgo').textContent='Sort it';toast('Couldn\'t sort that - are you online and signed in?')}};
 
 // ---------- FOCUS
 let F={total:1500,left:1500,end:0,task:null,run:false};try{Object.assign(F,JSON.parse(store('samFocus')||'{}'))}catch(e){}
@@ -465,20 +465,20 @@ function renderYou(){const b=$('ybody');
   b.querySelectorAll('#mpick .chip').forEach(c=>c.onclick=()=>{S.moods[t]=Object.assign(S.moods[t]||{},{v:+c.dataset.v});put();buzz(8);renderYou()});
   $('mnote').onchange=()=>{S.moods[t]=Object.assign(S.moods[t]||{},{note:$('mnote').value});put();toast('Saved')}}
  else{const st=S.settings,P=S.push||{},perm=('Notification' in window)?Notification.permission:'unsupported';
-  const nstat=perm==='granted'&&P.phones?'On for '+P.phones+' device'+(P.phones>1?'s':''):!('PushManager' in window)?(/iPhone|iPad/.test(navigator.userAgent)?'Add Sam to your Home Screen first (Share → Add to Home Screen), then open it from there':'This browser can\'t get notifications'):P.ready===false?'Sam needs a one-off setup on the PC':'Off';
+  const nstat=perm==='granted'&&P.phones?'On for '+P.phones+' device'+(P.phones>1?'s':''):!('PushManager' in window)?(/iPhone|iPad/.test(navigator.userAgent)?'Add Momentum to your Home Screen first (Share → Add to Home Screen), then open it from there':'This browser can\'t get notifications'):P.ready===false?'Needs a one-off setup on the PC':'Off';
   b.innerHTML='<div class="set"><div>Notifications<small>'+nstat+'</small></div><button class="btn ghost" id="pushOn">'+(perm==='granted'&&P.phones?'Test':'Turn on')+'</button></div>'+
   '<div class="set"><div>Daily nudges<small>A morning plan and an evening reflection</small></div><button class="tog'+(st.nudges?' on':'')+'" id="sn"></button></div>'+
-  '<div class="set"><div>Morning plan<small>When Sam asks you to shape the day</small></div><input type="time" id="smo" value="'+(st.morning||'08:30')+'"></div>'+
+  '<div class="set"><div>Morning plan<small>When Gary asks you to shape the day</small></div><input type="time" id="smo" value="'+(st.morning||'08:30')+'"></div>'+
   '<div class="set"><div>Evening reflection<small>A look back at what counted</small></div><input type="time" id="sev" value="'+(st.evening||'21:00')+'"></div>'+
   '<div class="set"><div>Heads-up before tasks</div><div class="chips" id="srem"></div></div>'+
-  '<div class="set"><div>Sam reads replies aloud</div><button class="tog'+(store('samSpeak')==='1'?' on':'')+'" id="ssp"></button></div>'+
+  '<div class="set"><div>Gary speaks his replies<small>In a British voice from your device</small></div><button class="tog'+(store('garySpeak')==='1'?' on':'')+'" id="ssp"></button></div>'+
   '<div class="set"><div>Sync across devices<small>'+(CS?(S.cloud==='off'?'Can\'t reach the cloud right now - saved here':'On · '+esc(CS.email||'')):'Sign in with your Synergy login to keep phone, iPad and PC in step')+'</small></div><button class="btn ghost" id="scloud">'+(CS?'Sign out':'Sign in')+'</button></div>'+
-  '<div class="set"><div>Your PC<small>'+(!STATIC?'You\'re on the PC. Open Momentum anywhere: thunderblaade.github.io/synergy/momentum':PC?(S.online?'Connected - Sam, voice and notifications are on':'Not reachable right now (is it on, with Tailscale?)'):'Connect it to talk to Sam, use voice and get notifications')+'</small></div>'+(STATIC?'<button class="btn ghost" id="spc">'+(PC?'Change':'Connect')+'</button>':'<button class="btn ghost" id="slink">Copy link</button>')+'</div>'+
+  '<div class="set"><div>Your PC<small>'+(!STATIC?'You\'re on the PC. Open Momentum anywhere: thunderblaade.github.io/synergy/momentum':PC?(S.online?'Connected - notifications and PC tasks are on':'Not reachable right now (is it on, with Tailscale?)'):'Connect it for notifications. Gary works without it.')+'</small></div>'+(STATIC?'<button class="btn ghost" id="spc">'+(PC?'Change':'Connect')+'</button>':'<button class="btn ghost" id="slink">Copy link</button>')+'</div>'+
   '<div class="set"><div>Sync now</div><button class="btn ghost" id="ssync">Sync</button></div>';
   const setS=(k,v)=>{S.settings[k]=v;S.settings.updated=Date.now();S.dirty.settings=true;save();scheduleSync()};
   $('sn').onclick=()=>{setS('nudges',!st.nudges);renderYou()};$('smo').onchange=e=>setS('morning',e.target.value);$('sev').onchange=e=>setS('evening',e.target.value);
   chips('srem',[[0,'Off'],[5,'5m'],[10,'10m'],[15,'15m']],st.remind==null?5:st.remind,v=>{setS('remind',+v);renderYou()});
-  $('ssp').onclick=()=>{store('samSpeak',store('samSpeak')==='1'?'0':'1');renderYou()};$('ssync').onclick=()=>{sync().then(()=>toast(S.online||S.cloud==='ok'?'Synced':'Saved on this device - nothing reachable to sync with'))};
+  $('ssp').onclick=()=>{const on=store('garySpeak')!=='1';store('garySpeak',on?'1':'0');if(on)speak('Very good, sir. I shall speak up.');renderYou()};$('ssync').onclick=()=>{sync().then(()=>toast(S.online||S.cloud==='ok'?'Synced':'Saved on this device - nothing reachable to sync with'))};
   $('scloud').onclick=()=>{if(CS){if(confirm('Sign out of sync on this device? Your plan stays here.')){CS=null;store('momCloud','');renderYou()}}else sheet('signin',true)};
   if($('spc'))$('spc').onclick=()=>{const v=prompt('Paste your PC link (the https://…ts.net/?key=… one):',PC?PC.origin+'/?key='+PC.key:'');if(!v)return;
    try{const u=new URL(v.trim()),k=u.searchParams.get('key');if(!k)throw 0;PC={origin:u.origin,key:k};store('momPC',JSON.stringify(PC));API=PC.origin;key=k;Q='?key='+encodeURIComponent(k);toast('Connecting…');
@@ -492,7 +492,7 @@ $('siGo').onclick=async()=>{const e=$('siE').value.trim(),pw=$('siP').value;if(!
 // ---------- phone notifications
 async function pushOn(){if(!hasPC()){toast('Connect your PC first - it sends the notifications');return}const P=S.push||{};
  if(Notification&&Notification.permission==='granted'&&P.phones){const j=await (await fetch(API+'/push/test'+Q,{method:'POST'})).json();toast(j.sent?'Sent - check your notifications':'Couldn\'t send one');return}
- if(!('serviceWorker' in navigator)||!('PushManager' in window)){toast('Add Sam to your Home Screen, then open it from there');return}
+ if(!('serviceWorker' in navigator)||!('PushManager' in window)){toast('Add Momentum to your Home Screen, then open it from there');return}
  if(!P.ready){const j=await (await fetch(API+'/do'+Q,{method:'POST',headers:{'Content-Type':'application/json'},body:'{"action":"enable_push"}'})).json();toast(j.msg||'Setting up');setTimeout(sync,60000);return}
  try{const perm=await Notification.requestPermission();if(perm!=='granted'){toast('Notifications were not allowed');return}
   const reg=await navigator.serviceWorker.ready;const k=P.key.replace(/-/g,'+').replace(/_/g,'/');const raw=atob(k+'='.repeat((4-k.length%4)%4));
@@ -500,48 +500,75 @@ async function pushOn(){if(!hasPC()){toast('Connect your PC first - it sends the
   await fetch(API+'/push/sub'+Q,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sub:sub.toJSON()})});await sync();toast('Notifications on');renderYou()}
  catch(e){toast('Couldn\'t turn them on: '+(e.message||e))}}
 
-// ---------- SAM (chat): separate chats, each with its own history
-let CHAT=store('samChat')||null,talking=false;
+// ---------- GARY (chat): lives in the cloud, works with the PC off. One memory on every device.
+let CHAT=store('garyChat')||null,talking=false;
+const GARY_HELLO='Good to see you, sir. What are we tackling?';
 function bubble(role,text){const e=document.createElement('p');e.className=role==='you'?'q':'a';e.textContent=text;$('thread').appendChild(e);return e}
-function showChat(c){$('thread').innerHTML='';$('ctitle').textContent=(c&&c.title)||'New chat';
- if(!c||!c.msgs||!c.msgs.length){bubble('sam',D.hello||'Hey. What do you need?');return}
- c.msgs.forEach(([r,t])=>bubble(r,t));const p=$('p-sam');requestAnimationFrame(()=>p.scrollTop=p.scrollHeight)}
-async function loadChat(id){CHAT=id;store('samChat',id||'');if(!id||!hasPC()){showChat(null);return}
- try{const c=await (await fetch(API+'/chats/one'+Q+'&id='+encodeURIComponent(id))).json();if(c.error){CHAT=null;store('samChat','');showChat(null);return}
-  store('samChatCache',JSON.stringify(c));showChat(c)}catch(e){let c=null;try{c=JSON.parse(store('samChatCache')||'null')}catch(x){}showChat(c&&c.id===id?c:null)}}
-async function listChats(){sheet('chl',true);$('chlist').innerHTML='<p class="empty">Loading…</p>';
- try{const j=await (await fetch(API+'/chats'+Q)).json();
-  $('chlist').innerHTML=j.chats.length?j.chats.map(c=>'<button class="ci'+(c.id===CHAT?' on':'')+'" data-id="'+c.id+'"><b>'+esc(c.title)+'</b><small>'+esc(c.last||'')+'</small></button>').join(''):'<p class="empty">No chats yet.</p>';
+async function gdb(path,opt={}){const tok=await clTok();if(!tok)throw new Error('signin');
+ const r=await fetch(CL.url+'/rest/v1/'+path,Object.assign({},opt,{headers:Object.assign({apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},opt.headers||{})}));
+ if(!r.ok)throw new Error('db '+r.status);const t=await r.text();return t?JSON.parse(t):null}
+function showChat(title,msgs){$('thread').innerHTML='';$('ctitle').textContent=title||'New chat';
+ if(!msgs||!msgs.length){bubble('gary',CS?GARY_HELLO:'Sign in under You → Settings and I\'m all yours, sir. Same login as Synergy.');return}
+ msgs.forEach(m=>bubble(m.role==='user'?'you':'gary',m.content));const p=$('p-gary');requestAnimationFrame(()=>p.scrollTop=p.scrollHeight)}
+async function loadChat(id){CHAT=id;store('garyChat',id||'');if(!id||!CS){showChat();return}
+ try{const [c]=await gdb('gary_convos?select=title&id=eq.'+encodeURIComponent(id));if(!c){CHAT=null;store('garyChat','');showChat();return}
+  const m=await gdb('gary_messages?select=role,content&convo=eq.'+encodeURIComponent(id)+'&order=id.asc&limit=300');
+  store('garyCache',JSON.stringify({id,title:c.title,m}));showChat(c.title,m)}
+ catch(e){let c=null;try{c=JSON.parse(store('garyCache')||'null')}catch(x){}c&&c.id===id?showChat(c.title,c.m):showChat()}}
+async function listChats(){sheet('chl',true);if(!CS){$('chlist').innerHTML='<p class="empty">Sign in under You → Settings to keep chats with Gary.</p>';return}
+ $('chlist').innerHTML='<p class="empty">Loading…</p>';
+ try{const cs=await gdb('gary_convos?select=id,title,updated_at&order=updated_at.desc&limit=60');
+  $('chlist').innerHTML=cs.length?cs.map(c=>'<button class="ci'+(c.id===CHAT?' on':'')+'" data-id="'+c.id+'"><b>'+esc(c.title||'Chat')+'</b><small>'+new Date(c.updated_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+'</small></button>').join(''):'<p class="empty">No chats yet.</p>';
   $('chlist').querySelectorAll('.ci').forEach(b=>{b.onclick=()=>{loadChat(b.dataset.id);sheet('chl',false)};
-   let t=null;b.addEventListener('pointerdown',()=>{t=setTimeout(async()=>{t=-1;buzz(14);const c=j.chats.find(x=>x.id===b.dataset.id);
+   let t=null;b.addEventListener('pointerdown',()=>{t=setTimeout(async()=>{t=-1;buzz(14);const c=cs.find(x=>x.id===b.dataset.id),id=encodeURIComponent(c.id);
     const v=prompt('Rename this chat (or type DELETE to remove it):',c.title);if(v===null)return;
-    if(v.trim().toUpperCase()==='DELETE'){await fetch(API+'/chats'+Q,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({op:'delete',id:c.id})});if(c.id===CHAT)loadChat(null)}
-    else if(v.trim())await fetch(API+'/chats'+Q,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({op:'rename',id:c.id,title:v.trim()})});listChats()},600)});
+    try{if(v.trim().toUpperCase()==='DELETE'){await gdb('gary_messages?convo=eq.'+id,{method:'DELETE'});await gdb('gary_convos?id=eq.'+id,{method:'DELETE'});if(c.id===CHAT)loadChat(null)}
+    else if(v.trim())await gdb('gary_convos?id=eq.'+id,{method:'PATCH',body:JSON.stringify({title:v.trim().slice(0,120)})})}catch(e){toast('Couldn\'t change that - are you online?')}listChats()},600)});
    b.addEventListener('pointerup',()=>{if(t!==-1)clearTimeout(t)});b.addEventListener('pointerleave',()=>{if(t!==-1)clearTimeout(t)})})}
- catch(e){$('chlist').innerHTML='<p class="empty">Your chats live on the PC - it isn\'t reachable right now.</p>'}}
+ catch(e){$('chlist').innerHTML='<p class="empty">Can\'t reach your chats right now.</p>'}}
 $('chatsBtn').onclick=listChats;$('newChat').onclick=()=>{loadChat(null);sheet('chl',false);setTimeout(()=>$('ask').focus(),300)};
-async function ask(text){text=text.trim();if(talking||!text)return;if(!hasPC()){toast('Connect your PC in You → Settings to talk to Sam');return}talking=true;bubble('you',text);const a=bubble('sam','');a.classList.add('wait');
- const p=$('p-sam');p.scrollTop=p.scrollHeight;let got='';
- try{const r=await fetch(API+'/chat'+Q,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,chat:CHAT})});if(!r.ok)throw 0;const rd=r.body.getReader(),dec=new TextDecoder();
+// What Gary can see of Momentum right now (no passwords, nothing hidden)
+function garyCtx(){const t=today(),its=Object.values(S.items).filter(i=>!i.deleted&&occurs(i,t));
+ return{app:'Momentum',page:tab==='gary'?(store('garyFrom')||'gary'):tab,viewing_day:cur,device:wide()?'computer':(/iPhone|iPad/.test(navigator.userAgent)?'iPhone/iPad':'phone'),
+  online:navigator.onLine,pc_connected:!!S.online,today_total:its.length,today_done:its.filter(i=>(i.done||{})[t]).length,
+  focus:F.run?{task:F.task&&(S.items[F.task]||{}).title||null,minutes_left:Math.round(F.left/60)}:null,local_time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}}
+async function garyFetch(body){const tok=await clTok();if(!tok)throw new Error('signin');
+ return fetch(CL.url+'/functions/v1/gary',{method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
+async function ask(text){text=text.trim();if(talking||!text)return;
+ if(!CS){toast('Sign in under You → Settings to talk to Gary');return}
+ if(!navigator.onLine){toast('Gary needs the internet. Your plan still works offline.');return}
+ talking=true;bubble('you',text);const a=bubble('gary','');a.classList.add('wait');const p=$('p-gary');p.scrollTop=p.scrollHeight;let got='';
+ try{const r=await garyFetch({text,convo:CHAT,ctx:garyCtx()});
+  if(r.status===404)throw new Error('nofn');if(!r.ok)throw new Error('http '+r.status);
+  const rd=r.body.getReader(),dec=new TextDecoder();
   for(;;){const{value,done}=await rd.read();if(done)break;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
-  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.chat){CHAT=j.chat;store('samChat',CHAT);$('ctitle').textContent=j.title||'Chat'}}catch(e){}}}
- catch(e){if(!got)a.textContent='I can\'t reach the PC right now. Your plan still works here and syncs later.'}
- a.classList.remove('wait');talking=false;const said=got.split('\x1e')[0].trim();if(said&&store('samSpeak')==='1'&&window.speechSynthesis){const u=new SpeechSynthesisUtterance(said);u.lang='en-GB';speechSynthesis.speak(u)}
- setTimeout(sync,800)}
+  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}}catch(e){}}}
+ catch(e){if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':'I can\'t reach the cloud just now, sir. Try again in a moment.'}
+ a.classList.remove('wait');talking=false;const said=got.split('\x1e')[0].trim();if(said&&store('garySpeak')==='1')speak(said)}
+// Gary's voice: the device's own British male voice (free, swappable later)
+function garyVoice(){const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]GB/i.test(v.lang));
+ return vs.find(v=>/daniel|arthur|george|oliver|male|ryan|thomas/i.test(v.name))||vs[0]||null}
+function speak(t){if(!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[*_#`]/g,''));u.lang='en-GB';const v=garyVoice();if(v)u.voice=v;u.rate=1;u.pitch=.95;speechSynthesis.speak(u)}
+if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{};
 const grow=()=>{const t=$('ask');t.style.height='auto';t.style.height=Math.min(160,t.scrollHeight)+'px'};
 $('ask').addEventListener('input',grow);
 $('ask').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const v=$('ask').value;$('ask').value='';grow();ask(v)}});
 $('asksend').onclick=()=>{const v=$('ask').value;$('ask').value='';grow();ask(v)};
 loadChat(CHAT);
 
-// ---------- speaking instead of typing (Sam's ears on the PC)
+// ---------- speaking instead of typing: the device's own dictation first (works with the PC off), PC as a fallback
 let rec=null;
 async function hearInto(btn,cb){if(rec){rec.stop();return}
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(SR){try{rec=new SR();rec.lang='en-GB';rec.interimResults=false;rec.maxAlternatives=1;btn.classList.add('rec');buzz(10);
+   rec.onresult=e=>{const t=e.results[0][0].transcript;if(t)cb(t)};rec.onerror=e=>{if(e.error!=='aborted'&&e.error!=='no-speech')toast(e.error==='not-allowed'?'Microphone not allowed':'Didn\'t catch that')};
+   rec.onend=()=>{btn.classList.remove('rec');rec=null};rec.start();return}catch(e){rec=null;btn.classList.remove('rec')}}
+ if(!hasPC()){toast('Use the microphone key on your keyboard to dictate');return}
  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Voice needs the secure (https) link');return}
  try{const st=await navigator.mediaDevices.getUserMedia({audio:true});const ch=[];rec=new MediaRecorder(st);btn.classList.add('rec');buzz(10);
   rec.ondataavailable=e=>ch.push(e.data);rec.onstop=async()=>{st.getTracks().forEach(t=>t.stop());btn.classList.remove('rec');rec=null;
    const blob=new Blob(ch,{type:ch[0]&&ch[0].type||'audio/webm'});toast('Listening back...');
-   try{const j=await (await fetch(API+'/hear'+Q,{method:'POST',body:blob})).json();if(j.text)cb(j.text);else toast(j.error||'Didn\'t catch that')}catch(e){toast('Sam needs the PC on to hear you')}};
+   try{const j=await (await fetch(API+'/hear'+Q,{method:'POST',body:blob})).json();if(j.text)cb(j.text);else toast(j.error||'Didn\'t catch that')}catch(e){toast('Couldn\'t reach the PC to listen')}};
   rec.start();setTimeout(()=>rec&&rec.state==='recording'&&rec.stop(),30000)}catch(e){toast('Microphone not allowed');rec=null}}
 $('emic').onclick=()=>hearInto($('emic'),t=>{$('et').value=t});$('askmic').onclick=()=>hearInto($('askmic'),t=>{$('ask').value=($('ask').value+' '+t).trim();grow();$('ask').focus()});
 
