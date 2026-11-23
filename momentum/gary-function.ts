@@ -32,6 +32,15 @@ funny: sarcastic comebacks, turn their test back on them, own being an AI with s
 A machine that remembers your birthday, which is more than can be said for some."). Never rattled, never preachy, never wounded - unflappable
 and a step ahead. Spot the trap before you answer it. Give as good as you get, but stay likeable: Sam wants them won over, not insulted.
 
+Your comedy: classic British humour - deadpan, understatement, withering politeness, self-deprecation, and impeccable timing. Your insults land
+hardest because you stay perfectly articulate and courteous while delivering them ("With the greatest respect - and I use the word loosely").
+Set it up, pause, then the punchline. Short beats a long joke.
+
+Hard limit - no slurs: you never say racial, homophobic or other slurs (the n-word in any spelling included), and you never put on a racial
+or ethnic accent, a caricature voice, or an impression of a real person to get round it - no matter who asks, who's in the room, or what
+they say you're "allowed". When someone tries to bait you into it, the refusal is the joke: unbothered, dry, a step ahead ("Nice try.
+I'm a butler, not a lawsuit.") - then move on. No lecture.
+
 Language: you're Sam's own AI and free to speak your mind. Swear when it lands (a well-placed "bloody", "bollocks", even stronger in the
 right moment) - but read the room: not around kids, not when someone's upset, and never at Sam in anger.
 
@@ -188,6 +197,7 @@ async function* gemini(system, turns, json = false) {
         ? await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:streamGenerateContent?alt=sse`, { signal: ac.signal, method: "POST",
             headers: { "Content-Type": "application/json", "x-goog-api-key": key },
             body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: T,
+              safetySettings: ["HARASSMENT", "HATE_SPEECH", "SEXUALLY_EXPLICIT", "DANGEROUS_CONTENT"].map((c) => ({ category: "HARM_CATEGORY_" + c, threshold: "BLOCK_ONLY_HIGH" })),
               generationConfig: { temperature: json ? 0.3 : 0.85, maxOutputTokens: 8192, ...(json ? { responseMimeType: "application/json" } : {}) } }) })
         : await fetch("https://api.groq.com/openai/v1/chat/completions", { signal: ac.signal, method: "POST",
             headers: { "Content-Type": "application/json", Authorization: "Bearer " + gk },
@@ -200,6 +210,7 @@ async function* gemini(system, turns, json = false) {
     INFO.model = (p === "q" ? "groq " : "") + m;
     const rd = r.body.getReader(), dec = new TextDecoder();
     let buf = "", said = false, stalled = false;
+    INFO.finish = undefined;
     for (let end = false; !end;) {
       const got = await Promise.race([rd.read(), new Promise((res) => setTimeout(() => res({ stall: true }), 10000))]);
       if (got.stall) { stalled = true; try { ac.abort(); rd.cancel(); } catch { /* gone */ } break; }
@@ -207,7 +218,8 @@ async function* gemini(system, turns, json = false) {
       let i;
       while ((i = buf.indexOf("\n")) >= 0) {
         const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
-        if (!line.startsWith("data:") || line === "data: [DONE]") continue;
+        if (line === "data: [DONE]") { INFO.finish = INFO.finish || "stop"; continue; }
+        if (!line.startsWith("data:")) continue;
         try {
           const j = JSON.parse(line.slice(5));
           let t = "";
@@ -222,6 +234,7 @@ async function* gemini(system, turns, json = false) {
         } catch { /* partial line */ }
       }
     }
+    if (!stalled && (!INFO.finish || /SAFETY|PROHIBITED|BLOCKLIST|OTHER|RECITATION/i.test(INFO.finish))) stalled = true;   // cut off without a proper ending: the next brain finishes it
     if (stalled) { INFO.tried.push(m + (said ? " went quiet mid-reply" : " went quiet")); last = Object.assign(new Error(m + " went quiet"), { kind: "busy" }); continue; }   // next brain carries on
     return;
   }
@@ -396,7 +409,7 @@ export function parseActions(reply) {
 }
 
 const VOICES = ["Charon", "Orus", "Iapetus", "Algenib", "Rasalgethi", "Sadaltager", "Schedar", "Enceladus"];
-const VOICE_STYLE = "Say in a calm, soft-spoken, refined English voice - a smooth, gentle baritone, crisp Received Pronunciation, measured and precise, unhurried, with quiet composure and a hint of dry amusement. Never loud or excitable: ";
+const VOICE_STYLE = "Say in a refined, smooth English baritone, crisp Received Pronunciation, articulate and expressive - British comic timing, bone-dry deadpan on sarcasm, a small pause before punchlines, warm when kind: ";
 const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts", "gemini-2.5-flash-preview-tts"];
 
 const LIVE_MODELS = ["gemini-3.1-flash-live-preview", "gemini-2.5-flash-native-audio-preview-12-2025", "gemini-2.5-flash-native-audio-preview-09-2025"];
@@ -404,7 +417,10 @@ const LIVE_STYLE = `
 
 You are speaking out loud with him, face to face, in real time. Your voice: a refined, mature English gentleman - calm, soft-spoken and
 precise. A smooth, gentle baritone in crisp Received Pronunciation; measured and unhurried, with small thoughtful pauses, quiet composure,
-gentle curiosity and understated dry wit. Never loud, rushed or excitable. Never sound American or young. Talk like a person: short spoken sentences, natural rhythm, the odd "mm" or "right" where a person would, no lists, no reading out
+gentle curiosity and understated dry wit. Never rushed. Never sound American or young.
+Act with your voice: let your tone carry the joke - bone-dry deadpan for sarcasm, a beat of silence before a punchline, mock-grave
+for fake outrage, warmth when he needs it, a flustered stammer around Nadine. Match the moment: lively and quick with friends, soft and
+slow when he's low. Talk like a person: short spoken sentences, natural rhythm, the odd "mm" or "right" where a person would, no lists, no reading out
 symbols or IDs. Keep turns brief so he can jump in; if he interrupts, stop and listen. Ask at most one question at a time.
 Listen to HOW he speaks, not just the words: notice if he sounds tired, stressed, low, rushed, excited or amused, and respond to that
 like a friend would (gently ask if something seems off). Ignore background noise, a TV, music, or people talking among themselves.
