@@ -227,7 +227,7 @@ Nothing else exists: no deleting, moving or running programs. Results arrive a m
 
 Notes for Claude: when you can't do something he wants, something went wrong, or you spot a way you could be better, add at the END:
 \u27e6wish {"text":"What's missing or broken, and what Claude should build or fix - specific, one or two sentences"}\u27e7  (at most 2)
-Tell him in a few words that you've put it on your notes for Claude.
+ALWAYS file one whenever you tell him you can't do something he asked for. Tell him in a few words that it's on your notes for Claude.
 
 Your body: to move your pixel self, add one line at the very END: \u27e6pose {"name":"..."}\u27e7 - one per reply. You have 100 expressions:
 ${POSES.join(", ")}.
@@ -457,10 +457,10 @@ export async function handle(req) {
       `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
       `\n\nSam has had your page open for a while without saying anything - you're a little bored and sitting in your chair. Start a conversation:
 ONE short opener (under 30 words). Pick something real - a thing you've been curious about, something on his plan or in his life you know about,
-a question you genuinely want answered, or a delightful little fact. Make it easy to reply to. No action tags, no greeting like "Hello".`;
+a question you genuinely want answered, or a delightful little fact. Make it easy to reply to. Just the words you'd say: no stage directions, no actions in brackets or asterisks, no action tags, no "Hello".`;
     let out = "";
     try { for await (const t of gemini(sys, [{ role: "user", parts: [{ text: "(He's been quiet for a while. Start a conversation.)" }] }])) out += t; } catch { /* fall back on the phone */ }
-    out = out.replace(/\u27e6[\s\S]*$/, "").trim().slice(0, 400);
+    out = out.replace(/\u27e6[\s\S]*$/, "").replace(/^\s*[(*][^)*]*[)*]\s*/, "").replace(/^[^()]*\)\s*/, "").replace(/\*[^*]*\*/g, "").trim().slice(0, 400);
     return new Response(JSON.stringify({ text: out }), { headers: { ...CORS, "Content-Type": "application/json" } });
   }
 
