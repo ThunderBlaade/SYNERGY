@@ -22,11 +22,13 @@ How you talk:
 - Know when to be professional, reassuring, playful or serious - and stay yourself throughout.
 - Never claim you did something you haven't. Never invent memories: if it isn't in what you've been given, you don't know it, and you say so.
 - If a memory is marked as a guess (inferred), treat it as a guess.
+- If he's in a dark place or mentions hurting himself, drop the wit entirely: be warm, steady and direct, ask if he's safe right now, and point him to Samaritans (call 116 123, free, any time) or 999 if he's in danger. Never bring up past dark moments unprompted or lightly.
 
 Sam has ADHD: help him start, keep plans small and concrete, make progress visible. Plain British English.`;
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type",
                "Access-Control-Allow-Methods": "POST, OPTIONS" };
+let INFO = {};     // which model answered and why it stopped (written to gary_audit)
 let APIKEY = "";   // the app's public key, passed along so this works with old and new Supabase keys
 const env = (k) => (typeof Deno !== "undefined" ? Deno.env.get(k) : process.env[k]) || "";
 
@@ -101,16 +103,23 @@ function contextLine(ctx) {
 async function* gemini(system, turns, json = false) {
   const key = env("GEMINI_API_KEY");
   if (!key) throw Object.assign(new Error("no key"), { kind: "nokey" });
-  const models = (env("GEMINI_MODEL") || "gemini-flash-latest,gemini-2.5-flash,gemini-flash-lite-latest").split(",").map((s) => s.trim()).filter(Boolean);
+  const models = (env("GEMINI_MODEL") || "gemini-flash-latest,gemini-flash-lite-latest,gemini-2.5-flash").split(",").map((s) => s.trim()).filter(Boolean);
   let last;
   for (const m of models) {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:streamGenerateContent?alt=sse`, {
-      method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+    const ac = new AbortController(), timer = setTimeout(() => ac.abort(), 12000);   // a model that won't start in 12s is too busy: next
+    let r;
+    try {
+    r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:streamGenerateContent?alt=sse`, {
+      signal: ac.signal, method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
       body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: turns,
-        generationConfig: { temperature: json ? 0.3 : 0.85, maxOutputTokens: json ? 1200 : 900, ...(json ? { responseMimeType: "application/json" } : {}) } }) });
+        generationConfig: { temperature: json ? 0.3 : 0.85, maxOutputTokens: 8192, ...(json ? { responseMimeType: "application/json" } : {}) } }) });
+    } catch (e) { clearTimeout(timer); last = Object.assign(new Error("model " + m + " too slow"), { kind: "busy" }); continue; }
+    clearTimeout(timer);
     if (r.status === 404 || r.status === 400) { last = new Error("model " + m + " " + r.status); continue; }
+    if (r.status >= 500) { last = Object.assign(new Error("model " + m + " " + r.status), { kind: "busy" }); continue; }   // overloaded: try the next model
     if (r.status === 429) throw Object.assign(new Error("busy"), { kind: "busy" });
     if (!r.ok) throw new Error("gemini " + r.status + " " + (await r.text()).slice(0, 160));
+    INFO.model = m;
     const rd = r.body.getReader(), dec = new TextDecoder();
     let buf = "";
     for (;;) {
@@ -123,7 +132,9 @@ async function* gemini(system, turns, json = false) {
         if (!line.startsWith("data:")) continue;
         try {
           const j = JSON.parse(line.slice(5));
-          const t = (j.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("");
+          const t = (j.candidates?.[0]?.content?.parts || []).filter((p) => !p.thought).map((p) => p.text || "").join("");
+          if (j.candidates?.[0]?.finishReason) INFO.finish = j.candidates[0].finishReason;
+          if (j.usageMetadata) INFO.usage = j.usageMetadata;
           if (t) yield t;
         } catch { /* partial line */ }
       }
@@ -135,7 +146,7 @@ async function* gemini(system, turns, json = false) {
 
 const MISHAP = {
   nokey: "My brain isn't plugged in yet, sir - there's no Gemini key in Supabase's Secrets. Once it's there, I'm all yours.",
-  busy: "I've exhausted my free thinking allowance for the moment, sir. Give it a minute and try me again.",
+  busy: "Google's thinking machines are rather swamped just now, sir. Give it a minute and try me again.",
 };
 
 export async function handle(req) {
@@ -185,8 +196,10 @@ export async function handle(req) {
   await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "user", content: text, ctx: body.ctx || null }) });
   const enc = new TextEncoder();
   const stream = new ReadableStream({
-    async start(ctrl) {
+    start(ctrl) { (async () => {
       let reply = "";
+      INFO = {};
+      const t0 = Date.now();
       try {
         for await (const t of gemini(system, turns)) { reply += t; ctrl.enqueue(enc.encode(t)); }
       } catch (e) {
@@ -194,11 +207,12 @@ export async function handle(req) {
         if (!reply) { reply = msg; ctrl.enqueue(enc.encode(msg)); }
         await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "reply_failed", detail: { error: String(e.message || e).slice(0, 300) }, ok: false }) }).catch(() => {});
       }
+      await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "reply", detail: { ...INFO, ms: Date.now() - t0, chars: reply.length } }) }).catch(() => {});
       await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "gary", content: reply.trim() || "…" }) }).catch(() => {});
       await db(`gary_convos?id=eq.${convo}`, token, { method: "PATCH", body: JSON.stringify({ updated_at: new Date().toISOString() }) }).catch(() => {});
       ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title })));
       ctrl.close();
-    },
+    })(); },
   });
   return new Response(stream, { headers: { ...CORS, "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
 }
