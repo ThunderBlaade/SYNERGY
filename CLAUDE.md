@@ -52,8 +52,10 @@ Private social fitness-gaming web app for a small group of friends (about 10 peo
 - **Permissions sheet** `#perm`: location, compass, city choice; each has an offline/no-permission fallback.
 - **Service worker**: `VERSION` was found stuck at v39 for a long time because sed bumps silently missed; check it with `grep VERSION service-worker.js` after every bump.
 - Not built yet: Apple Health Shortcut route, Fitbit connection, Monitor screen, goal widgets, Astral sky during swipe when Astral is the incoming page.
+- Cleanup v239: 11 unreachable functions removed (found by `python3 /home/claude/dead.py`). Still kept on purpose: the pterodactyl, flying car and golden hen code (`fxPtero`, `fxCar`, `fxHen`, wired to the editor simulators).
+- Add by hand (v237): source `hand` in `S.hd` (overrides other sources for that day), `QAK/QAF/qaView/qaSave`, sheet `qadd`, entry from empty health widgets and Profile > Health data. Test: `node /home/claude/qa_t.js`.
 
-## Dashboard widget list (definitive, 12 in the Add sheet)
+## Dashboard widget list (the 12 originals; later widgets are listed in the sections below)
 - Gallery flag is `p:1` in `GW`. Gym: `freq` (Workouts completed), `lift` (Total weight lifted), `recs` (Personal records). Activity: `steps acal adur walk run cyc flt`. Social: `streak`, `fstreak`. Older widgets (time, bars, dist, last, cons, level, hist, month, cal, sets, pr, sparks, links) still render if already placed but are not offered. No Nutrition widgets.
 - Period widgets (`cyc:1`) cycle Today / This week / This month / This year / All time on tap (`S.gp[k]`, `perR`, `gper`). `streak` toggles weeks/days (`S.gp.su`); `fstreak` cycles all friends then each friend (`S.gp.fs`).
 - Records are derived in `recEvents()` from completed sets only: heaviest weight, one-rep max (real single), estimated 1RM (Epley), exercise volume, most reps at a weight (only when that weight was used before), reps, holds, distance, duration, fastest average pace (>= 1 km).
