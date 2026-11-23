@@ -210,7 +210,8 @@ async function* gemini(system, turns, json = false) {
     INFO.model = (p === "q" ? "groq " : "") + m;
     const rd = r.body.getReader(), dec = new TextDecoder();
     let buf = "", said = false, stalled = false, hold = sofar ? "" : null;   // when carrying on another brain's reply, hold the start back to trim any repeat
-    const trim = (x) => {
+    const trim = (x) => { const y = trim0(x); return /[.!?,;:]$/.test(sofar) && /^[A-Za-z0-9]/.test(y) ? " " + y : y; };
+    const trim0 = (x) => {
       for (let k = Math.min(x.length, sofar.length, 300); k >= 6; k--) if (sofar.endsWith(x.slice(0, k))) return x.slice(k);
       // the new brain re-said the sentence in slightly different words: skip ahead to just after where the first brain stopped
       const n = (z) => z.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
