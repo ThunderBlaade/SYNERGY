@@ -209,7 +209,8 @@ async function* gemini(system, turns, json = false) {
     if (!r.ok) { last = Object.assign(new Error(m + " " + r.status + " " + (await r.text()).slice(0, 160)), { kind: r.status === 429 || r.status >= 500 ? "busy" : undefined }); continue; }
     INFO.model = (p === "q" ? "groq " : "") + m;
     const rd = r.body.getReader(), dec = new TextDecoder();
-    let buf = "", said = false, stalled = false;
+    let buf = "", said = false, stalled = false, hold = sofar ? "" : null;   // when carrying on another brain's reply, hold the start back to trim any repeat
+    const trim = (x) => { for (let k = Math.min(x.length, sofar.length, 300); k >= 6; k--) if (sofar.endsWith(x.slice(0, k))) return x.slice(k); return x; };
     INFO.finish = undefined;
     for (let end = false; !end;) {
       const got = await Promise.race([rd.read(), new Promise((res) => setTimeout(() => res({ stall: true }), 10000))]);
@@ -230,10 +231,12 @@ async function* gemini(system, turns, json = false) {
             t = j.choices?.[0]?.delta?.content || "";
             if (j.choices?.[0]?.finish_reason) INFO.finish = j.choices[0].finish_reason;
           }
+          if (t && hold !== null) { hold += t; if (hold.length < 120) continue; t = trim(hold); hold = null; }
           if (t) { said = true; sofar += t; yield t; }
         } catch { /* partial line */ }
       }
     }
+    if (hold) { const t = trim(hold); hold = null; if (t) { said = true; sofar += t; yield t; } }
     if (!stalled && (!INFO.finish || /SAFETY|PROHIBITED|BLOCKLIST|OTHER|RECITATION/i.test(INFO.finish))) stalled = true;   // cut off without a proper ending: the next brain finishes it
     if (stalled) { INFO.tried.push(m + (said ? " went quiet mid-reply" : " went quiet")); last = Object.assign(new Error(m + " went quiet"), { kind: "busy" }); continue; }   // next brain carries on
     return;
