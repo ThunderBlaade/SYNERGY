@@ -139,6 +139,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
  .sheet .grab{display:none}
  .week .wd{width:56px}}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01s!important;animation:none!important}}
+.set.stack{flex-direction:column;align-items:flex-start;gap:12px}.set.stack .chips{justify-content:flex-start}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -484,7 +485,7 @@ function renderYou(){const b=$('ybody');
   '<div class="set"><div>Morning plan<small>When Gary asks you to shape the day</small></div><input type="time" id="smo" value="'+(st.morning||'08:30')+'"></div>'+
   '<div class="set"><div>Evening reflection<small>A look back at what counted</small></div><input type="time" id="sev" value="'+(st.evening||'21:00')+'"></div>'+
   '<div class="set"><div>Heads-up before tasks</div><div class="chips" id="srem"></div></div>'+
-  '<div class="set"><div>Gary\'s voice<small>Tap one to hear him</small></div><div class="chips" id="svoice"></div></div>'+
+  '<div class="set stack"><div>Gary\'s voice<small>Tap one to hear him say hello</small></div><div class="chips" id="svoice"></div></div>'+
   '<div class="set"><div>Gary speaks every reply<small>He always answers aloud when you talk to him</small></div><button class="tog'+(store('garySpeak')==='1'?' on':'')+'" id="ssp"></button></div>'+
   '<div class="set"><div>Sync across devices<small>'+(CS?(S.cloud==='off'?'Can\'t reach the cloud right now - saved here':'On · '+esc(CS.email||'')):'Sign in with your Synergy login to keep phone, iPad and PC in step')+'</small></div><button class="btn ghost" id="scloud">'+(CS?'Sign out':'Sign in')+'</button></div>'+
   '<div class="set"><div>Your PC<small>'+(!STATIC?'You\'re on the PC. Open Momentum anywhere: thunderblaade.github.io/synergy/momentum':PC?(S.online?'Connected - notifications and PC tasks are on':'Not reachable right now (is it on, with Tailscale?)'):'Connect it for notifications. Gary works without it.')+'</small></div>'+(STATIC?'<button class="btn ghost" id="spc">'+(PC?'Change':'Connect')+'</button>':'<button class="btn ghost" id="slink">Copy link</button>')+'</div>'+
