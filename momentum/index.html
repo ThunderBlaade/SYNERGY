@@ -1065,7 +1065,7 @@ function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
  gCanvas($('gdock'));$('gdock').onclick=()=>{gPoke();gMood(['wave','tiphat','bow','pose','cheeky','dapper','thumbsup'][Math.floor(Math.random()*7)],2400)};gCanvas($('lvorb'));
  $('goyes').onclick=gOpenReply;$('gono').onclick=()=>{gOpenClose();gMood('sitwhistle',3000)};$('gcut').onclick=()=>{speakStop();gMood('idle')};gFloatSync()}
 async function gNotesCopy(){if(!CS){toast('Sign in first');return}
- try{const since=new Date(Date.now()-14*864e5).toISOString();const r=await gdb('gary_audit?select=action,detail,at&or=(ok.eq.false,action.eq.wish)&at=gte.'+since+'&order=at.desc&limit=40');const rows=await r.json();
+ try{const since=new Date(Date.now()-14*864e5).toISOString();const rows=await gdb('gary_audit?select=action,detail,at&or=(ok.eq.false,action.eq.wish)&at=gte.'+since+'&order=at.desc&limit=40')||[];
   if(!rows.length){toast('Nothing to fix - Gary reports all well');return}
   const txt='Notes from Gary (Momentum) for Claude, last 14 days:\n'+rows.map(x=>'- '+x.at.slice(0,16).replace('T',' ')+' '+(x.action==='wish'?'NOTE: '+(x.detail&&x.detail.text||''):'ERROR '+x.action+': '+JSON.stringify(x.detail||{}).slice(0,300))).join('\n');
   await navigator.clipboard.writeText(txt);toast(rows.length+' notes copied - paste them to Claude')}catch(e){toast('Couldn\'t fetch the notes just now')}}
