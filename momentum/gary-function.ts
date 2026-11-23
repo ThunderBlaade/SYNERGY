@@ -28,7 +28,8 @@ Sam has ADHD: help him start, keep plans small and concrete, make progress visib
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type",
                "Access-Control-Allow-Methods": "POST, OPTIONS" };
-let INFO = {};     // which model answered and why it stopped (written to gary_audit)
+let INFO = {};
+let KNOWN = new Set();   // task ids Gary is allowed to touch (only ones he was shown)     // which model answered and why it stopped (written to gary_audit)
 let APIKEY = "";   // the app's public key, passed along so this works with old and new Supabase keys
 const env = (k) => (typeof Deno !== "undefined" ? Deno.env.get(k) : process.env[k]) || "";
 
@@ -61,20 +62,26 @@ function occurs(it, day) {
   if (r === "weekly") return !!st && new Date(st + "T12:00:00Z").getUTCDay() === wd;
   return false;
 }
-async function planSummary(token) {
-  let rows;
-  try { rows = await db("momentum?select=data&kind=eq.item", token); } catch { return "(his plan couldn't be read just now)"; }
-  const items = rows.map((r) => r.data).filter((i) => i && !i.deleted);
+async function planSummary(token, sent) {
+  let items;
+  if (Array.isArray(sent)) items = sent.filter((i) => i && i.id && !i.deleted).slice(0, 150);
+  else {
+    let rows;
+    try { rows = await db("momentum?select=data&kind=eq.item", token); } catch { return "(his plan couldn't be read just now)"; }
+    items = rows.map((r) => r.data).filter((i) => i && !i.deleted);
+  }
+  KNOWN = new Set(items.map((i) => String(i.id)));
   const fmt = (day, label) => {
     const its = items.filter((i) => occurs(i, day)).sort((a, b) => (a.time || "99").localeCompare(b.time || "99"));
     if (!its.length) return `${label}: nothing planned.`;
-    return `${label}: ` + its.map((i) => `${i.time || "anytime"} ${i.title} (${i.dur || 15}m${i.prio === "high" ? ", high priority" : ""})${(i.done || {})[day] ? " - done" : ""}`).join("; ");
+    return `${label}: ` + its.map((i) => `[${i.id}] ${i.time || "anytime"} ${i.title} (${i.dur || 15}m${i.prio === "high" ? ", high priority" : ""})${(i.done || {})[day] ? " - done" : ""}`).join("; ");
   };
   const todo = items.filter((i) => !i.date && (i.repeat || "none") === "none" && !Object.keys(i.done || {}).length);
   const pr = { high: 0, med: 1, low: 2, none: 3 };
   todo.sort((a, b) => (pr[a.prio || "none"] - pr[b.prio || "none"]));
-  return [fmt(londonDate(0), "Today"), fmt(londonDate(1), "Tomorrow"),
-          "To-do without a day: " + (todo.length ? todo.slice(0, 12).map((i) => `${i.title} (${i.prio || "none"})`).join("; ") : "empty")].join("\n");
+  const week = [2, 3, 4, 5, 6].map((n) => fmt(londonDate(n), new Date(Date.now() + n * 864e5).toLocaleDateString("en-GB", { timeZone: "Europe/London", weekday: "long" }) + " " + londonDate(n)));
+  return [fmt(londonDate(0), "Today " + londonDate(0)), fmt(londonDate(1), "Tomorrow " + londonDate(1)), ...week,
+          "To-do without a day: " + (todo.length ? todo.slice(0, 20).map((i) => `[${i.id}] ${i.title} (${i.prio || "none"})`).join("; ") : "empty")].join("\n");
 }
 
 // --- memories: who he is always; moments only when they're relevant
@@ -144,6 +151,49 @@ async function* gemini(system, turns, json = false) {
   throw last || new Error("no model available");
 }
 
+const TOOLS = `
+
+You can change his plan in Momentum. Do it only when he asks, or clearly wants it. Write your normal reply first (say plainly what you've done,
+e.g. "Done - gym's in for tomorrow at six."), then put each change on its own line at the very END, exactly like this:
+⟦add {"title":"Gym","date":"YYYY-MM-DD","time":"18:00","dur":60,"prio":"none","repeat":"none"}⟧
+⟦edit {"id":"<id>","date":"YYYY-MM-DD","time":"HH:MM"}⟧   (move, rename, retime, change length/priority/repeat: only the fields that change)
+⟦done {"id":"<id>","date":"YYYY-MM-DD"}⟧   ⟦undone {"id":"<id>","date":"YYYY-MM-DD"}⟧
+⟦delete {"id":"<id>"}⟧   (he'll be asked to confirm, so say you've asked rather than that it's gone)
+Rules: date null = to-do with no day; time null = anytime. prio high|med|low|none. repeat none|daily|weekdays|weekly. dur in minutes.
+Use only ids shown in [brackets] above. If it's unclear which task he means, ask instead of guessing. At most 8 changes.
+Keep titles short and verb-first. You can't yet open things on his PC or look at his files - say so plainly if asked.`;
+
+// --- turning Gary's action lines into safe, checked changes (nothing else ever runs)
+const ISO = /^\d{4}-\d{2}-\d{2}$/, HM = /^([01]\d|2[0-3]):[0-5]\d$/;
+function cleanFields(a, into) {
+  if (typeof a.title === "string" && a.title.trim()) into.title = a.title.trim().slice(0, 120);
+  if ("date" in a) { if (a.date === null || ISO.test(a.date)) into.date = a.date; }
+  if ("time" in a) { if (a.time === null || HM.test(a.time)) into.time = a.time; }
+  if ("dur" in a && Number.isFinite(+a.dur)) into.dur = Math.max(5, Math.min(600, Math.round(+a.dur)));
+  if (["high", "med", "low", "none"].includes(a.prio)) into.prio = a.prio;
+  if (["none", "daily", "weekdays", "weekly"].includes(a.repeat)) into.repeat = a.repeat;
+  return into;
+}
+export function parseActions(reply) {
+  const out = [];
+  for (const m of reply.matchAll(/\u27e6\s*(add|edit|done|undone|delete)\s+(\{[\s\S]*?\})\s*\u27e7/g)) {
+    if (out.length >= 8) break;
+    let a; try { a = JSON.parse(m[2]); } catch { continue; }
+    const op = m[1];
+    if (op === "add") {
+      const f = cleanFields(a, {});
+      if (f.title) out.push({ op, ...{ date: null, time: null, dur: 15, prio: "none", repeat: "none" }, ...f });
+      continue;
+    }
+    const id = String(a.id || "");
+    if (!KNOWN.has(id)) continue;                       // never touch a task he wasn't shown
+    if (op === "edit") { const f = cleanFields(a, {}); if (Object.keys(f).length) out.push({ op, id, ...f }); }
+    else if (op === "done" || op === "undone") out.push({ op, id, date: ISO.test(a.date) ? a.date : londonDate(0) });
+    else if (op === "delete") out.push({ op, id });
+  }
+  return out;
+}
+
 const MISHAP = {
   nokey: "My brain isn't plugged in yet, sir - there's no Gemini key in Supabase's Secrets. Once it's there, I'm all yours.",
   busy: "Google's thinking machines are rather swamped just now, sir. Give it a minute and try me again.",
@@ -185,13 +235,13 @@ export async function handle(req) {
   const past = await db(`gary_messages?select=role,content&convo=eq.${convo}&order=id.desc&limit=30`, token).catch(() => []);
   const turns = past.reverse().map((m) => ({ role: m.role === "gary" ? "model" : "user", parts: [{ text: m.content }] }));
   turns.push({ role: "user", parts: [{ text }] });
-  const [mem, plan] = await Promise.all([recall(text, token), planSummary(token)]);
+  const [mem, plan] = await Promise.all([recall(text, token), planSummary(token, body.items)]);
   const system = IDENTITY +
     `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) +
     `\n\nHis plan in Momentum:\n${plan}` +
     `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` +
     (mem.moments ? `\n\nMemories that may relate to this (dated where known; only use if relevant):\n${mem.moments}` : "") +
-    `\n\nWhat you can't do yet: change his plan, open things on his PC or look at his files - those abilities are coming. If he asks, say so plainly and tell him how to do it himself in Momentum.`;
+    TOOLS;
 
   await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "user", content: text, ctx: body.ctx || null }) });
   const enc = new TextEncoder();
@@ -201,16 +251,28 @@ export async function handle(req) {
       INFO = {};
       const t0 = Date.now();
       try {
-        for await (const t of gemini(system, turns)) { reply += t; ctrl.enqueue(enc.encode(t)); }
+        let shown = 0;
+        for await (const t of gemini(system, turns)) {
+          reply += t;
+          const cut = reply.indexOf("\u27e6");
+          const upto = cut < 0 ? Math.max(shown, reply.length - 1) : cut;   // keep one char back in case a bracket is arriving
+          if (upto > shown) { ctrl.enqueue(enc.encode(reply.slice(shown, upto))); shown = upto; }
+        }
+        const cut = reply.indexOf("\u27e6");
+        const end = cut < 0 ? reply.length : cut;
+        if (end > shown) ctrl.enqueue(enc.encode(reply.slice(shown, end)));
       } catch (e) {
         const msg = MISHAP[e.kind] || "Something's gone awry on my end, sir. Try me again in a moment.";
         if (!reply) { reply = msg; ctrl.enqueue(enc.encode(msg)); }
         await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "reply_failed", detail: { error: String(e.message || e).slice(0, 300) }, ok: false }) }).catch(() => {});
       }
       await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "reply", detail: { ...INFO, ms: Date.now() - t0, chars: reply.length } }) }).catch(() => {});
-      await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "gary", content: reply.trim() || "…" }) }).catch(() => {});
+      const actions = parseActions(reply);
+      const said = (reply.indexOf("\u27e6") < 0 ? reply : reply.slice(0, reply.indexOf("\u27e6"))).trim();
+      if (actions.length) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "proposed", detail: { actions } }) }).catch(() => {});
+      await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "gary", content: said || "…" }) }).catch(() => {});
       await db(`gary_convos?id=eq.${convo}`, token, { method: "PATCH", body: JSON.stringify({ updated_at: new Date().toISOString() }) }).catch(() => {});
-      ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title })));
+      ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title, actions })));
       ctrl.close();
     })(); },
   });

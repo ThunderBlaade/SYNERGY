@@ -107,6 +107,8 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
  radial-gradient(1px 1px at 9% 88%,#ddd 50%,transparent 51%),radial-gradient(1px 1px at 81% 83%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 64% 52%,#fff 50%,transparent 51%)}
 .q{font:500 10.5px/1.6 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:28px 0 10px}
 .a{font:400 20px/1.45 var(--serif);white-space:pre-wrap}
+.gact{margin:12px 0 4px;padding:12px 0 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px;animation:gin .35s var(--ease)}@keyframes gin{from{opacity:0;transform:translateY(6px)}}
+.gact .gl{font:500 12px/1.7 var(--sans);letter-spacing:.06em;color:var(--dim)}.gact .gundo{align-self:flex-start}.gact .gdel{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .a.wait::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--fg);margin-left:6px;animation:blink 1s infinite}@keyframes blink{50%{opacity:.2}}
 #askbar{position:absolute;left:0;right:0;bottom:calc(58px + var(--safeB));padding:10px 22px;display:none;gap:10px;align-items:center;z-index:6;background:linear-gradient(transparent,#000 30%)}
 #askbar.on{display:flex}
@@ -532,17 +534,48 @@ function garyCtx(){const t=today(),its=Object.values(S.items).filter(i=>!i.delet
  return{app:'Momentum',page:tab==='gary'?(store('garyFrom')||'gary'):tab,viewing_day:cur,device:wide()?'computer':(/iPhone|iPad/.test(navigator.userAgent)?'iPhone/iPad':'phone'),
   online:navigator.onLine,pc_connected:!!S.online,today_total:its.length,today_done:its.filter(i=>(i.done||{})[t]).length,
   focus:F.run?{task:F.task&&(S.items[F.task]||{}).title||null,minutes_left:Math.round(F.left/60)}:null,local_time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}}
+// ---------- Gary acting on the plan: checked in the cloud, applied here, always undoable
+function garyItems(){const t=today(),end=addDays(t,7),out=[];
+ for(const i of Object.values(S.items)){if(i.deleted)continue;const r=i.repeat||'none';
+  if(r!=='none'||!i.date||(i.date>=addDays(t,-1)&&i.date<=end))out.push({id:i.id,title:i.title,date:i.date||null,time:i.time||null,dur:i.dur||15,prio:i.prio||'none',repeat:r,done:i.done||{}})}
+ return out.slice(0,150)}
+const dShort=d=>!d?'to-do':d===today()?'today':d===addDays(today(),1)?'tomorrow':DAYS[parseISO(d).getDay()].slice(0,3)+' '+parseISO(d).getDate();
+function actLine(a,it){const name=(it&&it.title)||a.title||'task';
+ if(a.op==='add')return'+ '+name+' · '+dShort(a.date)+(a.time?' '+t12(a.time):'');
+ if(a.op==='done')return'✓ '+name;if(a.op==='undone')return'○ '+name+' not done';
+ if(a.op==='delete')return'Delete “'+name+'”?';
+ const ch=[];if('date' in a)ch.push(dShort(a.date));if('time' in a)ch.push(a.time?t12(a.time):'anytime');if(a.title&&it&&a.title!==it.title)ch.push('renamed');if(a.prio)ch.push(PRIO[a.prio].toLowerCase()+' priority');if(a.dur)ch.push(fmtMins(a.dur));if(a.repeat)ch.push(a.repeat==='none'?'no repeat':a.repeat);
+ return'→ '+name+(ch.length?' · '+ch.join(', '):'')}
+function garyApply(actions,after){if(!actions||!actions.length)return;const undo=[],lines=[],dels=[];
+ for(const a of actions){const old=a.id&&S.items[a.id];if(a.op!=='add'&&(!old||old.deleted))continue;
+  if(a.op==='delete'){dels.push(a);continue}
+  if(a.op==='add'){const it={id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:a.title,date:a.date,time:a.time,dur:a.dur||15,prio:a.prio||'none',repeat:a.repeat||'none',notes:'',created:Date.now(),done:{},by:'gary'};
+   touch(it);undo.push([it.id,null]);lines.push(actLine(a));continue}
+  undo.push([old.id,JSON.parse(JSON.stringify(old))]);const it=JSON.parse(JSON.stringify(old));
+  if(a.op==='edit'){['title','date','time','dur','prio','repeat'].forEach(k=>{if(k in a)it[k]=a[k]});if('time' in a)it.part=null}
+  else if(a.op==='done'){it.done=Object.assign({},it.done,{[a.date]:Date.now()});it.undone=[]}
+  else if(a.op==='undone'){it.done=Object.assign({},it.done);delete it.done[a.date];it.undone=[a.date]}
+  lines.push(actLine(a,old));touch(it)}
+ const box=document.createElement('div');box.className='gact';
+ if(lines.length){box.innerHTML='<div class="gl">'+lines.map(esc).join('<br>')+'</div><button class="btn ghost gundo">Undo</button>';
+  box.querySelector('.gundo').onclick=e=>{for(const[id,prev]of undo.reverse()){if(prev)touch(Object.assign(prev,{undone:Object.keys(S.items[id].done||{}).filter(k=>!(prev.done||{})[k])}));else touch(Object.assign(S.items[id],{deleted:true}))}
+   e.target.outerHTML='<span class="lab">Undone</span>';garyLog('undo',{n:undo.length});render()};garyLog('applied',{lines})}
+ for(const a of dels){const it=S.items[a.id];const row=document.createElement('div');row.className='gl gdel';row.innerHTML=esc(actLine(a,it))+' <button class="btn fill gyes">Delete</button> <button class="btn ghost gno">Keep</button>';
+  row.querySelector('.gyes').onclick=()=>{touch(Object.assign(S.items[a.id],{deleted:true}));row.innerHTML='<span class="lab">Deleted “'+esc(it.title)+'”</span>';garyLog('deleted',{title:it.title});render()};
+  row.querySelector('.gno').onclick=()=>{row.innerHTML='<span class="lab">Kept “'+esc(it.title)+'”</span>'};box.appendChild(row)}
+ after.after(box);render()}
+function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
 async function garyFetch(body){const tok=await clTok();if(!tok)throw new Error('signin');
  return fetch(CL.url+'/functions/v1/gary',{method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
 async function ask(text){text=text.trim();if(talking||!text)return;
  if(!CS){toast('Sign in under You → Settings to talk to Gary');return}
  if(!navigator.onLine){toast('Gary needs the internet. Your plan still works offline.');return}
  talking=true;bubble('you',text);const a=bubble('gary','');a.classList.add('wait');const p=$('p-gary');p.scrollTop=p.scrollHeight;let got='';
- try{const r=await garyFetch({text,convo:CHAT,ctx:garyCtx()});
+ try{const r=await garyFetch({text,convo:CHAT,ctx:garyCtx(),items:garyItems()});
   if(r.status===404)throw new Error('nofn');if(!r.ok)throw new Error('http '+r.status);
   const rd=r.body.getReader(),dec=new TextDecoder();
   for(;;){const{value,done}=await rd.read();if(done)break;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
-  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}}catch(e){}}}
+  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a)}catch(e){}}}
  catch(e){if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':'I can\'t reach the cloud just now, sir. Try again in a moment.'}
  a.classList.remove('wait');talking=false;const said=got.split('\x1e')[0].trim();if(said&&store('garySpeak')==='1')speak(said)}
 // Gary's voice: the device's own British male voice (free, swappable later)
