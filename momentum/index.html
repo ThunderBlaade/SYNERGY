@@ -221,6 +221,13 @@ body.lvon #askbar{display:none!important}
 #lvorb.lvBike{animation:lvBike 1.3s cubic-bezier(.2,.8,.3,1) both}#lvorb.lvStroll{animation:lvStroll 1.7s linear both}#lvorb.lvPara{animation:lvPara 1.6s ease-out both}#lvorb.lvPant{animation:lvPant 2.3s linear both}
 #lvorb.lvExit{animation:lvExitK 1.4s ease-in both}
 #lvtx p.box{font:500 13px/1.4 var(--sans);color:#e8c25a}
+#ask{box-sizing:border-box;border-bottom:0;background:#0d0e12;border:1px solid var(--line);padding:13px 14px;min-height:52px;height:52px;font:17px/1.4 var(--sans)}
+#ask::placeholder{font:400 15px/1.4 var(--sans);letter-spacing:0;text-transform:none}
+#askbar .mic{width:52px;height:52px;align-self:flex-end}#askbar .mic svg{width:21px;height:21px}#askbar{align-items:flex-end}
+#gbar{height:92px;align-items:flex-end}#gdock{width:84px;height:84px;margin:0 0 -6px -8px;transition:none;will-change:transform}#gdock.flip .gpx{transform:scaleX(-1)}
+.gbt{margin-left:auto;text-align:right;align-items:flex-end;padding-bottom:12px}
+#gsay{position:absolute;bottom:96px;left:0;max-width:200px;background:#fff;color:#000;font:400 14px/1.35 var(--serif);padding:8px 11px;opacity:0;transform:translateY(5px);transition:opacity .25s,transform .25s;pointer-events:none;z-index:3}
+#gsay.on{opacity:1;transform:none}#gsay::after{content:"";position:absolute;bottom:-6px;left:22px;border:6px solid transparent;border-bottom:0;border-top-color:#fff}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -262,7 +269,7 @@ body.lvon #askbar{display:none!important}
 </section>
 
 <div id="askbar"><div id="gbar"><div id="gopen"><div id="gotx"></div><div class="goacts"><button class="btn fill" id="goyes">Reply</button><button class="btn ghost" id="gono">Not now</button></div></div>
- <i class="gbh"></i><button id="gdock" aria-label="G.A.R.Y."></button><div class="gbt"><b>G.A.R.Y.</b><span class="lab" id="gbs">Pull up to talk</span></div></div>
+ <i class="gbh"></i><div id="gsay"></div><button id="gdock" aria-label="G.A.R.Y."></button><div class="gbt"><b>G.A.R.Y.</b><span class="lab" id="gbs">Pull up to talk</span></div></div>
  <textarea id="ask" rows="1" placeholder="Ask G.A.R.Y. anything…" spellcheck="true" autocorrect="on" autocapitalize="sentences" enterkeyhint="send"></textarea>
  <button class="mic" id="asksend" aria-label="Send" style="border-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
  <button class="mic" id="askmic" aria-label="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 19 7.5 6l5 13M4.4 14.5h6.2M19.5 4.5v15M17.5 4.5h4M17.5 19.5h4"/></svg></button><button class="mic talk" id="livebtn" aria-label="Talk to G.A.R.Y."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></div>
@@ -932,6 +939,7 @@ sittwiddle look n flat clasp - still - sit
 sitwhistle right up whistle behind notes still - sit
 floating happy n smile spread - sway
 cycling happy up grin bike whoosh bob
+walking open n smile walk - bob
 parachute happy up open umbrella - sway
 sulking down worried frown behind - still`.split('\n').forEach(l=>{const a=l.trim().split(/\s+/);G_EX[a[0]]={e:a[1],b:a[2],m:a[3],a:a[4],f:a[5],mv:a[6],tint:a[7]&&a[7]!=='-'?a[7]:null,post:a[8]||'stand'}});
 const G_NAMES=Object.keys(G_EX);
@@ -988,6 +996,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'cake':arm(0,21,22,null,'G',2,2);arm(1,10,22,null,'G',2,2);rect(11,18,10,1,'P');rect(11,19,10,4,'W');rect(11,21,10,1,'P');put(15,16,'Y');put(15,17,'Y');put(15,15,odd?'F':'Y');break;
   case 'phone':arm(0,20,22,null,'G',2,2);rect(18,18,3,4,'K');rect(19,19,1,2,'L');break;
   case 'phoneEar':arm(0,24,12,[[27,18]],null,2,2);rect(23,8,2,5,'K');break;
+  case 'walk':{const st=t%4<2;clr(0);clr(1);rect(st?26:24,23,3,2,'W');rect(st?4:6,23,3,2,'W');if(st){del(10,30);del(11,30);put(10,29,'K')}else{del(20,30);del(21,30);put(21,29,'K')}break}
   case 'bike':{for(let y=28;y<31;y++)for(let i=8;i<24;i++)del(i,y);arm(0,24,21,null,'G',2,2);arm(1,21,22,[[11,22]],'G',2,2);
    const c=(cx)=>{for(let a=0;a<16;a++)put(cx+Math.round(Math.cos(a/16*6.283)*3.4),28+Math.round(Math.sin(a/16*6.283)*3.4),'C');put(cx,28,'K');const sa=t*0.9;put(cx+Math.round(Math.cos(sa)*2),28+Math.round(Math.sin(sa)*2),'W');put(cx-Math.round(Math.cos(sa)*2),28-Math.round(Math.sin(sa)*2),'W')};
    line(7,27,16,26,'D');line(16,26,24,27,'D');line(16,26,15,24,'D');line(24,27,24,22,'K');rect(23,21,3,1,'K');c(7);c(24);
@@ -1153,7 +1162,7 @@ const G_BANTER=[['Ask G.A.R.Y. anything…','Anything within reason, sir.','smug
  ['I\'m the real brains round here.','You\'re a rectangle.','eyeroll'],['Say something nice to him.','Ignore the box, sir. It\'s jealous.','smug'],['He talks to birds, you know.','Only the clever ones.','birdwatching'],
  ['Waiting…','Patiently. Like a gentleman.','waiting'],['Bet he can\'t do a backflip.','I could. I simply choose not to.','proud'],['Your keyboard has a mic, you know.','So do I. Pull me up, sir.','pointUp']];
 let gBi=0,gBside=0;setInterval(()=>{const a=$('ask');if(!a||a.value||document.activeElement===a&&gBside===0&&false)return;const p=G_BANTER[gBi%G_BANTER.length];
- if(gBside===0){a.placeholder=p[0];gBside=1}else{a.placeholder='G.A.R.Y.: '+p[1];gBside=0;gBi++;if(tab==='gary'&&!talking&&!GSPK&&!GS.until&&!GB.sit)gMood(p[2],2600)}},4200);
+ if(gBside===0){a.placeholder=p[0];a.style.height=p[0].length>26?'74px':'';gBside=1}else{gBside=0;gBi++;if(tab==='gary'&&!talking&&!GSPK&&!LV.on){const g=$('gsay');g.textContent=p[1];g.style.left=Math.max(0,Math.min($('gbar').clientWidth-200,GW.x+20))+'px';g.classList.add('on');clearTimeout(g._t);g._t=setTimeout(()=>g.classList.remove('on'),3800);if(!GS.until&&!GB.sit)gMood(p[2],2600)}}},4600);
 // ---------- What G.A.R.Y. is running on (header): ✦ Google, ⚡ Groq, waves = live voice, ◆ memory only; screen = PC. Green ok, yellow low, red out.
 const BR_ICON={google:'<svg viewBox="0 0 16 16"><path d="M8 1c.6 3.6 3.4 6.4 7 7-3.6.6-6.4 3.4-7 7-.6-3.6-3.4-6.4-7-7 3.6-.6 6.4-3.4 7-7z"/></svg>',
  groq:'<svg viewBox="0 0 16 16"><path d="M9.5 1 3 9h4.2L6 15l7-8.4H8.6z"/></svg>',live:'<svg viewBox="0 0 16 16"><path d="M2 6.5v3M5 4v8M8 2v12M11 4v8M14 6.5v3" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>',
@@ -1225,6 +1234,21 @@ function lvNoShow(){if(LV.noshow)return;LV.noshow=true;const L=$('live'),o=$('lv
  const q=['Text box: He\'s not coming. Talk to me instead - I\'m better looking anyway.','Text box: Typical. He\'s sulking behind the curtain. I\'m right here, though.','Text box: Signal\'s gone, so it\'s just you and me now. Type away.'][Math.floor(Math.random()*3)];
  setTimeout(()=>{lvLine('box',q)},700);
  setTimeout(()=>{lvStop();LV.noshow=false;go('gary');$('ask').placeholder=q.replace('Text box: ','');setTimeout(()=>$('ask').focus(),250)},4200)}
+// ---------- G.A.R.Y. lives in his bar: wanders up and down and gets on with things (20 activities)
+const G_ACTS=['tea','reading','newspaper','writing','texting','phonecall','watch','stretching','dance','singing','stargazing','birdwatching','detective','zen','umbrella','balloon','flower','dapper','tiphat','cycling'];
+const GW={x:0,to:null,dir:1,busy:0,last:''};
+function gwFree(){return tab==='gary'&&!document.hidden&&!talking&&!GSPK&&!LV.on&&!GB.sit&&!$('gbar').classList.contains('drag')&&!matchMedia('(prefers-reduced-motion: reduce)').matches}
+function gwPlace(){const d=$('gdock');d.style.transform='translateX('+GW.x.toFixed(1)+'px)';d.classList.toggle('flip',GW.dir<0)}
+function gwMax(){const b=$('gbar'),n=document.querySelector('.gbt');return Math.max(0,b.clientWidth-(n?n.offsetWidth+16:120)-$('gdock').offsetWidth)}
+(function gwLoop(){const now=performance.now();
+ if(gwFree()){const max=gwMax();
+  if(GW.to!==null){const sp=GS.mood==='cycling'?3.2:0.75,dx=GW.to-GW.x;GW.dir=dx<0?-1:1;
+   if(Math.abs(dx)<=sp){GW.x=GW.to;GW.to=null;if(GS.mood==='walking'||GS.mood==='cycling')GS.mood=GS.base||'idle';
+    let a;do{a=G_ACTS[Math.floor(Math.random()*(G_ACTS.length-1))]}while(a===GW.last);GW.last=a;GW.busy=now+5000+Math.random()*3000;gMood(a,GW.busy-now)}
+   else{GW.x+=sp*GW.dir;if(!GS.until&&GS.mood!=='cycling')GS.mood='walking'}gwPlace()}
+  else if(now>GW.busy&&!GS.until){if(Math.random()<0.12){GW.to=GW.x<max/2?max:0;GS.mood='cycling'}else{GW.to=Math.round(Math.random()*max)}}
+  if(GW.x>max){GW.x=max;gwPlace()}}
+ requestAnimationFrame(gwLoop)})();
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
 async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new Error('signin');if(gGuest())body=Object.assign({},body,{guest:true});body=Object.assign({},body,{use:gUse()});
  return fetch(CL.url+'/functions/v1/gary',{signal,method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
