@@ -110,7 +110,7 @@ function contextLine(ctx) {
 async function* gemini(system, turns, json = false) {
   const key = env("GEMINI_API_KEY");
   if (!key) throw Object.assign(new Error("no key"), { kind: "nokey" });
-  const models = (env("GEMINI_MODEL") || "gemini-flash-latest,gemini-flash-lite-latest,gemini-2.5-flash").split(",").map((s) => s.trim()).filter(Boolean);
+  const models = (env("GEMINI_MODEL") || "gemini-flash-lite-latest,gemini-flash-latest,gemini-2.5-flash-lite,gemini-2.5-flash,gemini-2.0-flash").split(",").map((s) => s.trim()).filter(Boolean);
   let last;
   for (const m of models) {
     const ac = new AbortController(), timer = setTimeout(() => ac.abort(), 12000);   // a model that won't start in 12s is too busy: next
@@ -122,9 +122,10 @@ async function* gemini(system, turns, json = false) {
         generationConfig: { temperature: json ? 0.3 : 0.85, maxOutputTokens: 8192, ...(json ? { responseMimeType: "application/json" } : {}) } }) });
     } catch (e) { clearTimeout(timer); last = Object.assign(new Error("model " + m + " too slow"), { kind: "busy" }); continue; }
     clearTimeout(timer);
+    (INFO.tried = INFO.tried || []).push(m + " " + r.status);
     if (r.status === 404 || r.status === 400) { last = new Error("model " + m + " " + r.status); continue; }
     if (r.status >= 500) { last = Object.assign(new Error("model " + m + " " + r.status), { kind: "busy" }); continue; }   // overloaded: try the next model
-    if (r.status === 429) throw Object.assign(new Error("busy"), { kind: "busy" });
+    if (r.status === 429) { last = Object.assign(new Error("model " + m + " limit " + (await r.text()).slice(0, 200)), { kind: "busy" }); continue; }   // this model's free allowance is used up: next
     if (!r.ok) throw new Error("gemini " + r.status + " " + (await r.text()).slice(0, 160));
     INFO.model = m;
     const rd = r.body.getReader(), dec = new TextDecoder();
@@ -196,7 +197,7 @@ export function parseActions(reply) {
 
 const MISHAP = {
   nokey: "My brain isn't plugged in yet, sir - there's no Gemini key in Supabase's Secrets. Once it's there, I'm all yours.",
-  busy: "Google's thinking machines are rather swamped just now, sir. Give it a minute and try me again.",
+  busy: "I've used up my free thinking allowance with Google for now, sir. Give it a few minutes and try me again.",
 };
 
 export async function handle(req) {
@@ -264,7 +265,7 @@ export async function handle(req) {
       } catch (e) {
         const msg = MISHAP[e.kind] || "Something's gone awry on my end, sir. Try me again in a moment.";
         if (!reply) { reply = msg; ctrl.enqueue(enc.encode(msg)); }
-        await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "reply_failed", detail: { error: String(e.message || e).slice(0, 300) }, ok: false }) }).catch(() => {});
+        await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "reply_failed", detail: { error: String(e.message || e).slice(0, 300), tried: INFO.tried }, ok: false }) }).catch(() => {});
       }
       await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "reply", detail: { ...INFO, ms: Date.now() - t0, chars: reply.length } }) }).catch(() => {});
       const actions = parseActions(reply);
