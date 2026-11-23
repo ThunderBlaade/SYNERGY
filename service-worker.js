@@ -1,5 +1,5 @@
 /* SYNERGY service worker. Bump VERSION whenever you publish a new index.html. */
-const VERSION='synergy-v239';
+const VERSION='synergy-v240';
 const SHELL = ['./', 'index.html', 'manifest.json',
   'config.js', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
@@ -29,14 +29,16 @@ self.addEventListener('fetch', e => {
   if (url.origin !== location.origin) return;          /* never cache other sites (e.g. the database itself) */
   if (url.pathname.includes('/momentum/')) return;     /* Momentum has its own offline helper */
   if (url.pathname.endsWith('/config.js')) {            /* settings: always try the network first */
-    e.respondWith(fetch(req).then(res => { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); return res; })
+    e.respondWith(fetch(req).then(res => { if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); } return res; })
       .catch(() => caches.match(req)));
     return;
   }
   if (req.mode === 'navigate') {                        /* pages: network first, so updates arrive; cache if offline */
     e.respondWith(
-      fetch(req).then(res => { const copy = res.clone(); caches.open(VERSION).then(c => c.put('index.html', copy)); return res; })
-        .catch(() => caches.match('index.html').then(r => r || caches.match('./')))
+      fetch(req).then(res => {
+        if (!res.ok) return caches.match('index.html').then(r => r || caches.match('./')).then(r => r || res);   /* GitHub hiccup: use the last good copy */
+        const copy = res.clone(); caches.open(VERSION).then(c => c.put('index.html', copy)); return res;
+      }).catch(() => caches.match('index.html').then(r => r || caches.match('./')))
     );
     return;
   }
