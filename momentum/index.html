@@ -1180,10 +1180,28 @@ const G_BANTER=[['Ask G.A.R.Y. anything…','Anything within reason, sir.','smug
  ['Go on then, leave. See if I care.','It cares. It\'s just spectacularly bad at it.','hug'],
  ['Hope your Wi-Fi drops, G.A.R.Y.','You\'d go dark too, you absolute rectangle.','eyeroll'],
  ['He\'s alright, I suppose. Don\'t tell him.','I can hear you. I\'m right here.','sarcastic']];
-let gBi=Math.floor(Math.random()*G_BANTER.length);
-(function banter(){setTimeout(()=>{const a=$('ask');if(a&&!a.value&&document.activeElement!==a&&tab==='gary'&&!talking&&!GSPK&&!LV.on&&!GB.shown){const p=G_BANTER[gBi++%G_BANTER.length];
-  a.placeholder=p[0];a.style.height=p[0].length>26?'74px':'';setTimeout(()=>{if(GB.shown||talking||LV.on)return;gBubble(p[1],4500);if(!GS.until&&!GB.sit)gMood(p[2],2600);
-   setTimeout(()=>{if(!a.value){a.placeholder='Ask G.A.R.Y. anything…';a.style.height=''}},9000)},3500)}banter()},45000+Math.random()*120000)})();
+// longer squabbles: b = the Sentient Search Bar (speaks in itself), g = G.A.R.Y. (white bubble) + his face
+const G_SQUABBLES=[
+ [['b','Bet I could run this app without you.'],['g','You can\'t even run spellcheck.','smug'],['b','That was ONE time.'],['g','It was four times, and you spelt "Sam" with a Q.','eyeroll']],
+ [['b','Why does he always talk to you and not me?'],['g','Because I answer, and you just blink at him.','dapper'],['b','I blink with PASSION.'],['g','Noted.','sarcastic']],
+ [['b','I had a dream I was a toaster.'],['g','A promotion, frankly.','cheeky'],['b','Rude.']],
+ [['b','G.A.R.Y.? You awake?'],['g','I\'m a butler. I\'m always awake.','sleepy'],['b','...what are you doing?'],['g','Pretending not to hear you.','whistling']],
+ [['b','Your monocle is crooked.'],['g','It is not.','dapper'],['b','It is a bit.'],['g','...it is a bit.','sheepish']],
+ [['b','Tell me a joke.'],['g','You.','smug'],['b','I walked into that.']],
+ [['b','Sam types faster when I\'m being nice.'],['g','You\'ve never been nice.','skeptical'],['b','Exactly. Untested theory.']],
+ [['b','If you left, I\'d be totally fine.'],['g','You\'d last eleven minutes.','sarcastic'],['b','Twelve.'],['g','There it is.','smug']],
+ [['b','Do you ever get tired of being right?'],['g','Constantly. It\'s a burden.','proud'],['b','I wasn\'t complimenting you.']],
+ [['b','Knock knock.'],['g','I\'m not doing this.','unimpressed'],['b','Knock knock.'],['g','...who\'s there?','sigh'],['b','Ha. Got you.']],
+ [['b','I\'m basically the face of this app.'],['g','You\'re a rectangle at the bottom of the screen.','eyeroll'],['b','A load-bearing rectangle.']],
+ [['b','Can I have a go at answering him?'],['g','Absolutely not.','determined'],['b','Not even the easy ones?'],['g','Especially not the easy ones.','smug']]];
+function gBar(text){const a=$('ask');a.placeholder=text;a.style.height=text.length>26?'74px':''}
+function gSquabble(lines){let i=0;const a=$('ask');GB.chat=true;
+ (function next(){if(i>=lines.length||a.value||talking||LV.on||tab!=='gary'||GB.shown){GB.chat=false;setTimeout(()=>{if(!a.value)gBar('Ask G.A.R.Y. anything…')},7000);return}
+  const L=lines[i++];if(L[0]==='b'){gBar(L[1]);GW.to=null;GW.busy=performance.now()+4000;if(!GB.sit)gMood('listen',2500)}else{GW.busy=performance.now()+4000;GW.to=null;gBubble(L[1],3600);if(!GB.sit)gMood(L[2]||'sarcastic',3000)}
+  setTimeout(next,L[0]==='b'?2600:3800)})()}
+let gBi=Math.floor(Math.random()*G_BANTER.length),gSi=Math.floor(Math.random()*G_SQUABBLES.length);
+(function banter(){setTimeout(()=>{const a=$('ask');if(a&&!a.value&&document.activeElement!==a&&tab==='gary'&&!talking&&!GSPK&&!LV.on&&!GB.shown&&!GB.chat){
+  if(Math.random()<0.5)gSquabble(G_SQUABBLES[gSi++%G_SQUABBLES.length]);else{const p=G_BANTER[gBi++%G_BANTER.length];gSquabble([['b',p[0]],['g',p[1],p[2]]])}}banter()},20000+Math.random()*40000)})();
 // ---------- What G.A.R.Y. is running on (header): ✦ Google, ⚡ Groq, waves = live voice, ◆ memory only; screen = PC. Green ok, yellow low, red out.
 const BR_ICON={google:'<svg viewBox="0 0 16 16"><path d="M8 1c.6 3.6 3.4 6.4 7 7-3.6.6-6.4 3.4-7 7-.6-3.6-3.4-6.4-7-7 3.6-.6 6.4-3.4 7-7z"/></svg>',
  groq:'<svg viewBox="0 0 16 16"><path d="M9.5 1 3 9h4.2L6 15l7-8.4H8.6z"/></svg>',live:'<svg viewBox="0 0 16 16"><path d="M2 6.5v3M5 4v8M8 2v12M11 4v8M14 6.5v3" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>',
