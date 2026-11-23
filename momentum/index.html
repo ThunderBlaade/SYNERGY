@@ -200,9 +200,16 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 body.lvon #askbar{display:none!important}
 @media (min-width:1000px){#live.mini{left:210px;bottom:0;padding:14px max(48px,calc((100% - 970px)/2)) 20px}}
 #gfid{display:none;color:#e8c25a}body.guest #gfid{display:inline}body.guest #memBtn,body.guest #chatsBtn{display:none}body.guest #gopen{display:none!important}
+#brain{gap:10px;margin-left:12px}#brain i{width:16px;height:16px;position:relative}#brain svg{width:16px;height:16px}
+#brain i:not(.act){opacity:.55}#brain i.act{opacity:1}#bsrc{display:none!important}#bsrc.show{display:block!important}
+#brain i.dis{color:var(--faint);opacity:.5}#brain i.dis::after,.bmi.dis::after{content:"";position:absolute;left:-2px;right:-2px;top:50%;height:1.5px;background:#e0605a;transform:rotate(-40deg)}
+.bmrow{align-items:center}.bmi{width:22px;height:22px;flex:none;position:relative;margin-right:4px;color:var(--fg)}.bmi svg{width:22px;height:22px;fill:currentColor;stroke:currentColor;stroke-width:0}
+.bmi.ok{color:#5fbf5f}.bmi.low{color:#e8c25a}.bmi.out{color:#e0605a}.bmi.off,.bmi.dis{color:var(--faint)}#bmlist .bmi.pc svg,#bmlist .bmi svg path[fill=none]{fill:none}
+#bconf{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:24px}#bconf.on{display:flex;animation:gin .2s var(--ease)}
+.bcbox{background:#0d0e12;border:1px solid var(--line);padding:20px;max-width:380px}#bctx{font:400 22px var(--serif);margin-bottom:10px}#bcbody{font:400 15px/1.5 var(--sans);color:var(--dim);margin:0 0 18px}
 </style></head><body>
 <div id="app">
-<header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bsrc"></i><i id="bpc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
+<header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
 
 <section class="pane on" id="p-today">
  <div class="lab" id="tlab">Today</div><h1 id="tday"></h1>
@@ -245,7 +252,7 @@ body.lvon #askbar{display:none!important}
  <textarea id="ask" rows="1" placeholder="Ask G.A.R.Y. anything…" spellcheck="true" autocorrect="on" autocapitalize="sentences" enterkeyhint="send"></textarea>
  <button class="mic" id="asksend" aria-label="Send" style="border-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
  <button class="mic" id="askmic" aria-label="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 19 7.5 6l5 13M4.4 14.5h6.2M19.5 4.5v15M17.5 4.5h4M17.5 19.5h4"/></svg></button><button class="mic talk" id="livebtn" aria-label="Talk to G.A.R.Y."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></div>
-<div id="bpop"></div>
+
 <button id="gcut">Tap to interrupt</button>
 <div id="gfloat" aria-label="Open Gary"><div id="gfbub"></div><div id="gfsp"></div></div>
 <button id="fab" aria-label="Add">+</button>
@@ -275,6 +282,8 @@ body.lvon #askbar{display:none!important}
  <div id="lvstat">Connecting…</div><div id="lvtx"></div>
  <button id="lvcut">Tap to interrupt</button>
  <div class="lvacts"><button class="lvb" id="lvmute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path class="slash" d="M4 3l16 18" stroke="#e0605a" stroke-width="2.2"/></svg></button><button class="lvb" id="lvend" aria-label="Make small"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>
+<div class="sheet" id="bmenu"><div class="grab"></div><div class="lab">What G.A.R.Y. runs on</div><div id="bmlist" style="margin-top:10px"></div></div>
+<div id="bconf"><div class="bcbox"><div id="bctx"></div><p id="bcbody"></p><div class="goacts"><button class="btn fill" id="bcyes">Turn off</button><button class="btn ghost" id="bcno">Keep on</button></div></div></div>
 <div class="sheet" id="mem"><div class="grab"></div>
  <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab">What Gary remembers</div><button class="btn" id="madd">Add +</button></div>
  <input class="big" id="mq" placeholder="Search memories or people" style="font-size:18px;margin:14px 0 12px" spellcheck="false">
@@ -330,8 +339,16 @@ async function clAuth(body,grant){const r=await fetch(CL.url+'/auth/v1/token?gra
  const j=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(j.error_description||j.msg||j.message||'Sign-in failed'),{status:r.status});return j}
 function clKeep(j){CS=Object.assign(CS||{since:'1970-01-01T00:00:00Z'},{access:j.access_token,refresh:j.refresh_token,exp:Date.now()+(j.expires_in||3600)*1000,
  uid:(j.user&&j.user.id)||(CS&&CS.uid),email:(j.user&&j.user.email)||(CS&&CS.email)});store('momCloud',JSON.stringify(CS))}
-async function clTok(){if(Date.now()<CS.exp-60000)return CS.access;try{clKeep(await clAuth({refresh_token:CS.refresh},'refresh_token'))}
- catch(e){if(e.status===400||e.status===401){CS=null;store('momCloud','');toast('Signed out of sync - sign in again in Settings')}throw e}return CS.access}
+// Sign-in renewal: one at a time (parallel renewals used to clash and sign Sam out), and never sign out if another tab already renewed it.
+let CLR=null;
+async function clTok(){if(!CS)throw new Error('signin');if(Date.now()<CS.exp-60000)return CS.access;
+ if(!CLR)CLR=(async()=>{try{clKeep(await clAuth({refresh_token:CS.refresh},'refresh_token'))}
+  catch(e){let o=null;try{o=JSON.parse(localStorage.getItem('momCloud')||'null')}catch(x){}
+   if(o&&o.refresh&&o.refresh!==CS.refresh){CS=o;return}                                   // another tab or the app itself already renewed it
+   if(e.status===400||e.status===401){await new Promise(r=>setTimeout(r,1500));try{o=JSON.parse(localStorage.getItem('momCloud')||'null')}catch(x){}
+    if(o&&o.refresh&&o.refresh!==CS.refresh){CS=o;return}try{clKeep(await clAuth({refresh_token:CS.refresh},'refresh_token'));return}catch(e2){}
+    CS=null;store('momCloud','');toast('Signed out of sync - sign in again in Settings')}throw e}finally{CLR=null}})();
+ await CLR;if(!CS)throw new Error('signin');return CS.access}
 async function clLogin(email,pw){const j=await clAuth({email,password:pw},'password');CS=null;clKeep(j);
  try{const k=await clAuth({email,password:pw},'password');store('momPCcloud',JSON.stringify({refresh:k.refresh_token,email}))}catch(e){}  // a separate login for the PC
  S.cAll=true;await cloudSync();await handCloudToPC()}
@@ -756,7 +773,7 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
  if(c.outputTranscription&&c.outputTranscription.text)LV.outT+=c.outputTranscription.text;
  if(c.modelTurn&&!LV.drop)for(const p of c.modelTurn.parts||[]){if(p.inlineData&&p.inlineData.data){const r=+((p.inlineData.mimeType||'').match(/rate=(\d+)/)||[0,24000])[1];lvPlay(p.inlineData.data,r);lvStatus('Gary')}}
  if(c.turnComplete){LV.drop=false;LV.recv=0;if(LV.inT.trim())lvLine('you',LV.inT.trim());if(LV.outT.trim())lvLine('gary',LV.outT.trim());lvSaveTurn()}}
-async function liveStart(again){if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
+async function liveStart(again){if(!gUse().google){toast('Live voice needs Google Gemini - tap the symbols by Momentum to switch it on');return}if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // inside the tap, so iPhone allows sound
  LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again)$('lvtx').innerHTML='';lvStatus('Connecting…');
@@ -1095,7 +1112,7 @@ function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
  const end=()=>{if(!GF.drag)return;GF.drag=false;if(GF.moved){store('garyPos',Math.round(GF.x)+','+Math.round(GF.y));GF.hold=performance.now()+8000;gMood('happy',900)}else go('gary')};
  f.addEventListener('pointerup',end);f.addEventListener('pointercancel',end);
  addEventListener('resize',()=>{if(f.classList.contains('on'))gFloatPlace()});
- gCanvas($('gdock'));gCanvas($('lvorb'));$('gfid').onclick=()=>gGate();$('brain').onclick=e=>{e.stopPropagation();brainInfo()};$('bpop').onclick=()=>$('bpop').classList.remove('on');brainDraw();
+ gCanvas($('gdock'));gCanvas($('lvorb'));$('gfid').onclick=()=>gGate();$('brain').onclick=e=>{e.stopPropagation();brainMenu()};$('bmlist').onclick=e=>{const t=e.target.closest('[data-bk]');if(t)brainToggle(t.dataset.bk)};brainDraw();
  $('goyes').onclick=gOpenReply;$('gono').onclick=()=>{gOpenClose();gMood('sitwhistle',3000)};$('gcut').onclick=()=>{speakStop();gMood('idle')};gFloatSync()}
 async function gNotesCopy(){if(!CS){toast('Sign in first');return}
  try{const since=new Date(Date.now()-14*864e5).toISOString();const rows=await gdb('gary_audit?select=action,detail,at&or=(ok.eq.false,action.eq.wish)&at=gte.'+since+'&order=at.desc&limit=40')||[];
@@ -1119,25 +1136,37 @@ let gBi=0,gBside=0;setInterval(()=>{const a=$('ask');if(!a||a.value||document.ac
 const BR_ICON={google:'<svg viewBox="0 0 16 16"><path d="M8 1c.6 3.6 3.4 6.4 7 7-3.6.6-6.4 3.4-7 7-.6-3.6-3.4-6.4-7-7 3.6-.6 6.4-3.4 7-7z"/></svg>',
  groq:'<svg viewBox="0 0 16 16"><path d="M9.5 1 3 9h4.2L6 15l7-8.4H8.6z"/></svg>',live:'<svg viewBox="0 0 16 16"><path d="M2 6.5v3M5 4v8M8 2v12M11 4v8M14 6.5v3" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>',
  local:'<svg viewBox="0 0 16 16"><path d="M8 1.5 14.5 8 8 14.5 1.5 8z"/></svg>',pc:'<svg viewBox="0 0 16 16"><path d="M2 3h12v8H2zM6 14h4M8 11v3" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>'};
-let BR={src:'google',lvl:'ok',model:'',groqLeft:null,googleNote:'',pc:'off',pcName:'',at:0};try{Object.assign(BR,JSON.parse(store('garyBrain')||'{}'))}catch(e){}
+let BR={src:'google',g:'ok',q:'ok',model:'',groqLeft:null,googleNote:'',pc:'off',pcName:'',at:0};try{Object.assign(BR,JSON.parse(store('garyBrain')||'{}'))}catch(e){}
 function brainSave(){store('garyBrain',JSON.stringify(BR))}
+function gUse(){let u={};try{u=JSON.parse(store('garyUse')||'{}')}catch(e){}return{google:u.google!==false,groq:u.groq!==false,pc:u.pc!==false}}
 function brainFrom(b){if(!b||!b.model)return;const tried=b.tried||[],groq=/^groq /.test(b.model);BR.model=b.model.replace(/^groq /,'');BR.at=Date.now();
  const gFail=tried.filter(x=>/^gemini/.test(x)&&!/ 200$/.test(x));BR.groqLeft=b.groqLeft!=null?b.groqLeft:BR.groqLeft;
- if(groq){BR.src='groq';BR.lvl=BR.groqLeft!=null&&BR.groqLeft<0.2?'low':'ok';BR.googleNote=gFail.length?'Google is full or busy right now':''}
- else{BR.src='google';BR.lvl=gFail.length?'low':'ok';BR.googleNote=gFail.length?'Google\'s first choice was busy - running on a backup model':''}
- if(/went quiet/.test(tried.join(' ')))BR.lvl='low';brainSave();brainDraw()}
-function brainDraw(){const e=$('brain');if(!e)return;let src=BR.src,lvl=BR.lvl;
- if(!navigator.onLine||!CS){src='local';lvl='off'}else if(typeof LV!=='undefined'&&LV.on){src='live';lvl=LV.ready?'ok':'low'}
- $('bsrc').innerHTML=BR_ICON[src];$('bsrc').className=lvl;$('bpc').innerHTML=BR_ICON.pc;$('bpc').className=BR.pc==='on'?'ok':'off'}
+ BR.src=groq?'groq':'google';BR.g=gFail.length?(groq?'out':'low'):(groq&&tried.some(x=>/^gemini/.test(x))?'out':'ok');BR.q=BR.groqLeft!=null&&BR.groqLeft<0.2?'low':'ok';
+ BR.googleNote=gFail.length||(groq&&tried.some(x=>/^gemini/.test(x)))?(groq?'Google was busy or full - Groq took over':'Google\'s first choice was busy - running on a backup model'):'';brainSave();brainDraw()}
+function brainDraw(){const e=$('brain');if(!e)return;const U=gUse(),off=!navigator.onLine||!CS,live=typeof LV!=='undefined'&&LV.on;
+ const set=(id,icon,cls)=>{$(id).innerHTML=BR_ICON[icon];$(id).className=cls};
+ set('bgo','google',off?'off':!U.google?'dis':(BR.g==='ok'?'ok':BR.g)+(BR.src==='google'||live?' act':''));
+ set('bgq','groq',off?'off':!U.groq?'dis':BR.q+(BR.src==='groq'&&!live?' act':''));
+ set('bpc','pc',!U.pc?'dis':BR.pc==='on'?'ok':'off');
+ if(off)set('bsrc','local','off show');else if(live)set('bsrc','live',(LV.ready?'ok':'low')+' show act');else $('bsrc').className=''}
 async function brainPC(){if(!CS||!navigator.onLine)return;try{const a=await gdb('gary_agents?select=name,last_seen&order=last_seen.desc&limit=1');const on=a&&a[0]&&Date.now()-new Date(a[0].last_seen).getTime()<150000;
  BR.pc=on?'on':'off';BR.pcName=a&&a[0]?a[0].name:'';brainSave();brainDraw()}catch(e){}}
 setInterval(brainPC,60000);setTimeout(brainPC,1500);addEventListener('online',brainDraw);addEventListener('offline',brainDraw);
-function brainInfo(){const names={google:'Google Gemini',groq:'Groq (backup brain)',live:'Gemini Live (voice)',local:'Memory only - no internet or not signed in'};
- const src=!navigator.onLine||!CS?'local':(LV.on?'live':BR.src),lv={ok:'healthy',low:'running low or struggling - will switch if needed',off:'',out:'out'}[!navigator.onLine||!CS?'off':BR.lvl];
- const L=['Thinking with: '+names[src]+(BR.model&&src!=='local'&&src!=='live'?' ('+BR.model+')':'')+(lv?' - '+lv:'')];
- if(BR.googleNote&&src!=='local')L.push(BR.googleNote);if(BR.groqLeft!=null)L.push('Groq allowance left today: '+Math.round(BR.groqLeft*100)+'%');
- L.push('PC'+(BR.pcName?' ('+BR.pcName+')':'')+': '+(BR.pc==='on'?'on - G.A.R.Y. can use it':'off or asleep'));L.push('Plan sync: '+($('sync').className==='ok'?'up to date':'waiting for a connection'));
- const p=$('bpop');p.innerHTML=L.map(x=>'<div>'+x.replace(/</g,'&lt;')+'</div>').join('');p.classList.add('on');clearTimeout(p._t);p._t=setTimeout(()=>p.classList.remove('on'),6000)}
+const BR_OFF={google:'G.A.R.Y. will think with Groq only. Live voice talk needs Google, so pulling him up to talk will stop working, and his spoken replies will use Groq\'s voice instead.',
+ groq:'No backup brain: if Google is busy or runs out, G.A.R.Y. won\'t switch over - he\'ll just tell you he\'s unavailable until Google is back.',
+ pc:'G.A.R.Y. won\'t do anything on your PC - no opening apps, finding files or media controls. Your plan still syncs with the PC as normal.'};
+function brainMenu(){const U=gUse(),live=LV.on,off=!navigator.onLine||!CS;
+ const row=(k,icon,name,stat)=>'<div class="set bmrow"><i class="bmi '+$('b'+({google:'go',groq:'gq',pc:'pc'})[k]).className+'">'+BR_ICON[icon]+'</i><div>'+name+'<small>'+stat+'</small></div><button class="tog'+(U[k]?' on':'')+'" data-bk="'+k+'"></button></div>';
+ const gs=off?'Offline':!U.google?'Switched off':BR.g==='out'?'Busy or out right now - Groq is covering':BR.g==='low'?'Busy - using a backup Google model':(BR.src==='google'?'Thinking with it now':'Ready')+(BR.src==='google'&&BR.model?' ('+BR.model+')':'');
+ const qs=off?'Offline':!U.groq?'Switched off':(BR.src==='groq'?'Thinking with it now':'Standing by as backup')+(BR.groqLeft!=null?' - '+Math.round(BR.groqLeft*100)+'% allowance left today':'');
+ const ps=!U.pc?'Switched off':BR.pc==='on'?'On'+(BR.pcName?' ('+BR.pcName+')':'')+' - G.A.R.Y. can use it':'Off or asleep';
+ $('bmlist').innerHTML=row('google','google','Google Gemini',gs)+row('groq','groq','GroqCloud',qs)+row('pc','pc','Your PC',ps)+
+  '<div class="hint">'+(off?'No internet or not signed in: Momentum runs from this phone\'s memory and G.A.R.Y. can\'t think.':live?'Live voice is running on Google Gemini Live.':'Plan sync: '+($('sync').className==='ok'?'up to date':'waiting for a connection'))+'</div>';
+ sheet('bmenu',true)}
+function brainToggle(k){const U=gUse();if(!U[k]){U[k]=true;store('garyUse',JSON.stringify(U));brainDraw();brainMenu();toast({google:'Google Gemini',groq:'GroqCloud',pc:'PC access'}[k]+' is back on');return}
+ const both=(k==='google'&&!U.groq)||(k==='groq'&&!U.google);
+ $('bctx').textContent='Turn off '+{google:'Google Gemini',groq:'GroqCloud',pc:'PC access'}[k]+'?';$('bcbody').textContent=BR_OFF[k]+(both?' With both brains off, G.A.R.Y. can\'t reply at all.':'');
+ $('bconf').classList.add('on');$('bcyes').onclick=()=>{U[k]=false;store('garyUse',JSON.stringify(U));$('bconf').classList.remove('on');brainDraw();brainMenu();toast('Switched off')};$('bcno').onclick=()=>$('bconf').classList.remove('on')}
 // voice screen: swipe down (or the cross) to shrink into the message bar's spot; swipe up or tap G.A.R.Y. to bring it back
 function lvMini(on){$('live').classList.toggle('mini',on);$('lvend').setAttribute('aria-label',on?'End call':'Make small')}
 (function(){const L=$('live');let y0=null,dy=0;
@@ -1165,7 +1194,7 @@ async function gLockSet(on){if(on){if(!window.PublicKeyCredential||!(await Publi
  else{if(!(await gFace())){toast('Face ID needed to turn this off');return}store('garyLock','0');GL.ok=Date.now();if(GL.guest)gUnlock();toast('Face ID lock is off')}
  renderYou()}
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
-async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new Error('signin');if(gGuest())body=Object.assign({},body,{guest:true});
+async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new Error('signin');if(gGuest())body=Object.assign({},body,{guest:true});body=Object.assign({},body,{use:gUse()});
  return fetch(CL.url+'/functions/v1/gary',{signal,method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
 let VOICEIN=false;
 async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock();

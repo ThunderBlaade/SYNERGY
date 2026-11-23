@@ -94,6 +94,7 @@ Sam has ADHD: help him start, keep plans small and concrete, make progress visib
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type",
                "Access-Control-Allow-Methods": "POST, OPTIONS" };
 let INFO = {};
+let USE = {};   // what Sam has switched on in the app: { google, groq, pc } (missing = on)
 let KNOWN = new Set();   // task ids Gary is allowed to touch (only ones he was shown)     // which model answered and why it stopped (written to gary_audit)
 let APIKEY = "";   // the app's public key, passed along so this works with old and new Supabase keys
 const env = (k) => (typeof Deno !== "undefined" ? Deno.env.get(k) : process.env[k]) || "";
@@ -180,8 +181,9 @@ async function* gemini(system, turns, json = false) {
   const key = env("GEMINI_API_KEY"), gk = env("GROQ_API_KEY");
   if (!key && !gk) throw Object.assign(new Error("no key"), { kind: "nokey" });
   const list = (v, d) => (v || d).split(",").map((x) => x.trim()).filter(Boolean);
-  const gm = key ? list(env("GEMINI_MODEL"), "gemini-flash-lite-latest,gemini-flash-latest") : [];
-  const qm = gk ? list(env("GROQ_MODEL"), "openai/gpt-oss-120b,llama-3.3-70b-versatile,openai/gpt-oss-20b,llama-3.1-8b-instant") : [];
+  if (USE.google === false && USE.groq === false) throw Object.assign(new Error("both brains off"), { kind: "off" });
+  const gm = key && USE.google !== false ? list(env("GEMINI_MODEL"), "gemini-flash-lite-latest,gemini-flash-latest") : [];
+  const qm = gk && USE.groq !== false ? list(env("GROQ_MODEL"), "openai/gpt-oss-120b,llama-3.3-70b-versatile,openai/gpt-oss-20b,llama-3.1-8b-instant") : [];
   const plan = [];
   for (let i = 0; i < Math.max(gm.length, qm.length); i++) { if (gm[i]) plan.push(["g", gm[i]]); if (qm[i]) plan.push(["q", qm[i]]); }
   let last, sofar = "";
@@ -493,11 +495,13 @@ const LIVE_TOOLS = [
 ];
 
 const MISHAP = {
+  off: "Both my brains are switched off, sir - tap the symbols next to Momentum and turn one back on.",
   nokey: "My brain isn't plugged in yet, sir - there's no Gemini or Groq key in Supabase's Secrets. Once one is there, I'm all yours.",
   busy: "I've used up my free thinking allowance with Google for now, sir. Give it a few minutes and try me again.",
 };
 
 export async function handle(req) {
+  USE = {};
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return new Response("Gary only takes POST.", { status: 405, headers: CORS });
   APIKEY = req.headers.get("apikey") || env("SUPABASE_ANON_KEY");
@@ -507,6 +511,7 @@ export async function handle(req) {
   let body;
   try { body = await req.json(); } catch { body = {}; }
   const text = String(body.text || "").trim().slice(0, 6000);
+  USE = body.use && typeof body.use === "object" ? body.use : {};
   if (!text) return new Response(JSON.stringify({ error: "Say something." }), { status: 400, headers: { ...CORS, "Content-Type": "application/json" } });
 
   // Live conversation: a short-lived pass for Gemini Live, already set up as Gary (the real key never leaves Supabase).
@@ -569,7 +574,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
     const order = (env("GARY_TTS_MODEL") || TTS_MODELS.join(",")).split(",").map((x) => x.trim()).filter(Boolean);
     if (TTS_MODELS.includes(body.tts)) order.unshift(body.tts);   // for testing one model
     for (const m of order) {
-      if (!key) break;
+      if (!key || USE.google === false) break;
       try {
         const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
           method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
@@ -585,7 +590,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
       } catch { /* next */ }
     }
     const gk = env("GROQ_API_KEY");
-    if (gk) {
+    if (gk && USE.groq !== false) {
       try {
         const r = await fetch("https://api.groq.com/openai/v1/audio/speech", { method: "POST",
           headers: { "Content-Type": "application/json", Authorization: "Bearer " + gk },
@@ -627,7 +632,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
     `\n\nHis plan in Momentum:\n${plan}` +
     `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` +
     (mem.moments ? `\n\nMemories that may relate to this (dated where known; only use if relevant):\n${mem.moments}` : "") +
-    TOOLS + await pcState(token) + await selfCheck(token) + await health(token) + await guestReport(token);
+    TOOLS + (USE.pc === false ? "\n\nSam has switched off your access to his PC in the app - you can't do anything on it right now; if asked, say so and that he can switch it back on by tapping the PC symbol next to Momentum." : await pcState(token)) + await selfCheck(token) + await health(token) + await guestReport(token);
   const chores = tidy(token).catch(() => {});
   try { globalThis.EdgeRuntime?.waitUntil?.(chores); } catch { /* runs alongside anyway */ }
 
@@ -659,7 +664,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
       const gnote = guest ? parseGuest(reply) : null;
       if (guest) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "guest", detail: { ...(gnote || { name: null, personal: false, note: text.slice(0, 200) }), convo } }) }).catch(() => {});
       const said = (reply.indexOf("\u27e6") < 0 ? reply : reply.slice(0, reply.indexOf("\u27e6"))).trim();
-      const jobs = guest ? [] : parsePc(reply);
+      const jobs = guest || USE.pc === false ? [] : parsePc(reply);
       if (jobs.length) await db("gary_jobs", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(jobs) }).catch(() => { jobs.length = 0; });
       const remembered = guest ? [] : parseMemories(reply);
       const pose = parsePose(reply);
