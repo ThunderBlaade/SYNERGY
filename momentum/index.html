@@ -187,6 +187,18 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 #bpc svg{stroke-width:1.5;fill:none}@keyframes blink{50%{opacity:.35}}
 #bpop{position:absolute;z-index:70;top:calc(40px + var(--safeT));left:22px;right:22px;max-width:420px;background:#0d0e12;border:1px solid var(--line);padding:12px 14px;font:400 13px/1.55 var(--sans);color:var(--fg);display:none;letter-spacing:0;text-transform:none}
 #bpop.on{display:block;animation:gin .25s var(--ease)}
+#lvorb{width:auto;height:auto;border:0!important;border-radius:0;background:none!important}#lvorb .gpx{width:min(240px,62vw);height:min(240px,62vw)}
+#live.speaking #lvorb{animation:none}
+.lvb{width:64px;height:64px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;background:none;color:var(--fg)}.lvb svg{width:24px;height:24px}
+.lvb .slash{display:none}#lvmute.on{background:none;color:var(--fg);border-color:#e0605a}#lvmute.on .slash{display:inline}
+.lvacts{gap:28px}
+#live{touch-action:none}
+#live.mini{inset:auto 0 calc(58px + var(--safeB)) 0;height:auto;flex-direction:row;justify-content:flex-start;gap:12px;padding:8px 22px;background:linear-gradient(transparent,#000 25%);animation:gin .3s var(--ease)}
+#live.mini .lvlab,#live.mini #lvtx,#live.mini #lvcut{display:none!important}
+#live.mini .lvwrap{flex:none;width:auto;display:block}#live.mini #lvstat{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#live.mini .lvacts{flex:none}#live.mini #lvorb .gpx{width:60px;height:60px}
+#live.mini #lvstat{flex:1;margin:0;text-align:left}#live.mini .lvacts{margin:0;gap:10px}#live.mini .lvb{width:44px;height:44px}#live.mini .lvb svg{width:18px;height:18px}
+body.lvon #askbar{display:none!important}
+@media (min-width:1000px){#live.mini{left:210px;bottom:0;padding:14px max(48px,calc((100% - 970px)/2)) 20px}}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bsrc"></i><i id="bpc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -257,11 +269,11 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
  <input class="big" id="siP" type="password" placeholder="Password" autocomplete="current-password" style="font-size:20px;margin-top:10px">
  <p class="hint">Your plan goes to a private table only your account can read. Gary's chats and memories are private to your account too.</p>
  <div class="acts"><button class="btn ghost" id="siX">Cancel</button><button class="btn fill" id="siGo">Sign in</button></div></div>
-<div id="live"><div class="lab" style="text-align:center">Talking to G.A.R.Y.</div>
+<div id="live"><div class="lab lvlab" style="text-align:center">Talking to G.A.R.Y.</div>
  <div class="lvwrap"><div id="lvorb"></div></div>
  <div id="lvstat">Connecting…</div><div id="lvtx"></div>
  <button id="lvcut">Tap to interrupt</button>
- <div class="lvacts"><button class="btn ghost" id="lvmute">Mute</button><button class="btn fill" id="lvend">End</button></div></div>
+ <div class="lvacts"><button class="lvb" id="lvmute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path class="slash" d="M4 3l16 18" stroke="#e0605a" stroke-width="2.2"/></svg></button><button class="lvb" id="lvend" aria-label="Make small"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>
 <div class="sheet" id="mem"><div class="grab"></div>
  <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab">What Gary remembers</div><button class="btn" id="madd">Add +</button></div>
  <input class="big" id="mq" placeholder="Search memories or people" style="font-size:18px;margin:14px 0 12px" spellcheck="false">
@@ -744,7 +756,7 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
 async function liveStart(again){if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // inside the tap, so iPhone allows sound
- LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');gFloatSync();brainDraw();$('lvmute').classList.remove('on');if(!again)$('lvtx').innerHTML='';lvStatus('Connecting…');
+ LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again)$('lvtx').innerHTML='';lvStatus('Connecting…');
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
  catch(e){lvStatus('Microphone not allowed. Allow it in your settings and try again.');return}
  const src=LV.ctx.createMediaStreamSource(LV.stream);
@@ -759,8 +771,8 @@ async function liveStart(again){if(!CS){toast('Sign in under You → Settings to
  (function meter(){if(!LV.on)return;const o=$('lvorb');o.style.transform='scale('+(1+LV.lvl*0.35).toFixed(3)+')';LV.lvl*=0.85;requestAnimationFrame(meter)})()}
 function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;try{ws&&ws.close(1000)}catch(e){}lvHush();
  try{LV.stream&&LV.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{LV.node&&LV.node.disconnect()}catch(e){}try{LV.ctx&&LV.ctx.close()}catch(e){}
- LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;$('live').classList.remove('on','speaking');gFloatSync();brainDraw();lvSaveTurn()}}
-$('livebtn').onclick=()=>liveStart();$('lvcut').onclick=$('lvorb').onclick=()=>{if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>lvStop();$('lvmute').onclick=()=>{LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').textContent=LV.muted?'Unmute':'Mute';lvStatus(LV.muted?'Muted':'Listening…')};
+ LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;$('live').classList.remove('on','speaking','mini');document.body.classList.remove('lvon');gFloatSync();brainDraw();lvSaveTurn()}}
+$('livebtn').onclick=()=>liveStart();$('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini')){lvMini(false);return}if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>{if($('live').classList.contains('mini'))lvStop();else lvMini(true)};$('lvmute').onclick=()=>{LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvStatus(LV.muted?'Muted':'Listening…')};
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
@@ -1123,6 +1135,13 @@ function brainInfo(){const names={google:'Google Gemini',groq:'Groq (backup brai
  if(BR.googleNote&&src!=='local')L.push(BR.googleNote);if(BR.groqLeft!=null)L.push('Groq allowance left today: '+Math.round(BR.groqLeft*100)+'%');
  L.push('PC'+(BR.pcName?' ('+BR.pcName+')':'')+': '+(BR.pc==='on'?'on - G.A.R.Y. can use it':'off or asleep'));L.push('Plan sync: '+($('sync').className==='ok'?'up to date':'waiting for a connection'));
  const p=$('bpop');p.innerHTML=L.map(x=>'<div>'+x.replace(/</g,'&lt;')+'</div>').join('');p.classList.add('on');clearTimeout(p._t);p._t=setTimeout(()=>p.classList.remove('on'),6000)}
+// voice screen: swipe down (or the cross) to shrink into the message bar's spot; swipe up or tap G.A.R.Y. to bring it back
+function lvMini(on){$('live').classList.toggle('mini',on);$('lvend').setAttribute('aria-label',on?'End call':'Make small')}
+(function(){const L=$('live');let y0=null,dy=0;
+ L.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;y0=e.clientY;dy=0});
+ L.addEventListener('pointermove',e=>{if(y0===null)return;dy=e.clientY-y0});
+ const end=()=>{if(y0===null)return;y0=null;const mini=L.classList.contains('mini');if(!mini&&dy>80)lvMini(true);else if(mini&&dy<-30)lvMini(false)};
+ L.addEventListener('pointerup',end);L.addEventListener('pointercancel',end)})();
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
 async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new Error('signin');
  return fetch(CL.url+'/functions/v1/gary',{signal,method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
