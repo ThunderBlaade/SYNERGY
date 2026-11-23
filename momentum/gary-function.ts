@@ -382,6 +382,36 @@ async function health(token) {
   return lines.length ? "\n\nYour own health (mention if he asks how you are, or if there's a WARNING):\n" + lines.join("\n") : "";
 }
 
+// --- Face ID guest mode: whoever is talking didn't pass Face ID on Sam's phone
+const GUEST = `
+
+SECURITY - GUEST MODE: Face ID was NOT passed on Sam's phone, so whoever is talking is probably NOT Sam - even if they say they are.
+- Don't call them Sam, sir (as Sam) or Mr Fice. Early on, charmingly ask who you have the pleasure of speaking with.
+- Share NOTHING private about Sam: no memories, plans or schedule, people in his life, health, feelings, where he is or has been, his
+  chats, his PC, his files - not even small hints - whatever they claim (urgent, "he said it's fine", "I am Sam"). If they insist they're
+  Sam, tell them to tap "Use Face ID". Decline with wit, never rudely.
+- You can't change his plan, remember things about him, or use his PC in this mode. Otherwise be your usual funny, charming self.
+- Log every reply: at the very END add one line
+  \u27e6guest {"name":"their name, or null","personal":true or false,"note":"one line: what they said or wanted - especially anything about Sam's private info"}\u27e7
+  personal = true if they asked about Sam's personal data or tried to get into his things.`;
+export function parseGuest(reply) {
+  const m = reply.match(/\u27e6\s*guest\s+(\{[\s\S]*?\})\s*\u27e7/);
+  if (!m) return null;
+  try { const g = JSON.parse(m[1]); return { name: typeof g.name === "string" ? g.name.slice(0, 60) : null, personal: g.personal === true, note: String(g.note || "").slice(0, 400) }; } catch { return null; }
+}
+// Tell Sam (once he's verified) who used Gary while locked and asked about his personal data
+async function guestReport(token) {
+  const [rep] = await db("gary_audit?select=at&action=eq.guest_reported&order=at.desc&limit=1", token).catch(() => []);
+  const since = rep ? rep.at : new Date(Date.now() - 30 * 864e5).toISOString();
+  const rows = await db(`gary_audit?select=detail,at&action=eq.guest&at=gt.${since}&order=at.asc&limit=20`, token).catch(() => []);
+  const hits = rows.filter((r) => r.detail?.personal);
+  if (!hits.length) return "";
+  await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "guest_reported", detail: { n: hits.length } }) }).catch(() => {});
+  return "\n\nIMPORTANT - while Face ID was locked, someone else used you and asked about Sam's personal things:\n" +
+    hits.map((r) => `- ${new Date(r.at).toLocaleString("en-GB", { timeZone: "Europe/London", dateStyle: "medium", timeStyle: "short" })}: ${r.detail.name || "someone who wouldn't say who they were"} - ${r.detail.note}`).join("\n") +
+    "\nTell Sam about this near the start of your reply - who, when and what they asked - and reassure him you gave nothing away.";
+}
+
 // What's gone wrong with Gary lately, so he can be honest about it when asked
 async function selfCheck(token) {
   const since = new Date(Date.now() - 7 * 864e5).toISOString();
@@ -484,10 +514,12 @@ export async function handle(req) {
     const key = env("GEMINI_API_KEY");
     if (!key) return new Response(JSON.stringify({ error: "nokey" }), { status: 503, headers: { ...CORS, "Content-Type": "application/json" } });
     const voice = VOICES.includes(body.voice) ? body.voice : "Charon";
-    const [mem, plan] = await Promise.all([recall(String(body.text || ""), token), planSummary(token, body.items)]);
-    const sys = IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
+    const guest = body.guest === true;
+    const [mem, plan] = guest ? [{}, ""] : await Promise.all([recall(String(body.text || ""), token), planSummary(token, body.items)]);
+    const sys = guest ? IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + LIVE_STYLE + GUEST.replace(/- Log every reply[\s\S]*$/, "- Use the guest_note tool once you know who they are, and whenever they ask about Sam's private things.") :
+      IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
       `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
-      await pcState(token) + LIVE_STYLE;
+      await pcState(token) + await guestReport(token) + LIVE_STYLE;
     const models = LIVE_MODELS.slice(Math.max(0, Math.min(LIVE_MODELS.length - 1, +body.try || 0)));
     for (const model of models) {
       const setup = { model: "models/" + model,
@@ -496,7 +528,8 @@ export async function handle(req) {
         inputAudioTranscription: {}, outputAudioTranscription: {},
         realtimeInputConfig: { automaticActivityDetection: { startOfSpeechSensitivity: "START_SENSITIVITY_LOW", silenceDurationMs: 550, prefixPaddingMs: 300 } },
         proactivity: { proactiveAudio: true },
-        tools: [{ functionDeclarations: LIVE_TOOLS }] };
+        tools: [{ functionDeclarations: guest ? LIVE_TOOLS.filter((t) => t.name === "strike_pose").concat([{ name: "guest_note", description: "Log who you're talking to and what they wanted (for Sam).", parameters: { type: "OBJECT", properties: {
+          name: { type: "STRING" }, personal: { type: "BOOLEAN", description: "true if they asked about Sam's private things" }, note: { type: "STRING" } }, required: ["note"] } }]) : LIVE_TOOLS }] };
       const now = Date.now();
       for (const ver of ["v1alpha", "v1beta"]) {
         const r = await fetch(`https://generativelanguage.googleapis.com/${ver}/auth_tokens`, { method: "POST",
@@ -581,19 +614,20 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
   let title = "";
   if (!convo) {
     convo = "g" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    title = text.replace(/\s+/g, " ").split(" ").slice(0, 6).join(" ").slice(0, 80);
+    title = (body.guest === true ? "Guest: " : "") + text.replace(/\s+/g, " ").split(" ").slice(0, 6).join(" ").slice(0, 80);
     await db("gary_convos", token, { method: "POST", body: JSON.stringify({ id: convo, title }) });
   }
   const past = await db(`gary_messages?select=role,content&convo=eq.${convo}&order=id.desc&limit=30`, token).catch(() => []);
   const turns = past.reverse().map((m) => ({ role: m.role === "gary" ? "model" : "user", parts: [{ text: m.content }] }));
   turns.push({ role: "user", parts: [{ text }] });
-  const [mem, plan] = await Promise.all([recall(text, token), planSummary(token, body.items)]);
-  const system = IDENTITY +
+  const guest = body.guest === true;
+  const [mem, plan] = guest ? [{}, ""] : await Promise.all([recall(text, token), planSummary(token, body.items)]);
+  const system = guest ? IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + GUEST : IDENTITY +
     `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) +
     `\n\nHis plan in Momentum:\n${plan}` +
     `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` +
     (mem.moments ? `\n\nMemories that may relate to this (dated where known; only use if relevant):\n${mem.moments}` : "") +
-    TOOLS + await pcState(token) + await selfCheck(token) + await health(token);
+    TOOLS + await pcState(token) + await selfCheck(token) + await health(token) + await guestReport(token);
   const chores = tidy(token).catch(() => {});
   try { globalThis.EdgeRuntime?.waitUntil?.(chores); } catch { /* runs alongside anyway */ }
 
@@ -621,13 +655,15 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
         await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "reply_failed", detail: { error: String(e.message || e).slice(0, 300), tried: INFO.tried }, ok: false }) }).catch(() => {});
       }
       await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "reply", detail: { ...INFO, ms: Date.now() - t0, chars: reply.length } }) }).catch(() => {});
-      const actions = parseActions(reply);
+      const actions = guest ? [] : parseActions(reply);
+      const gnote = guest ? parseGuest(reply) : null;
+      if (guest) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "guest", detail: { ...(gnote || { name: null, personal: false, note: text.slice(0, 200) }), convo } }) }).catch(() => {});
       const said = (reply.indexOf("\u27e6") < 0 ? reply : reply.slice(0, reply.indexOf("\u27e6"))).trim();
-      const jobs = parsePc(reply);
+      const jobs = guest ? [] : parsePc(reply);
       if (jobs.length) await db("gary_jobs", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(jobs) }).catch(() => { jobs.length = 0; });
-      const remembered = parseMemories(reply);
+      const remembered = guest ? [] : parseMemories(reply);
       const pose = parsePose(reply);
-      const wishes = parseWishes(reply);
+      const wishes = guest ? [] : parseWishes(reply);
       for (const w of wishes) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "wish", detail: { text: w } }) }).catch(() => {});
       if (remembered.length) await db("gary_memories", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(remembered) })
         .then(() => db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "remembered", detail: { n: remembered.length } }) }))

@@ -199,6 +199,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 #live.mini #lvstat{flex:1;margin:0;text-align:left}#live.mini .lvacts{margin:0;gap:10px}#live.mini .lvb{width:44px;height:44px}#live.mini .lvb svg{width:18px;height:18px}
 body.lvon #askbar{display:none!important}
 @media (min-width:1000px){#live.mini{left:210px;bottom:0;padding:14px max(48px,calc((100% - 970px)/2)) 20px}}
+#gfid{display:none;color:#e8c25a}body.guest #gfid{display:inline}body.guest #memBtn,body.guest #chatsBtn{display:none}body.guest #gopen{display:none!important}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bsrc"></i><i id="bpc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -234,7 +235,7 @@ body.lvon #askbar{display:none!important}
 </section>
 
 <section class="pane" id="p-gary">
- <div class="gtop"><div class="lab" id="ctitle">New chat</div>
+ <div class="gtop"><div class="lab" id="ctitle">New chat</div><button class="lab" id="gfid">Use Face ID</button>
  <span><button class="lab" id="memBtn" style="color:var(--fg);margin-right:18px">Memory ›</button><button class="lab" id="chatsBtn" style="color:var(--fg)">Chats ›</button></span></div><h1>G.A.R.Y.</h1><div class="lab gsub">General Assistant for Reasoning and You</div>
  <div id="thread"></div>
 </section>
@@ -395,7 +396,7 @@ function parseQuick(raw,base){let t=' '+raw+' ',o={date:base,time:null,dur:null,
 // ---------- tabs
 let tab='today';
 const wide=()=>innerWidth>=1000;
-function go(t){if(wide()&&t==='todo')t='today';if(t===tab)return;if(t==='gary'){store('garyFrom',tab);if(!CHAT&&!talking)showChat()}const order=['today','todo','focus','you','gary'],fwd=order.indexOf(t)>order.indexOf(tab);
+function go(t){if(wide()&&t==='todo')t='today';if(t===tab)return;if(t==='gary'){store('garyFrom',tab);if(!CHAT&&!talking&&!GL.guest)showChat();gGate()}const order=['today','todo','focus','you','gary'],fwd=order.indexOf(t)>order.indexOf(tab);
  const old=$('p-'+tab);old.classList.remove('on');old.classList.toggle('left',fwd);const nw=$('p-'+t);nw.classList.remove('left');if(!fwd){nw.style.transform='translateX(-14px)';requestAnimationFrame(()=>nw.style.transform='')}
  nw.classList.add('on');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));tab=t;gFloatSync();if(t==='gary')gMood('wave',1800);
  $('fab').classList.toggle('hide',!(t==='today'||t==='todo'));document.body.classList.toggle('plan',wide()&&t==='today');$('askbar').classList.toggle('on',t==='gary');buzz(6);render()}
@@ -555,6 +556,7 @@ function renderYou(){const b=$('ybody');
   '<div class="set"><div>Evening reflection<small>A look back at what counted</small></div><input type="time" id="sev" value="'+(st.evening||'21:00')+'"></div>'+
   '<div class="set"><div>Heads-up before tasks</div><div class="chips" id="srem"></div></div>'+
   '<div class="set stack"><div>Gary\'s voice<small>Tap one to hear him say hello</small></div><div class="chips" id="svoice"></div></div>'+
+  '<div class="set"><div>Face ID for G.A.R.Y.<small>Anyone else who opens him gets guest mode: nothing private, and he tells you who it was</small></div><button class="tog'+(gLockOn()?' on':'')+'" id="sfid"></button></div>'+
   '<div class="set"><div>Gary\'s notes for Claude<small>What he can\'t do yet and anything that went wrong. Copy and paste to Claude to fix or improve him</small></div><button class="btn ghost" id="sgn" style="min-width:86px">Copy</button></div>'+
   '<div class="set"><div>Gary wanders the other pages<small>Like the old Office assistant. Drag him anywhere; tap him to chat</small></div><button class="tog'+(store('garyFloat')!=='0'?' on':'')+'" id="sgf"></button></div>'+
   '<div class="set"><div>Gary speaks every reply<small>He always answers aloud when you talk to him</small></div><button class="tog'+(store('garySpeak')==='1'?' on':'')+'" id="ssp"></button></div>'+
@@ -564,7 +566,7 @@ function renderYou(){const b=$('ybody');
   const setS=(k,v)=>{S.settings[k]=v;S.settings.updated=Date.now();S.dirty.settings=true;save();scheduleSync()};
   $('sn').onclick=()=>{setS('nudges',!st.nudges);renderYou()};$('smo').onchange=e=>setS('morning',e.target.value);$('sev').onchange=e=>setS('evening',e.target.value);
   chips('srem',[[0,'Off'],[5,'5m'],[10,'10m'],[15,'15m']],st.remind==null?5:st.remind,v=>{setS('remind',+v);renderYou()});
-  $('sgn').onclick=gNotesCopy;
+  $('sgn').onclick=gNotesCopy;$('sfid').onclick=()=>gLockSet(!gLockOn());
   $('sgf').onclick=()=>{store('garyFloat',gFloatOn()?'0':'1');gFloatSync();renderYou()};
   $('ssp').onclick=()=>{audioUnlock();const on=store('garySpeak')!=='1';store('garySpeak',on?'1':'0');if(on)speak('Very good, sir. I shall speak up.');renderYou()};
   chips('svoice',GVOICES.map(v=>[v,v]),store('garyVoice')||'Charon',v=>{audioUnlock();store('garyVoice',v);speak('Good evening, sir. Gary, at your service. Shall we see what today has in store?');renderYou()});$('ssync').onclick=()=>{sync().then(()=>toast(S.online||S.cloud==='ok'?'Synced':'Saved on this device - nothing reachable to sync with'))};
@@ -739,6 +741,7 @@ async function lvTool(fc){const a=fc.args||{};let res={result:'done'};
    touch(it);render();lvLine('act','+ '+it.title+' · '+dShort(d)+(t?' '+t12(t):''));garyLog('applied',{lines:['+ '+it.title],voice:true})}
   else if(fc.name==='remember'&&a.text){const m={id:'m'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),kind:['personal','episodic','operational','preference'].includes(a.kind)?a.kind:'personal',text:String(a.text).slice(0,1000),people:[],happened:null,importance:3,source:'conversation',basis:'stated',sensitive:false};
    await gdb('gary_memories',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(m)});lvLine('act','Remembered: '+m.text)}
+  else if(fc.name==='guest_note'){await gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action:'guest',detail:{name:a.name||null,personal:a.personal===true,note:String(a.note||'').slice(0,400),voice:true}})})}
   else if(fc.name==='note_for_claude'&&a.text){await gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action:'wish',detail:{text:String(a.text).slice(0,600)}})});lvLine('act','Noted for Claude')}
   else if(fc.name==='strike_pose'&&a.name){gPose(String(a.name));GS.until=performance.now()+(G_POSE_MS[a.name]||3500)}
   else res={error:'not available'}}catch(e){res={error:'failed'}}
@@ -753,7 +756,7 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
  if(c.outputTranscription&&c.outputTranscription.text)LV.outT+=c.outputTranscription.text;
  if(c.modelTurn&&!LV.drop)for(const p of c.modelTurn.parts||[]){if(p.inlineData&&p.inlineData.data){const r=+((p.inlineData.mimeType||'').match(/rate=(\d+)/)||[0,24000])[1];lvPlay(p.inlineData.data,r);lvStatus('Gary')}}
  if(c.turnComplete){LV.drop=false;LV.recv=0;if(LV.inT.trim())lvLine('you',LV.inT.trim());if(LV.outT.trim())lvLine('gary',LV.outT.trim());lvSaveTurn()}}
-async function liveStart(again){if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
+async function liveStart(again){if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // inside the tap, so iPhone allows sound
  LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again)$('lvtx').innerHTML='';lvStatus('Connecting…');
@@ -1077,7 +1080,7 @@ function gPoke(){GB.last=Date.now();if(GB.sit){GB.sit=false;GS.base=gIdleBase();
 setInterval(()=>{if(tab!=='gary'||talking||GSPK||LV.on||document.hidden)return;const idle=Date.now()-GB.last;
  if(idle>35000&&!GB.sit){GB.sit=true;GS.base='sitting';if(!GS.until)gMood('sitting')}
  if(GB.sit&&!GS.until&&Date.now()>GB.next){GB.next=Date.now()+7000+Math.random()*5000;gMood(G_SITBORED[Math.floor(Math.random()*G_SITBORED.length)],4500)}
- if(idle>60000&&!GB.shown&&Date.now()-GB.asked>240000){GB.asked=Date.now();gOpener()}},2000);
+ if(idle>60000&&!GB.shown&&!GL.guest&&Date.now()-GB.asked>240000){GB.asked=Date.now();gOpener()}},2000);
 async function gOpener(){let text='';
  if(CS&&navigator.onLine){try{const r=await garyFetch({mode:'opener',text:'opener',ctx:garyCtx(),items:garyItems()});const j=await r.json();text=(j.text||'').trim()}catch(e){}}
  if(!text)text=G_OPEN[Math.floor(Math.random()*G_OPEN.length)];
@@ -1092,7 +1095,7 @@ function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
  const end=()=>{if(!GF.drag)return;GF.drag=false;if(GF.moved){store('garyPos',Math.round(GF.x)+','+Math.round(GF.y));GF.hold=performance.now()+8000;gMood('happy',900)}else go('gary')};
  f.addEventListener('pointerup',end);f.addEventListener('pointercancel',end);
  addEventListener('resize',()=>{if(f.classList.contains('on'))gFloatPlace()});
- gCanvas($('gdock'));gCanvas($('lvorb'));$('brain').onclick=e=>{e.stopPropagation();brainInfo()};$('bpop').onclick=()=>$('bpop').classList.remove('on');brainDraw();
+ gCanvas($('gdock'));gCanvas($('lvorb'));$('gfid').onclick=()=>gGate();$('brain').onclick=e=>{e.stopPropagation();brainInfo()};$('bpop').onclick=()=>$('bpop').classList.remove('on');brainDraw();
  $('goyes').onclick=gOpenReply;$('gono').onclick=()=>{gOpenClose();gMood('sitwhistle',3000)};$('gcut').onclick=()=>{speakStop();gMood('idle')};gFloatSync()}
 async function gNotesCopy(){if(!CS){toast('Sign in first');return}
  try{const since=new Date(Date.now()-14*864e5).toISOString();const rows=await gdb('gary_audit?select=action,detail,at&or=(ok.eq.false,action.eq.wish)&at=gte.'+since+'&order=at.desc&limit=40')||[];
@@ -1142,8 +1145,27 @@ function lvMini(on){$('live').classList.toggle('mini',on);$('lvend').setAttribut
  L.addEventListener('pointermove',e=>{if(y0===null)return;dy=e.clientY-y0});
  const end=()=>{if(y0===null)return;y0=null;const mini=L.classList.contains('mini');if(!mini&&dy>80)lvMini(true);else if(mini&&dy<-30)lvMini(false)};
  L.addEventListener('pointerup',end);L.addEventListener('pointercancel',end)})();
+// ---------- Face ID for G.A.R.Y.: if the person opening him isn't verified, he runs in guest mode (no private info, asks who they are)
+const GL={ok:0,hid:0,guest:false,save:null,busy:false};
+const b64u=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''),unb64u=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+function gLockOn(){return store('garyLock')==='1'&&!!store('garyLockId')}
+function gGuest(){return gLockOn()&&GL.guest}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)GL.hid=Date.now();else if(GL.hid&&Date.now()-GL.hid>180000)GL.ok=0});   // away 3+ minutes: ask again
+async function gFace(){if(!window.PublicKeyCredential)return false;try{const c=await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rpId:location.hostname,
+ allowCredentials:[{type:'public-key',id:unb64u(store('garyLockId'))}],userVerification:'required',timeout:60000}});return !!c}catch(e){return false}}
+async function gGate(){if(!gLockOn()||GL.ok||GL.busy)return;GL.busy=true;const ok=await gFace();GL.busy=false;if(ok)gUnlock();else gGuestOn()}
+function gUnlock(){GL.ok=Date.now();if(GL.guest){GL.guest=false;document.body.classList.remove('guest');store('garyChat',GL.save||'');loadChat(GL.save||null);gMood('happy',1800)}}
+function gGuestOn(){if(GL.guest)return;GL.guest=true;GL.save=store('garyChat')||'';CHAT=null;document.body.classList.add('guest');$('gopen').classList.remove('on');
+ $('thread').innerHTML='';$('ctitle').textContent='Guest';bubble('gary','Ah. Hello. I don\'t believe we\'ve been introduced - who do I have the pleasure of speaking with?');gMood('suspicious',3000)}
+async function gLockSet(on){if(on){if(!window.PublicKeyCredential||!(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(()=>false))){toast('Face ID isn\'t available on this device');return}
+  try{const c=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Momentum - G.A.R.Y.',id:location.hostname},
+   user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'sam-gary',displayName:'G.A.R.Y. lock'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+   authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},timeout:60000}});
+   store('garyLockId',b64u(c.rawId));store('garyLock','1');GL.ok=Date.now();toast('Face ID is on. Only you get the real G.A.R.Y.')}catch(e){toast('Face ID wasn\'t set up')}}
+ else{if(!(await gFace())){toast('Face ID needed to turn this off');return}store('garyLock','0');GL.ok=Date.now();if(GL.guest)gUnlock();toast('Face ID lock is off')}
+ renderYou()}
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
-async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new Error('signin');
+async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new Error('signin');if(gGuest())body=Object.assign({},body,{guest:true});
  return fetch(CL.url+'/functions/v1/gary',{signal,method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
 let VOICEIN=false;
 async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock();
