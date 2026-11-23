@@ -692,7 +692,7 @@ async function liveStart(again){if(!CS){toast('Sign in under You → Settings to
  const src=LV.ctx.createMediaStreamSource(LV.stream);
  try{await LV.ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([LIVE_WORKLET],{type:'application/javascript'})));LV.node=new AudioWorkletNode(LV.ctx,'gmic');LV.node.port.onmessage=e=>lvMic(e.data);src.connect(LV.node)}
  catch(e){LV.node=LV.ctx.createScriptProcessor(2048,1,1);LV.node.onaudioprocess=e=>lvMic(e.inputBuffer.getChannelData(0));src.connect(LV.node);const z=LV.ctx.createGain();z.gain.value=0;LV.node.connect(z);z.connect(LV.ctx.destination)}
- let j;try{const r=await garyFetch({mode:'live',text:'',ctx:garyCtx(),items:garyItems(),voice:store('garyVoice')||'Charon',try:LV.tries});j=await r.json();if(!j.url)throw 0}
+ let j;try{const r=await garyFetch({mode:'live',text:'Talk with Gary',ctx:garyCtx(),items:garyItems(),voice:store('garyVoice')||'Charon',try:LV.tries});j=await r.json();if(!j.url)throw 0}
  catch(e){lvStatus('Gary\'s live voice isn\'t available right now. Try the mic button instead.');return}
  const ws=new WebSocket(j.url);LV.ws=ws;
  ws.onopen=()=>ws.send(JSON.stringify({setup:j.setup}));ws.onmessage=lvMsg;
