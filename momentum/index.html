@@ -230,6 +230,14 @@ body.lvon #askbar{display:none!important}
 #gsay.on{opacity:1;transform:none}#gsay::after{content:"";position:absolute;bottom:-6px;left:22px;border:6px solid transparent;border-bottom:0;border-top-color:#fff}
 #askbar .mic{width:58px;height:58px}#asksend svg{width:24px;height:24px}#ask{min-height:58px;height:58px;padding:16px 14px}
 #gsay{max-width:min(280px,70vw);pointer-events:auto;cursor:pointer}
+#bdrop{position:fixed;left:0;right:0;top:0;z-index:80;max-width:560px;margin:0 auto;background:#000;border-bottom:1px solid var(--fg);padding:calc(16px + var(--safeT)) 22px 18px;transform:translateY(-105%);transition:transform .4s var(--ease);touch-action:pan-x}
+#bdrop{visibility:hidden;transition:transform .4s var(--ease),visibility 0s .4s}#bdrop.on{transform:none;visibility:visible;transition:transform .4s var(--ease)}.bdhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}#bdx{width:40px;height:40px;display:grid;place-items:center;background:none;border:0;color:var(--fg)}#bdx svg{width:22px;height:22px}
+.bdrow{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}.bdrow .bmi{margin-top:2px}.bdtx{flex:1;min-width:0}.bdrow .tog{margin-top:2px}
+.bdname{font:400 17px var(--sans)}.bdname span{font:500 10px var(--sans);letter-spacing:.16em;text-transform:uppercase;margin-left:6px}.bdon{color:#5fbf5f}.bdoff{color:var(--faint)}
+.bdtx small{display:block;color:var(--dim);font-size:13px;margin:3px 0 8px;line-height:1.4}
+.bdbar{height:5px;background:var(--line);position:relative}.bdbar i{position:absolute;left:0;top:0;bottom:0;background:#5fbf5f}.bdbar i.low{background:#e8c25a}.bdbar i.out{background:#e0605a}.bdbar i.off{background:var(--faint)}
+.bdlab{font-size:11.5px;color:var(--dim);margin-top:5px}#bdfoot{margin-top:12px;font-size:12.5px}.bdgrab{display:block;width:36px;height:3px;background:var(--line);margin:12px auto 0}
+@media (min-width:1000px){#bdrop{left:auto;right:40px;top:60px;border:1px solid var(--fg);width:480px}}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -305,7 +313,7 @@ body.lvon #askbar{display:none!important}
  <div id="lvstat">Connecting…</div><div id="lvtx"></div>
  <button id="lvcut">Tap to interrupt</button>
  <div class="lvacts"><button class="lvb" id="lvmute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path class="slash" d="M4 3l16 18" stroke="#e0605a" stroke-width="2.2"/></svg></button><button class="lvb" id="lvend" aria-label="Make small"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>
-<div class="sheet" id="bmenu"><div class="grab"></div><div class="lab">What G.A.R.Y. runs on</div><div id="bmlist" style="margin-top:10px"></div></div>
+<div id="bdrop"><div class="bdhead"><div class="lab">What G.A.R.Y. runs on</div><button id="bdx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="bdlist"></div><div class="hint" id="bdfoot"></div><i class="bdgrab"></i></div>
 <div id="bconf"><div class="bcbox"><div id="bctx"></div><p id="bcbody"></p><div class="goacts"><button class="btn fill" id="bcyes">Turn off</button><button class="btn ghost" id="bcno">Keep on</button></div></div></div>
 <div class="sheet" id="mem"><div class="grab"></div>
  <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab">What Gary remembers</div><button class="btn" id="madd">Add +</button></div>
@@ -796,7 +804,7 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
  if(c.outputTranscription&&c.outputTranscription.text)LV.outT+=c.outputTranscription.text;
  if(c.modelTurn&&!LV.drop)for(const p of c.modelTurn.parts||[]){if(p.inlineData&&p.inlineData.data){const r=+((p.inlineData.mimeType||'').match(/rate=(\d+)/)||[0,24000])[1];lvPlay(p.inlineData.data,r);lvStatus('Gary')}}
  if(c.turnComplete){LV.drop=false;LV.recv=0;if(LV.inT.trim())lvLine('you',LV.inT.trim());if(LV.outT.trim())lvLine('gary',LV.outT.trim());lvSaveTurn()}}
-async function liveStart(again){if(!gUse().google){toast('Live voice needs Google Gemini - tap the symbols by Momentum to switch it on');return}if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
+async function liveStart(again){if(!gUse().live){toast('Live voice is switched off - tap the symbols by Momentum to switch it on');return}if(!gUse().google){toast('Live voice needs Google Gemini - tap the symbols by Momentum to switch it on');return}if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // inside the tap, so iPhone allows sound
  LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open');$('lvorb').className=''}lvStatus('Connecting…');
@@ -1146,7 +1154,7 @@ function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
  const end=()=>{if(!GF.drag)return;GF.drag=false;if(GF.moved){store('garyPos',Math.round(GF.x)+','+Math.round(GF.y));GF.hold=performance.now()+8000;gMood('happy',900)}else go('gary')};
  f.addEventListener('pointerup',end);f.addEventListener('pointercancel',end);
  addEventListener('resize',()=>{if(f.classList.contains('on'))gFloatPlace()});
- gCanvas($('gdock'));gCanvas($('lvorb'));$('gfid').onclick=()=>gGate();$('brain').onclick=e=>{e.stopPropagation();brainMenu()};$('bmlist').onclick=e=>{const t=e.target.closest('[data-bk]');if(t)brainToggle(t.dataset.bk)};brainDraw();
+ gCanvas($('gdock'));gCanvas($('lvorb'));$('gfid').onclick=()=>gGate();$('brain').onclick=e=>{e.stopPropagation();brainMenu()};$('bdlist').onclick=e=>{const t=e.target.closest('[data-bk]');if(t)brainToggle(t.dataset.bk)};$('bdx').onclick=brainClose;$('veil').addEventListener('click',brainClose);(function(){const d=$('bdrop');let y0=null;d.addEventListener('pointerdown',e=>{if(!e.target.closest('button'))y0=e.clientY});d.addEventListener('pointermove',e=>{if(y0!==null&&e.clientY-y0<-50){y0=null;brainClose()}});d.addEventListener('pointerup',()=>y0=null)})();brainDraw();
  $('gsay').onclick=()=>$('ask').focus();$('gcut').onclick=()=>{speakStop();gMood('idle')};gFloatSync()}
 async function gNotesCopy(){if(!CS){toast('Sign in first');return}
  try{const since=new Date(Date.now()-14*864e5).toISOString();const rows=await gdb('gary_audit?select=action,detail,at&or=(ok.eq.false,action.eq.wish)&at=gte.'+since+'&order=at.desc&limit=40')||[];
@@ -1179,7 +1187,7 @@ const BR_ICON={google:'<svg viewBox="0 0 16 16"><path d="M8 1c.6 3.6 3.4 6.4 7 7
  local:'<svg viewBox="0 0 16 16"><path d="M8 1.5 14.5 8 8 14.5 1.5 8z"/></svg>',pc:'<svg viewBox="0 0 16 16"><path d="M2 3h12v8H2zM6 14h4M8 11v3" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>'};
 let BR={src:'google',g:'ok',q:'ok',model:'',groqLeft:null,googleNote:'',pc:'off',pcName:'',at:0};try{Object.assign(BR,JSON.parse(store('garyBrain')||'{}'))}catch(e){}
 function brainSave(){store('garyBrain',JSON.stringify(BR))}
-function gUse(){let u={};try{u=JSON.parse(store('garyUse')||'{}')}catch(e){}return{google:u.google!==false,groq:u.groq!==false,pc:u.pc!==false}}
+function gUse(){let u={};try{u=JSON.parse(store('garyUse')||'{}')}catch(e){}return{google:u.google!==false,groq:u.groq!==false,pc:u.pc!==false,live:u.live!==false}}
 function brainFrom(b){if(!b||!b.model)return;const tried=b.tried||[],groq=/^groq /.test(b.model);BR.model=b.model.replace(/^groq /,'');BR.at=Date.now();
  const gFail=tried.filter(x=>/^gemini/.test(x)&&!/ 200$/.test(x));BR.groqLeft=b.groqLeft!=null?b.groqLeft:BR.groqLeft;
  BR.src=groq?'groq':'google';BR.g=gFail.length?(groq?'out':'low'):(groq&&tried.some(x=>/^gemini/.test(x))?'out':'ok');BR.q=BR.groqLeft!=null&&BR.groqLeft<0.2?'low':'ok';
@@ -1189,25 +1197,38 @@ function brainDraw(){const e=$('brain');if(!e)return;const U=gUse(),off=!navigat
  set('bgo','google',off?'off':!U.google?'dis':(BR.g==='ok'?'ok':BR.g)+(BR.src==='google'||live?' act':''));
  set('bgq','groq',off?'off':!U.groq?'dis':BR.q+(BR.src==='groq'&&!live?' act':''));
  set('bpc','pc',!U.pc?'dis':BR.pc==='on'?'ok':'off');
- if(off)set('bsrc','local','off show');else if(live)set('bsrc','live',(LV.ready?'ok':'low')+' show act');else $('bsrc').className=''}
+ if(off)set('bsrc','local','off show');else if(live)set('bsrc','live',(LV.ready?'ok':'low')+' show act');else if(!U.live)set('bsrc','live','dis show');else $('bsrc').className=''}
 async function brainPC(){if(!CS||!navigator.onLine)return;try{const a=await gdb('gary_agents?select=name,last_seen&order=last_seen.desc&limit=1');const on=a&&a[0]&&Date.now()-new Date(a[0].last_seen).getTime()<150000;
  BR.pc=on?'on':'off';BR.pcName=a&&a[0]?a[0].name:'';brainSave();brainDraw()}catch(e){}}
 setInterval(brainPC,60000);setTimeout(brainPC,1500);addEventListener('online',brainDraw);addEventListener('offline',brainDraw);
-const BR_OFF={google:'G.A.R.Y. will think with Groq only. Live voice talk needs Google, so pulling him up to talk will stop working, and his spoken replies will use Groq\'s voice instead.',
+const BR_OFF={live:'You won\'t be able to talk out loud with G.A.R.Y. - pulling his bar up will do nothing. Typing still works as normal.',google:'G.A.R.Y. will think with Groq only. Live voice talk needs Google, so pulling him up to talk will stop working, and his spoken replies will use Groq\'s voice instead.',
  groq:'No backup brain: if Google is busy or runs out, G.A.R.Y. won\'t switch over - he\'ll just tell you he\'s unavailable until Google is back.',
  pc:'G.A.R.Y. won\'t do anything on your PC - no opening apps, finding files or media controls. Your plan still syncs with the PC as normal.'};
-function brainMenu(){const U=gUse(),live=LV.on,off=!navigator.onLine||!CS;
- const row=(k,icon,name,stat)=>'<div class="set bmrow"><i class="bmi '+$('b'+({google:'go',groq:'gq',pc:'pc'})[k]).className+'">'+BR_ICON[icon]+'</i><div>'+name+'<small>'+stat+'</small></div><button class="tog'+(U[k]?' on':'')+'" data-bk="'+k+'"></button></div>';
- const gs=off?'Offline':!U.google?'Switched off':BR.g==='out'?'Busy or out right now - Groq is covering':BR.g==='low'?'Busy - using a backup Google model':(BR.src==='google'?'Thinking with it now':'Ready')+(BR.src==='google'&&BR.model?' ('+BR.model+')':'');
- const qs=off?'Offline':!U.groq?'Switched off':(BR.src==='groq'?'Thinking with it now':'Standing by as backup')+(BR.groqLeft!=null?' - '+Math.round(BR.groqLeft*100)+'% allowance left today':'');
- const ps=!U.pc?'Switched off':BR.pc==='on'?'On'+(BR.pcName?' ('+BR.pcName+')':'')+' - G.A.R.Y. can use it':'Off or asleep';
- $('bmlist').innerHTML=row('google','google','Google Gemini',gs)+row('groq','groq','GroqCloud',qs)+row('pc','pc','Your PC',ps)+
-  '<div class="hint">'+(off?'No internet or not signed in: Momentum runs from this phone\'s memory and G.A.R.Y. can\'t think.':live?'Live voice is running on Google Gemini Live.':'Plan sync: '+($('sync').className==='ok'?'up to date':'waiting for a connection'))+'</div>';
- sheet('bmenu',true)}
-function brainToggle(k){const U=gUse();if(!U[k]){U[k]=true;store('garyUse',JSON.stringify(U));brainDraw();brainMenu();toast({google:'Google Gemini',groq:'GroqCloud',pc:'PC access'}[k]+' is back on');return}
+const BR_NAME={google:'Google Gemini',groq:'GroqCloud',live:'Live voice',pc:'Your PC'};
+let BRD={};
+async function brainData(){if(!CS||!navigator.onLine)return;const day=new Date();day.setHours(0,0,0,0);
+ try{const [ag,rp,lv]=await Promise.all([gdb('gary_agents?select=name,last_seen,info&order=last_seen.desc&limit=1'),
+  gdb('gary_audit?select=detail&action=eq.reply&at=gte.'+day.toISOString()+'&limit=500'),gdb('gary_audit?select=at&action=eq.live_start&at=gte.'+day.toISOString()+'&limit=200')]);
+  BRD={pc:ag&&ag[0],g:(rp||[]).filter(r=>!/^groq/.test(r.detail&&r.detail.model||'')).length,q:(rp||[]).filter(r=>/^groq/.test(r.detail&&r.detail.model||'')).length,lv:(lv||[]).length};
+  if(BRD.pc){BR.pc=Date.now()-new Date(BRD.pc.last_seen).getTime()<150000?'on':'off';BR.pcName=BRD.pc.name}brainSave();brainDraw();if($('bdrop').classList.contains('on'))brainMenu(true)}catch(e){}}
+function brainMenu(keep){const U=gUse(),off=!navigator.onLine||!CS,live=typeof LV!=='undefined'&&LV.on;
+ const bar=(pct,cls,label)=>'<div class="bdbar"><i class="'+cls+'" style="width:'+Math.max(3,Math.min(100,pct))+'%"></i></div><div class="bdlab">'+label+'</div>';
+ const row=(k,icon,meaning,conn,b)=>'<div class="bdrow"><i class="bmi '+(!U[k]?'dis':conn?'ok':'off')+'">'+BR_ICON[icon]+'</i><div class="bdtx"><div class="bdname">'+BR_NAME[k]+' <span class="'+(conn&&U[k]?'bdon':'bdoff')+'">'+(!U[k]?'Switched off':conn?'Connected':'Not connected')+'</span></div><small>'+meaning+'</small>'+(U[k]?b:'')+'</div><button class="tog'+(U[k]?' on':'')+'" data-bk="'+k+'"></button></div>';
+ const gConn=!off&&BR.g!=='out',gp=BR.g==='ok'?100:BR.g==='low'?45:8;
+ const qConn=!off,qp=BR.groqLeft!=null?Math.round(BR.groqLeft*100):100;
+ const pcOn=BR.pc==='on',dr=BRD.pc&&BRD.pc.info&&BRD.pc.info.drives||{},dk=Object.keys(dr)[0];
+ $('bdlist').innerHTML=
+  row('google','google','✦ His main brain - thinks and writes his replies.',gConn,bar(gp,BR.g==='ok'?'ok':BR.g,(BR.g==='ok'?'Running well':BR.g==='low'?'Busy - on a backup model':'Full or busy - Groq is covering')+(BRD.g!=null?' · '+BRD.g+' replies today':'')+' · Google doesn\'t say exactly how much is left'))+
+  row('groq','groq','⚡ His backup brain - takes over the moment Google is busy or full.',qConn,bar(qp,qp<20?'low':'ok',(BR.groqLeft!=null?qp+'% of today\'s allowance left':'Allowance not checked yet - shows after he uses it')+(BRD.q!=null?' · '+BRD.q+' replies today':'')))+
+  row('live','live','〰 Talking out loud with him - pull his bar up. Runs on Google Gemini Live.',!off&&U.google,bar(live?100:BRD.lv?Math.max(8,100-BRD.lv*4):100,'ok',(live?'Talking now':'Ready')+(BRD.lv!=null?' · '+BRD.lv+' conversation'+(BRD.lv===1?'':'s')+' today':'')))+
+  row('pc','pc','▭ Your computer - he can open apps, find files and control media when it\'s on.',pcOn,dk?bar(Math.round(100*(1-dr[dk].free_gb/dr[dk].total_gb)),dr[dk].free_gb<15?'low':'ok',dk+' drive: '+dr[dk].free_gb+' GB free of '+dr[dk].total_gb+(BR.pcName?' · '+BR.pcName:'')):bar(pcOn?100:5,pcOn?'ok':'off',pcOn?'On':'Off or asleep'));
+ $('bdfoot').textContent=(off?'◆ Right now: no internet or not signed in, so Momentum is running from this phone\'s memory and G.A.R.Y. can\'t think. ':'◆ appears instead when you\'re offline: Momentum runs from this phone\'s memory. ')+'Plan sync: '+($('sync').className==='ok'?'up to date.':'waiting for a connection.');
+ if(!keep){$('bdrop').classList.add('on');$('veil').classList.add('on');brainData()}}
+function brainClose(){$('bdrop').classList.remove('on');if(!document.querySelector('.sheet.on'))$('veil').classList.remove('on')}
+function brainToggle(k){const U=gUse();if(!U[k]){U[k]=true;store('garyUse',JSON.stringify(U));brainDraw();brainMenu(true);toast(BR_NAME[k]+' is back on');return}
  const both=(k==='google'&&!U.groq)||(k==='groq'&&!U.google);
- $('bctx').textContent='Turn off '+{google:'Google Gemini',groq:'GroqCloud',pc:'PC access'}[k]+'?';$('bcbody').textContent=BR_OFF[k]+(both?' With both brains off, G.A.R.Y. can\'t reply at all.':'');
- $('bconf').classList.add('on');$('bcyes').onclick=()=>{U[k]=false;store('garyUse',JSON.stringify(U));$('bconf').classList.remove('on');brainDraw();brainMenu();toast('Switched off')};$('bcno').onclick=()=>$('bconf').classList.remove('on')}
+ $('bctx').textContent='Turn off '+BR_NAME[k]+'?';$('bcbody').textContent=BR_OFF[k]+(both?' With both brains off, G.A.R.Y. can\'t reply at all.':'');
+ $('bconf').classList.add('on');$('bcyes').onclick=()=>{U[k]=false;store('garyUse',JSON.stringify(U));$('bconf').classList.remove('on');brainDraw();brainMenu(true);toast('Switched off')};$('bcno').onclick=()=>$('bconf').classList.remove('on')}
 // voice screen: swipe down (or the cross) to shrink into the message bar's spot; swipe up or tap G.A.R.Y. to bring it back
 function lvMini(on){$('live').classList.toggle('mini',on);$('lvend').setAttribute('aria-label',on?'End call':'Make small')}
 (function(){const L=$('live');let y0=null,dy=0;
