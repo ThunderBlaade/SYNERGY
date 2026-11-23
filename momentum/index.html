@@ -238,9 +238,12 @@ body.lvon #askbar{display:none!important}
 .bdbar{height:5px;background:var(--line);position:relative}.bdbar i{position:absolute;left:0;top:0;bottom:0;background:#5fbf5f}.bdbar i.low{background:#e8c25a}.bdbar i.out{background:#e0605a}.bdbar i.off{background:var(--faint)}
 .bdlab{font-size:11.5px;color:var(--dim);margin-top:5px}#bdfoot{margin-top:12px;font-size:12.5px}.bdgrab{display:block;width:36px;height:3px;background:var(--line);margin:12px auto 0}
 @media (min-width:1000px){#bdrop{left:auto;right:40px;top:60px;border:1px solid var(--fg);width:480px}}
+#bgo,#bgq,#bpc,#bsrc,#bsrc.show{display:none!important}
+#brain #bwifi{display:block;width:20px;height:20px;opacity:1}#brain #bwifi svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2}
+#bwifi.ok{color:#5fbf5f}#bwifi.low{color:#e8c25a}#bwifi.out{color:#e0605a}#bwifi.off{color:var(--faint)}#bwifi.live{animation:blink 1.4s ease-in-out infinite}
 </style></head><body>
 <div id="app">
-<header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
+<header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
 
 <section class="pane on" id="p-today">
  <div class="lab" id="tlab">Today</div><h1 id="tday"></h1>
@@ -273,8 +276,8 @@ body.lvon #askbar{display:none!important}
 </section>
 
 <section class="pane" id="p-gary">
- <div class="gtop"><div class="lab" id="ctitle">New chat</div><button class="lab" id="gfid">Use Face ID</button>
- <span><button class="lab" id="memBtn" style="color:var(--fg);margin-right:18px">Memory ›</button><button class="lab" id="chatsBtn" style="color:var(--fg)">Chats ›</button></span></div><h1>G.A.R.Y.</h1><div class="lab gsub">General Assistant for Reasoning and You</div>
+ <div class="gtop"><button class="lab" id="memBtn" style="color:var(--fg)">Memory ›</button><div class="lab" id="ctitle" hidden>New chat</div><button class="lab" id="gfid">Use Face ID</button>
+ <button class="lab" id="chatsBtn" style="color:var(--fg)">Chats ›</button></div><h1>G.A.R.Y.</h1><div class="lab gsub">General Assistant for Reasoning and You</div>
  <div id="thread"></div>
 </section>
 
@@ -1197,7 +1200,7 @@ function brainDraw(){const e=$('brain');if(!e)return;const U=gUse(),off=!navigat
  set('bgo','google',off?'off':!U.google?'dis':(BR.g==='ok'?'ok':BR.g)+(BR.src==='google'||live?' act':''));
  set('bgq','groq',off?'off':!U.groq?'dis':BR.q+(BR.src==='groq'&&!live?' act':''));
  set('bpc','pc',!U.pc?'dis':BR.pc==='on'?'ok':'off');
- if(off)set('bsrc','local','off show');else if(live)set('bsrc','live',(LV.ready?'ok':'low')+' show act');else if(!U.live)set('bsrc','live','dis show');else $('bsrc').className=''}
+ if(off)set('bsrc','local','off show');else if(live)set('bsrc','live',(LV.ready?'ok':'low')+' show act');else if(!U.live)set('bsrc','live','dis show');else $('bsrc').className='';const w=$('bwifi'),noBrain=(!U.google||BR.g==='out')&&!U.groq;w.className=off?'off':noBrain?'out':live?'ok live':(BR.g!=='ok'||(BR.groqLeft!=null&&BR.groqLeft<0.2))?'low':'ok'}
 async function brainPC(){if(!CS||!navigator.onLine)return;try{const a=await gdb('gary_agents?select=name,last_seen&order=last_seen.desc&limit=1');const on=a&&a[0]&&Date.now()-new Date(a[0].last_seen).getTime()<150000;
  BR.pc=on?'on':'off';BR.pcName=a&&a[0]?a[0].name:'';brainSave();brainDraw()}catch(e){}}
 setInterval(brainPC,60000);setTimeout(brainPC,1500);addEventListener('online',brainDraw);addEventListener('offline',brainDraw);
