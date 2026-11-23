@@ -97,6 +97,9 @@ async function recall(text, token) {
     const score = (m) => words.filter((w) => m.text.toLowerCase().includes(w) || (m.people || []).some((p) => p.toLowerCase() === w)).length;
     hits = hits.map((m) => [score(m), m]).sort((a, b) => b[0] - a[0]).slice(0, 8).map((x) => x[1]);
   }
+  const recent = await db("gary_memories?select=id,text&source=eq.conversation&deleted=is.false&order=created_at.desc&limit=8", token).catch(() => []);
+  const seen = new Set(hits.map((m) => m.text));
+  hits = hits.concat(recent.filter((m) => !seen.has(m.text)));
   return { profile: profile.map((m) => "- " + m.text).join("\n"),
            moments: hits.map((m) => `- ${m.happened ? m.happened.slice(0, 7) + ": " : ""}${m.text}${m.basis === "inferred" ? " (his guess, unconfirmed)" : ""}`).join("\n") };
 }
@@ -198,7 +201,13 @@ e.g. "Done - gym's in for tomorrow at six."), then put each change on its own li
 ⟦delete {"id":"<id>"}⟧   (he'll be asked to confirm, so say you've asked rather than that it's gone)
 Rules: date null = to-do with no day; time null = anytime. prio high|med|low|none. repeat none|daily|weekdays|weekly. dur in minutes.
 Use only ids shown in [brackets] above. If it's unclear which task he means, ask instead of guessing. At most 8 changes.
-Keep titles short and verb-first. You can't yet open things on his PC or look at his files - say so plainly if asked.`;
+Keep titles short and verb-first. You can't yet open things on his PC or look at his files - say so plainly if asked.
+
+Memory: when he tells you something about himself worth keeping long-term (a fact, preference, goal, routine, a person in his life,
+something that happened, a decision), save it in his own terms, one fact per line, at the very END like the changes above:
+\u27e6remember {"text":"Started a new job at TK Maxx in November 2026","kind":"personal|episodic|operational|preference","people":["Name"],"happened":"YYYY-MM-DD" or null}\u27e7
+Only save what he actually said - never your guesses. Don't save small talk, or anything already in what you know about him. At most 3 per reply.
+Don't announce it at length; a light "noted" is plenty.`;
 
 // --- turning Gary's action lines into safe, checked changes (nothing else ever runs)
 const ISO = /^\d{4}-\d{2}-\d{2}$/, HM = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -210,6 +219,20 @@ function cleanFields(a, into) {
   if (["high", "med", "low", "none"].includes(a.prio)) into.prio = a.prio;
   if (["none", "daily", "weekdays", "weekly"].includes(a.repeat)) into.repeat = a.repeat;
   return into;
+}
+export function parseMemories(reply) {
+  const out = [];
+  for (const m of reply.matchAll(/\u27e6\s*remember\s+(\{[\s\S]*?\})\s*\u27e7/g)) {
+    if (out.length >= 3) break;
+    let a; try { a = JSON.parse(m[1]); } catch { continue; }
+    const text = typeof a.text === "string" ? a.text.trim().slice(0, 1000) : "";
+    if (text.length < 4) continue;
+    out.push({ id: "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text,
+      kind: ["personal", "episodic", "operational", "preference"].includes(a.kind) ? a.kind : "personal",
+      people: Array.isArray(a.people) ? a.people.filter((p) => typeof p === "string").map((p) => p.slice(0, 40)).slice(0, 8) : [],
+      happened: ISO.test(a.happened || "") ? a.happened : null, importance: 3, source: "conversation", basis: "stated", sensitive: false });
+  }
+  return out;
 }
 export function parseActions(reply) {
   const out = [];
@@ -306,10 +329,14 @@ export async function handle(req) {
       await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "reply", detail: { ...INFO, ms: Date.now() - t0, chars: reply.length } }) }).catch(() => {});
       const actions = parseActions(reply);
       const said = (reply.indexOf("\u27e6") < 0 ? reply : reply.slice(0, reply.indexOf("\u27e6"))).trim();
+      const remembered = parseMemories(reply);
+      if (remembered.length) await db("gary_memories", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(remembered) })
+        .then(() => db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "remembered", detail: { n: remembered.length } }) }))
+        .catch(() => { remembered.length = 0; });
       if (actions.length) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "proposed", detail: { actions } }) }).catch(() => {});
       await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "gary", content: said || "…" }) }).catch(() => {});
       await db(`gary_convos?id=eq.${convo}`, token, { method: "PATCH", body: JSON.stringify({ updated_at: new Date().toISOString() }) }).catch(() => {});
-      ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title, actions })));
+      ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title, actions, remembered: remembered.map((m) => ({ id: m.id, text: m.text })) })));
       ctrl.close();
     })(); },
   });
