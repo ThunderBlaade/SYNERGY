@@ -1163,7 +1163,12 @@ async function gNotesCopy(){if(!CS){toast('Sign in first');return}
 const G_BANTER=[['Ask G.A.R.Y. anything…','Anything within reason, sir.','smug'],['He doesn\'t bite.','I nibble. Occasionally.','cheeky'],['G.A.R.Y. is pretty gay if you ask me.','Fabulous, actually. Nobody asked you.','sarcastic'],
  ['Type something. He\'s getting bored.','The sentient search bar is being mean to me again, sir.','sad'],['Go on, he\'s lonely.','I am NOT lonely. I have tea.','sittea'],['Psst. Ask about his monocle.','It\'s for reading. And judging.','dapper'],
  ['I\'m the real brains round here.','You\'re a rectangle.','eyeroll'],['Say something nice to him.','Ignore the sentient search bar, sir. It\'s jealous.','smug'],['He talks to birds, you know.','Only the clever ones.','birdwatching'],
- ['Waiting…','Patiently. Like a gentleman.','waiting'],['Bet he can\'t do a backflip.','I could. I simply choose not to.','proud'],['Your keyboard has a mic, you know.','So do I. Pull me up, sir.','pointUp']];
+ ['Waiting…','Patiently. Like a gentleman.','waiting'],['Bet he can\'t do a backflip.','I could. I simply choose not to.','proud'],['Pull him up to talk, I dare you.','Finally, it says something useful.','smug'],
+ ['Without G.A.R.Y. I\'m just a rectangle.','And with me, you\'re a rectangle with prospects.','dapper'],
+ ['I don\'t NEED him. I just like the company.','It cried when the Wi-Fi went down.','cheeky'],
+ ['Don\'t you dare leave me alone with Sam\'s typing.','There, there. I\'m not going anywhere.','hug'],
+ ['If he goes offline I go dark. No pressure.','Melodramatic, but technically correct.','eyeroll'],
+ ['He\'s alright, I suppose. Don\'t tell him.','I can hear you. I\'m right here.','sarcastic']];
 let gBi=Math.floor(Math.random()*G_BANTER.length);
 (function banter(){setTimeout(()=>{const a=$('ask');if(a&&!a.value&&document.activeElement!==a&&tab==='gary'&&!talking&&!GSPK&&!LV.on&&!GB.shown){const p=G_BANTER[gBi++%G_BANTER.length];
   a.placeholder=p[0];a.style.height=p[0].length>26?'74px':'';setTimeout(()=>{if(GB.shown||talking||LV.on)return;gBubble(p[1],4500);if(!GS.until&&!GB.sit)gMood(p[2],2600);
