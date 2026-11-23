@@ -294,6 +294,11 @@ export function parseActions(reply) {
   return out;
 }
 
+const VOICES = ["Charon", "Orus", "Iapetus", "Algenib", "Rasalgethi", "Sadaltager", "Schedar", "Enceladus"];
+const VOICE_STYLE = "Read this aloud as Gary: a refined English gentleman butler in his fifties with a warm, low, smooth Received Pronunciation " +
+  "British accent. Relaxed, natural pace with real pauses and breaths, dry understated wit, quietly confident, never robotic or sing-song. " +
+  "Say only the words after the colon:\n\n";
+
 const MISHAP = {
   nokey: "My brain isn't plugged in yet, sir - there's no Gemini or Groq key in Supabase's Secrets. Once one is there, I'm all yours.",
   busy: "I've used up my free thinking allowance with Google for now, sir. Give it a few minutes and try me again.",
@@ -310,6 +315,39 @@ export async function handle(req) {
   try { body = await req.json(); } catch { body = {}; }
   const text = String(body.text || "").trim().slice(0, 6000);
   if (!text) return new Response(JSON.stringify({ error: "Say something." }), { status: 400, headers: { ...CORS, "Content-Type": "application/json" } });
+
+  // Gary's voice: text -> natural speech (raw 16-bit mono PCM). Google first, Groq next; the app falls back to the device voice.
+  if (body.mode === "speak") {
+    const voice = VOICES.includes(body.voice) ? body.voice : (env("GARY_VOICE") || "Charon");
+    const say = text.replace(/[*_#`\u27e6\u27e7]/g, "").slice(0, 1500);
+    const key = env("GEMINI_API_KEY");
+    for (const m of (env("GARY_TTS_MODEL") || "gemini-3.8-flash-tts,gemini-3.1-flash-tts-preview,gemini-2.5-flash-preview-tts").split(",").map((x) => x.trim()).filter(Boolean)) {
+      if (!key) break;
+      try {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
+          method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+          body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: VOICE_STYLE + say }] }],
+            generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } } }) });
+        if (!r.ok) continue;
+        const j = await r.json();
+        const part = (j.candidates?.[0]?.content?.parts || []).find((p) => p.inlineData?.data);
+        if (!part) continue;
+        const rate = +((part.inlineData.mimeType || "").match(/rate=(\d+)/) || [0, 24000])[1];
+        const bin = Uint8Array.from(atob(part.inlineData.data), (c) => c.charCodeAt(0));
+        return new Response(bin, { headers: { ...CORS, "Content-Type": "audio/pcm", "X-Rate": String(rate), "X-Voice": m, "Access-Control-Expose-Headers": "X-Rate, X-Voice" } });
+      } catch { /* next */ }
+    }
+    const gk = env("GROQ_API_KEY");
+    if (gk) {
+      try {
+        const r = await fetch("https://api.groq.com/openai/v1/audio/speech", { method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: "Bearer " + gk },
+          body: JSON.stringify({ model: "canopylabs/orpheus-v1-english", voice: "daniel", input: say.slice(0, 1200), response_format: "wav" }) });
+        if (r.ok) return new Response(await r.arrayBuffer(), { headers: { ...CORS, "Content-Type": "audio/wav", "X-Voice": "groq", "Access-Control-Expose-Headers": "X-Rate, X-Voice" } });
+      } catch { /* fall through */ }
+    }
+    return new Response(JSON.stringify({ error: "no voice" }), { status: 503, headers: { ...CORS, "Content-Type": "application/json" } });
+  }
 
   // Brain dump: messy thoughts -> small tasks (JSON, not a conversation)
   if (body.mode === "dump") {

@@ -484,14 +484,16 @@ function renderYou(){const b=$('ybody');
   '<div class="set"><div>Morning plan<small>When Gary asks you to shape the day</small></div><input type="time" id="smo" value="'+(st.morning||'08:30')+'"></div>'+
   '<div class="set"><div>Evening reflection<small>A look back at what counted</small></div><input type="time" id="sev" value="'+(st.evening||'21:00')+'"></div>'+
   '<div class="set"><div>Heads-up before tasks</div><div class="chips" id="srem"></div></div>'+
-  '<div class="set"><div>Gary speaks his replies<small>In a British voice from your device</small></div><button class="tog'+(store('garySpeak')==='1'?' on':'')+'" id="ssp"></button></div>'+
+  '<div class="set"><div>Gary\'s voice<small>Tap one to hear him</small></div><div class="chips" id="svoice"></div></div>'+
+  '<div class="set"><div>Gary speaks every reply<small>He always answers aloud when you talk to him</small></div><button class="tog'+(store('garySpeak')==='1'?' on':'')+'" id="ssp"></button></div>'+
   '<div class="set"><div>Sync across devices<small>'+(CS?(S.cloud==='off'?'Can\'t reach the cloud right now - saved here':'On · '+esc(CS.email||'')):'Sign in with your Synergy login to keep phone, iPad and PC in step')+'</small></div><button class="btn ghost" id="scloud">'+(CS?'Sign out':'Sign in')+'</button></div>'+
   '<div class="set"><div>Your PC<small>'+(!STATIC?'You\'re on the PC. Open Momentum anywhere: thunderblaade.github.io/synergy/momentum':PC?(S.online?'Connected - notifications and PC tasks are on':'Not reachable right now (is it on, with Tailscale?)'):'Connect it for notifications. Gary works without it.')+'</small></div>'+(STATIC?'<button class="btn ghost" id="spc">'+(PC?'Change':'Connect')+'</button>':'<button class="btn ghost" id="slink">Copy link</button>')+'</div>'+
   '<div class="set"><div>Sync now</div><button class="btn ghost" id="ssync">Sync</button></div>';
   const setS=(k,v)=>{S.settings[k]=v;S.settings.updated=Date.now();S.dirty.settings=true;save();scheduleSync()};
   $('sn').onclick=()=>{setS('nudges',!st.nudges);renderYou()};$('smo').onchange=e=>setS('morning',e.target.value);$('sev').onchange=e=>setS('evening',e.target.value);
   chips('srem',[[0,'Off'],[5,'5m'],[10,'10m'],[15,'15m']],st.remind==null?5:st.remind,v=>{setS('remind',+v);renderYou()});
-  $('ssp').onclick=()=>{const on=store('garySpeak')!=='1';store('garySpeak',on?'1':'0');if(on)speak('Very good, sir. I shall speak up.');renderYou()};$('ssync').onclick=()=>{sync().then(()=>toast(S.online||S.cloud==='ok'?'Synced':'Saved on this device - nothing reachable to sync with'))};
+  $('ssp').onclick=()=>{audioUnlock();const on=store('garySpeak')!=='1';store('garySpeak',on?'1':'0');if(on)speak('Very good, sir. I shall speak up.');renderYou()};
+  chips('svoice',GVOICES.map(v=>[v,v]),store('garyVoice')||'Charon',v=>{audioUnlock();store('garyVoice',v);speak('Good evening, sir. Gary, at your service. Shall we see what today has in store?');renderYou()});$('ssync').onclick=()=>{sync().then(()=>toast(S.online||S.cloud==='ok'?'Synced':'Saved on this device - nothing reachable to sync with'))};
   $('scloud').onclick=()=>{if(CS){if(confirm('Sign out of sync on this device? Your plan stays here.')){CS=null;store('momCloud','');renderYou()}}else sheet('signin',true)};
   if($('spc'))$('spc').onclick=()=>{const v=prompt('Paste your PC link (the https://…ts.net/?key=… one):',PC?PC.origin+'/?key='+PC.key:'');if(!v)return;
    try{const u=new URL(v.trim()),k=u.searchParams.get('key');if(!k)throw 0;PC={origin:u.origin,key:k};store('momPC',JSON.stringify(PC));API=PC.origin;key=k;Q='?key='+encodeURIComponent(k);toast('Connecting…');
@@ -628,7 +630,8 @@ function garyJobs(jobs,after){if(!jobs||!jobs.length)return;const box=document.c
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
 async function garyFetch(body){const tok=await clTok();if(!tok)throw new Error('signin');
  return fetch(CL.url+'/functions/v1/gary',{method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
-async function ask(text){text=text.trim();if(talking||!text)return;
+let VOICEIN=false;
+async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock();
  if(!CS){toast('Sign in under You → Settings to talk to Gary');return}
  if(!navigator.onLine){toast('Gary needs the internet. Your plan still works offline.');return}
  talking=true;bubble('you',text);const a=bubble('gary','');a.classList.add('wait');const p=$('p-gary');p.scrollTop=p.scrollHeight;let got='';
@@ -638,11 +641,29 @@ async function ask(text){text=text.trim();if(talking||!text)return;
   for(;;){const{value,done}=await rd.read();if(done)break;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
   const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);garyJobs(j.jobs,a)}catch(e){}}}
  catch(e){if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':'I can\'t reach the cloud just now, sir. Try again in a moment.'}
- a.classList.remove('wait');talking=false;const said=got.split('\x1e')[0].trim();if(said&&store('garySpeak')==='1')speak(said)}
+ a.classList.remove('wait');talking=false;const said=got.split('\x1e')[0].trim();if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
 // Gary's voice: the device's own British male voice (free, swappable later)
 function garyVoice(){const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]GB/i.test(v.lang));
  return vs.find(v=>/daniel|arthur|george|oliver|male|ryan|thomas/i.test(v.name))||vs[0]||null}
-function speak(t){if(!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[*_#`]/g,''));u.lang='en-GB';const v=garyVoice();if(v)u.voice=v;u.rate=1;u.pitch=.95;speechSynthesis.speak(u)}
+// ---------- Gary's voice: natural speech from the cloud, played gap-free; the device voice is only a fallback
+const GVOICES=['Charon','Orus','Iapetus','Algenib','Rasalgethi','Sadaltager','Schedar','Enceladus'];
+let AC=null,acEnd=0,talkGen=0;
+function audioUnlock(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
+ const b=AC.createBuffer(1,1,22050),s=AC.createBufferSource();s.buffer=b;s.connect(AC.destination);s.start(0)}catch(e){}}
+async function ttsFetch(text){const tok=await clTok();if(!tok)throw 0;
+ const r=await fetch(CL.url+'/functions/v1/gary',{method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({mode:'speak',text,voice:store('garyVoice')||'Charon'})});
+ if(!r.ok)throw 0;const buf=await r.arrayBuffer();
+ if((r.headers.get('content-type')||'').includes('pcm')){const rate=+r.headers.get('X-Rate')||24000,i16=new Int16Array(buf.byteLength>>1);new Uint8Array(i16.buffer).set(new Uint8Array(buf,0,i16.length*2));
+  const ab=AC.createBuffer(1,i16.length,rate),ch=ab.getChannelData(0);for(let k=0;k<i16.length;k++)ch[k]=i16[k]/32768;return ab}
+ return await AC.decodeAudioData(buf)}
+function playBuf(ab){const s=AC.createBufferSource();s.buffer=ab;s.connect(AC.destination);const at=Math.max(AC.currentTime+0.05,acEnd);s.start(at);acEnd=at+ab.duration;return s}
+function speakDevice(t){if(!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';const v=garyVoice();if(v)u.voice=v;u.rate=1;u.pitch=.95;speechSynthesis.speak(u)}
+function speakStop(){talkGen++;try{if(AC){AC.close();AC=null;acEnd=0}}catch(e){}try{speechSynthesis.cancel()}catch(e){}}
+async function speak(t){t=String(t||'').replace(/[*_#`]/g,'').trim();if(!t)return;speakStop();audioUnlock();if(!AC||!CS||!navigator.onLine){speakDevice(t);return}
+ const gen=++talkGen;const m=t.match(/^[\s\S]*?[.!?](\s|$)/);const first=m&&m[0].length<t.length&&m[0].length>12?m[0]:t,rest=t.slice(first.length).trim();
+ const parts=[ttsFetch(first)].concat(rest?[ttsFetch(rest)]:[]);   // both start now; the first plays as soon as it's ready
+ try{for(const p of parts){const ab=await p;if(gen!==talkGen)return;playBuf(ab)}}
+ catch(e){if(gen===talkGen){speakStop();speakDevice(t)}}}
 if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{};
 const grow=()=>{const t=$('ask');t.style.height='auto';t.style.height=Math.min(160,t.scrollHeight)+'px'};
 $('ask').addEventListener('input',grow);
@@ -664,7 +685,7 @@ async function hearInto(btn,cb){if(rec){rec.stop();return}
    const blob=new Blob(ch,{type:ch[0]&&ch[0].type||'audio/webm'});toast('Listening back...');
    try{const j=await (await fetch(API+'/hear'+Q,{method:'POST',body:blob})).json();if(j.text)cb(j.text);else toast(j.error||'Didn\'t catch that')}catch(e){toast('Couldn\'t reach the PC to listen')}};
   rec.start();setTimeout(()=>rec&&rec.state==='recording'&&rec.stop(),30000)}catch(e){toast('Microphone not allowed');rec=null}}
-$('emic').onclick=()=>hearInto($('emic'),t=>{$('et').value=t});$('askmic').onclick=()=>hearInto($('askmic'),t=>{$('ask').value=($('ask').value+' '+t).trim();grow();$('ask').focus()});
+$('emic').onclick=()=>hearInto($('emic'),t=>{$('et').value=t});$('askmic').onclick=()=>{audioUnlock();speakStop();hearInto($('askmic'),t=>{const v=($('ask').value+' '+t).trim();$('ask').value='';grow();VOICEIN=true;ask(v)})};
 
 // ---------- reminders and nudges while the app is open
 async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=await (await fetch(API+'/events'+Q)).json();(j.events||[]).forEach(e=>e.text&&toast(e.text));(j.reminders||[]).forEach(r=>toast('Reminder: '+r))}catch(e){}setTimeout(poll,20000)}
