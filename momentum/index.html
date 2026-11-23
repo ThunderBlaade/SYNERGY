@@ -161,6 +161,16 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 #gfbub{position:absolute;bottom:74px;right:0;width:190px;background:#fff;color:#000;font:400 14px/1.35 var(--serif);padding:10px 12px;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
 #gfloat.left #gfbub{right:auto;left:0}#gfloat.say #gfbub{opacity:1;transform:none}
 #gfbub::after{content:"";position:absolute;bottom:-7px;right:24px;border:7px solid transparent;border-bottom:0;border-top-color:#fff}#gfloat.left #gfbub::after{right:auto;left:24px}
+.ghead{display:flex;align-items:flex-end;gap:12px}
+#gdock{width:84px;height:84px;border:0;background:none;padding:0;flex:none;overflow:visible;margin:-6px 0 -2px -8px}
+#gfsp{width:64px;height:64px;background:none;border:0;padding:0;-webkit-backdrop-filter:none;backdrop-filter:none;animation:gbob 3.2s ease-in-out infinite}
+#gfloat{filter:drop-shadow(0 0 1px rgba(255,255,255,.55)) drop-shadow(0 6px 8px rgba(0,0,0,.55))}
+@keyframes gbob{0%{transform:translateY(0)}12.5%{transform:translateY(-1.5px)}25%{transform:translateY(-2.8px)}37.5%{transform:translateY(-3.7px)}50%{transform:translateY(-4px)}62.5%{transform:translateY(-3.7px)}75%{transform:translateY(-2.8px)}87.5%{transform:translateY(-1.5px)}100%{transform:translateY(0)}}
+#gopen{display:none;margin:12px 0 4px;padding:14px 16px;border:1px solid var(--line);background:#0d0e12;animation:gin .35s var(--ease)}#gopen.on{display:block}
+#gotx{font:400 17px/1.45 var(--serif);margin-bottom:12px}.goacts{display:flex;gap:10px}.goacts .btn{flex:1}
+#gcut,#lvcut{display:none;font:500 11px var(--sans);letter-spacing:.18em;text-transform:uppercase;background:#fff;color:#000;border:0;padding:12px 20px}
+#gcut{position:fixed;z-index:45;left:50%;transform:translateX(-50%);bottom:calc(128px + var(--safeB))}#gcut.on{display:block;animation:gin .25s var(--ease)}
+#live.speaking #lvcut{display:block;margin-top:10px}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -198,12 +208,14 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 <section class="pane" id="p-gary">
  <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab" id="ctitle">New chat</div>
  <span><button class="lab" id="memBtn" style="color:var(--fg);margin-right:18px">Memory ›</button><button class="lab" id="chatsBtn" style="color:var(--fg)">Chats ›</button></span></div><div class="ghead"><button id="gdock" aria-label="Gary"></button><h1>Gary</h1></div>
+ <div id="gopen"><div id="gotx"></div><div class="goacts"><button class="btn fill" id="goyes">Reply</button><button class="btn ghost" id="gono">Not now</button></div></div>
  <div id="thread"></div>
 </section>
 
 <div id="askbar"><textarea id="ask" rows="1" placeholder="Ask anything..." spellcheck="true" autocorrect="on" autocapitalize="sentences" enterkeyhint="send"></textarea>
  <button class="mic" id="asksend" aria-label="Send" style="border-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
  <button class="mic" id="askmic" aria-label="Speak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><button class="mic talk" id="livebtn" aria-label="Talk to Gary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg></button></div>
+<button id="gcut">Tap to interrupt</button>
 <div id="gfloat" aria-label="Open Gary"><div id="gfbub"></div><div id="gfsp"></div></div>
 <button id="fab" aria-label="Add">+</button>
 <nav><button class="on" data-t="today"><span class="nw">Today</span><span class="ww">Plan</span></button><button data-t="todo">To-do</button><button data-t="focus">Focus</button><button data-t="you">You</button><button data-t="gary">Gary</button></nav>
@@ -230,6 +242,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 <div id="live"><div class="lab" style="text-align:center">Talking to Gary</div>
  <div class="lvwrap"><div id="lvorb"></div></div>
  <div id="lvstat">Connecting…</div><div id="lvtx"></div>
+ <button id="lvcut">Tap to interrupt</button>
  <div class="lvacts"><button class="btn ghost" id="lvmute">Mute</button><button class="btn fill" id="lvend">End</button></div></div>
 <div class="sheet" id="mem"><div class="grab"></div>
  <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab">What Gary remembers</div><button class="btn" id="madd">Add +</button></div>
@@ -512,6 +525,7 @@ function renderYou(){const b=$('ybody');
   '<div class="set"><div>Evening reflection<small>A look back at what counted</small></div><input type="time" id="sev" value="'+(st.evening||'21:00')+'"></div>'+
   '<div class="set"><div>Heads-up before tasks</div><div class="chips" id="srem"></div></div>'+
   '<div class="set stack"><div>Gary\'s voice<small>Tap one to hear him say hello</small></div><div class="chips" id="svoice"></div></div>'+
+  '<div class="set"><div>Gary\'s notes for Claude<small>What he can\'t do yet and anything that went wrong. Copy and paste to Claude to fix or improve him</small></div><button class="btn ghost" id="sgn" style="min-width:86px">Copy</button></div>'+
   '<div class="set"><div>Gary wanders the other pages<small>Like the old Office assistant. Drag him anywhere; tap him to chat</small></div><button class="tog'+(store('garyFloat')!=='0'?' on':'')+'" id="sgf"></button></div>'+
   '<div class="set"><div>Gary speaks every reply<small>He always answers aloud when you talk to him</small></div><button class="tog'+(store('garySpeak')==='1'?' on':'')+'" id="ssp"></button></div>'+
   '<div class="set"><div>Sync across devices<small>'+(CS?(S.cloud==='off'?'Can\'t reach the cloud right now - saved here':'On · '+esc(CS.email||'')):'Sign in with your Synergy login to keep phone, iPad and PC in step')+'</small></div><button class="btn ghost" id="scloud">'+(CS?'Sign out':'Sign in')+'</button></div>'+
@@ -520,6 +534,7 @@ function renderYou(){const b=$('ybody');
   const setS=(k,v)=>{S.settings[k]=v;S.settings.updated=Date.now();S.dirty.settings=true;save();scheduleSync()};
   $('sn').onclick=()=>{setS('nudges',!st.nudges);renderYou()};$('smo').onchange=e=>setS('morning',e.target.value);$('sev').onchange=e=>setS('evening',e.target.value);
   chips('srem',[[0,'Off'],[5,'5m'],[10,'10m'],[15,'15m']],st.remind==null?5:st.remind,v=>{setS('remind',+v);renderYou()});
+  $('sgn').onclick=gNotesCopy;
   $('sgf').onclick=()=>{store('garyFloat',gFloatOn()?'0':'1');gFloatSync();renderYou()};
   $('ssp').onclick=()=>{audioUnlock();const on=store('garySpeak')!=='1';store('garySpeak',on?'1':'0');if(on)speak('Very good, sir. I shall speak up.');renderYou()};
   chips('svoice',GVOICES.map(v=>[v,v]),store('garyVoice')||'Charon',v=>{audioUnlock();store('garyVoice',v);speak('Good evening, sir. Gary, at your service. Shall we see what today has in store?');renderYou()});$('ssync').onclick=()=>{sync().then(()=>toast(S.online||S.cloud==='ok'?'Synced':'Saved on this device - nothing reachable to sync with'))};
@@ -675,8 +690,14 @@ function lvMic(f32){if(!LV.ready||LV.muted)return;let e=0;for(let i=0;i<f32.leng
  if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({realtimeInput:{audio:{data:b64(new Uint8Array(all.buffer)),mimeType:'audio/pcm;rate=16000'}}}))}
 function lvPlay(b64s,rate){const bin=atob(b64s),n=bin.length>>1,ab=LV.ctx.createBuffer(1,n,rate||24000),ch=ab.getChannelData(0);
  for(let i=0;i<n;i++){let v=bin.charCodeAt(2*i)|(bin.charCodeAt(2*i+1)<<8);if(v>32767)v-=65536;ch[i]=v/32768}
- const s=LV.ctx.createBufferSource();s.buffer=ab;s.connect(LV.ctx.destination);const at=Math.max(LV.ctx.currentTime+0.03,LV.playAt);s.start(at);LV.playAt=at+ab.duration;
+ LV.recv=(LV.recv||0)+ab.duration;const s=LV.ctx.createBufferSource();s.buffer=ab;s.connect(LV.ctx.destination);const at=Math.max(LV.ctx.currentTime+0.03,LV.playAt);s.start(at);LV.playAt=at+ab.duration;
  LV.srcs.push(s);s.onended=()=>{LV.srcs=LV.srcs.filter(x=>x!==s);if(!LV.srcs.length&&LV.on)$('live').classList.remove('speaking')};$('live').classList.add('speaking')}
+// When Sam cuts in: tell Gary exactly how far Sam heard, so he can answer first and then pick up where he left off.
+function lvNoteCut(){const full=(LV.outT||'').trim();if(!full||!LV.ctx)return;const queued=Math.max(0,LV.playAt-LV.ctx.currentTime),rec=LV.recv||0;
+ const frac=rec?Math.max(0,Math.min(1,(rec-queued)/rec)):1;let heard=full.slice(0,Math.floor(full.length*frac)).replace(/\S*$/,'').trim();const rest=full.slice(heard.length).trim();
+ LV.outT=heard?heard+' -':'';LV.recv=0;if(!rest)return;
+ const note='(Note: Sam cut in while you were speaking. He heard you up to: "'+heard.slice(-240)+'". He did not hear the rest: "'+rest.slice(0,300)+'". Answer what he says next first. Then, if it still matters, pick up where you left off in your own way.)';
+ if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:note}]}],turnComplete:false}}))}
 function lvHush(){for(const s of LV.srcs){try{s.stop()}catch(e){}}LV.srcs=[];LV.playAt=0;$('live').classList.remove('speaking')}
 async function lvSaveTurn(){const you=LV.inT.trim(),him=LV.outT.trim();LV.inT='';LV.outT='';if(!you&&!him)return;
  try{if(!CHAT){CHAT='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);store('garyChat',CHAT);await gdb('gary_convos',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id:CHAT,title:'Talk with Gary'})});$('ctitle').textContent='Talk with Gary'}
@@ -688,6 +709,8 @@ async function lvTool(fc){const a=fc.args||{};let res={result:'done'};
    touch(it);render();lvLine('act','+ '+it.title+' · '+dShort(d)+(t?' '+t12(t):''));garyLog('applied',{lines:['+ '+it.title],voice:true})}
   else if(fc.name==='remember'&&a.text){const m={id:'m'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),kind:['personal','episodic','operational','preference'].includes(a.kind)?a.kind:'personal',text:String(a.text).slice(0,1000),people:[],happened:null,importance:3,source:'conversation',basis:'stated',sensitive:false};
    await gdb('gary_memories',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(m)});lvLine('act','Remembered: '+m.text)}
+  else if(fc.name==='note_for_claude'&&a.text){await gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action:'wish',detail:{text:String(a.text).slice(0,600)}})});lvLine('act','Noted for Claude')}
+  else if(fc.name==='strike_pose'&&a.name){gPose(String(a.name));GS.until=performance.now()+(G_POSE_MS[a.name]||3500)}
   else res={error:'not available'}}catch(e){res={error:'failed'}}
  if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({toolResponse:{functionResponses:[{id:fc.id,name:fc.name,response:res}]}}))}
 async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.text():new Response(d).text());let m;try{m=JSON.parse(d)}catch(e){return}
@@ -695,11 +718,11 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
  if(m.toolCall){(m.toolCall.functionCalls||[]).forEach(lvTool);return}
  if(m.goAway){lvStatus('One moment…');setTimeout(()=>{if(LV.on){lvStop(true);liveStart(true)}},300);return}
  const c=m.serverContent;if(!c)return;
- if(c.interrupted){lvHush();lvStatus('Listening…')}
+ if(c.interrupted){lvNoteCut();lvHush();LV.drop=false;lvStatus('Listening…')}
  if(c.inputTranscription&&c.inputTranscription.text){LV.inT+=c.inputTranscription.text;lvStatus('Listening…')}
  if(c.outputTranscription&&c.outputTranscription.text)LV.outT+=c.outputTranscription.text;
- if(c.modelTurn)for(const p of c.modelTurn.parts||[]){if(p.inlineData&&p.inlineData.data){const r=+((p.inlineData.mimeType||'').match(/rate=(\d+)/)||[0,24000])[1];lvPlay(p.inlineData.data,r);lvStatus('Gary')}}
- if(c.turnComplete){if(LV.inT.trim())lvLine('you',LV.inT.trim());if(LV.outT.trim())lvLine('gary',LV.outT.trim());lvSaveTurn()}}
+ if(c.modelTurn&&!LV.drop)for(const p of c.modelTurn.parts||[]){if(p.inlineData&&p.inlineData.data){const r=+((p.inlineData.mimeType||'').match(/rate=(\d+)/)||[0,24000])[1];lvPlay(p.inlineData.data,r);lvStatus('Gary')}}
+ if(c.turnComplete){LV.drop=false;LV.recv=0;if(LV.inT.trim())lvLine('you',LV.inT.trim());if(LV.outT.trim())lvLine('gary',LV.outT.trim());lvSaveTurn()}}
 async function liveStart(again){if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // inside the tap, so iPhone allows sound
@@ -719,108 +742,333 @@ async function liveStart(again){if(!CS){toast('Sign in under You → Settings to
 function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;try{ws&&ws.close(1000)}catch(e){}lvHush();
  try{LV.stream&&LV.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{LV.node&&LV.node.disconnect()}catch(e){}try{LV.ctx&&LV.ctx.close()}catch(e){}
  LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;$('live').classList.remove('on','speaking');gFloatSync();lvSaveTurn()}}
-$('livebtn').onclick=()=>liveStart();$('lvend').onclick=()=>lvStop();$('lvmute').onclick=()=>{LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').textContent=LV.muted?'Unmute':'Mute';lvStatus(LV.muted?'Muted':'Listening…')};
-// ---------- Gary in pixels: sits in the circle on his page, wanders the other pages like the old Office assistant.
-const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c'};
-const G_BODY=[
-"................................",
-"................................",
-"............SSSSSSSS............",
-"..........SSSSSSSSSSHH..........",
-".........SSSSSSSSSSSSHH.........",
-".........SSSSSSSSSSSSSH.........",
-"........SSSSSSSSSSSSSSHH........",
-"........SSSSSSSSSSSSSSSH........",
-"........MMSSSSSSSSSSSSMM........",
-".......SMMSSSSSSSSSSSSMMH.......",
-".......SMMSSSSSSSSSSSSMMH.......",
-"........SSSSSSSSSSSSSSSH........",
-"........SSSSSSSSSSSSSSSH........",
-".........SSSSSSSSSSSSHH.........",
-"..........SSSSSSSSSSHH..........",
-"...........SSSSSSSSHH...........",
-".............HHHHHH.............",
-".........GBBBBWWWWBBBBG.........",
-"........GBBBBBWWWWBBBBBB........",
-".......GBBBBBBWWWWBBBBBBB.......",
-".......GBBBBBBBWWBBBBBBBB.......",
-"......GBBBBBBBBWWBBBBBBBBB......",
-"......GBBBBBBBBBBBBBBBBBBB......",
-"......GBBBBBBBBBBBBBBBBBBB......",
-".....WWWBBBBBBBBBBBBBBBBBWWW....",
-".....WWWBBBBBBBBBBBBBBBBBWWW....",
-".......GBBBBBBBBBBBBBBBBBB......",
-"........GBBBBBBBBBBBBBBBB.......",
-"..........BBBBB..BBBBB..........",
-"..........BBBBB..BBBBB..........",
-".........BBBBBB..BBBBBB.........",
-"................................"];
-const GS={mood:'idle',until:0,tick:0,blink:0,cv:[],face:1};
-function gMood(m,ms){GS.mood=m;GS.until=ms?performance.now()+ms:0}
-function gState(){const now=performance.now();if(GS.until&&now>GS.until){GS.mood='idle';GS.until=0}
+$('livebtn').onclick=()=>liveStart();$('lvcut').onclick=$('lvorb').onclick=()=>{if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>lvStop();$('lvmute').onclick=()=>{LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').textContent=LV.muted?'Unmute':'Mute';lvStatus(LV.muted?'Muted':'Listening…')};
+// ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
+const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
+const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
+const G_BODY=["................................","................................","............SSSSSSSS............","..........SSSSSSSSSSHH..........",".........SSSSSSSSSSSSHH.........",".........SSSSSSSSSSSSSH.........","........SSSSSSSSSSSSSSHH........","........SSSSSSSSSSSSSSSH........","........MMSSSSSSSSSSSSMM........",".......SMMSSSSSSSSSSSSMMH.......",".......SMMSSSSSSSSSSSSMMH.......","........SSSSSSSSSSSSSSSH........","........SSSSSSSSSSSSSSSH........",".........SSSSSSSSSSSSHH.........","..........SSSSSSSSSSHH..........","...........SSSSSSSSHH...........",".............HHHHHH.............",".........GBBBBWWWWBBBBG.........","........GBBBBBWWWWBBBBBB........",".......GBBBBBBWWWWBBBBBBB.......",".......GBBBBBBBWWBBBBBBBB.......","......GBBBBBBBBWWBBBBBBBBB......","......GBBBBBBBBBBBBBBBBBBB......","......GBBBBBBBBBBBBBBBBBBB......",".....WWWBBBBBBBBBBBBBBBBBWWW....",".....WWWBBBBBBBBBBBBBBBBBWWW....",".......GBBBBBBBBBBBBBBBBBB......","........GBBBBBBBBBBBBBBBB.......","..........BBBBB..BBBBB..........","..........BBBBB..BBBBB..........",".........BBBBBB..BBBBBB.........","................................"];
+// name: eyes brows mouth arms fx motion tint posture
+const G_EX={};`idle open n smile rest - bob
+happy happy n grin upR - bob
+wave open n grin wave - bob
+think up up flat chin dots still
+talk open n talk rest - still
+listen open up smile rest ear still
+confused open quirk wavy chin question still
+bow closed n flat bowR - still - bow
+pose wink n grin pose sparkle still
+thumbsup wink n grin thumbs - bob
+dance happy n grin dance notes dance
+salute open low flat salute - still
+shrug open up wavy shrug - still
+laugh happy up open rest tears shake
+tiphat wink n grin tiphat - still
+facepalm hidden n flat facepalm - still
+jump happy up open upBoth - jump
+sleep closed n o rest zzz bob
+excited wide high open upBoth sparkle bounce
+angry angry angry grit rest steam shake red
+furious angry angry shout fists vein tremble red
+sad down worried frown rest - still
+crying closed worried frown rest tears tremble
+sobbing closed worried open hanky tears tremble
+scared wide worried gasp clasp sweat tremble pale
+terrified wide high shout upBoth sweat2 tremble pale
+surprised wide high gasp rest exclaim still
+shocked wide high open upBoth exclaim jump
+skeptical squint quirk smirk cross - still
+suspicious look angry flat chin - still
+disdainful closed up frown cross - still
+smug tired up smirk cross - still
+proud closed up grin hips sparkle still
+determined angry angry grit fist - still
+bored tired n flat rest - still
+yawning closed up yawn mouthcover - still
+sleepy tired worried small rest zzz sway
+sick tired worried wavy belly sweat tremble green
+dizzy spiral n wavy rest stars sway
+lovestruck hearts up smile heart hearts bob
+blushing down worried small rest blush still
+shy down worried smile clasp blush still
+starstruck stars high open upBoth sparkle bounce
+mischievous wink angry smirk clasp - still
+cheeky wink n tongue rest - bob
+whistling right up whistle behind notes still
+humming closed n small behind notes sway
+singing closed up open mic notes sway
+clapping happy n grin clap - bounce
+applauding happy up open clap sparkle bounce
+cheering happy high open upBoth confetti jump
+celebrating happy up grin trophy confetti jump
+victorious closed up grin trophy sparkle still
+tea closed n smile tea - still
+sipping closed up small tea - still
+reading down n flat book - still
+detective squint angry flat glass - still
+idea up high open pointUp bulb bounce
+eureka wide high grin upBoth bulb jump
+pointing open n smile point - still
+explaining open up talk point - still
+nodding closed n smile rest - nod
+headshake closed n flat rest - shake
+sigh closed worried o rest puff still
+exasperated closed angry frown facepalm vein still
+eyeroll up n flat cross - still
+sarcastic tired quirk smirk hipL - still
+unimpressed tired low flat cross - still
+nervous look worried wavy clasp sweat tremble
+panicking wide worried shout upBoth sweat2 shake
+embarrassed down worried wavy scratch blush still flush
+sheepish closed worried smile scratch sweat still
+grateful closed up smile clasp hearts still - bow
+flourish happy up grin spread sparkle still
+welcoming happy n grin spread - bob
+hug closed up smile hug hearts bob
+blowkiss wink n kiss blowkiss hearts still
+pondering closed angry flat temple dots still
+texting down n small phone - still
+phonecall look up talk phoneEar - still
+watch down n flat watch - still
+impatient tired angry flat watch vein nod
+waiting right n flat behind - sway
+umbrella open worried flat umbrella rain still
+shivering closed worried grit cross snow tremble blue
+hot tired worried open wave sweat still flush
+romantic closed up smile flower hearts bob
+party happy up grin balloon confetti bob
+birthday happy high open cake confetti bounce
+announcer open up talk mic exclaim still
+writing down n small quill - still
+newspaper down up flat paper - still
+zen closed n smile clasp zen still
+knockedout x n o rest stars still
+exhausted closed worried open rest sweat nod
+hungry up n tongue belly drool still
+satisfied closed n smile belly - bob
+glitch open n flat rest glitch tremble
+dapper closed up smirk bowtie sparkle still
+astonished wide high gasp rest exclaim still - pop
+chefkiss closed up kiss chefkiss sparkle still
+peekaboo hidden2 n grin peek - still
+achoo closed worried open mouthcover spray shake
+thumbsdown open angry frown thumbsdown - still
+stretching closed up yawn upBoth - sway
+daydreaming up n smile clasp cloud sway
+stargazing up up o pointUp twinkle still
+birdwatching right up small binoculars bird still
+fistpump happy angry grin fist sparkle jump
+sitting open n smile rest - bob - sit
+sitbored tired n flat rest - still - sit
+sityawn closed up yawn mouthcover - still - sit
+sitwatch down n flat watch - still - sit
+sittea closed n smile tea - still - sit
+sitread down n flat book - still - sit
+sitdoze closed n o rest zzz bob - sit
+sittwiddle look n flat clasp - still - sit
+sitwhistle right up whistle behind notes still - sit
+floating happy n smile spread - sway`.split('\n').forEach(l=>{const a=l.trim().split(/\s+/);G_EX[a[0]]={e:a[1],b:a[2],m:a[3],a:a[4],f:a[5],mv:a[6],tint:a[7]&&a[7]!=='-'?a[7]:null,post:a[8]||'stand'}});
+const G_NAMES=Object.keys(G_EX);
+const GS={mood:'idle',until:0,tick:0,cv:[],base:'idle'};
+let GTALK=false,GPOSE=null,GSPK=false;
+function gMood(m,ms){if(!G_EX[m])return;GS.mood=m;GS.until=ms?performance.now()+ms:0}
+function gState(){const now=performance.now();if(GS.until&&now>GS.until){GS.mood=GS.base;GS.until=0}
  if(GS.until)return GS.mood;
  if(typeof LV!=='undefined'&&LV.on)return $('live').classList.contains('speaking')?'talk':'listen';
- if(talking)return GTALK?'talk':'think';return GS.mood}
-let GTALK=false;
-function gDraw(x){const st=gState(),t=GS.tick,P=[];
+ if(talking)return GTALK?'talk':'think';if(GSPK)return 'talk';return GS.mood}
+function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.tick,P=[];
  for(let y=0;y<32;y++)for(let i=0;i<32;i++){const c=G_BODY[y][i];if(c!=='.')P[y*32+i]=c}
- const put=(i,y,c)=>{if(i>=0&&i<32&&y>=0&&y<32)P[y*32+i]=c},del=(i,y)=>{delete P[y*32+i]};
- const bob=(st==='idle'||st==='listen')&&t%8>=4?1:0;
- // arms: wave, thinking hand, or both up for happy
- if(st==='wave'||st==='happy'){for(let y=24;y<26;y++)for(let i=25;i<28;i++)del(i,y);
-  const up=t%4<2?0:1;[[24,21],[25,21],[25,20],[26,20],[25,19],[26,19],[26,18],[27,18],[26,17],[27,17],[27+up,16],[28,16]].forEach(([i,y])=>put(i,y,'B'));
-  for(let y=12;y<16;y++)for(let i=26;i<29;i++)put(i+up,y,'W')}
- if(st==='think'||st==='confused'){for(let y=24;y<26;y++)for(let i=25;i<28;i++)del(i,y);
-  [[24,22],[23,22],[23,21],[22,21],[22,20],[21,20],[21,19],[20,19]].forEach(([i,y])=>put(i,y,'B'));for(let y=15;y<18;y++)for(let i=18;i<21;i++)put(i,y,'W')}
- // eyebrows, eyes, monocle
- const up=st==='think'?1:0;
- if(st==='confused'){put(11,6,'M');put(12,5,'M');put(13,6,'M')}else{for(let i=11;i<14;i++)put(i,7-up,'M')}
- for(let i=18;i<21;i++)put(i,7-up,'M');
- const blink=(t%40===0||t%40===1)&&st!=='happy';
- if(st==='happy'){put(11,9,'K');put(12,8,'K');put(13,9,'K')}
- else if(blink){put(11,10,'K');put(12,10,'K');put(13,10,'K')}
- else{put(12,9-up,'W');put(13,9-up,'K');put(12,10-up,'K');put(13,10-up,'K')}
- [[18,8],[19,8],[20,8],[21,8],[18,11],[19,11],[20,11],[21,11],[18,9],[18,10],[21,9],[21,10]].forEach(([i,y])=>put(i,y,'C'));
- if(blink){put(19,9,'L');put(20,9,'L');put(19,10,'K');put(20,10,'K')}else{put(19,9,'K');put(20,9,'L');put(19,10,'K');put(20,10,'K')}put(22,12,'Y');put(22,13,'Y');put(23,14,'Y');
- // nose, moustache, mouth
- put(15,11,'H');put(16,11,'H');put(14,18,'K');put(15,18,'K');put(16,18,'K');put(17,18,'K');put(14,19,'K');put(17,19,'K');put(15,19,'W');put(16,19,'W');for(let i=11;i<21;i++)put(i,12,'M');put(10,11,'M');put(21,11,'M');put(12,13,'M');put(19,13,'M');
- if(st==='talk'){const o=[0,1,2,1][t%4];for(let i=14;i<18;i++)put(i,14,'R');if(o)for(let i=14;i<18;i++)put(i,15,'R');if(o>1){put(15,16,'R');put(16,16,'R')}}
- else if(st==='happy'||st==='wave'){for(let i=13;i<19;i++)put(i,14,'W');for(let i=14;i<18;i++)put(i,15,'R')}
- else if(st==='confused'){put(14,14,'R');put(15,15,'R');put(16,14,'R');put(17,15,'R')}
- else if(st==='think'){for(let i=14;i<18;i++)put(i,14,'R')}
- else{put(13,13,'R');for(let i=14;i<18;i++)put(i,14,'R');put(18,13,'R')}
+ const put=(i,y,c)=>{i=Math.round(i);y=Math.round(y);if(i>=0&&i<32&&y>=0&&y<32)P[y*32+i]=c},del=(i,y)=>{delete P[y*32+i]};
+ const rect=(x0,y0,w,h,c)=>{for(let y=y0;y<y0+h;y++)for(let i=x0;i<x0+w;i++)put(i,y,c)};
+ const clr=s=>{for(let y=24;y<26;y++)for(let i=s?5:25;i<(s?8:28);i++)del(i,y)};
+ const line=(a,b,c,d,col)=>{const n=Math.max(Math.abs(c-a),Math.abs(d-b))||1;for(let k=0;k<=n;k++){const px=a+(c-a)*k/n,py=b+(d-b)*k/n;put(px,py,col);put(px,py+1,col)}};
+ // an arm from the shoulder (via optional elbow) to a glove; L = left side of the picture
+ const arm=(L,gx,gy,via,col,gw,gh)=>{clr(L);const sx=L?7:24,sy=19;col=col||'B';let px=sx,py=sy;for(const [vx,vy] of via||[]){line(px,py,vx,vy,col);px=vx;py=vy}line(px,py,gx,gy,col);gw=gw||3;gh=gh||3;rect(Math.round(gx-(gw-1)/2),Math.round(gy-(gh-1)/2),gw,gh,'W')};
+ const A=X.a,odd=t%4<2;
+ switch(A){
+  case 'wave':arm(0,27+(odd?0:1),13);break; case 'upR':arm(0,27,12);break; case 'upL':arm(1,4,12);break;
+  case 'upBoth':arm(0,27,12);arm(1,4,12);break; case 'fist':arm(0,26,11,null,null,3,3);put(25,10,'K');put(27,10,'K');break;
+  case 'fists':arm(0,22,20,[[26,22]],'G');arm(1,9,20,[[5,22]],'G');break;
+  case 'chin':arm(0,19,16,[[23,22]]);break; case 'temple':arm(0,23,7,[[26,15]]);break;
+  case 'pose':arm(0,27,12);arm(1,7,22,[[4,21]]);break; case 'hips':arm(1,7,22,[[4,21]]);arm(0,24,22,[[27,21]]);break; case 'hipL':arm(1,7,22,[[4,21]]);break;
+  case 'thumbs':arm(0,25,19,[[26,22]]);put(25,17,'W');put(25,16,'W');break; case 'thumbsdown':arm(0,26,21,[[27,20]]);put(26,23,'W');put(26,24,'W');break;
+  case 'salute':arm(0,23,6,[[26,14]],null,4,2);break;
+  case 'shrug':arm(0,29,19,[[27,22]]);arm(1,2,19,[[4,22]]);break;
+  case 'facepalm':arm(1,12,9,[[7,15]],null,4,3);break; case 'peek':arm(1,12,9,[[7,15]],null,4,3);arm(0,20,9,[[24,15]],null,4,3);break;
+  case 'cross':clr(0);clr(1);rect(8,21,16,2,'G');rect(7,21,2,2,'W');rect(23,21,2,2,'W');break;
+  case 'clap':if(t%2){arm(0,17,20,null,'G',2,3);arm(1,14,20,null,'G',2,3)}else{arm(0,20,20,null,'G',2,3);arm(1,11,20,null,'G',2,3)}break;
+  case 'clasp':arm(0,17,21,null,'G',2,3);arm(1,14,21,null,'G',2,3);break;
+  case 'mouthcover':arm(0,16,14,[[22,20]],null,4,2);break;
+  case 'point':arm(0,29,19,null,null,2,2);put(31,19,'W');break; case 'pointUp':arm(0,26,10,null,null,2,3);put(26,7,'W');put(26,8,'W');break;
+  case 'spread':arm(0,29,17,null,null,2,3);arm(1,2,17,null,null,2,3);break;
+  case 'hug':arm(0,20,20,null,'G');arm(1,11,20,null,'G');break;
+  case 'heart':arm(0,19,20,null,'G',2,2);arm(1,12,20,null,'G',2,2);[[14,19],[15,20],[16,20],[17,19],[15,21],[16,21],[14,20],[17,20]].forEach(([i,y])=>put(i,y,'P'));break;
+  case 'scratch':arm(0,22,3,[[27,12]]);break; case 'behind':clr(0);clr(1);break; case 'belly':arm(0,19,23,null,'G');break;
+  case 'bowtie':arm(0,18,18,null,'G',2,2);arm(1,13,18,null,'G',2,2);break; case 'bowR':arm(0,15,22,null,'G');break;
+  case 'dance':odd?arm(0,27,12):arm(1,4,12);break;
+  case 'blowkiss':odd?arm(0,18,14,[[22,20]],null,2,2):arm(0,28,13);break; case 'chefkiss':arm(0,17,14,[[22,20]],null,2,2);break;
+  case 'hanky':arm(1,11,11,[[6,16]],null,2,2);rect(9,12,3,3,'W');break;
+  case 'tea':arm(0,22,21,null,'G',3,2);rect(20,19,6,1,'C');rect(21,17,4,2,'W');put(25,17,'W');if(odd){put(22,15,'C');put(23,14,'C')}else{put(23,15,'C');put(22,14,'C')}break;
+  case 'book':case 'paper':case 'quill':arm(0,21,22,null,'G',2,2);arm(1,10,22,null,'G',2,2);rect(11,18,10,6,A==='paper'?'C':'D');rect(12,19,3,4,'W');rect(17,19,3,4,'W');if(A==='paper')for(let y=19;y<23;y+=2){rect(12,y,3,1,'K');rect(17,y,3,1,'K')}
+   if(A==='quill'){put(19,20,'K');put(20,19,'Y');put(21,18,'Y');put(22,17,'Y');put(23,16,'W');put(24,15,'W')}break;
+  case 'glass':arm(0,24,16,null,null,2,2);line(24,14,25,12,'n');[[25,8],[26,8],[27,8],[24,9],[28,9],[24,10],[28,10],[25,11],[26,11],[27,11]].forEach(([i,y])=>put(i,y,'C'));rect(25,9,3,2,'L');break;
+  case 'binoculars':arm(0,20,13,[[24,17]],null,2,2);arm(1,11,13,[[7,17]],null,2,2);rect(11,8,3,3,'K');rect(18,8,4,3,'K');put(12,9,'L');put(19,9,'L');break;
+  case 'flower':arm(0,23,20,null,null,2,2);line(23,14,23,18,'V');rect(22,11,3,3,'P');put(23,12,'Y');break;
+  case 'trophy':arm(0,20,21,null,'G',2,2);arm(1,11,21,null,'G',2,2);rect(13,15,6,4,'Y');put(12,16,'Y');put(19,16,'Y');rect(15,19,2,2,'Y');rect(14,21,4,1,'n');break;
+  case 'umbrella':arm(0,25,18,null,null,2,2);line(25,4,25,16,'K');rect(18,2,14,2,'D');rect(20,1,10,1,'D');for(let i=18;i<32;i+=3)put(i,4,'D');break;
+  case 'watch':arm(1,10,20,[[6,23]],null,3,2);put(12,20,'Y');put(12,21,'Y');break;
+  case 'mic':arm(0,19,17,[[23,21]],null,2,2);rect(18,14,2,2,'K');put(18,16,'G');break;
+  case 'balloon':arm(0,26,21,null,null,2,2);line(26,8,27,19,'C');rect(25,2,4,5,'D');put(24,3,'D');put(29,3,'D');put(24,4,'D');put(29,4,'D');put(26,3,'W');break;
+  case 'cake':arm(0,21,22,null,'G',2,2);arm(1,10,22,null,'G',2,2);rect(11,18,10,1,'P');rect(11,19,10,4,'W');rect(11,21,10,1,'P');put(15,16,'Y');put(15,17,'Y');put(15,15,odd?'F':'Y');break;
+  case 'phone':arm(0,20,22,null,'G',2,2);rect(18,18,3,4,'K');rect(19,19,1,2,'L');break;
+  case 'phoneEar':arm(0,24,12,[[27,18]],null,2,2);rect(23,8,2,5,'K');break;
+  case 'tiphat':arm(0,27,13);rect(24,11,7,1,'K');rect(25,6,5,5,'K');rect(25,10,5,1,'G');break}
+ // brows
+ const B=X.b;if(B==='quirk'){put(11,6,'M');put(12,5,'M');put(13,6,'M');for(let i=18;i<21;i++)put(i,7,'M')}
+ else if(B==='angry'){put(11,6,'M');put(12,7,'M');put(13,8,'M');put(18,7,'M');put(19,7,'M');put(20,6,'M')}
+ else if(B==='worried'){put(11,8,'M');put(12,7,'M');put(13,6,'M');put(18,6,'M');put(19,7,'M');put(20,7,'M')}
+ else{const r=B==='up'?6:B==='high'?5:B==='low'?8:7;for(let i=11;i<14;i++)put(i,r,'M');for(let i=18;i<21;i++)put(i,Math.min(r,7),'M')}
+ // eyes
+ let E=X.e;if(E==='open'&&(t%40===0||t%40===1))E='closed';if(E==='look')E=t%16<8?'left':'right';
+ const ring=()=>[[18,8],[19,8],[20,8],[21,8],[18,11],[19,11],[20,11],[21,11],[18,9],[18,10],[21,9],[21,10]].forEach(([i,y])=>put(i,y,'C'));
+ const Le=(a)=>a.forEach(([i,y,c])=>put(i,y,c)),Re=(c9a,c9b,c10a,c10b)=>{put(19,9,c9a);put(20,9,c9b);put(19,10,c10a);put(20,10,c10b)};
+ const pop=X.tint==='pop'||name==='astonished';
+ if(!pop)ring();
+ switch(E){
+  case 'happy':Le([[11,9,'K'],[12,8,'K'],[13,9,'K']]);Re('K','K','L','L');break;
+  case 'closed':Le([[11,10,'K'],[12,10,'K'],[13,10,'K']]);Re('L','L','K','K');break;
+  case 'wink':Le([[11,10,'K'],[12,10,'K'],[13,10,'K']]);Re('K','L','K','K');break;
+  case 'up':Le([[12,8,'W'],[13,8,'K'],[12,9,'K'],[13,9,'K']]);Re('K','K','L','L');break;
+  case 'down':Le([[12,10,'K'],[13,10,'K']]);Re('L','L','K','K');break;
+  case 'left':Le([[12,9,'K'],[12,10,'K'],[13,9,'W'],[13,10,'W']]);Re('K','L','K','L');break;
+  case 'right':Le([[12,9,'W'],[12,10,'W'],[13,9,'K'],[13,10,'K']]);Re('L','K','L','K');break;
+  case 'wide':Le([[11,8,'W'],[12,8,'W'],[13,8,'W'],[11,9,'W'],[12,9,'K'],[13,9,'W'],[11,10,'W'],[12,10,'W'],[13,10,'W']]);Re('W','W','W','K');break;
+  case 'angry':case 'squint':Le([[12,10,'K'],[13,10,'K']]);Re('L','L','K','K');break;
+  case 'tired':Le([[12,9,'H'],[13,9,'H'],[12,10,'K'],[13,10,'K']]);Re('H','H','K','K');break;
+  case 'stars':Le([[12,8,'Y'],[11,9,'Y'],[12,9,'Y'],[13,9,'Y'],[12,10,'Y']]);Re('Y','L','L','Y');break;
+  case 'hearts':Le([[11,8,'P'],[13,8,'P'],[11,9,'P'],[12,9,'P'],[13,9,'P'],[12,10,'P']]);Re('P','P','P','P');break;
+  case 'spiral':Le([[11,8,'K'],[12,8,'K'],[13,8,'K'],[13,9,'K'],[13,10,'K'],[12,10,'K'],[11,10,'K'],[11,9,'K'],[12,9,'W']]);Re(odd?'K':'L',odd?'L':'K',odd?'L':'K',odd?'K':'L');break;
+  case 'x':Le([[11,8,'K'],[13,8,'K'],[12,9,'K'],[11,10,'K'],[13,10,'K']]);Re('K','L','L','K');break;
+  case 'hidden':Re('K','L','K','K');break;
+  case 'hidden2':if(odd){}else{Le([[12,9,'W'],[13,9,'K'],[12,10,'K'],[13,10,'K']])}break;
+  default:Le([[12,9,'W'],[13,9,'K'],[12,10,'K'],[13,10,'K']]);Re('K','L','K','K')}
+ if(pop){Re(E==='wide'?'W':'K','K','K','K');[[23,16],[24,16],[25,16],[26,16],[23,19],[24,19],[25,19],[26,19],[23,17],[23,18],[26,17],[26,18]].forEach(([i,y])=>put(i,y,'C'))}else{put(22,12,'Y');put(22,13,'Y');put(23,14,'Y')}
+ // nose, moustache, bow tie
+ put(15,11,'H');put(16,11,'H');for(let i=11;i<21;i++)put(i,12,'M');put(10,11,'M');put(21,11,'M');put(12,13,'M');put(19,13,'M');
+ if(A!=='bowtie'&&A!=='trophy'){[14,15,16,17].forEach(i=>put(i,18,'K'));put(14,19,'K');put(17,19,'K');put(15,19,'W');put(16,19,'W')}
+ // mouth
+ if(A!=='mouthcover'&&A!=='chefkiss')switch(X.m){
+  case 'talk':{const o=[0,1,2,1][t%4];rect(14,14,4,1,'R');if(o)rect(14,15,4,1,'R');if(o>1)rect(15,16,2,1,'R');break}
+  case 'grin':rect(13,14,6,1,'W');rect(14,15,4,1,'R');break;
+  case 'open':rect(13,14,6,1,'W');rect(13,15,6,1,'R');rect(14,16,4,1,'R');break;
+  case 'shout':rect(13,14,6,1,'W');rect(13,15,6,2,'R');rect(14,16,4,1,'K');break;
+  case 'gasp':rect(14,14,4,3,'R');rect(15,15,2,1,'K');break;
+  case 'yawn':rect(14,14,4,3,'R');rect(15,15,2,2,'K');break;
+  case 'grit':rect(13,14,6,2,'W');put(15,14,'K');put(15,15,'K');put(17,14,'K');put(17,15,'K');break;
+  case 'flat':rect(14,14,4,1,'R');break;
+  case 'frown':rect(14,14,4,1,'R');put(13,15,'R');put(18,15,'R');break;
+  case 'wavy':Le([[14,14,'R'],[15,15,'R'],[16,14,'R'],[17,15,'R']]);break;
+  case 'smirk':rect(14,14,3,1,'R');put(17,14,'R');put(18,13,'R');break;
+  case 'tongue':rect(13,14,6,1,'R');rect(15,15,2,1,'P');put(16,16,'P');break;
+  case 'o':rect(15,14,2,2,'R');break; case 'small':rect(15,14,2,1,'R');break;
+  case 'whistle':put(17,14,'R');put(17,15,'R');break;
+  case 'kiss':put(16,14,'P');put(16,15,'P');put(15,14,'R');break;
+  default:put(13,13,'R');rect(14,14,4,1,'R');put(18,13,'R')}
  // effects
- if(st==='think')for(let k=0;k<3;k++)if(t%6>=k*2||t%6>=4)put(24+k*2,3,k<=(t>>1)%3?'C':'G');
- if(st==='confused'){[[26,1],[27,0],[28,0],[29,1],[29,2],[28,3],[27,4],[27,6]].forEach(([i,y])=>put(i,y,'Q'))}
- if(st==='listen'&&t%10<5){put(4,9,'C');put(3,10,'C');put(4,11,'C')}
- // outline + paint
- x.clearRect(0,0,32,32);x.fillStyle=GP.K;
- for(let y=0;y<32;y++)for(let i=0;i<32;i++)if(!P[y*32+i]&&(P[y*32+i-1]&&i>0||P[y*32+i+1]&&i<31||P[(y-1)*32+i]||P[(y+1)*32+i]))x.fillRect(i,y+bob,1,1);
- for(let y=0;y<32;y++)for(let i=0;i<32;i++){const c=P[y*32+i];if(c){x.fillStyle=GP[c];x.fillRect(i,y+bob,1,1)}}}
+ const f=X.f,k=t%6;
+ switch(f){
+  case 'dots':for(let j=0;j<3;j++)put(24+j*2,3,j<=(t>>1)%3?'C':'G');break;
+  case 'question':Le([[26,1,'Q'],[27,0,'Q'],[28,0,'Q'],[29,1,'Q'],[29,2,'Q'],[28,3,'Q'],[27,4,'Q'],[27,6,'Q']]);break;
+  case 'exclaim':rect(27,0,2,4,'Y');rect(27,5,2,1,'Y');break;
+  case 'sparkle':if(odd)Le([[2,3,'Y'],[1,4,'Y'],[3,4,'Y'],[2,5,'Y']]);else Le([[29,1,'Y'],[28,2,'Y'],[30,2,'Y'],[29,3,'Y']]);break;
+  case 'hearts':{const h=5-(t%6);Le([[25,h,'P'],[27,h,'P'],[25,h+1,'P'],[26,h+1,'P'],[27,h+1,'P'],[26,h+2,'P']]);break}
+  case 'sweat':Le([[23,5,'Q'],[23,6,'Q'],[24,6,'Q']]);break;
+  case 'sweat2':Le([[23,5,'Q'],[23,6,'Q'],[24,6,'Q'],[7,4,'Q'],[7,5,'Q'],[8,5,'Q']]);if(odd)Le([[25,9,'Q'],[6,8,'Q']]);break;
+  case 'steam':if(odd)Le([[6,2,'C'],[7,1,'C'],[24,2,'C'],[25,1,'C']]);else Le([[5,1,'C'],[6,0,'C'],[25,2,'C'],[26,1,'C']]);break;
+  case 'vein':Le([[22,3,'D'],[24,3,'D'],[23,4,'D'],[22,5,'D'],[24,5,'D']]);break;
+  case 'zzz':{const z=(t>>1)%3;Le([[25+z,6-z*2,'Q'],[26+z,6-z*2,'Q'],[26+z,7-z*2,'Q'],[25+z,8-z*2,'Q'],[26+z,8-z*2,'Q']]);break}
+  case 'notes':{const y=odd?2:1;Le([[25,y,'C'],[25,y+1,'C'],[25,y+2,'C'],[26,y,'C'],[24,y+3,'C'],[25,y+3,'C'],[4,y+2,'C'],[4,y+3,'C'],[3,y+4,'C'],[4,y+4,'C']]);break}
+  case 'bulb':rect(24,0,4,3,odd?'Y':'W');rect(25,3,2,1,'G');break;
+  case 'tears':{const d=t%3;Le([[11,11+d,'Q'],[22,10+d,'Q']]);break}
+  case 'blush':Le([[10,13,'P'],[11,13,'P'],[20,13,'P'],[21,13,'P']]);break;
+  case 'stars':{const a=t*0.7;for(let j=0;j<3;j++){put(16+Math.cos(a+j*2.1)*9,2+Math.sin(a+j*2.1)*1.5,'Y')}break}
+  case 'rain':for(let j=0;j<5;j++)put(2+j*3,(t+j*3)%12+4,'Q');break;
+  case 'snow':for(let j=0;j<5;j++)put(2+j*6,(t+j*5)%14+1,'W');break;
+  case 'confetti':for(let j=0;j<8;j++)put((j*7+t)%32,(t*2+j*5)%14,['Y','P','Q','V','D'][j%5]);break;
+  case 'ear':if(t%10<5)Le([[4,9,'C'],[3,10,'C'],[4,11,'C']]);break;
+  case 'puff':if(odd)Le([[9,15,'C'],[8,15,'C'],[8,16,'C']]);break;
+  case 'glitch':for(let j=0;j<6;j++)put((t*13+j*11)%32,(t*7+j*5)%32,['Q','P','V'][j%3]);break;
+  case 'zen':for(let j=0;j<6;j++){const a=t*0.4+j;put(16+Math.cos(a)*13,15+Math.sin(a)*13,'Y')}break;
+  case 'cloud':rect(23,1,6,2,'C');rect(24,0,4,1,'C');put(22,4,'C');put(21,6,'C');break;
+  case 'twinkle':for(let j=0;j<4;j++)if((t+j)%3)put([3,27,6,29][j],[2,1,5,6][j],'Y');break;
+  case 'bird':{const bx=(t*2)%34-2;Le([[bx,3,'K'],[bx+1,2+(odd?0:1),'K'],[bx-1,2+(odd?0:1),'K']]);break}
+  case 'drool':put(17,15,'Q');put(17,16+(t%2),'Q');break;
+  case 'spray':if(odd)for(let j=0;j<5;j++)put(20+j,13+(j%3)-1,'Q');break}
+ // posture
+ if(X.post==='bow'){const Q=[];for(const kk in P){const y=kk>>5,i=kk&31;if(y<17)Q[((y+3)<<5)+i]=P[kk];else if(Q[kk]===undefined)Q[kk]=P[kk]}for(const kk in P)delete P[kk];for(const kk in Q)P[kk]=Q[kk]}
+ if(X.post==='sit'){const Q=[];for(let y=12;y<27;y++){Q[(y<<5)+6]='N';Q[(y<<5)+7]='n';Q[(y<<5)+24]='n';Q[(y<<5)+25]='N'}for(let i=6;i<26;i++){Q[(11<<5)+i]='N'}
+  for(const kk in P){const y=kk>>5,i=kk&31;if(y<28&&y+1<32)Q[((y+1)<<5)+i]=P[kk]}for(let i=5;i<27;i++){Q[(29<<5)+i]='N'}for(const i of [6,7,24,25]){Q[(30<<5)+i]='n';Q[(31<<5)+i]='n'}
+  for(const i of [11,12,13,18,19,20]){Q[(30<<5)+i]='B';Q[(31<<5)+i]='B'}for(const kk in P)delete P[kk];for(const kk in Q)P[kk]=Q[kk]}
+ // motion + paint
+ let dx=0,dy=0,flip=false;const mv=X.mv;
+ if(mv==='bob')dy=t%8>=4?1:0;else if(mv==='jump')dy=odd?-2:0;else if(mv==='bounce')dy=t%2?-1:0;else if(mv==='nod')dy=t%2;
+ else if(mv==='shake')dx=t%2?1:-1;else if(mv==='tremble')dx=(t*7)%3-1;else if(mv==='sway')dx=[-1,0,1,0][t%4];else if(mv==='dance'){flip=t%8>=4;dy=t%2}
+ const tint=G_TINT[X.tint]||{};x.clearRect(0,0,32,32);x.save();if(flip){x.translate(32,0);x.scale(-1,1)}x.fillStyle=GP.K;
+ for(let y=0;y<32;y++)for(let i=0;i<32;i++)if(!P[y*32+i]&&(P[y*32+i-1]&&i>0||P[y*32+i+1]&&i<31||P[(y-1)*32+i]||P[(y+1)*32+i]))x.fillRect(i+dx,y+dy,1,1);
+ for(let y=0;y<32;y++)for(let i=0;i<32;i++){const c=P[y*32+i];if(c){x.fillStyle=tint[c]||GP[c];x.fillRect(i+dx,y+dy,1,1)}}x.restore()}
 function gPaint(){GS.cv=GS.cv.filter(c=>c.isConnected);for(const c of GS.cv)if(c.offsetParent!==null||c.closest('#gfloat'))gDraw(c.getContext('2d'))}
 function gCanvas(el){const c=document.createElement('canvas');c.width=c.height=32;c.className='gpx';el.appendChild(c);GS.cv.push(c);gDraw(c.getContext('2d'));return c}
-setInterval(()=>{GS.tick++;gPaint()},140);
-// --- floating Gary on the other pages
-const GF={x:0,y:0,vx:-0.18,vy:-0.12,drag:false,moved:false,last:0,hold:0};
+const G_POSE_MS={dance:6000,sleep:6000,laugh:4000,jump:3500,cheering:4500,celebrating:4500,singing:6000,clapping:4000,applauding:4000};
+function gPose(n){n=String(n||'').toLowerCase();if(!G_EX[n])return;gMood(n,G_POSE_MS[n]||3800);GB.last=Date.now();if(GB.sit&&G_EX[n].post!=='sit'){GB.sit=false;GS.base=gIdleBase()}if($('gfloat').classList.contains('on'))GF.hold=performance.now()+(G_POSE_MS[n]||3800)}
+setInterval(()=>{GS.tick++;try{GSPK=(typeof AC!=='undefined'&&AC&&acEnd>AC.currentTime+0.05)||(window.speechSynthesis&&speechSynthesis.speaking)}catch(e){GSPK=false}
+ $('gcut').classList.toggle('on',GSPK&&tab==='gary'&&!LV.on);gPaint()},140);
+// --- floating Gary: no box, just Gary, happily drifting about
+const GF={x:0,y:0,vx:-0.22,vy:-0.14,drag:false,moved:false,last:0,hold:0,next:0};
 const G_LINES={today:['Shall I tidy today\'s plan for you, sir?','A fine day for getting things done, Sam.','Your day awaits, Mr Fice.'],todo:['That list won\'t tick itself, sir.','Shall we pick just one, Sam?'],focus:['I\'ll keep quiet while you focus, sir.','Head down, Mr Fice. I\'m right here.'],you:['Admiring your progress, Sam?','Looking rather well, sir.']};
+const G_FLOATFUN=['whistling','humming','wave','cheeky','tiphat','dance','happy','stargazing','birdwatching','flourish','thumbsup','dapper','pose','fistpump'];
+function gIdleBase(){return tab==='gary'?(GB.sit?'sitting':'idle'):'floating'}
 function gFloatOn(){return store('garyFloat')!=='0'}
-function gFloatBounds(){const nav=document.querySelector('nav'),nb=nav?nav.getBoundingClientRect().top:innerHeight;return{x0:8,y0:70,x1:innerWidth-72,y1:nb-78}}
-function gFloatSync(){const f=$('gfloat');if(!f)return;const show=gFloatOn()&&tab!=='gary'&&!(typeof LV!=='undefined'&&LV.on);
+function gFloatBounds(){const nav=document.querySelector('nav'),nb=nav?nav.getBoundingClientRect().top:innerHeight;return{x0:4,y0:70,x1:innerWidth-68,y1:nb-74}}
+function gFloatSync(){const f=$('gfloat');if(!f)return;const show=gFloatOn()&&tab!=='gary'&&!(typeof LV!=='undefined'&&LV.on);GS.base=gIdleBase();if(!GS.until)GS.mood=GS.base;
  if(show&&!f.classList.contains('on')){const b=gFloatBounds();const p=(store('garyPos')||'').split(',');GF.x=+p[0]||b.x0+10;GF.y=+p[1]||b.y1;gFloatPlace();f.classList.add('on');
   if(Date.now()-GF.last>150000){GF.last=Date.now();setTimeout(()=>gSay((G_LINES[tab]||G_LINES.today)[Math.floor(Math.random()*2)],'wave'),700)}}
  if(!show)f.classList.remove('on')}
 function gSay(text,mood){const f=$('gfloat');if(!f.classList.contains('on'))return;$('gfbub').textContent=text;f.classList.toggle('left',GF.x<innerWidth/2);f.classList.add('say');gMood(mood||'wave',2400);clearTimeout(GF.sayT);GF.sayT=setTimeout(()=>f.classList.remove('say'),5200)}
 function gFloatPlace(){const b=gFloatBounds();GF.x=Math.max(b.x0,Math.min(b.x1,GF.x));GF.y=Math.max(b.y0,Math.min(b.y1,GF.y));const f=$('gfloat');f.style.left=GF.x+'px';f.style.top=GF.y+'px'}
-(function drift(){const f=$('gfloat');if(f&&f.classList.contains('on')&&!GF.drag&&!f.classList.contains('say')&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&performance.now()>GF.hold){
-  const b=gFloatBounds();GF.x+=GF.vx;GF.y+=GF.vy;if(GF.x<=b.x0||GF.x>=b.x1)GF.vx*=-1;if(GF.y<=b.y0||GF.y>=b.y1)GF.vy*=-1;gFloatPlace()}
+(function drift(){const f=$('gfloat'),now=performance.now();if(f&&f.classList.contains('on')&&!GF.drag&&!f.classList.contains('say')&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&now>GF.hold){
+  const b=gFloatBounds();GF.x+=GF.vx+Math.sin(now/1700)*0.12;GF.y+=GF.vy;if(GF.x<=b.x0||GF.x>=b.x1)GF.vx*=-1;if(GF.y<=b.y0||GF.y>=b.y1)GF.vy*=-1;gFloatPlace()}
+ if(f&&f.classList.contains('on')&&!GS.until&&now>GF.next){if(GF.next)gMood(G_FLOATFUN[Math.floor(Math.random()*G_FLOATFUN.length)],3500);GF.next=now+9000+Math.random()*8000}
  requestAnimationFrame(drift)})();
+// --- on his page: stands; gets bored and sits; then starts a conversation you can answer
+const GB={last:Date.now(),sit:false,next:0,asked:0,shown:false};
+const G_SITBORED=['sitbored','sityawn','sitwatch','sittea','sitread','sitdoze','sittwiddle','sitwhistle'];
+const G_OPEN=['I\'ve been wondering, sir - does tea genuinely taste better from a proper cup? I\'m firmly of the view it does.','Penny for your thoughts, Sam?','Did you know a group of owls is called a parliament? I find that enormously satisfying.','How\'s the day really treating you, Mr Fice?','I was thinking about the stars just now. Have you ever seen the Milky Way properly, away from the lights?','Anything on your mind you\'d like a second pair of eyes on, sir?'];
+function gPoke(){GB.last=Date.now();if(GB.sit){GB.sit=false;GS.base=gIdleBase();gMood('wave',1500)}}
+['pointerdown','keydown','input'].forEach(ev=>addEventListener(ev,gPoke,{passive:true}));
+setInterval(()=>{if(tab!=='gary'||talking||GSPK||LV.on||document.hidden)return;const idle=Date.now()-GB.last;
+ if(idle>35000&&!GB.sit){GB.sit=true;GS.base='sitting';if(!GS.until)gMood('sitting')}
+ if(GB.sit&&!GS.until&&Date.now()>GB.next){GB.next=Date.now()+7000+Math.random()*5000;gMood(G_SITBORED[Math.floor(Math.random()*G_SITBORED.length)],4500)}
+ if(idle>60000&&!GB.shown&&Date.now()-GB.asked>240000){GB.asked=Date.now();gOpener()}},2000);
+async function gOpener(){let text='';
+ if(CS&&navigator.onLine){try{const r=await garyFetch({mode:'opener',text:'opener',ctx:garyCtx(),items:garyItems()});const j=await r.json();text=(j.text||'').trim()}catch(e){}}
+ if(!text)text=G_OPEN[Math.floor(Math.random()*G_OPEN.length)];
+ if(tab!=='gary'||talking)return;GB.shown=true;$('gotx').textContent=text;$('gopen').classList.add('on');gMood('sitting');}
+function gOpenClose(){GB.shown=false;$('gopen').classList.remove('on');GB.last=Date.now()}
+async function gOpenReply(){const text=$('gotx').textContent;gOpenClose();GB.sit=false;GS.base='idle';gMood('happy',1500);bubble('gary',text);const p=$('p-gary');p.scrollTop=p.scrollHeight;$('ask').focus();
+ try{if(!CHAT){CHAT='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);store('garyChat',CHAT);await gdb('gary_convos',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id:CHAT,title:'A chat Gary started'})});$('ctitle').textContent='A chat Gary started'}
+  await gdb('gary_messages',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({convo:CHAT,role:'gary',content:text.slice(0,2000)})})}catch(e){}}
 function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
  f.addEventListener('pointerdown',e=>{GF.drag=true;GF.moved=false;sx=e.clientX;sy=e.clientY;ox=GF.x;oy=GF.y;f.setPointerCapture(e.pointerId)});
  f.addEventListener('pointermove',e=>{if(!GF.drag)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>6)GF.moved=true;if(GF.moved){GF.x=ox+dx;GF.y=oy+dy;gFloatPlace();f.classList.remove('say')}});
  const end=()=>{if(!GF.drag)return;GF.drag=false;if(GF.moved){store('garyPos',Math.round(GF.x)+','+Math.round(GF.y));GF.hold=performance.now()+8000;gMood('happy',900)}else go('gary')};
  f.addEventListener('pointerup',end);f.addEventListener('pointercancel',end);
  addEventListener('resize',()=>{if(f.classList.contains('on'))gFloatPlace()});
- gCanvas($('gdock'));$('gdock').onclick=()=>{gMood('wave',1800)};gCanvas($('lvorb'));gFloatSync()}
+ gCanvas($('gdock'));$('gdock').onclick=()=>{gPoke();gMood(['wave','tiphat','bow','pose','cheeky','dapper','thumbsup'][Math.floor(Math.random()*7)],2400)};gCanvas($('lvorb'));
+ $('goyes').onclick=gOpenReply;$('gono').onclick=()=>{gOpenClose();gMood('sitwhistle',3000)};$('gcut').onclick=()=>{speakStop();gMood('idle')};gFloatSync()}
+async function gNotesCopy(){if(!CS){toast('Sign in first');return}
+ try{const since=new Date(Date.now()-14*864e5).toISOString();const r=await gdb('gary_audit?select=action,detail,at&or=(ok.eq.false,action.eq.wish)&at=gte.'+since+'&order=at.desc&limit=40');const rows=await r.json();
+  if(!rows.length){toast('Nothing to fix - Gary reports all well');return}
+  const txt='Notes from Gary (Momentum) for Claude, last 14 days:\n'+rows.map(x=>'- '+x.at.slice(0,16).replace('T',' ')+' '+(x.action==='wish'?'NOTE: '+(x.detail&&x.detail.text||''):'ERROR '+x.action+': '+JSON.stringify(x.detail||{}).slice(0,300))).join('\n');
+  await navigator.clipboard.writeText(txt);toast(rows.length+' notes copied - paste them to Claude')}catch(e){toast('Couldn\'t fetch the notes just now')}}
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
 async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new Error('signin');
  return fetch(CL.url+'/functions/v1/gary',{signal,method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
@@ -834,9 +1082,9 @@ async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock()
   if(r.status===404)throw new Error('nofn');if(!r.ok)throw new Error('http '+r.status);
   const rd=r.body.getReader(),dec=new TextDecoder();
   for(;;){const{value,done}=await rd.read();if(done)break;pet();GTALK=true;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
-  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);garyJobs(j.jobs,a)}catch(e){}}}
+  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);GPOSE=j.pose||null;garyJobs(j.jobs,a)}catch(e){}}}
  catch(e){if(e.name==='AbortError'&&!got)a.textContent='That took far too long, sir - Google seems to have nodded off. Try me again.';else if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':'I can\'t reach the cloud just now, sir. Try again in a moment.'}
- clearTimeout(wd);a.classList.remove('wait');talking=false;GTALK=false;if(got)gMood('happy',1600);else gMood('confused',3500);const said=got.split('\x1e')[0].trim();if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
+ clearTimeout(wd);a.classList.remove('wait');talking=false;GTALK=false;if(GPOSE)gPose(GPOSE);else if(got)gMood('happy',1600);else gMood('confused',3500);GPOSE=null;const said=got.split('\x1e')[0].trim();if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
 // Gary's voice: the device's own British male voice (free, swappable later)
 function garyVoice(){const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]GB/i.test(v.lang));
  return vs.find(v=>/daniel|arthur|george|oliver|male|ryan|thomas/i.test(v.name))||vs[0]||null}

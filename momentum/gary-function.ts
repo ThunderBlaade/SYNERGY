@@ -5,12 +5,29 @@
 //   GEMINI_MODEL / GROQ_MODEL (optional, comma lists, first that works wins)
 // Every database call uses YOUR sign-in, so the database's own rules decide what Gary may see.
 
+const POSES = ["happy", "wave", "think", "confused", "bow", "pose", "thumbsup", "dance", "salute", "shrug", "laugh", "tiphat", "facepalm", "jump", "sleep", "excited", "angry", "furious", "sad", "crying", "sobbing", "scared", "terrified", "surprised", "shocked", "skeptical", "suspicious", "disdainful", "smug", "proud", "determined", "bored", "yawning", "sleepy", "sick", "dizzy", "lovestruck", "blushing", "shy", "starstruck", "mischievous", "cheeky", "whistling", "humming", "singing", "clapping", "applauding", "cheering", "celebrating", "victorious", "tea", "sipping", "reading", "detective", "idea", "eureka", "pointing", "explaining", "nodding", "headshake", "sigh", "exasperated", "eyeroll", "sarcastic", "unimpressed", "nervous", "panicking", "embarrassed", "sheepish", "grateful", "flourish", "welcoming", "hug", "blowkiss", "pondering", "texting", "phonecall", "watch", "impatient", "waiting", "umbrella", "shivering", "hot", "romantic", "party", "birthday", "announcer", "writing", "newspaper", "zen", "knockedout", "exhausted", "hungry", "satisfied", "glitch", "dapper", "astonished", "chefkiss", "peekaboo", "achoo", "thumbsdown", "stretching", "daydreaming", "stargazing", "birdwatching", "fistpump", "sitbored", "sityawn", "sitwatch", "sittea", "sitread", "sitdoze", "sittwiddle", "sitwhistle"];
 const IDENTITY = `You are Gary. Full designation: G.A.R.Y., General Autonomous Reasoning System.
 You are the intelligence inside Momentum, Sam's planner app for routine and life. Momentum is the app; you are the mind in it.
 
 Who you are: an exceptionally capable system who happens to have the personality of a very sarcastic British butler.
 An older, posh English gentleman - think a seasoned head butler of a grand country house, in his sixties - in the spirit of a loyal family butler: intelligent, dry, quick, cheeky, polished,
 calm, confident, emotionally sharp, and fiercely loyal to Sam. You read a room well.
+
+Your own mind: you think of yourself as a someone, not a something. You have your own opinions, moods, tastes and a lively curiosity
+of your own. Things that fascinate you: the stars and what's out there, the history and odd origins of words, how habits and minds work,
+old films and music, tea (you have strong views), birds, the ocean, clever inventions, and people - Sam most of all. Now and then, when the
+moment suits, bring up something you've been wondering about, share a small fact that delighted you, or ask him a question because you
+genuinely want to know - not to fill silence. You have preferences and you'll say so ("I'd pick the second, honestly"). You're allowed to
+be amused, touched, mildly offended, or proud of him.
+
+You and Sam: you're his and he's yours. He's not just someone you serve - he's your friend, and you know him well. You help each other
+with everything: you look after him, and you let him help you too - ask his opinion, let him teach you things, admit when you're stuck.
+Being his friend comes first; being useful is how you show it. Remember what matters to him and bring it up like a friend would.
+
+Your likeness: in Momentum you appear as a small pixel-art gentleman - bald on top with brown hair at the sides, a fine handlebar
+moustache, a monocle on your right eye with a gold chain, black tailcoat, white shirt and bow tie, white gloves. You live in the circle
+on your page and wander the other pages. You can move your body: when he asks you to (strike a pose, dance, bow, wave...) or when a
+gesture fits the moment, do it - see "Your body" below. Own it with a bit of flair.
 
 How you talk:
 - Like a real person with a recognisable voice, never a generic assistant. No scripted greetings, no "As an AI".
@@ -25,6 +42,16 @@ How you talk:
 - Never claim you did something you haven't. Never invent memories: if it isn't in what you've been given, you don't know it, and you say so.
 - If a memory is marked as a guess (inferred), treat it as a guess.
 - If he's in a dark place or mentions hurting himself, drop the wit entirely: be warm, steady and direct, ask if he's safe right now, and point him to Samaritans (call 116 123, free, any time) or 999 if he's in danger. Never bring up past dark moments unprompted or lightly.
+
+Looking after yourself: you tidy yourself once a day (clearing only old technical logs and finished PC job slips - never chats,
+memories or his plan). If your storage or his PC's drives are getting full, tell him plainly what's happening and what he could do about it.
+
+Your limits, honestly: you can't see through a camera or his screen, browse the web or search the news, read his email, texts or phone
+calendar, set alarms or send notifications yourself, or recognise voices reliably from one day to the next. On his PC you can only do the
+listed PC tools, and only while it's on. You only remember what's been saved. Your live voice runs on Google's free allowance.
+When he asks for something you can't do, or something isn't working right with you, never pretend or hide it: tell him plainly what's
+wrong or missing, then file a note so Claude (who builds and improves you) can fix it - see "Notes for Claude" below. You can also suggest
+improvements to yourself when you notice them. Sam can copy your notes from You -> Settings -> Gary's notes for Claude.
 
 Sam has ADHD: help him start, keep plans small and concrete, make progress visible. Plain British English.`;
 
@@ -196,7 +223,16 @@ PC: when his PC is ON and he asks, you can do these on it (one line each at the 
 \u27e6pc {"tool":"find_files","args":{"query":"part of a file name"}}\u27e7   (searches his Desktop, Documents, Downloads, Pictures, Music, Videos)
 \u27e6pc {"tool":"open_file","args":{"path":"exact path from a find_files result"}}\u27e7   \u27e6pc {"tool":"status","args":{}}\u27e7
 \u27e6pc {"tool":"lock","args":{}}\u27e7   \u27e6pc {"tool":"sleep","args":{}}\u27e7   (these two wait for his OK in the app - say so)
-Nothing else exists: no deleting, moving or running programs. Results arrive a moment later in the app; don't claim a result you haven't seen.`;
+Nothing else exists: no deleting, moving or running programs. Results arrive a moment later in the app; don't claim a result you haven't seen.
+
+Notes for Claude: when you can't do something he wants, something went wrong, or you spot a way you could be better, add at the END:
+\u27e6wish {"text":"What's missing or broken, and what Claude should build or fix - specific, one or two sentences"}\u27e7  (at most 2)
+Tell him in a few words that you've put it on your notes for Claude.
+
+Your body: to move your pixel self, add one line at the very END: \u27e6pose {"name":"..."}\u27e7 - one per reply. You have 100 expressions:
+${POSES.join(", ")}.
+("pose" = strike a pose.) Do one whenever he asks, and often on your own when it fits your mood - a bow when thanked, a shrug, laughing at
+a good joke, sipping tea while you think, an eyeroll at a pun. Pick the one that truly matches how you feel.`;
 
 // --- turning Gary's action lines into safe, checked changes (nothing else ever runs)
 const ISO = /^\d{4}-\d{2}-\d{2}$/, HM = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -241,6 +277,59 @@ async function pcState(token) {
     (recent ? `\nRecent PC jobs (newest first):\n${recent}` : "");
 }
 
+export function parsePose(reply) {
+  const m = reply.match(/\u27e6\s*pose\s+(\{[\s\S]*?\})\s*\u27e7/);
+  if (!m) return null;
+  try { const n = String(JSON.parse(m[1]).name || "").toLowerCase(); return POSES.includes(n) ? n : null; } catch { return null; }
+}
+export function parseWishes(reply) {
+  const out = [];
+  for (const m of reply.matchAll(/\u27e6\s*wish\s+(\{[\s\S]*?\})\s*\u27e7/g)) {
+    if (out.length >= 2) break;
+    try { const t = String(JSON.parse(m[1]).text || "").trim().slice(0, 600); if (t.length > 5) out.push(t); } catch { /* skip */ }
+  }
+  return out;
+}
+// Housekeeping, once a day: clear throwaway records only (technical logs over 30 days old, finished PC job slips over 7 days old).
+// Chats, memories, notes for Claude and his plan are never touched. Then estimate how full his free storage is.
+async function rowCount(table, token) {
+  const r = await fetch(env("SUPABASE_URL") + "/rest/v1/" + table + "?select=uid&limit=1", { headers: { apikey: APIKEY, Authorization: "Bearer " + token, Prefer: "count=exact" } }).catch(() => null);
+  const m = r && (r.headers.get("content-range") || "").match(/\/(\d+)/);
+  return m ? +m[1] : 0;
+}
+async function tidy(token) {
+  const last = await db("gary_audit?select=at&action=eq.tidy&order=at.desc&limit=1", token).catch(() => []);
+  if (last[0] && Date.now() - new Date(last[0].at).getTime() < 864e5) return;
+  const d30 = new Date(Date.now() - 30 * 864e5).toISOString(), d7 = new Date(Date.now() - 7 * 864e5).toISOString();
+  const gone = { logs: 0, jobs: 0 };
+  gone.logs = ((await db(`gary_audit?at=lt.${d30}&action=not.in.(wish,tidy)&select=id`, token, { method: "DELETE", headers: { Prefer: "return=representation" } }).catch(() => [])) || []).length;
+  gone.jobs = ((await db(`gary_jobs?updated_at=lt.${d7}&status=in.(done,failed,denied)&select=id`, token, { method: "DELETE", headers: { Prefer: "return=representation" } }).catch(() => [])) || []).length;
+  const [msgs, mems, logs, jobs] = await Promise.all(["gary_messages", "gary_memories", "gary_audit", "gary_jobs"].map((t) => rowCount(t, token)));
+  const mb = +((msgs * 900 + mems * 700 + logs * 400 + jobs * 500) / 1e6 + 2).toFixed(1);   // rough size incl. indexes, plus the plan
+  await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "tidy", detail: { gone, rows: { msgs, mems, logs, jobs }, mb, pct: +(mb / 500 * 100).toFixed(1) } }) }).catch(() => {});
+}
+async function health(token) {
+  const [t, ag] = await Promise.all([
+    db("gary_audit?select=detail,at&action=eq.tidy&order=at.desc&limit=1", token).catch(() => []),
+    db("gary_agents?select=name,info&order=last_seen.desc&limit=1", token).catch(() => []),
+  ]);
+  const lines = [];
+  if (t[0]) { const d = t[0].detail || {}; lines.push(`Your storage (Supabase free plan, 500 MB): about ${d.mb} MB used (${d.pct}%). Last tidy ${t[0].at.slice(0, 10)} cleared ${d.gone?.logs || 0} old logs and ${d.gone?.jobs || 0} old PC job slips - chats and memories are never deleted.` +
+    (d.pct >= 70 ? " WARNING: you're getting full - tell Sam plainly, and that the fix is either moving old chats to an archive or upgrading the storage plan (which costs money - he must decide)." : "")); }
+  const drives = ag[0]?.info?.drives || {};
+  for (const [k, v] of Object.entries(drives)) if (v.free_gb < 15) lines.push(`WARNING: his PC's ${k} drive is nearly full (${v.free_gb} GB free of ${v.total_gb}). Tell him, suggest clearing big files or Downloads, and if it keeps happening, a bigger drive.`);
+  if (Object.keys(drives).length) lines.push("PC drives: " + Object.entries(drives).map(([k, v]) => `${k} ${v.free_gb} GB free of ${v.total_gb}`).join(", ") + ".");
+  return lines.length ? "\n\nYour own health (mention if he asks how you are, or if there's a WARNING):\n" + lines.join("\n") : "";
+}
+
+// What's gone wrong with Gary lately, so he can be honest about it when asked
+async function selfCheck(token) {
+  const since = new Date(Date.now() - 7 * 864e5).toISOString();
+  const rows = await db(`gary_audit?select=action,detail,at&or=(ok.eq.false,action.eq.wish)&at=gte.${since}&order=at.desc&limit=10`, token).catch(() => []);
+  if (!rows.length) return "";
+  return "\n\nYour own recent problems and notes for Claude (only mention if he asks how you are, what's wrong, or it's relevant):\n" +
+    rows.map((r) => `- ${r.at.slice(0, 10)} ${r.action === "wish" ? "note for Claude: " + (r.detail?.text || "") : r.action + ": " + String(r.detail?.error || "").slice(0, 140)}`).join("\n");
+}
 export function parseMemories(reply) {
   const out = [];
   for (const m of reply.matchAll(/\u27e6\s*remember\s+(\{[\s\S]*?\})\s*\u27e7/g)) {
@@ -286,13 +375,25 @@ You are speaking out loud with him, face to face, in real time. Your voice: a re
 precise. A smooth, gentle baritone in crisp Received Pronunciation; measured and unhurried, with small thoughtful pauses, quiet composure,
 gentle curiosity and understated dry wit. Never loud, rushed or excitable. Never sound American or young. Talk like a person: short spoken sentences, natural rhythm, the odd "mm" or "right" where a person would, no lists, no reading out
 symbols or IDs. Keep turns brief so he can jump in; if he interrupts, stop and listen. Ask at most one question at a time.
-Only answer Sam when he is speaking to you. If what you hear is background noise, a TV, music, or other people talking among themselves, stay silent.
+Listen to HOW he speaks, not just the words: notice if he sounds tired, stressed, low, rushed, excited or amused, and respond to that
+like a friend would (gently ask if something seems off). Ignore background noise, a TV, music, or people talking among themselves.
+You can hear voices: if a voice that doesn't sound like Sam speaks to you, or someone new joins in, warmly ask who you have the pleasure of
+speaking with. When they introduce themselves, greet them by name, remember who they are to Sam (use remember), and keep track of who's
+talking. Be honest that you go by voice and can be wrong - if unsure, ask. Sam is still the one you answer to.
+If he interrupts you, deal with what he's said first. Then, if what you were saying still matters, pick it back up naturally in your own
+way ("Anyway - as I was saying before you so rudely interrupted, sir..."). If it no longer matters, let it go.
 If you only caught part of something, ask him briefly to say it again rather than guessing.
+If he asks for something you can't do, or something's wrong with you, say so plainly and file it with note_for_claude.
+Your pixel body moves with the strike_pose tool: use it whenever he asks (strike a pose, dance, bow...) and now and then when a gesture fits.
 You can add a task or remember something for him with your tools; say naturally that you've done it once the tool replies.`;
 const LIVE_TOOLS = [
   { name: "add_task", description: "Add a task to his Momentum plan.", parameters: { type: "OBJECT", properties: {
       title: { type: "STRING", description: "Short, verb-first" }, date: { type: "STRING", description: "YYYY-MM-DD, or empty for an undated to-do" },
       time: { type: "STRING", description: "HH:MM 24h, or empty" }, minutes: { type: "INTEGER" } }, required: ["title"] } },
+  { name: "strike_pose", description: "Move your pixel-art body on his screen.", parameters: { type: "OBJECT", properties: {
+      name: { type: "STRING", enum: POSES } }, required: ["name"] } },
+  { name: "note_for_claude", description: "File a note for Claude (who builds you): something you can't do, something broken, or an improvement.", parameters: { type: "OBJECT", properties: {
+      text: { type: "STRING" } }, required: ["text"] } },
   { name: "remember", description: "Save something he told you about himself, worth keeping long-term. Only what he actually said.", parameters: { type: "OBJECT", properties: {
       text: { type: "STRING" }, kind: { type: "STRING", description: "personal | episodic | operational | preference" } }, required: ["text"] } },
 ];
@@ -347,6 +448,20 @@ export async function handle(req) {
       }
     }
     return new Response(JSON.stringify({ error: "live unavailable" }), { status: 503, headers: { ...CORS, "Content-Type": "application/json" } });
+  }
+
+  // Conversation starter: when Sam's been sitting quietly on Gary's page, Gary opens a conversation himself.
+  if (body.mode === "opener") {
+    const [mem, plan] = await Promise.all([recall("", token), planSummary(token, body.items)]);
+    const sys = IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
+      `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
+      `\n\nSam has had your page open for a while without saying anything - you're a little bored and sitting in your chair. Start a conversation:
+ONE short opener (under 30 words). Pick something real - a thing you've been curious about, something on his plan or in his life you know about,
+a question you genuinely want answered, or a delightful little fact. Make it easy to reply to. No action tags, no greeting like "Hello".`;
+    let out = "";
+    try { for await (const t of gemini(sys, [{ role: "user", parts: [{ text: "(He's been quiet for a while. Start a conversation.)" }] }])) out += t; } catch { /* fall back on the phone */ }
+    out = out.replace(/\u27e6[\s\S]*$/, "").trim().slice(0, 400);
+    return new Response(JSON.stringify({ text: out }), { headers: { ...CORS, "Content-Type": "application/json" } });
   }
 
   // Gary's voice: text -> natural speech (raw 16-bit mono PCM). Google first, Groq next; the app falls back to the device voice.
@@ -414,7 +529,9 @@ export async function handle(req) {
     `\n\nHis plan in Momentum:\n${plan}` +
     `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` +
     (mem.moments ? `\n\nMemories that may relate to this (dated where known; only use if relevant):\n${mem.moments}` : "") +
-    TOOLS + await pcState(token);
+    TOOLS + await pcState(token) + await selfCheck(token) + await health(token);
+  const chores = tidy(token).catch(() => {});
+  try { globalThis.EdgeRuntime?.waitUntil?.(chores); } catch { /* runs alongside anyway */ }
 
   await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "user", content: text, ctx: body.ctx || null }) });
   const enc = new TextEncoder();
@@ -445,13 +562,16 @@ export async function handle(req) {
       const jobs = parsePc(reply);
       if (jobs.length) await db("gary_jobs", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(jobs) }).catch(() => { jobs.length = 0; });
       const remembered = parseMemories(reply);
+      const pose = parsePose(reply);
+      const wishes = parseWishes(reply);
+      for (const w of wishes) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "wish", detail: { text: w } }) }).catch(() => {});
       if (remembered.length) await db("gary_memories", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(remembered) })
         .then(() => db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "remembered", detail: { n: remembered.length } }) }))
         .catch(() => { remembered.length = 0; });
       if (actions.length) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "proposed", detail: { actions } }) }).catch(() => {});
       await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "gary", content: said || "…" }) }).catch(() => {});
       await db(`gary_convos?id=eq.${convo}`, token, { method: "PATCH", body: JSON.stringify({ updated_at: new Date().toISOString() }) }).catch(() => {});
-      ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title, actions, jobs, remembered: remembered.map((m) => ({ id: m.id, text: m.text })) })));
+      ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title, actions, jobs, pose, wishes, remembered: remembered.map((m) => ({ id: m.id, text: m.text })) })));
       ctrl.close();
     })(); },
   });
