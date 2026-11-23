@@ -1,7 +1,8 @@
 // @ts-nocheck
 // G.A.R.Y. — General Autonomous Reasoning System. Gary Cloud: one Supabase Edge Function.
 // He works whether or not the PC is on. Secrets live in Supabase (Edge Functions -> Secrets), never in the app:
-//   GEMINI_API_KEY  (required)   GEMINI_MODEL (optional, comma list, first that works wins)
+//   GEMINI_API_KEY (main brain)   GROQ_API_KEY (backup brain, used when Google is full or down)
+//   GEMINI_MODEL / GROQ_MODEL (optional, comma lists, first that works wins)
 // Every database call uses YOUR sign-in, so the database's own rules decide what Gary may see.
 
 const IDENTITY = `You are Gary. Full designation: G.A.R.Y., General Autonomous Reasoning System.
@@ -109,8 +110,8 @@ function contextLine(ctx) {
 // --- talking to Gemini (streamed)
 async function* gemini(system, turns, json = false) {
   const key = env("GEMINI_API_KEY");
-  if (!key) throw Object.assign(new Error("no key"), { kind: "nokey" });
-  const models = (env("GEMINI_MODEL") || "gemini-flash-lite-latest,gemini-flash-latest,gemini-2.5-flash-lite,gemini-2.5-flash,gemini-2.0-flash").split(",").map((s) => s.trim()).filter(Boolean);
+  if (!key && !env("GROQ_API_KEY")) throw Object.assign(new Error("no key"), { kind: "nokey" });
+  const models = !key ? [] : (env("GEMINI_MODEL") || "gemini-flash-lite-latest,gemini-flash-latest,gemini-2.5-flash-lite,gemini-2.5-flash,gemini-2.0-flash").split(",").map((s) => s.trim()).filter(Boolean);
   let last;
   for (const m of models) {
     const ac = new AbortController(), timer = setTimeout(() => ac.abort(), 12000);   // a model that won't start in 12s is too busy: next
@@ -148,6 +149,41 @@ async function* gemini(system, turns, json = false) {
       }
     }
     return;
+  }
+  // Google full or down: the backup brain (Groq, free, no card)
+  const gk = env("GROQ_API_KEY");
+  if (gk) {
+    const msgs = [{ role: "system", content: system }, ...turns.map((t) => ({ role: t.role === "model" ? "assistant" : "user", content: t.parts.map((p) => p.text).join("") }))];
+    for (const m of (env("GROQ_MODEL") || "openai/gpt-oss-120b,llama-3.3-70b-versatile,openai/gpt-oss-20b,llama-3.1-8b-instant").split(",").map((x) => x.trim()).filter(Boolean)) {
+      const ac = new AbortController(), timer = setTimeout(() => ac.abort(), 12000);
+      let r;
+      try {
+        r = await fetch("https://api.groq.com/openai/v1/chat/completions", { signal: ac.signal, method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: "Bearer " + gk },
+          body: JSON.stringify({ model: m, messages: msgs, stream: true, temperature: json ? 0.3 : 0.85, max_tokens: 4096, ...(json ? { response_format: { type: "json_object" } } : {}) }) });
+      } catch { clearTimeout(timer); last = Object.assign(new Error("groq " + m + " too slow"), { kind: "busy" }); continue; }
+      clearTimeout(timer);
+      (INFO.tried = INFO.tried || []).push("groq " + m + " " + r.status);
+      if (!r.ok) { last = Object.assign(new Error("groq " + m + " " + r.status + " " + (await r.text()).slice(0, 160)), { kind: r.status === 429 || r.status >= 500 ? "busy" : undefined }); continue; }
+      INFO.model = "groq " + m;
+      const rd = r.body.getReader(), dec = new TextDecoder();
+      let buf = "";
+      for (let end = false; !end;) {
+        const { value, done } = await rd.read();
+        if (done) { end = true; buf += "\n"; } else buf += dec.decode(value, { stream: true });
+        let i;
+        while ((i = buf.indexOf("\n")) >= 0) {
+          const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+          if (!line.startsWith("data:") || line === "data: [DONE]") continue;
+          try {
+            const j = JSON.parse(line.slice(5)), c = j.choices?.[0];
+            if (c?.finish_reason) INFO.finish = c.finish_reason;
+            if (c?.delta?.content) yield c.delta.content;
+          } catch { /* partial line */ }
+        }
+      }
+      return;
+    }
   }
   throw last || new Error("no model available");
 }
@@ -196,7 +232,7 @@ export function parseActions(reply) {
 }
 
 const MISHAP = {
-  nokey: "My brain isn't plugged in yet, sir - there's no Gemini key in Supabase's Secrets. Once it's there, I'm all yours.",
+  nokey: "My brain isn't plugged in yet, sir - there's no Gemini or Groq key in Supabase's Secrets. Once one is there, I'm all yours.",
   busy: "I've used up my free thinking allowance with Google for now, sir. Give it a few minutes and try me again.",
 };
 
