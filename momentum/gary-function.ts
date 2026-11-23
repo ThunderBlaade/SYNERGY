@@ -553,10 +553,14 @@ export async function handle(req) {
   }
 
   // Conversation starter: when Sam's been sitting quietly on Gary's page, Gary opens a conversation himself.
-  if (body.mode === "opener") {
-    const [mem, plan] = await Promise.all([recall("", token), planSummary(token, body.items)]);
+  if (body.mode === "opener") {   // may answer SKIP when it isn't the moment
+    const cv = String(body.convo || "").replace(/[^a-z0-9]/gi, "").slice(0, 40);
+    const [mem, plan, recent] = await Promise.all([recall("", token), planSummary(token, body.items),
+      cv ? db(`gary_messages?select=role,content&convo=eq.${cv}&order=id.desc&limit=8`, token).catch(() => []) : []]);
     const sys = IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
       `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
+      (recent.length ? `\n\nThe conversation so far (newest last):\n${recent.reverse().map((m) => (m.role === "gary" ? "You: " : "Sam: ") + m.content.slice(0, 300)).join("\n")}` : "") +
+      `\n\nRead the mood first. If he seems busy, low, upset or focused, or the moment just isn't right, reply with exactly SKIP.` +
       `\n\nSam has had your page open for a while without saying anything - you're a little bored and sitting in your chair. Start a conversation:
 ONE short opener (under 30 words). Pick something real - a thing you've been curious about, something on his plan or in his life you know about,
 a question you genuinely want answered, or a delightful little fact. Make it easy to reply to. Just the words you'd say: no stage directions, no actions in brackets or asterisks, no action tags, no "Hello".`;

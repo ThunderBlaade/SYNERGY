@@ -228,6 +228,8 @@ body.lvon #askbar{display:none!important}
 .gbt{margin-left:auto;text-align:right;align-items:flex-end;padding-bottom:12px}
 #gsay{position:absolute;bottom:96px;left:0;max-width:200px;background:#fff;color:#000;font:400 14px/1.35 var(--serif);padding:8px 11px;opacity:0;transform:translateY(5px);transition:opacity .25s,transform .25s;pointer-events:none;z-index:3}
 #gsay.on{opacity:1;transform:none}#gsay::after{content:"";position:absolute;bottom:-6px;left:22px;border:6px solid transparent;border-bottom:0;border-top-color:#fff}
+#askbar .mic{width:58px;height:58px}#asksend svg{width:24px;height:24px}#ask{min-height:58px;height:58px;padding:16px 14px}
+#gsay{max-width:min(280px,70vw);pointer-events:auto;cursor:pointer}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -272,7 +274,7 @@ body.lvon #askbar{display:none!important}
  <i class="gbh"></i><div id="gsay"></div><button id="gdock" aria-label="G.A.R.Y."></button><div class="gbt"><b>G.A.R.Y.</b><span class="lab" id="gbs">Pull up to talk</span></div></div>
  <textarea id="ask" rows="1" placeholder="Ask G.A.R.Y. anything…" spellcheck="true" autocorrect="on" autocapitalize="sentences" enterkeyhint="send"></textarea>
  <button class="mic" id="asksend" aria-label="Send" style="border-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
- <button class="mic" id="askmic" aria-label="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 19 7.5 6l5 13M4.4 14.5h6.2M19.5 4.5v15M17.5 4.5h4M17.5 19.5h4"/></svg></button><button class="mic talk" id="livebtn" aria-label="Talk to G.A.R.Y."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></div>
+ <button class="mic" id="askmic" aria-label="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 19 7.5 6l5 13M4.4 14.5h6.2M19.5 4.5v15M17.5 4.5h4M17.5 19.5h4"/></svg></button></div>
 
 <button id="gcut">Tap to interrupt</button>
 <div id="gfloat" aria-label="Open Gary"><div id="gfbub"></div><div id="gfsp"></div></div>
@@ -760,7 +762,7 @@ function lvMic(f32){if(!LV.ready||LV.muted)return;let e=0;for(let i=0;i<f32.leng
  if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({realtimeInput:{audio:{data:b64(new Uint8Array(all.buffer)),mimeType:'audio/pcm;rate=16000'}}}))}
 function lvPlay(b64s,rate){const bin=atob(b64s),n=bin.length>>1,ab=LV.ctx.createBuffer(1,n,rate||24000),ch=ab.getChannelData(0);
  for(let i=0;i<n;i++){let v=bin.charCodeAt(2*i)|(bin.charCodeAt(2*i+1)<<8);if(v>32767)v-=65536;ch[i]=v/32768}
- LV.recv=(LV.recv||0)+ab.duration;const s=LV.ctx.createBufferSource();s.buffer=ab;s.connect(LV.ctx.destination);const at=Math.max(LV.ctx.currentTime+0.03,LV.playAt);s.start(at);LV.playAt=at+ab.duration;
+ LV.recv=(LV.recv||0)+ab.duration;LV.act=Date.now();const s=LV.ctx.createBufferSource();s.buffer=ab;s.connect(LV.ctx.destination);const at=Math.max(LV.ctx.currentTime+0.03,LV.playAt);s.start(at);LV.playAt=at+ab.duration;
  LV.srcs.push(s);s.onended=()=>{LV.srcs=LV.srcs.filter(x=>x!==s);if(!LV.srcs.length&&LV.on)$('live').classList.remove('speaking')};$('live').classList.add('speaking')}
 // When Sam cuts in: tell Gary exactly how far Sam heard, so he can answer first and then pick up where he left off.
 function lvNoteCut(){const full=(LV.outT||'').trim();if(!full||!LV.ctx)return;const queued=Math.max(0,LV.playAt-LV.ctx.currentTime),rec=LV.recv||0;
@@ -790,7 +792,7 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
  if(m.goAway){lvStatus('One moment…');setTimeout(()=>{if(LV.on){lvStop(true);liveStart(true)}},300);return}
  const c=m.serverContent;if(!c)return;
  if(c.interrupted){lvNoteCut();lvHush();LV.drop=false;lvStatus('Listening…')}
- if(c.inputTranscription&&c.inputTranscription.text){LV.inT+=c.inputTranscription.text;lvStatus('Listening…')}
+ if(c.inputTranscription&&c.inputTranscription.text){LV.act=Date.now();LV.inT+=c.inputTranscription.text;lvStatus('Listening…')}
  if(c.outputTranscription&&c.outputTranscription.text)LV.outT+=c.outputTranscription.text;
  if(c.modelTurn&&!LV.drop)for(const p of c.modelTurn.parts||[]){if(p.inlineData&&p.inlineData.data){const r=+((p.inlineData.mimeType||'').match(/rate=(\d+)/)||[0,24000])[1];lvPlay(p.inlineData.data,r);lvStatus('Gary')}}
  if(c.turnComplete){LV.drop=false;LV.recv=0;if(LV.inT.trim())lvLine('you',LV.inT.trim());if(LV.outT.trim())lvLine('gary',LV.outT.trim());lvSaveTurn()}}
@@ -813,7 +815,7 @@ async function liveStart(again){if(!gUse().google){toast('Live voice needs Googl
 function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;try{ws&&ws.close(1000)}catch(e){}lvHush();
  try{LV.stream&&LV.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{LV.node&&LV.node.disconnect()}catch(e){}try{LV.ctx&&LV.ctx.close()}catch(e){}
  LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;$('live').classList.remove('on','speaking','mini');document.body.classList.remove('lvon');gFloatSync();brainDraw();lvSaveTurn()}}
-$('livebtn').onclick=()=>liveStart();$('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini')){lvMini(false);return}if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>{if($('live').classList.contains('mini'))lvStop();else lvMini(true)};$('lvmute').onclick=()=>{LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvStatus(LV.muted?'Muted':'Listening…')};
+$('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini')){lvMini(false);return}if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>{if($('live').classList.contains('mini'))lvStop();else lvMini(true)};$('lvmute').onclick=()=>{LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvStatus(LV.muted?'Muted':'Listening…')};
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
@@ -1128,14 +1130,15 @@ function gPoke(){GB.last=Date.now();if(GB.sit){GB.sit=false;GS.base=gIdleBase();
 setInterval(()=>{if(tab!=='gary'||talking||GSPK||LV.on||document.hidden)return;const idle=Date.now()-GB.last;
  if(idle>35000&&!GB.sit){GB.sit=true;GS.base='sitting';if(!GS.until)gMood('sitting')}
  if(GB.sit&&!GS.until&&Date.now()>GB.next){GB.next=Date.now()+7000+Math.random()*5000;gMood(G_SITBORED[Math.floor(Math.random()*G_SITBORED.length)],4500)}
- if(idle>60000&&!GB.shown&&!GL.guest&&Date.now()-GB.asked>240000){GB.asked=Date.now();gOpener()}},2000);
+ if(!GB.wait)GB.wait=90000+Math.random()*240000;if(idle>GB.wait&&!GB.shown&&!GL.guest&&Date.now()-GB.asked>600000){GB.asked=Date.now();GB.wait=0;if(Math.random()<0.6)gOpener()}},2000);
 async function gOpener(){let text='';
- if(CS&&navigator.onLine){try{const r=await garyFetch({mode:'opener',text:'opener',ctx:garyCtx(),items:garyItems()});const j=await r.json();text=(j.text||'').trim()}catch(e){}}
- if(!text)text=G_OPEN[Math.floor(Math.random()*G_OPEN.length)];
- if(tab!=='gary'||talking)return;GB.shown=true;$('gotx').textContent=text;$('gopen').classList.add('on');gMood('sitting');}
-function gOpenClose(){GB.shown=false;$('gopen').classList.remove('on');GB.last=Date.now()}
-async function gOpenReply(){const text=$('gotx').textContent;gOpenClose();GB.sit=false;GS.base='idle';gMood('happy',1500);bubble('gary',text);const p=$('p-gary');p.scrollTop=p.scrollHeight;$('ask').focus();
- try{if(!CHAT){CHAT='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);store('garyChat',CHAT);await gdb('gary_convos',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id:CHAT,title:'A chat Gary started'})});$('ctitle').textContent='A chat Gary started'}
+ if(CS&&navigator.onLine){try{const r=await garyFetch({mode:'opener',text:'opener',convo:CHAT,ctx:garyCtx(),items:garyItems()});const j=await r.json();text=(j.text||'').trim()}catch(e){}}
+ else text=G_OPEN[Math.floor(Math.random()*G_OPEN.length)];
+ if(!text||/^SKIP\b/i.test(text)||tab!=='gary'||talking)return;GB.pending=text;GB.shown=true;gBubble(text,45000);gMood('sitting')}
+function gBubble(text,ms){const g=$('gsay');g.textContent=text;g.style.left=Math.max(0,Math.min($('gbar').clientWidth-g.offsetWidth-4,GW.x+14))+'px';
+ g.classList.add('on');clearTimeout(g._t);g._t=setTimeout(()=>{g.classList.remove('on');GB.shown=false},ms||4000)}
+async function gOpenSave(){const text=GB.pending;GB.pending=null;GB.shown=false;$('gsay').classList.remove('on');if(!text)return;bubble('gary',text);
+ try{if(!CHAT){CHAT='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);store('garyChat',CHAT);await gdb('gary_convos',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id:CHAT,title:'A chat G.A.R.Y. started'})});$('ctitle').textContent='A chat G.A.R.Y. started'}
   await gdb('gary_messages',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({convo:CHAT,role:'gary',content:text.slice(0,2000)})})}catch(e){}}
 function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
  f.addEventListener('pointerdown',e=>{GF.drag=true;GF.moved=false;sx=e.clientX;sy=e.clientY;ox=GF.x;oy=GF.y;f.setPointerCapture(e.pointerId)});
@@ -1144,7 +1147,7 @@ function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
  f.addEventListener('pointerup',end);f.addEventListener('pointercancel',end);
  addEventListener('resize',()=>{if(f.classList.contains('on'))gFloatPlace()});
  gCanvas($('gdock'));gCanvas($('lvorb'));$('gfid').onclick=()=>gGate();$('brain').onclick=e=>{e.stopPropagation();brainMenu()};$('bmlist').onclick=e=>{const t=e.target.closest('[data-bk]');if(t)brainToggle(t.dataset.bk)};brainDraw();
- $('goyes').onclick=gOpenReply;$('gono').onclick=()=>{gOpenClose();gMood('sitwhistle',3000)};$('gcut').onclick=()=>{speakStop();gMood('idle')};gFloatSync()}
+ $('gsay').onclick=()=>$('ask').focus();$('gcut').onclick=()=>{speakStop();gMood('idle')};gFloatSync()}
 async function gNotesCopy(){if(!CS){toast('Sign in first');return}
  try{const since=new Date(Date.now()-14*864e5).toISOString();const rows=await gdb('gary_audit?select=action,detail,at&or=(ok.eq.false,action.eq.wish)&at=gte.'+since+'&order=at.desc&limit=40')||[];
   if(!rows.length){toast('Nothing to fix - Gary reports all well');return}
@@ -1161,8 +1164,10 @@ const G_BANTER=[['Ask G.A.R.Y. anything…','Anything within reason, sir.','smug
  ['Type something. He\'s getting bored.','The text box is being mean to me again, sir.','sad'],['Go on, he\'s lonely.','I am NOT lonely. I have tea.','sittea'],['Psst. Ask about his monocle.','It\'s for reading. And judging.','dapper'],
  ['I\'m the real brains round here.','You\'re a rectangle.','eyeroll'],['Say something nice to him.','Ignore the box, sir. It\'s jealous.','smug'],['He talks to birds, you know.','Only the clever ones.','birdwatching'],
  ['Waiting…','Patiently. Like a gentleman.','waiting'],['Bet he can\'t do a backflip.','I could. I simply choose not to.','proud'],['Your keyboard has a mic, you know.','So do I. Pull me up, sir.','pointUp']];
-let gBi=0,gBside=0;setInterval(()=>{const a=$('ask');if(!a||a.value||document.activeElement===a&&gBside===0&&false)return;const p=G_BANTER[gBi%G_BANTER.length];
- if(gBside===0){a.placeholder=p[0];a.style.height=p[0].length>26?'74px':'';gBside=1}else{gBside=0;gBi++;if(tab==='gary'&&!talking&&!GSPK&&!LV.on){const g=$('gsay');g.textContent=p[1];g.style.left=Math.max(0,Math.min($('gbar').clientWidth-200,GW.x+20))+'px';g.classList.add('on');clearTimeout(g._t);g._t=setTimeout(()=>g.classList.remove('on'),3800);if(!GS.until&&!GB.sit)gMood(p[2],2600)}}},4600);
+let gBi=Math.floor(Math.random()*G_BANTER.length);
+(function banter(){setTimeout(()=>{const a=$('ask');if(a&&!a.value&&document.activeElement!==a&&tab==='gary'&&!talking&&!GSPK&&!LV.on&&!GB.shown){const p=G_BANTER[gBi++%G_BANTER.length];
+  a.placeholder=p[0];a.style.height=p[0].length>26?'74px':'';setTimeout(()=>{if(GB.shown||talking||LV.on)return;gBubble(p[1],4500);if(!GS.until&&!GB.sit)gMood(p[2],2600);
+   setTimeout(()=>{if(!a.value){a.placeholder='Ask G.A.R.Y. anything…';a.style.height=''}},9000)},3500)}banter()},45000+Math.random()*120000)})();
 // ---------- What G.A.R.Y. is running on (header): ✦ Google, ⚡ Groq, waves = live voice, ◆ memory only; screen = PC. Green ok, yellow low, red out.
 const BR_ICON={google:'<svg viewBox="0 0 16 16"><path d="M8 1c.6 3.6 3.4 6.4 7 7-3.6.6-6.4 3.4-7 7-.6-3.6-3.4-6.4-7-7 3.6-.6 6.4-3.4 7-7z"/></svg>',
  groq:'<svg viewBox="0 0 16 16"><path d="M9.5 1 3 9h4.2L6 15l7-8.4H8.6z"/></svg>',live:'<svg viewBox="0 0 16 16"><path d="M2 6.5v3M5 4v8M8 2v12M11 4v8M14 6.5v3" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>',
@@ -1229,6 +1234,9 @@ function lvEnter(ms){const L=$('live'),o=$('lvorb');L.classList.add('open');
  const pick=ms<1500?['lvBike','cycling',1300]:ms<4000?(Math.random()<.5?['lvStroll','whistling',1700]:['lvPara','parachute',1600]):['lvPant','exhausted',2300];
  o.className='';void o.offsetWidth;setTimeout(()=>{o.className=pick[0];gMood(pick[1],pick[2]+300)},450);
  setTimeout(()=>{if(!LV.on)return;o.className='';LV.ready=true;lvStatus('Listening… just talk');gMood('wave',1600);brainDraw()},450+pick[2])}
+setInterval(()=>{if(!LV.on||!LV.ready||LV.muted||LV.srcs.length||!LV.ws||LV.ws.readyState!==1)return;const now=Date.now();if(!LV.act)LV.act=now;if(!LV.nudgeAt)LV.nudgeAt=LV.act+90000+Math.random()*210000;
+ if(now<LV.nudgeAt||now-LV.act<60000)return;LV.nudgeAt=now+120000+Math.random()*300000;if(Math.random()<0.45)return;
+ LV.ws.send(JSON.stringify({realtimeInput:{text:'(Quiet moment: Sam has not said anything for a while. Only if it suits the mood, say ONE short thing to start a conversation - a thought, a question, something you are curious about. If he seems busy, low or focused, stay silent.)'}}))},5000);
 function lvNoShow(){if(LV.noshow)return;LV.noshow=true;const L=$('live'),o=$('lvorb');
  if(L.classList.contains('open')){gMood('sulking',2000);o.className='lvExit'}lvStatus('G.A.R.Y. can\'t hear you');
  const q=['Text box: He\'s not coming. Talk to me instead - I\'m better looking anyway.','Text box: Typical. He\'s sulking behind the curtain. I\'m right here, though.','Text box: Signal\'s gone, so it\'s just you and me now. Type away.'][Math.floor(Math.random()*3)];
@@ -1256,7 +1264,7 @@ let VOICEIN=false;
 async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock();
  if(!CS){toast('Sign in under You → Settings to talk to Gary');return}
  if(!navigator.onLine){toast('Gary needs the internet. Your plan still works offline.');return}
- talking=true;GTALK=false;bubble('you',text);const a=bubble('gary','');a.classList.add('wait');const p=$('p-gary');p.scrollTop=p.scrollHeight;let got='';
+ if(GB.pending)await gOpenSave();talking=true;GTALK=false;bubble('you',text);const a=bubble('gary','');a.classList.add('wait');const p=$('p-gary');p.scrollTop=p.scrollHeight;let got='';
  const ac=new AbortController();let wd=setTimeout(()=>ac.abort(),30000);const pet=()=>{clearTimeout(wd);wd=setTimeout(()=>ac.abort(),30000)};
  try{const r=await garyFetch({text,convo:CHAT,ctx:garyCtx(),items:garyItems()},ac.signal);
   if(r.status===404)throw new Error('nofn');if(!r.ok)throw new Error('http '+r.status);
