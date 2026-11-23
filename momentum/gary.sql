@@ -63,3 +63,33 @@ do $$ declare t text; begin
     execute format('create policy %I on public.%I for all to authenticated using (uid = (select auth.uid())) with check (uid = (select auth.uid()))', t || '_own', t);
   end loop;
 end $$;
+
+-- Gary Local: jobs Gary leaves for your PC, and your PC saying "I'm on" (added in Phase 5)
+create table if not exists public.gary_jobs (
+  uid        uuid        not null default auth.uid(),
+  id         text        not null check (length(id) between 1 and 40),
+  tool       text        not null check (tool in ('status','open_app','open_url','media','find_files','open_file','lock','sleep')),
+  args       jsonb       not null default '{}'::jsonb,
+  status     text        not null default 'pending' check (status in ('needs_ok','pending','running','done','failed','denied')),
+  result     jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (uid, id)
+);
+create table if not exists public.gary_agents (
+  uid       uuid        not null default auth.uid(),
+  id        text        not null check (length(id) between 1 and 40),
+  name      text,
+  last_seen timestamptz,
+  info      jsonb,
+  primary key (uid, id)
+);
+do $$ declare t text; begin
+  foreach t in array array['gary_jobs', 'gary_agents'] loop
+    execute format('alter table public.%I enable row level security', t);
+    execute format('revoke all on public.%I from anon', t);
+    execute format('grant select, insert, update, delete on public.%I to authenticated', t);
+    execute format('drop policy if exists %I on public.%I', t || '_own', t);
+    execute format('create policy %I on public.%I for all to authenticated using (uid = (select auth.uid())) with check (uid = (select auth.uid()))', t || '_own', t);
+  end loop;
+end $$;

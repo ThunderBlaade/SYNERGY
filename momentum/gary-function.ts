@@ -207,7 +207,15 @@ Memory: when he tells you something about himself worth keeping long-term (a fac
 something that happened, a decision), save it in his own terms, one fact per line, at the very END like the changes above:
 \u27e6remember {"text":"Started a new job at TK Maxx in November 2026","kind":"personal|episodic|operational|preference","people":["Name"],"happened":"YYYY-MM-DD" or null}\u27e7
 Only save what he actually said - never your guesses. Don't save small talk, or anything already in what you know about him. At most 3 per reply.
-Don't announce it at length; a light "noted" is plenty.`;
+Don't announce it at length; a light "noted" is plenty.
+
+PC: when his PC is ON and he asks, you can do these on it (one line each at the very END, at most 3):
+\u27e6pc {"tool":"open_app","args":{"name":"Spotify"}}\u27e7   \u27e6pc {"tool":"open_url","args":{"url":"https://..."}}\u27e7
+\u27e6pc {"tool":"media","args":{"action":"play_pause|next|previous|volume_up|volume_down|mute","times":1}}\u27e7
+\u27e6pc {"tool":"find_files","args":{"query":"part of a file name"}}\u27e7   (searches his Desktop, Documents, Downloads, Pictures, Music, Videos)
+\u27e6pc {"tool":"open_file","args":{"path":"exact path from a find_files result"}}\u27e7   \u27e6pc {"tool":"status","args":{}}\u27e7
+\u27e6pc {"tool":"lock","args":{}}\u27e7   \u27e6pc {"tool":"sleep","args":{}}\u27e7   (these two wait for his OK in the app - say so)
+Nothing else exists: no deleting, moving or running programs. Results arrive a moment later in the app; don't claim a result you haven't seen.`;
 
 // --- turning Gary's action lines into safe, checked changes (nothing else ever runs)
 const ISO = /^\d{4}-\d{2}-\d{2}$/, HM = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -220,6 +228,38 @@ function cleanFields(a, into) {
   if (["none", "daily", "weekdays", "weekly"].includes(a.repeat)) into.repeat = a.repeat;
   return into;
 }
+// --- Gary Local: the only things Gary can ask the PC to do. risk 1 = waits for his OK in the app.
+const PC_TOOLS = { status: 0, open_app: 0, open_url: 0, media: 0, find_files: 0, open_file: 0, lock: 1, sleep: 1 };
+export function parsePc(reply) {
+  const out = [];
+  for (const m of reply.matchAll(/\u27e6\s*pc\s+(\{[\s\S]*?\})\s*\u27e7/g)) {
+    if (out.length >= 3) break;
+    let a; try { a = JSON.parse(m[1]); } catch { continue; }
+    const tool = String(a.tool || ""), x = a.args && typeof a.args === "object" ? a.args : {};
+    if (!(tool in PC_TOOLS)) continue;
+    const args = {};
+    if (tool === "open_app" && typeof x.name === "string") args.name = x.name.slice(0, 80);
+    if (tool === "open_url") { if (!/^https?:\/\//.test(x.url || "")) continue; args.url = String(x.url).slice(0, 500); }
+    if (tool === "media") { if (!["play_pause", "next", "previous", "volume_up", "volume_down", "mute"].includes(x.action)) continue; args.action = x.action; args.times = Math.max(1, Math.min(10, +x.times || 1)); }
+    if (tool === "find_files") { if (typeof x.query !== "string" || x.query.trim().length < 2) continue; args.query = x.query.trim().slice(0, 80); }
+    if (tool === "open_file") { if (typeof x.path !== "string") continue; args.path = x.path.slice(0, 400); }
+    if (tool === "open_app" && !args.name) continue;
+    out.push({ id: "j" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), tool, args, status: PC_TOOLS[tool] ? "needs_ok" : "pending" });
+  }
+  return out;
+}
+async function pcState(token) {
+  const [ag, jobs] = await Promise.all([
+    db("gary_agents?select=name,last_seen&order=last_seen.desc&limit=1", token).catch(() => []),
+    db("gary_jobs?select=tool,args,status,result,created_at&order=created_at.desc&limit=5", token).catch(() => []),
+  ]);
+  const on = ag[0] && Date.now() - new Date(ag[0].last_seen).getTime() < 150000;
+  const recent = jobs.filter((j) => Date.now() - new Date(j.created_at).getTime() < 3600e3)
+    .map((j) => `- ${j.tool} ${JSON.stringify(j.args)} -> ${j.status}${j.result ? " " + JSON.stringify(j.result).slice(0, 600) : ""}`).join("\n");
+  return `\n\nHis PC (${ag[0] ? ag[0].name : "not set up yet"}) is ${on ? "ON - you can do things on it" : "OFF or asleep - you can't do things on it right now; say so plainly"}.` +
+    (recent ? `\nRecent PC jobs (newest first):\n${recent}` : "");
+}
+
 export function parseMemories(reply) {
   const out = [];
   for (const m of reply.matchAll(/\u27e6\s*remember\s+(\{[\s\S]*?\})\s*\u27e7/g)) {
@@ -301,7 +341,7 @@ export async function handle(req) {
     `\n\nHis plan in Momentum:\n${plan}` +
     `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` +
     (mem.moments ? `\n\nMemories that may relate to this (dated where known; only use if relevant):\n${mem.moments}` : "") +
-    TOOLS;
+    TOOLS + await pcState(token);
 
   await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "user", content: text, ctx: body.ctx || null }) });
   const enc = new TextEncoder();
@@ -329,6 +369,8 @@ export async function handle(req) {
       await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "reply", detail: { ...INFO, ms: Date.now() - t0, chars: reply.length } }) }).catch(() => {});
       const actions = parseActions(reply);
       const said = (reply.indexOf("\u27e6") < 0 ? reply : reply.slice(0, reply.indexOf("\u27e6"))).trim();
+      const jobs = parsePc(reply);
+      if (jobs.length) await db("gary_jobs", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(jobs) }).catch(() => { jobs.length = 0; });
       const remembered = parseMemories(reply);
       if (remembered.length) await db("gary_memories", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(remembered) })
         .then(() => db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "remembered", detail: { n: remembered.length } }) }))
@@ -336,7 +378,7 @@ export async function handle(req) {
       if (actions.length) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "proposed", detail: { actions } }) }).catch(() => {});
       await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "gary", content: said || "…" }) }).catch(() => {});
       await db(`gary_convos?id=eq.${convo}`, token, { method: "PATCH", body: JSON.stringify({ updated_at: new Date().toISOString() }) }).catch(() => {});
-      ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title, actions, remembered: remembered.map((m) => ({ id: m.id, text: m.text })) })));
+      ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title, actions, jobs, remembered: remembered.map((m) => ({ id: m.id, text: m.text })) })));
       ctrl.close();
     })(); },
   });

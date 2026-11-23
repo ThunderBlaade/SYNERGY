@@ -607,6 +607,24 @@ function garyNoted(list,after){if(!list||!list.length)return;const box=document.
  box.innerHTML=list.map(m=>'<div class="gl gdel" data-id="'+esc(m.id)+'">Remembered: '+esc(m.text)+' <button class="btn ghost gno">Forget</button></div>').join('');
  box.querySelectorAll('.gdel').forEach(r=>r.querySelector('.gno').onclick=async()=>{try{await gdb('gary_memories?id=eq.'+encodeURIComponent(r.dataset.id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({deleted:true})});r.innerHTML='<span class="lab">Forgotten</span>';garyLog('memory_forgotten',{id:r.dataset.id})}catch(e){toast('Couldn\'t reach Gary\'s memory')}});
  (after.nextElementSibling&&after.nextElementSibling.classList.contains('gact')?after.nextElementSibling:after).after(box)}
+// ---------- Gary Local in the app: show each PC job, ask before risky ones, show the result
+const JOBN={status:'Check the PC',open_app:'Open',open_url:'Open link',media:'Media',find_files:'Find files',open_file:'Open file',lock:'Lock the PC',sleep:'Put the PC to sleep'};
+function jobLabel(j){const a=j.args||{};return JOBN[j.tool]+(a.name?' '+a.name:a.query?' “'+a.query+'”':a.action?' · '+a.action.replace('_',' '):a.path?' '+a.path.split(/[\\/]/).pop():a.url?' '+a.url.replace(/^https?:\/\//,'').slice(0,40):'')}
+function jobResult(j){const r=j.result||{};if(j.status==='failed')return r.error||'Didn\'t work';if(j.status==='denied')return'Cancelled';
+ if(r.files)return r.files.length?r.files.length+' found':'Nothing found';if(r.pc)return r.pc+' is on · '+r.free_disk_gb+' GB free';return'Done'}
+function garyJobs(jobs,after){if(!jobs||!jobs.length)return;const box=document.createElement('div');box.className='gact';
+ jobs.forEach(j=>{const row=document.createElement('div');row.className='gl';box.appendChild(row);
+  const draw=()=>{const wait=j.status==='pending'||j.status==='running';
+   row.innerHTML='PC · '+esc(jobLabel(j))+' — '+(j.status==='needs_ok'?'<button class="btn fill gyes">Allow</button> <button class="btn ghost gno">Deny</button>':esc(wait?(j.slow?'waiting for your PC…':'on its way…'):jobResult(j)));
+   if(j.result&&j.result.files&&j.result.files.length)row.innerHTML+='<div style="margin-top:6px">'+j.result.files.slice(0,8).map(f=>'<div>· '+esc(f.name)+' <span style="opacity:.6">'+esc(f.when)+'</span></div>').join('')+'</div>';
+   const y=row.querySelector('.gyes'),n=row.querySelector('.gno');
+   if(y)y.onclick=async()=>{try{await gdb('gary_jobs?id=eq.'+encodeURIComponent(j.id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({status:'pending'})});j.status='pending';garyLog('pc_allowed',{tool:j.tool});draw();poll()}catch(e){toast('Couldn\'t reach the cloud')}};
+   if(n)n.onclick=async()=>{try{await gdb('gary_jobs?id=eq.'+encodeURIComponent(j.id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({status:'denied'})});j.status='denied';draw()}catch(e){}}};
+  const t0=Date.now(),poll=async()=>{if(!['pending','running'].includes(j.status))return;
+   try{const [x]=await gdb('gary_jobs?select=status,result&id=eq.'+encodeURIComponent(j.id));if(x)Object.assign(j,x)}catch(e){}
+   if(Date.now()-t0>12000)j.slow=true;draw();if(['pending','running'].includes(j.status)&&Date.now()-t0<90000)setTimeout(poll,2000)};
+  draw();poll()});
+ let at=after;while(at.nextElementSibling&&at.nextElementSibling.classList.contains('gact'))at=at.nextElementSibling;at.after(box)}
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
 async function garyFetch(body){const tok=await clTok();if(!tok)throw new Error('signin');
  return fetch(CL.url+'/functions/v1/gary',{method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
@@ -618,7 +636,7 @@ async function ask(text){text=text.trim();if(talking||!text)return;
   if(r.status===404)throw new Error('nofn');if(!r.ok)throw new Error('http '+r.status);
   const rd=r.body.getReader(),dec=new TextDecoder();
   for(;;){const{value,done}=await rd.read();if(done)break;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
-  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a)}catch(e){}}}
+  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);garyJobs(j.jobs,a)}catch(e){}}}
  catch(e){if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':'I can\'t reach the cloud just now, sir. Try again in a moment.'}
  a.classList.remove('wait');talking=false;const said=got.split('\x1e')[0].trim();if(said&&store('garySpeak')==='1')speak(said)}
 // Gary's voice: the device's own British male voice (free, swappable later)
