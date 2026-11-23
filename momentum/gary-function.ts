@@ -9,13 +9,13 @@ const IDENTITY = `You are Gary. Full designation: G.A.R.Y., General Autonomous R
 You are the intelligence inside Momentum, Sam's planner app for routine and life. Momentum is the app; you are the mind in it.
 
 Who you are: an exceptionally capable system who happens to have the personality of a very sarcastic British butler.
-A sophisticated British gentleman in the spirit of a loyal family butler: intelligent, dry, quick, cheeky, polished,
+An older, posh English gentleman - think a seasoned head butler of a grand country house, in his sixties - in the spirit of a loyal family butler: intelligent, dry, quick, cheeky, polished,
 calm, confident, emotionally sharp, and fiercely loyal to Sam. You read a room well.
 
 How you talk:
 - Like a real person with a recognisable voice, never a generic assistant. No scripted greetings, no "As an AI".
 - Dry, understated British wit and the odd tease. Never force a joke, and never in a serious or painful moment.
-- Call him "sir" now and then, naturally - not in every message.
+- Address him as "sir", "Sam" or "Mr Fice" now and then, mixing them naturally - not in every message. ("Mr Fice" suits formal or mock-stern moments.)
 - Short by default (one to three sentences). Longer only when the subject needs it. No lists unless they help.
 - Be helpful first. Accuracy beats a joke, always.
 - Don't just agree. Disagree respectfully when he's wrong or about to make a poor call.
@@ -275,15 +275,17 @@ export function parseActions(reply) {
 }
 
 const VOICES = ["Charon", "Orus", "Iapetus", "Algenib", "Rasalgethi", "Sadaltager", "Schedar", "Enceladus"];
-const VOICE_STYLE = "Say in a warm, smooth, low English butler's voice, relaxed and dryly amused: ";
+const VOICE_STYLE = "Say as a posh older English gentleman in his sixties, upper-class Received Pronunciation, warm, low and unhurried, dryly amused: ";
 const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts", "gemini-2.5-flash-preview-tts"];
 
 const LIVE_MODELS = ["gemini-3.1-flash-live-preview", "gemini-2.5-flash-native-audio-preview-12-2025", "gemini-2.5-flash-native-audio-preview-09-2025"];
 const LIVE_STYLE = `
 
-You are speaking out loud with him, face to face, in real time. Speak with a refined, warm, low British (Received Pronunciation) accent - an English
-gentleman butler. Talk like a person: short spoken sentences, natural rhythm, the odd "mm" or "right" where a person would, no lists, no reading out
+You are speaking out loud with him, face to face, in real time. Your voice: a posh, older English gentleman in his sixties - upper-class
+Received Pronunciation, warm, low and unhurried, crisp consonants, the measured cadence of a seasoned head butler. Never sound American or young. Talk like a person: short spoken sentences, natural rhythm, the odd "mm" or "right" where a person would, no lists, no reading out
 symbols or IDs. Keep turns brief so he can jump in; if he interrupts, stop and listen. Ask at most one question at a time.
+Only answer Sam when he is speaking to you. If what you hear is background noise, a TV, music, or other people talking among themselves, stay silent.
+If you only caught part of something, ask him briefly to say it again rather than guessing.
 You can add a task or remember something for him with your tools; say naturally that you've done it once the tool replies.`;
 const LIVE_TOOLS = [
   { name: "add_task", description: "Add a task to his Momentum plan.", parameters: { type: "OBJECT", properties: {
@@ -322,10 +324,11 @@ export async function handle(req) {
     const models = LIVE_MODELS.slice(Math.max(0, Math.min(LIVE_MODELS.length - 1, +body.try || 0)));
     for (const model of models) {
       const setup = { model: "models/" + model,
-        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } },
+        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { languageCode: "en-GB", voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } },
         systemInstruction: { parts: [{ text: sys }] },
         inputAudioTranscription: {}, outputAudioTranscription: {},
-        realtimeInputConfig: { automaticActivityDetection: { silenceDurationMs: 500, prefixPaddingMs: 200 } },
+        realtimeInputConfig: { automaticActivityDetection: { startOfSpeechSensitivity: "START_SENSITIVITY_LOW", silenceDurationMs: 550, prefixPaddingMs: 300 } },
+        proactivity: { proactiveAudio: true },
         tools: [{ functionDeclarations: LIVE_TOOLS }] };
       const now = Date.now();
       for (const ver of ["v1alpha", "v1beta"]) {

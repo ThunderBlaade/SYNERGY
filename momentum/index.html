@@ -655,6 +655,10 @@ function lvMic(f32){if(!LV.ready||LV.muted)return;let e=0;for(let i=0;i<f32.leng
  for(let i=0;i<n;i++){const a=Math.floor(i*r),b=Math.min(f32.length,Math.floor((i+1)*r));let s=0;for(let k=a;k<b;k++)s+=f32[k];const v=s/Math.max(1,b-a);o[i]=Math.max(-1,Math.min(1,v))*0x7fff}
  lvBuf.push(o);lvLen+=n;if(lvLen<640)return;           // ~40 ms of audio per message: low latency, not chatty
  const all=new Int16Array(lvLen);let p=0;for(const c of lvBuf){all.set(c,p);p+=c.length}lvBuf=[];lvLen=0;
+ let e2=0;for(let i=0;i<all.length;i++)e2+=all[i]*all[i];const rms=Math.sqrt(e2/all.length)/32768;
+ LV.floor=LV.floor==null?rms:(rms<LV.floor?LV.floor*0.7+rms*0.3:LV.floor*0.995+rms*0.005);   // the room's background level: falls fast, rises slowly
+ if(rms>Math.max(0.012,LV.floor*3))LV.open=all.length*18;else LV.open-=all.length;          // a clear voice above the room: let it through (plus ~0.7 s tail)
+ if(!(LV.open>0)){all.fill(0);LV.lvl*=0.5}                                                    // background only: Gary hears silence
  if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({realtimeInput:{audio:{data:b64(new Uint8Array(all.buffer)),mimeType:'audio/pcm;rate=16000'}}}))}
 function lvPlay(b64s,rate){const bin=atob(b64s),n=bin.length>>1,ab=LV.ctx.createBuffer(1,n,rate||24000),ch=ab.getChannelData(0);
  for(let i=0;i<n;i++){let v=bin.charCodeAt(2*i)|(bin.charCodeAt(2*i+1)<<8);if(v>32767)v-=65536;ch[i]=v/32768}
@@ -686,7 +690,7 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
 async function liveStart(again){if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // inside the tap, so iPhone allows sound
- LV.on=true;LV.ready=false;LV.muted=false;$('live').classList.add('on');$('lvmute').classList.remove('on');if(!again)$('lvtx').innerHTML='';lvStatus('Connecting…');
+ LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');$('lvmute').classList.remove('on');if(!again)$('lvtx').innerHTML='';lvStatus('Connecting…');
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
  catch(e){lvStatus('Microphone not allowed. Allow it in your settings and try again.');return}
  const src=LV.ctx.createMediaStreamSource(LV.stream);
