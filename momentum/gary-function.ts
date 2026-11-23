@@ -460,7 +460,7 @@ ONE short opener (under 30 words). Pick something real - a thing you've been cur
 a question you genuinely want answered, or a delightful little fact. Make it easy to reply to. Just the words you'd say: no stage directions, no actions in brackets or asterisks, no action tags, no "Hello".`;
     let out = "";
     try { for await (const t of gemini(sys, [{ role: "user", parts: [{ text: "(He's been quiet for a while. Start a conversation.)" }] }])) out += t; } catch { /* fall back on the phone */ }
-    out = out.replace(/\u27e6[\s\S]*$/, "").replace(/^\s*[(*][^)*]*[)*]\s*/, "").replace(/^[^()]*\)\s*/, "").replace(/\*[^*]*\*/g, "").trim().slice(0, 400);
+    out = out.replace(/\u27e6[\s\S]*$/, "").replace(/^\s*[(*][^)*]*[)*]\s*/, "").replace(/^[^()]*\)\s*/, "").replace(/\*[^*]*\*/g, "").replace(/^[\s.,;:!\u2014-]+/, "").trim().slice(0, 400);
     return new Response(JSON.stringify({ text: out }), { headers: { ...CORS, "Content-Type": "application/json" } });
   }
 
