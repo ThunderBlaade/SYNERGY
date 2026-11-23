@@ -129,10 +129,10 @@ async function* gemini(system, turns, json = false) {
     INFO.model = m;
     const rd = r.body.getReader(), dec = new TextDecoder();
     let buf = "";
-    for (;;) {
+    for (let last = false; !last;) {
       const { value, done } = await rd.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
+      if (done) { last = true; buf += "\n"; }               // the final piece may not end with a line break: keep it
+      else buf += dec.decode(value, { stream: true });
       let i;
       while ((i = buf.indexOf("\n")) >= 0) {
         const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
