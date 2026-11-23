@@ -148,17 +148,19 @@ async function* gemini(system, turns, json = false) {
   const qm = gk ? list(env("GROQ_MODEL"), "openai/gpt-oss-120b,llama-3.3-70b-versatile,openai/gpt-oss-20b,llama-3.1-8b-instant") : [];
   const plan = [];
   for (let i = 0; i < Math.max(gm.length, qm.length); i++) { if (gm[i]) plan.push(["g", gm[i]]); if (qm[i]) plan.push(["q", qm[i]]); }
-  const msgs = [{ role: "system", content: system }, ...turns.map((t) => ({ role: t.role === "model" ? "assistant" : "user", content: t.parts.map((p) => p.text).join("") }))];
-  let last;
+  let last, sofar = "";
+  const CONT = "(Your reply was cut off mid-way by a connection problem. Continue EXACTLY where you left off - don't repeat anything already said, don't mention the interruption.)";
   INFO.tried = INFO.tried || [];
   for (const [p, m] of plan) {
+    const T = sofar ? [...turns, { role: "model", parts: [{ text: sofar }] }, { role: "user", parts: [{ text: CONT }] }] : turns;
+    const msgs = [{ role: "system", content: system }, ...T.map((t) => ({ role: t.role === "model" ? "assistant" : "user", content: t.parts.map((x) => x.text).join("") }))];
     const ac = new AbortController(), timer = setTimeout(() => ac.abort(), 8000);
     let r;
     try {
       r = p === "g"
         ? await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:streamGenerateContent?alt=sse`, { signal: ac.signal, method: "POST",
             headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-            body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: turns,
+            body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: T,
               generationConfig: { temperature: json ? 0.3 : 0.85, maxOutputTokens: 8192, ...(json ? { responseMimeType: "application/json" } : {}) } }) })
         : await fetch("https://api.groq.com/openai/v1/chat/completions", { signal: ac.signal, method: "POST",
             headers: { "Content-Type": "application/json", Authorization: "Bearer " + gk },
@@ -188,14 +190,14 @@ async function* gemini(system, turns, json = false) {
             t = j.choices?.[0]?.delta?.content || "";
             if (j.choices?.[0]?.finish_reason) INFO.finish = j.choices[0].finish_reason;
           }
-          if (t) { said = true; yield t; }
+          if (t) { said = true; sofar += t; yield t; }
         } catch { /* partial line */ }
       }
     }
-    if (stalled && !said) { INFO.tried.push(m + " went quiet"); last = Object.assign(new Error(m + " went quiet"), { kind: "busy" }); continue; }
-    if (stalled) INFO.finish = "stalled";
+    if (stalled) { INFO.tried.push(m + (said ? " went quiet mid-reply" : " went quiet")); last = Object.assign(new Error(m + " went quiet"), { kind: "busy" }); continue; }   // next brain carries on
     return;
   }
+  if (sofar) { INFO.finish = "stalled"; return; }
   throw last || new Error("no model available");
 }
 
