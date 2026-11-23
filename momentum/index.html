@@ -144,13 +144,23 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 #live.on{display:flex;animation:gin .35s var(--ease)}
 .lvwrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%}
 #lvorb{width:168px;height:168px;border-radius:50%;border:1px solid #fff;transition:transform .08s linear,background .4s var(--ease),box-shadow .4s}
-#live.speaking #lvorb{background:#fff;animation:lvbreathe 1.6s ease-in-out infinite}
+#live.speaking #lvorb{animation:lvbreathe 1.6s ease-in-out infinite;border-color:#fff}
 @keyframes lvbreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 #lvstat{font:500 12px var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin:18px 0 10px;text-align:center}
 #lvtx{width:100%;max-width:560px;min-height:110px;max-height:30vh;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:8px}
 #lvtx p{margin:0;font:400 17px/1.4 var(--serif)}#lvtx p.you{color:var(--dim);font-family:var(--sans);font-size:15px}#lvtx p.act{font:500 11px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
 .lvacts{display:flex;gap:12px;margin-top:20px}.lvacts .btn{min-width:120px}#lvmute.on{background:#fff;color:#000}
 .mic.talk{border-color:#fff}
+.gpx{display:block;image-rendering:pixelated;image-rendering:crisp-edges;width:100%;height:100%}
+.ghead{display:flex;align-items:center;gap:14px}
+#gdock{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:#16171d;padding:5px;flex:none;overflow:hidden}
+#lvorb{display:flex;align-items:center;justify-content:center;background:#16171d}#lvorb .gpx{width:128px;height:128px}
+#gfloat{position:fixed;z-index:40;width:64px;height:64px;left:0;top:0;display:none;touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6))}
+#gfloat.on{display:block;animation:gin .4s var(--ease)}
+#gfsp{width:64px;height:64px;border-radius:16px;background:rgba(28,30,38,.86);border:1px solid rgba(255,255,255,.22);padding:2px;box-sizing:border-box;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#gfbub{position:absolute;bottom:74px;right:0;width:190px;background:#fff;color:#000;font:400 14px/1.35 var(--serif);padding:10px 12px;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
+#gfloat.left #gfbub{right:auto;left:0}#gfloat.say #gfbub{opacity:1;transform:none}
+#gfbub::after{content:"";position:absolute;bottom:-7px;right:24px;border:7px solid transparent;border-bottom:0;border-top-color:#fff}#gfloat.left #gfbub::after{right:auto;left:24px}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -187,13 +197,14 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 
 <section class="pane" id="p-gary">
  <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab" id="ctitle">New chat</div>
- <span><button class="lab" id="memBtn" style="color:var(--fg);margin-right:18px">Memory ›</button><button class="lab" id="chatsBtn" style="color:var(--fg)">Chats ›</button></span></div><h1>Gary</h1>
+ <span><button class="lab" id="memBtn" style="color:var(--fg);margin-right:18px">Memory ›</button><button class="lab" id="chatsBtn" style="color:var(--fg)">Chats ›</button></span></div><div class="ghead"><button id="gdock" aria-label="Gary"></button><h1>Gary</h1></div>
  <div id="thread"></div>
 </section>
 
 <div id="askbar"><textarea id="ask" rows="1" placeholder="Ask anything..." spellcheck="true" autocorrect="on" autocapitalize="sentences" enterkeyhint="send"></textarea>
  <button class="mic" id="asksend" aria-label="Send" style="border-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
  <button class="mic" id="askmic" aria-label="Speak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><button class="mic talk" id="livebtn" aria-label="Talk to Gary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg></button></div>
+<div id="gfloat" aria-label="Open Gary"><div id="gfbub"></div><div id="gfsp"></div></div>
 <button id="fab" aria-label="Add">+</button>
 <nav><button class="on" data-t="today"><span class="nw">Today</span><span class="ww">Plan</span></button><button data-t="todo">To-do</button><button data-t="focus">Focus</button><button data-t="you">You</button><button data-t="gary">Gary</button></nav>
 </div>
@@ -343,7 +354,7 @@ let tab='today';
 const wide=()=>innerWidth>=1000;
 function go(t){if(wide()&&t==='todo')t='today';if(t===tab)return;if(t==='gary'){store('garyFrom',tab);if(!CHAT&&!talking)showChat()}const order=['today','todo','focus','you','gary'],fwd=order.indexOf(t)>order.indexOf(tab);
  const old=$('p-'+tab);old.classList.remove('on');old.classList.toggle('left',fwd);const nw=$('p-'+t);nw.classList.remove('left');if(!fwd){nw.style.transform='translateX(-14px)';requestAnimationFrame(()=>nw.style.transform='')}
- nw.classList.add('on');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));tab=t;
+ nw.classList.add('on');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));tab=t;gFloatSync();if(t==='gary')gMood('wave',1800);
  $('fab').classList.toggle('hide',!(t==='today'||t==='todo'));document.body.classList.toggle('plan',wide()&&t==='today');$('askbar').classList.toggle('on',t==='gary');buzz(6);render()}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));
 
@@ -501,6 +512,7 @@ function renderYou(){const b=$('ybody');
   '<div class="set"><div>Evening reflection<small>A look back at what counted</small></div><input type="time" id="sev" value="'+(st.evening||'21:00')+'"></div>'+
   '<div class="set"><div>Heads-up before tasks</div><div class="chips" id="srem"></div></div>'+
   '<div class="set stack"><div>Gary\'s voice<small>Tap one to hear him say hello</small></div><div class="chips" id="svoice"></div></div>'+
+  '<div class="set"><div>Gary wanders the other pages<small>Like the old Office assistant. Drag him anywhere; tap him to chat</small></div><button class="tog'+(store('garyFloat')!=='0'?' on':'')+'" id="sgf"></button></div>'+
   '<div class="set"><div>Gary speaks every reply<small>He always answers aloud when you talk to him</small></div><button class="tog'+(store('garySpeak')==='1'?' on':'')+'" id="ssp"></button></div>'+
   '<div class="set"><div>Sync across devices<small>'+(CS?(S.cloud==='off'?'Can\'t reach the cloud right now - saved here':'On · '+esc(CS.email||'')):'Sign in with your Synergy login to keep phone, iPad and PC in step')+'</small></div><button class="btn ghost" id="scloud">'+(CS?'Sign out':'Sign in')+'</button></div>'+
   '<div class="set"><div>Your PC<small>'+(!STATIC?'You\'re on the PC. Open Momentum anywhere: thunderblaade.github.io/synergy/momentum':PC?(S.online?'Connected - notifications and PC tasks are on':'Not reachable right now (is it on, with Tailscale?)'):'Connect it for notifications. Gary works without it.')+'</small></div>'+(STATIC?'<button class="btn ghost" id="spc">'+(PC?'Change':'Connect')+'</button>':'<button class="btn ghost" id="slink">Copy link</button>')+'</div>'+
@@ -508,6 +520,7 @@ function renderYou(){const b=$('ybody');
   const setS=(k,v)=>{S.settings[k]=v;S.settings.updated=Date.now();S.dirty.settings=true;save();scheduleSync()};
   $('sn').onclick=()=>{setS('nudges',!st.nudges);renderYou()};$('smo').onchange=e=>setS('morning',e.target.value);$('sev').onchange=e=>setS('evening',e.target.value);
   chips('srem',[[0,'Off'],[5,'5m'],[10,'10m'],[15,'15m']],st.remind==null?5:st.remind,v=>{setS('remind',+v);renderYou()});
+  $('sgf').onclick=()=>{store('garyFloat',gFloatOn()?'0':'1');gFloatSync();renderYou()};
   $('ssp').onclick=()=>{audioUnlock();const on=store('garySpeak')!=='1';store('garySpeak',on?'1':'0');if(on)speak('Very good, sir. I shall speak up.');renderYou()};
   chips('svoice',GVOICES.map(v=>[v,v]),store('garyVoice')||'Charon',v=>{audioUnlock();store('garyVoice',v);speak('Good evening, sir. Gary, at your service. Shall we see what today has in store?');renderYou()});$('ssync').onclick=()=>{sync().then(()=>toast(S.online||S.cloud==='ok'?'Synced':'Saved on this device - nothing reachable to sync with'))};
   $('scloud').onclick=()=>{if(CS){if(confirm('Sign out of sync on this device? Your plan stays here.')){CS=null;store('momCloud','');renderYou()}}else sheet('signin',true)};
@@ -690,7 +703,7 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
 async function liveStart(again){if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // inside the tap, so iPhone allows sound
- LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');$('lvmute').classList.remove('on');if(!again)$('lvtx').innerHTML='';lvStatus('Connecting…');
+ LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');gFloatSync();$('lvmute').classList.remove('on');if(!again)$('lvtx').innerHTML='';lvStatus('Connecting…');
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
  catch(e){lvStatus('Microphone not allowed. Allow it in your settings and try again.');return}
  const src=LV.ctx.createMediaStreamSource(LV.stream);
@@ -705,8 +718,109 @@ async function liveStart(again){if(!CS){toast('Sign in under You → Settings to
  (function meter(){if(!LV.on)return;const o=$('lvorb');o.style.transform='scale('+(1+LV.lvl*0.35).toFixed(3)+')';LV.lvl*=0.85;requestAnimationFrame(meter)})()}
 function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;try{ws&&ws.close(1000)}catch(e){}lvHush();
  try{LV.stream&&LV.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{LV.node&&LV.node.disconnect()}catch(e){}try{LV.ctx&&LV.ctx.close()}catch(e){}
- LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;$('live').classList.remove('on','speaking');lvSaveTurn()}}
+ LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;$('live').classList.remove('on','speaking');gFloatSync();lvSaveTurn()}}
 $('livebtn').onclick=()=>liveStart();$('lvend').onclick=()=>lvStop();$('lvmute').onclick=()=>{LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').textContent=LV.muted?'Unmute':'Mute';lvStatus(LV.muted?'Muted':'Listening…')};
+// ---------- Gary in pixels: sits in the circle on his page, wanders the other pages like the old Office assistant.
+const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c'};
+const G_BODY=[
+"................................",
+"................................",
+"............SSSSSSSS............",
+"..........SSSSSSSSSSHH..........",
+".........SSSSSSSSSSSSHH.........",
+".........SSSSSSSSSSSSSH.........",
+"........SSSSSSSSSSSSSSHH........",
+"........SSSSSSSSSSSSSSSH........",
+"........MMSSSSSSSSSSSSMM........",
+".......SMMSSSSSSSSSSSSMMH.......",
+".......SMMSSSSSSSSSSSSMMH.......",
+"........SSSSSSSSSSSSSSSH........",
+"........SSSSSSSSSSSSSSSH........",
+".........SSSSSSSSSSSSHH.........",
+"..........SSSSSSSSSSHH..........",
+"...........SSSSSSSSHH...........",
+".............HHHHHH.............",
+".........GBBBBWWWWBBBBG.........",
+"........GBBBBBWWWWBBBBBB........",
+".......GBBBBBBWWWWBBBBBBB.......",
+".......GBBBBBBBWWBBBBBBBB.......",
+"......GBBBBBBBBWWBBBBBBBBB......",
+"......GBBBBBBBBBBBBBBBBBBB......",
+"......GBBBBBBBBBBBBBBBBBBB......",
+".....WWWBBBBBBBBBBBBBBBBBWWW....",
+".....WWWBBBBBBBBBBBBBBBBBWWW....",
+".......GBBBBBBBBBBBBBBBBBB......",
+"........GBBBBBBBBBBBBBBBB.......",
+"..........BBBBB..BBBBB..........",
+"..........BBBBB..BBBBB..........",
+".........BBBBBB..BBBBBB.........",
+"................................"];
+const GS={mood:'idle',until:0,tick:0,blink:0,cv:[],face:1};
+function gMood(m,ms){GS.mood=m;GS.until=ms?performance.now()+ms:0}
+function gState(){const now=performance.now();if(GS.until&&now>GS.until){GS.mood='idle';GS.until=0}
+ if(GS.until)return GS.mood;
+ if(typeof LV!=='undefined'&&LV.on)return $('live').classList.contains('speaking')?'talk':'listen';
+ if(talking)return GTALK?'talk':'think';return GS.mood}
+let GTALK=false;
+function gDraw(x){const st=gState(),t=GS.tick,P=[];
+ for(let y=0;y<32;y++)for(let i=0;i<32;i++){const c=G_BODY[y][i];if(c!=='.')P[y*32+i]=c}
+ const put=(i,y,c)=>{if(i>=0&&i<32&&y>=0&&y<32)P[y*32+i]=c},del=(i,y)=>{delete P[y*32+i]};
+ const bob=(st==='idle'||st==='listen')&&t%8>=4?1:0;
+ // arms: wave, thinking hand, or both up for happy
+ if(st==='wave'||st==='happy'){for(let y=24;y<26;y++)for(let i=25;i<28;i++)del(i,y);
+  const up=t%4<2?0:1;[[24,21],[25,21],[25,20],[26,20],[25,19],[26,19],[26,18],[27,18],[26,17],[27,17],[27+up,16],[28,16]].forEach(([i,y])=>put(i,y,'B'));
+  for(let y=12;y<16;y++)for(let i=26;i<29;i++)put(i+up,y,'W')}
+ if(st==='think'||st==='confused'){for(let y=24;y<26;y++)for(let i=25;i<28;i++)del(i,y);
+  [[24,22],[23,22],[23,21],[22,21],[22,20],[21,20],[21,19],[20,19]].forEach(([i,y])=>put(i,y,'B'));for(let y=15;y<18;y++)for(let i=18;i<21;i++)put(i,y,'W')}
+ // eyebrows, eyes, monocle
+ const up=st==='think'?1:0;
+ if(st==='confused'){put(11,6,'M');put(12,5,'M');put(13,6,'M')}else{for(let i=11;i<14;i++)put(i,7-up,'M')}
+ for(let i=18;i<21;i++)put(i,7-up,'M');
+ const blink=(t%40===0||t%40===1)&&st!=='happy';
+ if(st==='happy'){put(11,9,'K');put(12,8,'K');put(13,9,'K')}
+ else if(blink){put(11,10,'K');put(12,10,'K');put(13,10,'K')}
+ else{put(12,9-up,'W');put(13,9-up,'K');put(12,10-up,'K');put(13,10-up,'K')}
+ [[18,8],[19,8],[20,8],[21,8],[18,11],[19,11],[20,11],[21,11],[18,9],[18,10],[21,9],[21,10]].forEach(([i,y])=>put(i,y,'C'));
+ if(blink){put(19,9,'L');put(20,9,'L');put(19,10,'K');put(20,10,'K')}else{put(19,9,'K');put(20,9,'L');put(19,10,'K');put(20,10,'K')}put(22,12,'Y');put(22,13,'Y');put(23,14,'Y');
+ // nose, moustache, mouth
+ put(15,11,'H');put(16,11,'H');put(14,18,'K');put(15,18,'K');put(16,18,'K');put(17,18,'K');put(14,19,'K');put(17,19,'K');put(15,19,'W');put(16,19,'W');for(let i=11;i<21;i++)put(i,12,'M');put(10,11,'M');put(21,11,'M');put(12,13,'M');put(19,13,'M');
+ if(st==='talk'){const o=[0,1,2,1][t%4];for(let i=14;i<18;i++)put(i,14,'R');if(o)for(let i=14;i<18;i++)put(i,15,'R');if(o>1){put(15,16,'R');put(16,16,'R')}}
+ else if(st==='happy'||st==='wave'){for(let i=13;i<19;i++)put(i,14,'W');for(let i=14;i<18;i++)put(i,15,'R')}
+ else if(st==='confused'){put(14,14,'R');put(15,15,'R');put(16,14,'R');put(17,15,'R')}
+ else if(st==='think'){for(let i=14;i<18;i++)put(i,14,'R')}
+ else{put(13,13,'R');for(let i=14;i<18;i++)put(i,14,'R');put(18,13,'R')}
+ // effects
+ if(st==='think')for(let k=0;k<3;k++)if(t%6>=k*2||t%6>=4)put(24+k*2,3,k<=(t>>1)%3?'C':'G');
+ if(st==='confused'){[[26,1],[27,0],[28,0],[29,1],[29,2],[28,3],[27,4],[27,6]].forEach(([i,y])=>put(i,y,'Q'))}
+ if(st==='listen'&&t%10<5){put(4,9,'C');put(3,10,'C');put(4,11,'C')}
+ // outline + paint
+ x.clearRect(0,0,32,32);x.fillStyle=GP.K;
+ for(let y=0;y<32;y++)for(let i=0;i<32;i++)if(!P[y*32+i]&&(P[y*32+i-1]&&i>0||P[y*32+i+1]&&i<31||P[(y-1)*32+i]||P[(y+1)*32+i]))x.fillRect(i,y+bob,1,1);
+ for(let y=0;y<32;y++)for(let i=0;i<32;i++){const c=P[y*32+i];if(c){x.fillStyle=GP[c];x.fillRect(i,y+bob,1,1)}}}
+function gPaint(){GS.cv=GS.cv.filter(c=>c.isConnected);for(const c of GS.cv)if(c.offsetParent!==null||c.closest('#gfloat'))gDraw(c.getContext('2d'))}
+function gCanvas(el){const c=document.createElement('canvas');c.width=c.height=32;c.className='gpx';el.appendChild(c);GS.cv.push(c);gDraw(c.getContext('2d'));return c}
+setInterval(()=>{GS.tick++;gPaint()},140);
+// --- floating Gary on the other pages
+const GF={x:0,y:0,vx:-0.18,vy:-0.12,drag:false,moved:false,last:0,hold:0};
+const G_LINES={today:['Shall I tidy today\'s plan for you, sir?','A fine day for getting things done, Sam.','Your day awaits, Mr Fice.'],todo:['That list won\'t tick itself, sir.','Shall we pick just one, Sam?'],focus:['I\'ll keep quiet while you focus, sir.','Head down, Mr Fice. I\'m right here.'],you:['Admiring your progress, Sam?','Looking rather well, sir.']};
+function gFloatOn(){return store('garyFloat')!=='0'}
+function gFloatBounds(){const nav=document.querySelector('nav'),nb=nav?nav.getBoundingClientRect().top:innerHeight;return{x0:8,y0:70,x1:innerWidth-72,y1:nb-78}}
+function gFloatSync(){const f=$('gfloat');if(!f)return;const show=gFloatOn()&&tab!=='gary'&&!(typeof LV!=='undefined'&&LV.on);
+ if(show&&!f.classList.contains('on')){const b=gFloatBounds();const p=(store('garyPos')||'').split(',');GF.x=+p[0]||b.x0+10;GF.y=+p[1]||b.y1;gFloatPlace();f.classList.add('on');
+  if(Date.now()-GF.last>150000){GF.last=Date.now();setTimeout(()=>gSay((G_LINES[tab]||G_LINES.today)[Math.floor(Math.random()*2)],'wave'),700)}}
+ if(!show)f.classList.remove('on')}
+function gSay(text,mood){const f=$('gfloat');if(!f.classList.contains('on'))return;$('gfbub').textContent=text;f.classList.toggle('left',GF.x<innerWidth/2);f.classList.add('say');gMood(mood||'wave',2400);clearTimeout(GF.sayT);GF.sayT=setTimeout(()=>f.classList.remove('say'),5200)}
+function gFloatPlace(){const b=gFloatBounds();GF.x=Math.max(b.x0,Math.min(b.x1,GF.x));GF.y=Math.max(b.y0,Math.min(b.y1,GF.y));const f=$('gfloat');f.style.left=GF.x+'px';f.style.top=GF.y+'px'}
+(function drift(){const f=$('gfloat');if(f&&f.classList.contains('on')&&!GF.drag&&!f.classList.contains('say')&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&performance.now()>GF.hold){
+  const b=gFloatBounds();GF.x+=GF.vx;GF.y+=GF.vy;if(GF.x<=b.x0||GF.x>=b.x1)GF.vx*=-1;if(GF.y<=b.y0||GF.y>=b.y1)GF.vy*=-1;gFloatPlace()}
+ requestAnimationFrame(drift)})();
+function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
+ f.addEventListener('pointerdown',e=>{GF.drag=true;GF.moved=false;sx=e.clientX;sy=e.clientY;ox=GF.x;oy=GF.y;f.setPointerCapture(e.pointerId)});
+ f.addEventListener('pointermove',e=>{if(!GF.drag)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>6)GF.moved=true;if(GF.moved){GF.x=ox+dx;GF.y=oy+dy;gFloatPlace();f.classList.remove('say')}});
+ const end=()=>{if(!GF.drag)return;GF.drag=false;if(GF.moved){store('garyPos',Math.round(GF.x)+','+Math.round(GF.y));GF.hold=performance.now()+8000;gMood('happy',900)}else go('gary')};
+ f.addEventListener('pointerup',end);f.addEventListener('pointercancel',end);
+ addEventListener('resize',()=>{if(f.classList.contains('on'))gFloatPlace()});
+ gCanvas($('gdock'));$('gdock').onclick=()=>{gMood('wave',1800)};gCanvas($('lvorb'));gFloatSync()}
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
 async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new Error('signin');
  return fetch(CL.url+'/functions/v1/gary',{signal,method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
@@ -714,15 +828,15 @@ let VOICEIN=false;
 async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock();
  if(!CS){toast('Sign in under You → Settings to talk to Gary');return}
  if(!navigator.onLine){toast('Gary needs the internet. Your plan still works offline.');return}
- talking=true;bubble('you',text);const a=bubble('gary','');a.classList.add('wait');const p=$('p-gary');p.scrollTop=p.scrollHeight;let got='';
+ talking=true;GTALK=false;bubble('you',text);const a=bubble('gary','');a.classList.add('wait');const p=$('p-gary');p.scrollTop=p.scrollHeight;let got='';
  const ac=new AbortController();let wd=setTimeout(()=>ac.abort(),30000);const pet=()=>{clearTimeout(wd);wd=setTimeout(()=>ac.abort(),30000)};
  try{const r=await garyFetch({text,convo:CHAT,ctx:garyCtx(),items:garyItems()},ac.signal);
   if(r.status===404)throw new Error('nofn');if(!r.ok)throw new Error('http '+r.status);
   const rd=r.body.getReader(),dec=new TextDecoder();
-  for(;;){const{value,done}=await rd.read();if(done)break;pet();got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
+  for(;;){const{value,done}=await rd.read();if(done)break;pet();GTALK=true;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
   const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);garyJobs(j.jobs,a)}catch(e){}}}
  catch(e){if(e.name==='AbortError'&&!got)a.textContent='That took far too long, sir - Google seems to have nodded off. Try me again.';else if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':'I can\'t reach the cloud just now, sir. Try again in a moment.'}
- clearTimeout(wd);a.classList.remove('wait');talking=false;const said=got.split('\x1e')[0].trim();if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
+ clearTimeout(wd);a.classList.remove('wait');talking=false;GTALK=false;if(got)gMood('happy',1600);else gMood('confused',3500);const said=got.split('\x1e')[0].trim();if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
 // Gary's voice: the device's own British male voice (free, swappable later)
 function garyVoice(){const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]GB/i.test(v.lang));
  return vs.find(v=>/daniel|arthur|george|oliver|male|ryan|thomas/i.test(v.name))||vs[0]||null}
@@ -777,5 +891,5 @@ addEventListener('resize',()=>{document.body.classList.toggle('plan',wide()&&tab
 document.body.classList.toggle('plan',wide()&&tab==='today');
 function render(){if(tab==='today'&&wide())renderTodo();if(tab==='today')renderToday();else if(tab==='todo')renderTodo();else if(tab==='focus')renderFocus();else if(tab==='you')renderYou()}
 let lastDay=today();setInterval(()=>{if(today()!==lastDay){if(cur===lastDay)cur=today();lastDay=today()}if(tab==='today')renderToday()},60000);
-render();sync();
+render();sync();gFloatInit();
 </script></body></html>
