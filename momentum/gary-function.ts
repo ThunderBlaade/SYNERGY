@@ -295,9 +295,8 @@ export function parseActions(reply) {
 }
 
 const VOICES = ["Charon", "Orus", "Iapetus", "Algenib", "Rasalgethi", "Sadaltager", "Schedar", "Enceladus"];
-const VOICE_STYLE = "Read this aloud as Gary: a refined English gentleman butler in his fifties with a warm, low, smooth Received Pronunciation " +
-  "British accent. Relaxed, natural pace with real pauses and breaths, dry understated wit, quietly confident, never robotic or sing-song. " +
-  "Say only the words after the colon:\n\n";
+const VOICE_STYLE = "Say in a warm, smooth, low English butler's voice, relaxed and dryly amused: ";
+const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts", "gemini-2.5-flash-preview-tts"];
 
 const MISHAP = {
   nokey: "My brain isn't plugged in yet, sir - there's no Gemini or Groq key in Supabase's Secrets. Once one is there, I'm all yours.",
@@ -321,12 +320,14 @@ export async function handle(req) {
     const voice = VOICES.includes(body.voice) ? body.voice : (env("GARY_VOICE") || "Charon");
     const say = text.replace(/[*_#`\u27e6\u27e7]/g, "").slice(0, 1500);
     const key = env("GEMINI_API_KEY");
-    for (const m of (env("GARY_TTS_MODEL") || "gemini-3.8-flash-tts,gemini-3.1-flash-tts-preview,gemini-2.5-flash-preview-tts").split(",").map((x) => x.trim()).filter(Boolean)) {
+    const order = (env("GARY_TTS_MODEL") || TTS_MODELS.join(",")).split(",").map((x) => x.trim()).filter(Boolean);
+    if (TTS_MODELS.includes(body.tts)) order.unshift(body.tts);   // for testing one model
+    for (const m of order) {
       if (!key) break;
       try {
         const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
           method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-          body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: VOICE_STYLE + say }] }],
+          body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: (m.includes("3.8") ? "" : VOICE_STYLE) + say }] }],
             generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } } }) });
         if (!r.ok) continue;
         const j = await r.json();
