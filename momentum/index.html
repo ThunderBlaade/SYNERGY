@@ -1159,10 +1159,10 @@ async function gNotesCopy(){if(!CS){toast('Sign in first');return}
  b.addEventListener('pointermove',e=>{if(y0===null)return;dy=Math.min(0,e.clientY-y0);b.style.transform='translateY('+Math.max(-110,dy)+'px)';$('gbs').textContent=dy<-70?'Let go to talk':'Pull up to talk';if(dy<-70)gMood('excited')});
  const end=()=>{if(y0===null)return;y0=null;b.classList.remove('drag');b.style.transform='';$('gbs').textContent='Pull up to talk';if(dy<-70)liveStart();else if(dy>-6){gPoke();gMood(['wave','tiphat','bow','pose','cheeky','dapper','thumbsup'][Math.floor(Math.random()*7)],2400)}};
  b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end)})();
-// the message box has opinions; G.A.R.Y. answers back
+// the Sentient Search Bar has opinions (it talks in itself); G.A.R.Y. answers back
 const G_BANTER=[['Ask G.A.R.Y. anything…','Anything within reason, sir.','smug'],['He doesn\'t bite.','I nibble. Occasionally.','cheeky'],['G.A.R.Y. is pretty gay if you ask me.','Fabulous, actually. Nobody asked you.','sarcastic'],
- ['Type something. He\'s getting bored.','The text box is being mean to me again, sir.','sad'],['Go on, he\'s lonely.','I am NOT lonely. I have tea.','sittea'],['Psst. Ask about his monocle.','It\'s for reading. And judging.','dapper'],
- ['I\'m the real brains round here.','You\'re a rectangle.','eyeroll'],['Say something nice to him.','Ignore the box, sir. It\'s jealous.','smug'],['He talks to birds, you know.','Only the clever ones.','birdwatching'],
+ ['Type something. He\'s getting bored.','The sentient search bar is being mean to me again, sir.','sad'],['Go on, he\'s lonely.','I am NOT lonely. I have tea.','sittea'],['Psst. Ask about his monocle.','It\'s for reading. And judging.','dapper'],
+ ['I\'m the real brains round here.','You\'re a rectangle.','eyeroll'],['Say something nice to him.','Ignore the sentient search bar, sir. It\'s jealous.','smug'],['He talks to birds, you know.','Only the clever ones.','birdwatching'],
  ['Waiting…','Patiently. Like a gentleman.','waiting'],['Bet he can\'t do a backflip.','I could. I simply choose not to.','proud'],['Your keyboard has a mic, you know.','So do I. Pull me up, sir.','pointUp']];
 let gBi=Math.floor(Math.random()*G_BANTER.length);
 (function banter(){setTimeout(()=>{const a=$('ask');if(a&&!a.value&&document.activeElement!==a&&tab==='gary'&&!talking&&!GSPK&&!LV.on&&!GB.shown){const p=G_BANTER[gBi++%G_BANTER.length];
@@ -1239,9 +1239,9 @@ setInterval(()=>{if(!LV.on||!LV.ready||LV.muted||LV.srcs.length||!LV.ws||LV.ws.r
  LV.ws.send(JSON.stringify({realtimeInput:{text:'(Quiet moment: Sam has not said anything for a while. Only if it suits the mood, say ONE short thing to start a conversation - a thought, a question, something you are curious about. If he seems busy, low or focused, stay silent.)'}}))},5000);
 function lvNoShow(){if(LV.noshow)return;LV.noshow=true;const L=$('live'),o=$('lvorb');
  if(L.classList.contains('open')){gMood('sulking',2000);o.className='lvExit'}lvStatus('G.A.R.Y. can\'t hear you');
- const q=['Text box: He\'s not coming. Talk to me instead - I\'m better looking anyway.','Text box: Typical. He\'s sulking behind the curtain. I\'m right here, though.','Text box: Signal\'s gone, so it\'s just you and me now. Type away.'][Math.floor(Math.random()*3)];
+ const q=['Sentient search bar: He\'s not coming. Talk to me instead - I\'m better looking anyway.','Sentient search bar: Typical. He\'s sulking behind the curtain. I\'m right here, though.','Sentient search bar: Signal\'s gone, so it\'s just you and me now. Type away.'][Math.floor(Math.random()*3)];
  setTimeout(()=>{lvLine('box',q)},700);
- setTimeout(()=>{lvStop();LV.noshow=false;go('gary');$('ask').placeholder=q.replace('Text box: ','');setTimeout(()=>$('ask').focus(),250)},4200)}
+ setTimeout(()=>{lvStop();LV.noshow=false;go('gary');$('ask').placeholder=q.replace('Sentient search bar: ','');setTimeout(()=>$('ask').focus(),250)},4200)}
 // ---------- G.A.R.Y. lives in his bar: wanders up and down and gets on with things (20 activities)
 const G_ACTS=['tea','reading','newspaper','writing','texting','phonecall','watch','stretching','dance','singing','stargazing','birdwatching','detective','zen','umbrella','balloon','flower','dapper','tiphat','cycling'];
 const GW={x:0,to:null,dir:1,busy:0,last:''};
