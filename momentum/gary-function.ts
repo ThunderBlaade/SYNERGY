@@ -110,83 +110,63 @@ function contextLine(ctx) {
   return `\nWhat he's looking at in Momentum right now (only bring it up if it helps): ${c}`;
 }
 
-// --- talking to Gemini (streamed)
+// --- talking to the brains (streamed). Google and Groq take turns, so one slow or full service never stalls Gary.
+// A model that hasn't started in 8s, or goes quiet for 10s mid-reply, is dropped for the next one.
 async function* gemini(system, turns, json = false) {
-  const key = env("GEMINI_API_KEY");
-  if (!key && !env("GROQ_API_KEY")) throw Object.assign(new Error("no key"), { kind: "nokey" });
-  const models = !key ? [] : (env("GEMINI_MODEL") || "gemini-flash-lite-latest,gemini-flash-latest,gemini-2.5-flash-lite,gemini-2.5-flash,gemini-2.0-flash").split(",").map((s) => s.trim()).filter(Boolean);
+  const key = env("GEMINI_API_KEY"), gk = env("GROQ_API_KEY");
+  if (!key && !gk) throw Object.assign(new Error("no key"), { kind: "nokey" });
+  const list = (v, d) => (v || d).split(",").map((x) => x.trim()).filter(Boolean);
+  const gm = key ? list(env("GEMINI_MODEL"), "gemini-flash-lite-latest,gemini-flash-latest") : [];
+  const qm = gk ? list(env("GROQ_MODEL"), "openai/gpt-oss-120b,llama-3.3-70b-versatile,openai/gpt-oss-20b,llama-3.1-8b-instant") : [];
+  const plan = [];
+  for (let i = 0; i < Math.max(gm.length, qm.length); i++) { if (gm[i]) plan.push(["g", gm[i]]); if (qm[i]) plan.push(["q", qm[i]]); }
+  const msgs = [{ role: "system", content: system }, ...turns.map((t) => ({ role: t.role === "model" ? "assistant" : "user", content: t.parts.map((p) => p.text).join("") }))];
   let last;
-  for (const m of models) {
-    const ac = new AbortController(), timer = setTimeout(() => ac.abort(), 12000);   // a model that won't start in 12s is too busy: next
+  INFO.tried = INFO.tried || [];
+  for (const [p, m] of plan) {
+    const ac = new AbortController(), timer = setTimeout(() => ac.abort(), 8000);
     let r;
     try {
-    r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:streamGenerateContent?alt=sse`, {
-      signal: ac.signal, method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-      body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: turns,
-        generationConfig: { temperature: json ? 0.3 : 0.85, maxOutputTokens: 8192, ...(json ? { responseMimeType: "application/json" } : {}) } }) });
-    } catch (e) { clearTimeout(timer); last = Object.assign(new Error("model " + m + " too slow"), { kind: "busy" }); continue; }
+      r = p === "g"
+        ? await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:streamGenerateContent?alt=sse`, { signal: ac.signal, method: "POST",
+            headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+            body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: turns,
+              generationConfig: { temperature: json ? 0.3 : 0.85, maxOutputTokens: 8192, ...(json ? { responseMimeType: "application/json" } : {}) } }) })
+        : await fetch("https://api.groq.com/openai/v1/chat/completions", { signal: ac.signal, method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer " + gk },
+            body: JSON.stringify({ model: m, messages: msgs, stream: true, temperature: json ? 0.3 : 0.85, max_tokens: 4096, ...(json ? { response_format: { type: "json_object" } } : {}) }) });
+    } catch { clearTimeout(timer); INFO.tried.push(m + " slow"); last = Object.assign(new Error(m + " too slow"), { kind: "busy" }); continue; }
     clearTimeout(timer);
-    (INFO.tried = INFO.tried || []).push(m + " " + r.status);
-    if (r.status === 404 || r.status === 400) { last = new Error("model " + m + " " + r.status); continue; }
-    if (r.status >= 500) { last = Object.assign(new Error("model " + m + " " + r.status), { kind: "busy" }); continue; }   // overloaded: try the next model
-    if (r.status === 429) { last = Object.assign(new Error("model " + m + " limit " + (await r.text()).slice(0, 200)), { kind: "busy" }); continue; }   // this model's free allowance is used up: next
-    if (!r.ok) throw new Error("gemini " + r.status + " " + (await r.text()).slice(0, 160));
-    INFO.model = m;
+    INFO.tried.push(m + " " + r.status);
+    if (!r.ok) { last = Object.assign(new Error(m + " " + r.status + " " + (await r.text()).slice(0, 160)), { kind: r.status === 429 || r.status >= 500 ? "busy" : undefined }); continue; }
+    INFO.model = (p === "q" ? "groq " : "") + m;
     const rd = r.body.getReader(), dec = new TextDecoder();
-    let buf = "";
-    for (let last = false; !last;) {
-      const { value, done } = await rd.read();
-      if (done) { last = true; buf += "\n"; }               // the final piece may not end with a line break: keep it
-      else buf += dec.decode(value, { stream: true });
+    let buf = "", said = false, stalled = false;
+    for (let end = false; !end;) {
+      const got = await Promise.race([rd.read(), new Promise((res) => setTimeout(() => res({ stall: true }), 10000))]);
+      if (got.stall) { stalled = true; try { ac.abort(); rd.cancel(); } catch { /* gone */ } break; }
+      if (got.done) { end = true; buf += "\n"; } else buf += dec.decode(got.value, { stream: true });
       let i;
       while ((i = buf.indexOf("\n")) >= 0) {
         const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
-        if (!line.startsWith("data:")) continue;
+        if (!line.startsWith("data:") || line === "data: [DONE]") continue;
         try {
           const j = JSON.parse(line.slice(5));
-          const t = (j.candidates?.[0]?.content?.parts || []).filter((p) => !p.thought).map((p) => p.text || "").join("");
-          if (j.candidates?.[0]?.finishReason) INFO.finish = j.candidates[0].finishReason;
-          if (j.usageMetadata) INFO.usage = j.usageMetadata;
-          if (t) yield t;
+          let t = "";
+          if (p === "g") {
+            t = (j.candidates?.[0]?.content?.parts || []).filter((x) => !x.thought).map((x) => x.text || "").join("");
+            if (j.candidates?.[0]?.finishReason) INFO.finish = j.candidates[0].finishReason;
+          } else {
+            t = j.choices?.[0]?.delta?.content || "";
+            if (j.choices?.[0]?.finish_reason) INFO.finish = j.choices[0].finish_reason;
+          }
+          if (t) { said = true; yield t; }
         } catch { /* partial line */ }
       }
     }
+    if (stalled && !said) { INFO.tried.push(m + " went quiet"); last = Object.assign(new Error(m + " went quiet"), { kind: "busy" }); continue; }
+    if (stalled) INFO.finish = "stalled";
     return;
-  }
-  // Google full or down: the backup brain (Groq, free, no card)
-  const gk = env("GROQ_API_KEY");
-  if (gk) {
-    const msgs = [{ role: "system", content: system }, ...turns.map((t) => ({ role: t.role === "model" ? "assistant" : "user", content: t.parts.map((p) => p.text).join("") }))];
-    for (const m of (env("GROQ_MODEL") || "openai/gpt-oss-120b,llama-3.3-70b-versatile,openai/gpt-oss-20b,llama-3.1-8b-instant").split(",").map((x) => x.trim()).filter(Boolean)) {
-      const ac = new AbortController(), timer = setTimeout(() => ac.abort(), 12000);
-      let r;
-      try {
-        r = await fetch("https://api.groq.com/openai/v1/chat/completions", { signal: ac.signal, method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: "Bearer " + gk },
-          body: JSON.stringify({ model: m, messages: msgs, stream: true, temperature: json ? 0.3 : 0.85, max_tokens: 4096, ...(json ? { response_format: { type: "json_object" } } : {}) }) });
-      } catch { clearTimeout(timer); last = Object.assign(new Error("groq " + m + " too slow"), { kind: "busy" }); continue; }
-      clearTimeout(timer);
-      (INFO.tried = INFO.tried || []).push("groq " + m + " " + r.status);
-      if (!r.ok) { last = Object.assign(new Error("groq " + m + " " + r.status + " " + (await r.text()).slice(0, 160)), { kind: r.status === 429 || r.status >= 500 ? "busy" : undefined }); continue; }
-      INFO.model = "groq " + m;
-      const rd = r.body.getReader(), dec = new TextDecoder();
-      let buf = "";
-      for (let end = false; !end;) {
-        const { value, done } = await rd.read();
-        if (done) { end = true; buf += "\n"; } else buf += dec.decode(value, { stream: true });
-        let i;
-        while ((i = buf.indexOf("\n")) >= 0) {
-          const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
-          if (!line.startsWith("data:") || line === "data: [DONE]") continue;
-          try {
-            const j = JSON.parse(line.slice(5)), c = j.choices?.[0];
-            if (c?.finish_reason) INFO.finish = c.finish_reason;
-            if (c?.delta?.content) yield c.delta.content;
-          } catch { /* partial line */ }
-        }
-      }
-      return;
-    }
   }
   throw last || new Error("no model available");
 }
@@ -298,6 +278,21 @@ const VOICES = ["Charon", "Orus", "Iapetus", "Algenib", "Rasalgethi", "Sadaltage
 const VOICE_STYLE = "Say in a warm, smooth, low English butler's voice, relaxed and dryly amused: ";
 const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts", "gemini-2.5-flash-preview-tts"];
 
+const LIVE_MODELS = ["gemini-3.1-flash-live-preview", "gemini-2.5-flash-native-audio-preview-12-2025", "gemini-2.5-flash-native-audio-preview-09-2025"];
+const LIVE_STYLE = `
+
+You are speaking out loud with him, face to face, in real time. Speak with a refined, warm, low British (Received Pronunciation) accent - an English
+gentleman butler. Talk like a person: short spoken sentences, natural rhythm, the odd "mm" or "right" where a person would, no lists, no reading out
+symbols or IDs. Keep turns brief so he can jump in; if he interrupts, stop and listen. Ask at most one question at a time.
+You can add a task or remember something for him with your tools; say naturally that you've done it once the tool replies.`;
+const LIVE_TOOLS = [
+  { name: "add_task", description: "Add a task to his Momentum plan.", parameters: { type: "OBJECT", properties: {
+      title: { type: "STRING", description: "Short, verb-first" }, date: { type: "STRING", description: "YYYY-MM-DD, or empty for an undated to-do" },
+      time: { type: "STRING", description: "HH:MM 24h, or empty" }, minutes: { type: "INTEGER" } }, required: ["title"] } },
+  { name: "remember", description: "Save something he told you about himself, worth keeping long-term. Only what he actually said.", parameters: { type: "OBJECT", properties: {
+      text: { type: "STRING" }, kind: { type: "STRING", description: "personal | episodic | operational | preference" } }, required: ["text"] } },
+];
+
 const MISHAP = {
   nokey: "My brain isn't plugged in yet, sir - there's no Gemini or Groq key in Supabase's Secrets. Once one is there, I'm all yours.",
   busy: "I've used up my free thinking allowance with Google for now, sir. Give it a few minutes and try me again.",
@@ -314,6 +309,40 @@ export async function handle(req) {
   try { body = await req.json(); } catch { body = {}; }
   const text = String(body.text || "").trim().slice(0, 6000);
   if (!text) return new Response(JSON.stringify({ error: "Say something." }), { status: 400, headers: { ...CORS, "Content-Type": "application/json" } });
+
+  // Live conversation: a short-lived pass for Gemini Live, already set up as Gary (the real key never leaves Supabase).
+  if (body.mode === "live") {
+    const key = env("GEMINI_API_KEY");
+    if (!key) return new Response(JSON.stringify({ error: "nokey" }), { status: 503, headers: { ...CORS, "Content-Type": "application/json" } });
+    const voice = VOICES.includes(body.voice) ? body.voice : "Charon";
+    const [mem, plan] = await Promise.all([recall(String(body.text || ""), token), planSummary(token, body.items)]);
+    const sys = IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
+      `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
+      await pcState(token) + LIVE_STYLE;
+    const models = LIVE_MODELS.slice(Math.max(0, Math.min(LIVE_MODELS.length - 1, +body.try || 0)));
+    for (const model of models) {
+      const setup = { model: "models/" + model,
+        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } },
+        systemInstruction: { parts: [{ text: sys }] },
+        inputAudioTranscription: {}, outputAudioTranscription: {},
+        realtimeInputConfig: { automaticActivityDetection: { silenceDurationMs: 500, prefixPaddingMs: 200 } },
+        tools: [{ functionDeclarations: LIVE_TOOLS }] };
+      const now = Date.now();
+      for (const ver of ["v1alpha", "v1beta"]) {
+        const r = await fetch(`https://generativelanguage.googleapis.com/${ver}/auth_tokens`, { method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+          body: JSON.stringify({ uses: 1, expireTime: new Date(now + 30 * 60e3).toISOString(), newSessionExpireTime: new Date(now + 2 * 60e3).toISOString() }) }).catch(() => null);
+        if (!r || !r.ok) continue;
+        const t = await r.json();
+        if (!t.name) continue;
+        await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "live_start", detail: { model } }) }).catch(() => {});
+        return new Response(JSON.stringify({ token: t.name, setup,
+          url: "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage." + ver + ".GenerativeService.BidiGenerateContentConstrained?access_token=" + encodeURIComponent(t.name) }),
+          { headers: { ...CORS, "Content-Type": "application/json" } });
+      }
+    }
+    return new Response(JSON.stringify({ error: "live unavailable" }), { status: 503, headers: { ...CORS, "Content-Type": "application/json" } });
+  }
 
   // Gary's voice: text -> natural speech (raw 16-bit mono PCM). Google first, Groq next; the app falls back to the device voice.
   if (body.mode === "speak") {

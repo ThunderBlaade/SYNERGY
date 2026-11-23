@@ -140,6 +140,17 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
  .week .wd{width:56px}}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01s!important;animation:none!important}}
 .set.stack{flex-direction:column;align-items:flex-start;gap:12px}.set.stack .chips{justify-content:flex-start}
+#live{position:fixed;inset:0;z-index:60;background:#000;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(28px + env(safe-area-inset-top)) 26px calc(30px + env(safe-area-inset-bottom))}
+#live.on{display:flex;animation:gin .35s var(--ease)}
+.lvwrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%}
+#lvorb{width:168px;height:168px;border-radius:50%;border:1px solid #fff;transition:transform .08s linear,background .4s var(--ease),box-shadow .4s}
+#live.speaking #lvorb{background:#fff;animation:lvbreathe 1.6s ease-in-out infinite}
+@keyframes lvbreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+#lvstat{font:500 12px var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin:18px 0 10px;text-align:center}
+#lvtx{width:100%;max-width:560px;min-height:110px;max-height:30vh;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:8px}
+#lvtx p{margin:0;font:400 17px/1.4 var(--serif)}#lvtx p.you{color:var(--dim);font-family:var(--sans);font-size:15px}#lvtx p.act{font:500 11px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.lvacts{display:flex;gap:12px;margin-top:20px}.lvacts .btn{min-width:120px}#lvmute.on{background:#fff;color:#000}
+.mic.talk{border-color:#fff}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -182,7 +193,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 
 <div id="askbar"><textarea id="ask" rows="1" placeholder="Ask anything..." spellcheck="true" autocorrect="on" autocapitalize="sentences" enterkeyhint="send"></textarea>
  <button class="mic" id="asksend" aria-label="Send" style="border-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
- <button class="mic" id="askmic" aria-label="Speak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></div>
+ <button class="mic" id="askmic" aria-label="Speak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><button class="mic talk" id="livebtn" aria-label="Talk to Gary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg></button></div>
 <button id="fab" aria-label="Add">+</button>
 <nav><button class="on" data-t="today"><span class="nw">Today</span><span class="ww">Plan</span></button><button data-t="todo">To-do</button><button data-t="focus">Focus</button><button data-t="you">You</button><button data-t="gary">Gary</button></nav>
 </div>
@@ -205,6 +216,10 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
  <input class="big" id="siP" type="password" placeholder="Password" autocomplete="current-password" style="font-size:20px;margin-top:10px">
  <p class="hint">Your plan goes to a private table only your account can read. Gary's chats and memories are private to your account too.</p>
  <div class="acts"><button class="btn ghost" id="siX">Cancel</button><button class="btn fill" id="siGo">Sign in</button></div></div>
+<div id="live"><div class="lab" style="text-align:center">Talking to Gary</div>
+ <div class="lvwrap"><div id="lvorb"></div></div>
+ <div id="lvstat">Connecting…</div><div id="lvtx"></div>
+ <div class="lvacts"><button class="btn ghost" id="lvmute">Mute</button><button class="btn fill" id="lvend">End</button></div></div>
 <div class="sheet" id="mem"><div class="grab"></div>
  <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab">What Gary remembers</div><button class="btn" id="madd">Add +</button></div>
  <input class="big" id="mq" placeholder="Search memories or people" style="font-size:18px;margin:14px 0 12px" spellcheck="false">
@@ -628,21 +643,82 @@ function garyJobs(jobs,after){if(!jobs||!jobs.length)return;const box=document.c
    if(Date.now()-t0>12000)j.slow=true;draw();if(['pending','running'].includes(j.status)&&Date.now()-t0<90000)setTimeout(poll,2000)};
   draw();poll()});
  let at=after;while(at.nextElementSibling&&at.nextElementSibling.classList.contains('gact'))at=at.nextElementSibling;at.after(box)}
+// ---------- Talk to Gary: a live, spoken conversation (Gemini Live). You can interrupt him; he stops and listens.
+const LV={ws:null,ctx:null,stream:null,node:null,playAt:0,srcs:[],on:false,ready:false,inT:'',outT:'',tries:0,lvl:0,muted:false};
+const LIVE_WORKLET='class P extends AudioWorkletProcessor{process(i){const c=i[0]&&i[0][0];if(c)this.port.postMessage(c.slice(0));return true}}registerProcessor("gmic",P)';
+function lvStatus(t){$('lvstat').textContent=t}
+function lvLine(who,t){if(!t)return;const p=document.createElement('p');p.className=who;p.textContent=t;$('lvtx').appendChild(p);while($('lvtx').children.length>6)$('lvtx').firstChild.remove()}
+function b64(u8){let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));return btoa(s)}
+let lvBuf=[],lvLen=0;
+function lvMic(f32){if(!LV.ready||LV.muted)return;let e=0;for(let i=0;i<f32.length;i+=8)e+=f32[i]*f32[i];LV.lvl=Math.min(1,Math.sqrt(e/(f32.length/8))*6);
+ const r=LV.ctx.sampleRate/16000,n=Math.floor(f32.length/r),o=new Int16Array(n);
+ for(let i=0;i<n;i++){const a=Math.floor(i*r),b=Math.min(f32.length,Math.floor((i+1)*r));let s=0;for(let k=a;k<b;k++)s+=f32[k];const v=s/Math.max(1,b-a);o[i]=Math.max(-1,Math.min(1,v))*0x7fff}
+ lvBuf.push(o);lvLen+=n;if(lvLen<640)return;           // ~40 ms of audio per message: low latency, not chatty
+ const all=new Int16Array(lvLen);let p=0;for(const c of lvBuf){all.set(c,p);p+=c.length}lvBuf=[];lvLen=0;
+ if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({realtimeInput:{audio:{data:b64(new Uint8Array(all.buffer)),mimeType:'audio/pcm;rate=16000'}}}))}
+function lvPlay(b64s,rate){const bin=atob(b64s),n=bin.length>>1,ab=LV.ctx.createBuffer(1,n,rate||24000),ch=ab.getChannelData(0);
+ for(let i=0;i<n;i++){let v=bin.charCodeAt(2*i)|(bin.charCodeAt(2*i+1)<<8);if(v>32767)v-=65536;ch[i]=v/32768}
+ const s=LV.ctx.createBufferSource();s.buffer=ab;s.connect(LV.ctx.destination);const at=Math.max(LV.ctx.currentTime+0.03,LV.playAt);s.start(at);LV.playAt=at+ab.duration;
+ LV.srcs.push(s);s.onended=()=>{LV.srcs=LV.srcs.filter(x=>x!==s);if(!LV.srcs.length&&LV.on)$('live').classList.remove('speaking')};$('live').classList.add('speaking')}
+function lvHush(){for(const s of LV.srcs){try{s.stop()}catch(e){}}LV.srcs=[];LV.playAt=0;$('live').classList.remove('speaking')}
+async function lvSaveTurn(){const you=LV.inT.trim(),him=LV.outT.trim();LV.inT='';LV.outT='';if(!you&&!him)return;
+ try{if(!CHAT){CHAT='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);store('garyChat',CHAT);await gdb('gary_convos',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id:CHAT,title:'Talk with Gary'})});$('ctitle').textContent='Talk with Gary'}
+  const rows=[];if(you)rows.push({convo:CHAT,role:'user',content:you.slice(0,19000)});if(him)rows.push({convo:CHAT,role:'gary',content:him.slice(0,19000)});
+  await gdb('gary_messages',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(rows)});if(you)bubble('you',you);if(him)bubble('gary',him)}catch(e){}}
+async function lvTool(fc){const a=fc.args||{};let res={result:'done'};
+ try{if(fc.name==='add_task'&&a.title){const d=/^\d{4}-\d\d-\d\d$/.test(a.date||'')?a.date:null,t=/^([01]\d|2[0-3]):[0-5]\d$/.test(a.time||'')?a.time:null;
+   const it={id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:String(a.title).slice(0,120),date:d,time:t,dur:Math.max(5,Math.min(600,+a.minutes||15)),prio:'none',repeat:'none',notes:'',created:Date.now(),done:{},by:'gary'};
+   touch(it);render();lvLine('act','+ '+it.title+' · '+dShort(d)+(t?' '+t12(t):''));garyLog('applied',{lines:['+ '+it.title],voice:true})}
+  else if(fc.name==='remember'&&a.text){const m={id:'m'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),kind:['personal','episodic','operational','preference'].includes(a.kind)?a.kind:'personal',text:String(a.text).slice(0,1000),people:[],happened:null,importance:3,source:'conversation',basis:'stated',sensitive:false};
+   await gdb('gary_memories',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(m)});lvLine('act','Remembered: '+m.text)}
+  else res={error:'not available'}}catch(e){res={error:'failed'}}
+ if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({toolResponse:{functionResponses:[{id:fc.id,name:fc.name,response:res}]}}))}
+async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.text():new Response(d).text());let m;try{m=JSON.parse(d)}catch(e){return}
+ if(m.setupComplete){LV.ready=true;LV.tries=0;lvStatus('Listening… just talk');return}
+ if(m.toolCall){(m.toolCall.functionCalls||[]).forEach(lvTool);return}
+ if(m.goAway){lvStatus('One moment…');setTimeout(()=>{if(LV.on){lvStop(true);liveStart(true)}},300);return}
+ const c=m.serverContent;if(!c)return;
+ if(c.interrupted){lvHush();lvStatus('Listening…')}
+ if(c.inputTranscription&&c.inputTranscription.text){LV.inT+=c.inputTranscription.text;lvStatus('Listening…')}
+ if(c.outputTranscription&&c.outputTranscription.text)LV.outT+=c.outputTranscription.text;
+ if(c.modelTurn)for(const p of c.modelTurn.parts||[]){if(p.inlineData&&p.inlineData.data){const r=+((p.inlineData.mimeType||'').match(/rate=(\d+)/)||[0,24000])[1];lvPlay(p.inlineData.data,r);lvStatus('Gary')}}
+ if(c.turnComplete){if(LV.inT.trim())lvLine('you',LV.inT.trim());if(LV.outT.trim())lvLine('gary',LV.outT.trim());lvSaveTurn()}}
+async function liveStart(again){if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
+ if(LV.on&&!again)return;speakStop();
+ LV.ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // inside the tap, so iPhone allows sound
+ LV.on=true;LV.ready=false;LV.muted=false;$('live').classList.add('on');$('lvmute').classList.remove('on');if(!again)$('lvtx').innerHTML='';lvStatus('Connecting…');
+ try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
+ catch(e){lvStatus('Microphone not allowed. Allow it in your settings and try again.');return}
+ const src=LV.ctx.createMediaStreamSource(LV.stream);
+ try{await LV.ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([LIVE_WORKLET],{type:'application/javascript'})));LV.node=new AudioWorkletNode(LV.ctx,'gmic');LV.node.port.onmessage=e=>lvMic(e.data);src.connect(LV.node)}
+ catch(e){LV.node=LV.ctx.createScriptProcessor(2048,1,1);LV.node.onaudioprocess=e=>lvMic(e.inputBuffer.getChannelData(0));src.connect(LV.node);const z=LV.ctx.createGain();z.gain.value=0;LV.node.connect(z);z.connect(LV.ctx.destination)}
+ let j;try{const r=await garyFetch({mode:'live',text:'',ctx:garyCtx(),items:garyItems(),voice:store('garyVoice')||'Charon',try:LV.tries});j=await r.json();if(!j.url)throw 0}
+ catch(e){lvStatus('Gary\'s live voice isn\'t available right now. Try the mic button instead.');return}
+ const ws=new WebSocket(j.url);LV.ws=ws;
+ ws.onopen=()=>ws.send(JSON.stringify({setup:j.setup}));ws.onmessage=lvMsg;
+ ws.onclose=e=>{if(LV.ws!==ws)return;if(LV.on&&!LV.ready&&LV.tries<2){LV.tries++;lvStop(true);liveStart(true);return}
+  if(LV.on){lvStatus(e.code===1000?'Ended':'Connection dropped. Tap Talk to start again.');lvSaveTurn()}}
+ (function meter(){if(!LV.on)return;const o=$('lvorb');o.style.transform='scale('+(1+LV.lvl*0.35).toFixed(3)+')';LV.lvl*=0.85;requestAnimationFrame(meter)})()}
+function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;try{ws&&ws.close(1000)}catch(e){}lvHush();
+ try{LV.stream&&LV.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{LV.node&&LV.node.disconnect()}catch(e){}try{LV.ctx&&LV.ctx.close()}catch(e){}
+ LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;$('live').classList.remove('on','speaking');lvSaveTurn()}}
+$('livebtn').onclick=()=>liveStart();$('lvend').onclick=()=>lvStop();$('lvmute').onclick=()=>{LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').textContent=LV.muted?'Unmute':'Mute';lvStatus(LV.muted?'Muted':'Listening…')};
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
-async function garyFetch(body){const tok=await clTok();if(!tok)throw new Error('signin');
- return fetch(CL.url+'/functions/v1/gary',{method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
+async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new Error('signin');
+ return fetch(CL.url+'/functions/v1/gary',{signal,method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
 let VOICEIN=false;
 async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock();
  if(!CS){toast('Sign in under You → Settings to talk to Gary');return}
  if(!navigator.onLine){toast('Gary needs the internet. Your plan still works offline.');return}
  talking=true;bubble('you',text);const a=bubble('gary','');a.classList.add('wait');const p=$('p-gary');p.scrollTop=p.scrollHeight;let got='';
- try{const r=await garyFetch({text,convo:CHAT,ctx:garyCtx(),items:garyItems()});
+ const ac=new AbortController();let wd=setTimeout(()=>ac.abort(),30000);const pet=()=>{clearTimeout(wd);wd=setTimeout(()=>ac.abort(),30000)};
+ try{const r=await garyFetch({text,convo:CHAT,ctx:garyCtx(),items:garyItems()},ac.signal);
   if(r.status===404)throw new Error('nofn');if(!r.ok)throw new Error('http '+r.status);
   const rd=r.body.getReader(),dec=new TextDecoder();
-  for(;;){const{value,done}=await rd.read();if(done)break;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
+  for(;;){const{value,done}=await rd.read();if(done)break;pet();got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
   const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);garyJobs(j.jobs,a)}catch(e){}}}
- catch(e){if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':'I can\'t reach the cloud just now, sir. Try again in a moment.'}
- a.classList.remove('wait');talking=false;const said=got.split('\x1e')[0].trim();if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
+ catch(e){if(e.name==='AbortError'&&!got)a.textContent='That took far too long, sir - Google seems to have nodded off. Try me again.';else if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':'I can\'t reach the cloud just now, sir. Try again in a moment.'}
+ clearTimeout(wd);a.classList.remove('wait');talking=false;const said=got.split('\x1e')[0].trim();if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
 // Gary's voice: the device's own British male voice (free, swappable later)
 function garyVoice(){const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]GB/i.test(v.lang));
  return vs.find(v=>/daniel|arthur|george|oliver|male|ryan|thomas/i.test(v.name))||vs[0]||null}
