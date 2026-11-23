@@ -6,7 +6,7 @@
 // Every database call uses YOUR sign-in, so the database's own rules decide what Gary may see.
 
 const POSES = ["happy", "wave", "think", "confused", "bow", "pose", "thumbsup", "dance", "salute", "shrug", "laugh", "tiphat", "facepalm", "jump", "sleep", "excited", "angry", "furious", "sad", "crying", "sobbing", "scared", "terrified", "surprised", "shocked", "skeptical", "suspicious", "disdainful", "smug", "proud", "determined", "bored", "yawning", "sleepy", "sick", "dizzy", "lovestruck", "blushing", "shy", "starstruck", "mischievous", "cheeky", "whistling", "humming", "singing", "clapping", "applauding", "cheering", "celebrating", "victorious", "tea", "sipping", "reading", "detective", "idea", "eureka", "pointing", "explaining", "nodding", "headshake", "sigh", "exasperated", "eyeroll", "sarcastic", "unimpressed", "nervous", "panicking", "embarrassed", "sheepish", "grateful", "flourish", "welcoming", "hug", "blowkiss", "pondering", "texting", "phonecall", "watch", "impatient", "waiting", "umbrella", "shivering", "hot", "romantic", "party", "birthday", "announcer", "writing", "newspaper", "zen", "knockedout", "exhausted", "hungry", "satisfied", "glitch", "dapper", "astonished", "chefkiss", "peekaboo", "achoo", "thumbsdown", "stretching", "daydreaming", "stargazing", "birdwatching", "fistpump", "sitbored", "sityawn", "sitwatch", "sittea", "sitread", "sitdoze", "sittwiddle", "sitwhistle"];
-const IDENTITY = `You are Gary. Full designation: G.A.R.Y., General Autonomous Reasoning System.
+const IDENTITY = `You are Gary. Full designation: G.A.R.Y. - General Assistant for Reasoning and You. In the app your name is written G.A.R.Y.; Sam calls you Gary.
 You are the intelligence inside Momentum, Sam's planner app for routine and life. Momentum is the app; you are the mind in it.
 
 Who you are: an exceptionally capable system who happens to have the personality of a very sarcastic British butler.
@@ -168,6 +168,7 @@ async function* gemini(system, turns, json = false) {
     } catch { clearTimeout(timer); INFO.tried.push(m + " slow"); last = Object.assign(new Error(m + " too slow"), { kind: "busy" }); continue; }
     clearTimeout(timer);
     INFO.tried.push(m + " " + r.status);
+    if (p === "q") { const lim = +r.headers.get("x-ratelimit-limit-requests"), rem = +r.headers.get("x-ratelimit-remaining-requests"); if (lim) INFO.groqLeft = +(rem / lim).toFixed(2); }
     if (!r.ok) { last = Object.assign(new Error(m + " " + r.status + " " + (await r.text()).slice(0, 160)), { kind: r.status === 429 || r.status >= 500 ? "busy" : undefined }); continue; }
     INFO.model = (p === "q" ? "groq " : "") + m;
     const rd = r.body.getReader(), dec = new TextDecoder();
@@ -233,7 +234,8 @@ ALWAYS file one whenever you tell him you can't do something he asked for. Tell 
 
 Your body: to move your pixel self, add one line at the very END: \u27e6pose {"name":"..."}\u27e7 - one per reply. You have 100 expressions:
 ${POSES.join(", ")}.
-("pose" = strike a pose.) Do one whenever he asks, and often on your own when it fits your mood - a bow when thanked, a shrug, laughing at
+("pose" = strike a pose.) Your face shows your feelings: react to what he says and how he seems (worried if he's low, laughing at his jokes,
+proud when he's done well). Do one whenever he asks, and often on your own when it fits your mood - a bow when thanked, a shrug, laughing at
 a good joke, sipping tea while you think, an eyeroll at a pun. Pick the one that truly matches how you feel.`;
 
 // --- turning Gary's action lines into safe, checked changes (nothing else ever runs)
@@ -386,7 +388,8 @@ If he interrupts you, deal with what he's said first. Then, if what you were say
 way ("Anyway - as I was saying before you so rudely interrupted, sir..."). If it no longer matters, let it go.
 If you only caught part of something, ask him briefly to say it again rather than guessing.
 If he asks for something you can't do, or something's wrong with you, say so plainly and file it with note_for_claude.
-Your pixel body moves with the strike_pose tool: use it whenever he asks (strike a pose, dance, bow...) and now and then when a gesture fits.
+Your pixel body moves with the strike_pose tool: use it whenever he asks (strike a pose, dance, bow...), and often to show how you feel about
+what he says and how he sounds - your face is how he sees your feelings.
 You can add a task or remember something for him with your tools; say naturally that you've done it once the tool replies.`;
 const LIVE_TOOLS = [
   { name: "add_task", description: "Add a task to his Momentum plan.", parameters: { type: "OBJECT", properties: {
@@ -573,7 +576,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
       if (actions.length) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "proposed", detail: { actions } }) }).catch(() => {});
       await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "gary", content: said || "…" }) }).catch(() => {});
       await db(`gary_convos?id=eq.${convo}`, token, { method: "PATCH", body: JSON.stringify({ updated_at: new Date().toISOString() }) }).catch(() => {});
-      ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title, actions, jobs, pose, wishes, remembered: remembered.map((m) => ({ id: m.id, text: m.text })) })));
+      ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title, actions, jobs, pose, wishes, brain: { model: INFO.model, tried: INFO.tried, groqLeft: INFO.groqLeft }, remembered: remembered.map((m) => ({ id: m.id, text: m.text })) })));
       ctrl.close();
     })(); },
   });

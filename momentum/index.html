@@ -161,19 +161,35 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 #gfbub{position:absolute;bottom:74px;right:0;width:190px;background:#fff;color:#000;font:400 14px/1.35 var(--serif);padding:10px 12px;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
 #gfloat.left #gfbub{right:auto;left:0}#gfloat.say #gfbub{opacity:1;transform:none}
 #gfbub::after{content:"";position:absolute;bottom:-7px;right:24px;border:7px solid transparent;border-bottom:0;border-top-color:#fff}#gfloat.left #gfbub::after{right:auto;left:24px}
-.ghead{display:flex;align-items:flex-end;gap:12px}
-#gdock{width:84px;height:84px;border:0;background:none;padding:0;flex:none;overflow:visible;margin:-6px 0 -2px -8px}
 #gfsp{width:64px;height:64px;background:none;border:0;padding:0;-webkit-backdrop-filter:none;backdrop-filter:none;animation:gbob 3.2s ease-in-out infinite}
 #gfloat{filter:drop-shadow(0 0 1px rgba(255,255,255,.55)) drop-shadow(0 6px 8px rgba(0,0,0,.55))}
 @keyframes gbob{0%{transform:translateY(0)}12.5%{transform:translateY(-1.5px)}25%{transform:translateY(-2.8px)}37.5%{transform:translateY(-3.7px)}50%{transform:translateY(-4px)}62.5%{transform:translateY(-3.7px)}75%{transform:translateY(-2.8px)}87.5%{transform:translateY(-1.5px)}100%{transform:translateY(0)}}
-#gopen{display:none;margin:12px 0 4px;padding:14px 16px;border:1px solid var(--line);background:#0d0e12;animation:gin .35s var(--ease)}#gopen.on{display:block}
+#gopen{display:none;padding:14px 16px;border:1px solid var(--line);background:#0d0e12;animation:gin .35s var(--ease)}#gopen.on{display:block}
 #gotx{font:400 17px/1.45 var(--serif);margin-bottom:12px}.goacts{display:flex;gap:10px}.goacts .btn{flex:1}
 #gcut,#lvcut{display:none;font:500 11px var(--sans);letter-spacing:.18em;text-transform:uppercase;background:#fff;color:#000;border:0;padding:12px 20px}
 #gcut{position:fixed;z-index:45;left:50%;transform:translateX(-50%);bottom:calc(128px + var(--safeB))}#gcut.on{display:block;animation:gin .25s var(--ease)}
 #live.speaking #lvcut{display:block;margin-top:10px}
+.gtop{position:sticky;top:calc(-48px - var(--safeT));z-index:4;margin:calc(-48px - var(--safeT)) -22px 0;padding:calc(58px + var(--safeT)) 22px 12px;background:#000;display:flex;justify-content:space-between;align-items:center}
+.gsub{margin:-6px 0 18px;font-size:9.5px}
+#p-gary{padding-bottom:calc(200px + var(--safeB))}
+#askbar{flex-wrap:wrap;background:linear-gradient(transparent,#000 22%)}
+#gbar{flex-basis:100%;display:flex;align-items:flex-end;gap:12px;position:relative;touch-action:none;cursor:grab;padding-top:10px;transition:transform .3s var(--ease)}
+#gbar.drag{transition:none}#gbar .gbh{position:absolute;top:0;left:50%;width:36px;height:3px;margin-left:-18px;background:var(--line)}
+#gdock{width:60px;height:60px;border:0;background:none;padding:0;flex:none;margin:0 0 -4px -6px}
+.gbt{display:flex;flex-direction:column;gap:4px;padding-bottom:8px}.gbt b{font:400 19px var(--serif)}
+#gopen{position:absolute;left:0;right:0;bottom:100%;margin:0 0 8px}
+#askmic{display:none}@media (hover:hover) and (pointer:fine){#askmic{display:grid}}
+@media (min-width:1000px){.gtop{top:-100px;margin:-100px calc(-1 * max(48px,calc((100% - 760px)/2))) 0;padding:60px max(48px,calc((100% - 760px)/2)) 14px}}
+#sync{display:none}
+#brain{display:inline-flex;gap:7px;align-items:center;margin-left:10px;vertical-align:middle;background:none;border:0;padding:4px 2px;cursor:pointer}
+#brain i{display:block;width:11px;height:11px;transition:color .4s}#brain svg{width:11px;height:11px;fill:currentColor;stroke:currentColor;stroke-width:0;display:block}
+#brain i.ok{color:#5fbf5f}#brain i.low{color:#e8c25a;animation:blink 1.6s ease-in-out infinite}#brain i.out{color:#e0605a}#brain i.off{color:var(--faint)}
+#bpc svg{stroke-width:1.5;fill:none}@keyframes blink{50%{opacity:.35}}
+#bpop{position:absolute;z-index:70;top:calc(40px + var(--safeT));left:22px;right:22px;max-width:420px;background:#0d0e12;border:1px solid var(--line);padding:12px 14px;font:400 13px/1.55 var(--sans);color:var(--fg);display:none;letter-spacing:0;text-transform:none}
+#bpop.on{display:block;animation:gin .25s var(--ease)}
 </style></head><body>
 <div id="app">
-<header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<i id="sync"></i></span><span class="lab" id="hdate"></span></header>
+<header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bsrc"></i><i id="bpc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
 
 <section class="pane on" id="p-today">
  <div class="lab" id="tlab">Today</div><h1 id="tday"></h1>
@@ -206,19 +222,21 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 </section>
 
 <section class="pane" id="p-gary">
- <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab" id="ctitle">New chat</div>
- <span><button class="lab" id="memBtn" style="color:var(--fg);margin-right:18px">Memory ›</button><button class="lab" id="chatsBtn" style="color:var(--fg)">Chats ›</button></span></div><div class="ghead"><button id="gdock" aria-label="Gary"></button><h1>Gary</h1></div>
- <div id="gopen"><div id="gotx"></div><div class="goacts"><button class="btn fill" id="goyes">Reply</button><button class="btn ghost" id="gono">Not now</button></div></div>
+ <div class="gtop"><div class="lab" id="ctitle">New chat</div>
+ <span><button class="lab" id="memBtn" style="color:var(--fg);margin-right:18px">Memory ›</button><button class="lab" id="chatsBtn" style="color:var(--fg)">Chats ›</button></span></div><h1>G.A.R.Y.</h1><div class="lab gsub">General Assistant for Reasoning and You</div>
  <div id="thread"></div>
 </section>
 
-<div id="askbar"><textarea id="ask" rows="1" placeholder="Ask anything..." spellcheck="true" autocorrect="on" autocapitalize="sentences" enterkeyhint="send"></textarea>
+<div id="askbar"><div id="gbar"><div id="gopen"><div id="gotx"></div><div class="goacts"><button class="btn fill" id="goyes">Reply</button><button class="btn ghost" id="gono">Not now</button></div></div>
+ <i class="gbh"></i><button id="gdock" aria-label="G.A.R.Y."></button><div class="gbt"><b>G.A.R.Y.</b><span class="lab" id="gbs">Pull up to talk</span></div></div>
+ <textarea id="ask" rows="1" placeholder="Ask G.A.R.Y. anything…" spellcheck="true" autocorrect="on" autocapitalize="sentences" enterkeyhint="send"></textarea>
  <button class="mic" id="asksend" aria-label="Send" style="border-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
- <button class="mic" id="askmic" aria-label="Speak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><button class="mic talk" id="livebtn" aria-label="Talk to Gary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg></button></div>
+ <button class="mic" id="askmic" aria-label="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 19 7.5 6l5 13M4.4 14.5h6.2M19.5 4.5v15M17.5 4.5h4M17.5 19.5h4"/></svg></button><button class="mic talk" id="livebtn" aria-label="Talk to G.A.R.Y."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></div>
+<div id="bpop"></div>
 <button id="gcut">Tap to interrupt</button>
 <div id="gfloat" aria-label="Open Gary"><div id="gfbub"></div><div id="gfsp"></div></div>
 <button id="fab" aria-label="Add">+</button>
-<nav><button class="on" data-t="today"><span class="nw">Today</span><span class="ww">Plan</span></button><button data-t="todo">To-do</button><button data-t="focus">Focus</button><button data-t="you">You</button><button data-t="gary">Gary</button></nav>
+<nav><button class="on" data-t="today"><span class="nw">Today</span><span class="ww">Plan</span></button><button data-t="todo">To-do</button><button data-t="focus">Focus</button><button data-t="you">You</button><button data-t="gary">G.A.R.Y.</button></nav>
 </div>
 
 <div class="veil" id="veil"></div>
@@ -239,7 +257,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
  <input class="big" id="siP" type="password" placeholder="Password" autocomplete="current-password" style="font-size:20px;margin-top:10px">
  <p class="hint">Your plan goes to a private table only your account can read. Gary's chats and memories are private to your account too.</p>
  <div class="acts"><button class="btn ghost" id="siX">Cancel</button><button class="btn fill" id="siGo">Sign in</button></div></div>
-<div id="live"><div class="lab" style="text-align:center">Talking to Gary</div>
+<div id="live"><div class="lab" style="text-align:center">Talking to G.A.R.Y.</div>
  <div class="lvwrap"><div id="lvorb"></div></div>
  <div id="lvstat">Connecting…</div><div id="lvtx"></div>
  <button id="lvcut">Tap to interrupt</button>
@@ -330,7 +348,7 @@ async function sync(){if(!hasPC()){await cloudSync();render();return}const items
   S.items={};j.items.forEach(it=>{S.items[it.id]=it;if((it.updated||0)>(before[it.id]||0))S.cdirty.items[it.id]=1});Object.assign(S.items,keep);S.moods=Object.assign(j.moods||{},Object.fromEntries(Object.keys(S.dirty.moods).map(d=>[d,S.moods[d]])));
   S.settings=j.settings||S.settings;S.stats=j.stats;S.push=j.push||{};if(j.today&&j.today!==today())0;
   S.online=true}catch(e){S.online=false}
- await cloudSync();$('sync').className=(S.online||S.cloud==='ok')?'ok':'off';save();render()}
+ await cloudSync();$('sync').className=(S.online||S.cloud==='ok')?'ok':'off';brainDraw();save();render()}
 setInterval(()=>{if(!document.hidden)sync()},30000);setTimeout(handCloudToPC,3000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){sync();render()}});
 
 // ---------- what happens on a day (same rules as the PC)
@@ -714,7 +732,7 @@ async function lvTool(fc){const a=fc.args||{};let res={result:'done'};
   else res={error:'not available'}}catch(e){res={error:'failed'}}
  if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({toolResponse:{functionResponses:[{id:fc.id,name:fc.name,response:res}]}}))}
 async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.text():new Response(d).text());let m;try{m=JSON.parse(d)}catch(e){return}
- if(m.setupComplete){LV.ready=true;LV.tries=0;lvStatus('Listening… just talk');return}
+ if(m.setupComplete){LV.ready=true;brainDraw();LV.tries=0;lvStatus('Listening… just talk');return}
  if(m.toolCall){(m.toolCall.functionCalls||[]).forEach(lvTool);return}
  if(m.goAway){lvStatus('One moment…');setTimeout(()=>{if(LV.on){lvStop(true);liveStart(true)}},300);return}
  const c=m.serverContent;if(!c)return;
@@ -726,7 +744,7 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
 async function liveStart(again){if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // inside the tap, so iPhone allows sound
- LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');gFloatSync();$('lvmute').classList.remove('on');if(!again)$('lvtx').innerHTML='';lvStatus('Connecting…');
+ LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');gFloatSync();brainDraw();$('lvmute').classList.remove('on');if(!again)$('lvtx').innerHTML='';lvStatus('Connecting…');
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
  catch(e){lvStatus('Microphone not allowed. Allow it in your settings and try again.');return}
  const src=LV.ctx.createMediaStreamSource(LV.stream);
@@ -741,7 +759,7 @@ async function liveStart(again){if(!CS){toast('Sign in under You → Settings to
  (function meter(){if(!LV.on)return;const o=$('lvorb');o.style.transform='scale('+(1+LV.lvl*0.35).toFixed(3)+')';LV.lvl*=0.85;requestAnimationFrame(meter)})()}
 function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;try{ws&&ws.close(1000)}catch(e){}lvHush();
  try{LV.stream&&LV.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{LV.node&&LV.node.disconnect()}catch(e){}try{LV.ctx&&LV.ctx.close()}catch(e){}
- LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;$('live').classList.remove('on','speaking');gFloatSync();lvSaveTurn()}}
+ LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;$('live').classList.remove('on','speaking');gFloatSync();brainDraw();lvSaveTurn()}}
 $('livebtn').onclick=()=>liveStart();$('lvcut').onclick=$('lvorb').onclick=()=>{if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>lvStop();$('lvmute').onclick=()=>{LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').textContent=LV.muted?'Unmute':'Mute';lvStatus(LV.muted?'Muted':'Listening…')};
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
@@ -1062,13 +1080,49 @@ function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
  const end=()=>{if(!GF.drag)return;GF.drag=false;if(GF.moved){store('garyPos',Math.round(GF.x)+','+Math.round(GF.y));GF.hold=performance.now()+8000;gMood('happy',900)}else go('gary')};
  f.addEventListener('pointerup',end);f.addEventListener('pointercancel',end);
  addEventListener('resize',()=>{if(f.classList.contains('on'))gFloatPlace()});
- gCanvas($('gdock'));$('gdock').onclick=()=>{gPoke();gMood(['wave','tiphat','bow','pose','cheeky','dapper','thumbsup'][Math.floor(Math.random()*7)],2400)};gCanvas($('lvorb'));
+ gCanvas($('gdock'));gCanvas($('lvorb'));$('brain').onclick=e=>{e.stopPropagation();brainInfo()};$('bpop').onclick=()=>$('bpop').classList.remove('on');brainDraw();
  $('goyes').onclick=gOpenReply;$('gono').onclick=()=>{gOpenClose();gMood('sitwhistle',3000)};$('gcut').onclick=()=>{speakStop();gMood('idle')};gFloatSync()}
 async function gNotesCopy(){if(!CS){toast('Sign in first');return}
  try{const since=new Date(Date.now()-14*864e5).toISOString();const rows=await gdb('gary_audit?select=action,detail,at&or=(ok.eq.false,action.eq.wish)&at=gte.'+since+'&order=at.desc&limit=40')||[];
   if(!rows.length){toast('Nothing to fix - Gary reports all well');return}
   const txt='Notes from Gary (Momentum) for Claude, last 14 days:\n'+rows.map(x=>'- '+x.at.slice(0,16).replace('T',' ')+' '+(x.action==='wish'?'NOTE: '+(x.detail&&x.detail.text||''):'ERROR '+x.action+': '+JSON.stringify(x.detail||{}).slice(0,300))).join('\n');
   await navigator.clipboard.writeText(txt);toast(rows.length+' notes copied - paste them to Claude')}catch(e){toast('Couldn\'t fetch the notes just now')}}
+// ---------- G.A.R.Y.'s bar: pull it up to go into voice with him
+(function(){const b=$('gbar');let y0=null,dy=0,id=null;
+ b.addEventListener('pointerdown',e=>{if(e.target.closest('#gopen'))return;y0=e.clientY;dy=0;id=e.pointerId;b.setPointerCapture(id);b.classList.add('drag')});
+ b.addEventListener('pointermove',e=>{if(y0===null)return;dy=Math.min(0,e.clientY-y0);b.style.transform='translateY('+Math.max(-110,dy)+'px)';$('gbs').textContent=dy<-70?'Let go to talk':'Pull up to talk';if(dy<-70)gMood('excited')});
+ const end=()=>{if(y0===null)return;y0=null;b.classList.remove('drag');b.style.transform='';$('gbs').textContent='Pull up to talk';if(dy<-70)liveStart();else if(dy>-6){gPoke();gMood(['wave','tiphat','bow','pose','cheeky','dapper','thumbsup'][Math.floor(Math.random()*7)],2400)}};
+ b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end)})();
+// the message box has opinions; G.A.R.Y. answers back
+const G_BANTER=[['Ask G.A.R.Y. anything…','Anything within reason, sir.','smug'],['He doesn\'t bite.','I nibble. Occasionally.','cheeky'],['G.A.R.Y. is pretty gay if you ask me.','Fabulous, actually. Nobody asked you.','sarcastic'],
+ ['Type something. He\'s getting bored.','The text box is being mean to me again, sir.','sad'],['Go on, he\'s lonely.','I am NOT lonely. I have tea.','sittea'],['Psst. Ask about his monocle.','It\'s for reading. And judging.','dapper'],
+ ['I\'m the real brains round here.','You\'re a rectangle.','eyeroll'],['Say something nice to him.','Ignore the box, sir. It\'s jealous.','smug'],['He talks to birds, you know.','Only the clever ones.','birdwatching'],
+ ['Waiting…','Patiently. Like a gentleman.','waiting'],['Bet he can\'t do a backflip.','I could. I simply choose not to.','proud'],['Your keyboard has a mic, you know.','So do I. Pull me up, sir.','pointUp']];
+let gBi=0,gBside=0;setInterval(()=>{const a=$('ask');if(!a||a.value||document.activeElement===a&&gBside===0&&false)return;const p=G_BANTER[gBi%G_BANTER.length];
+ if(gBside===0){a.placeholder=p[0];gBside=1}else{a.placeholder='G.A.R.Y.: '+p[1];gBside=0;gBi++;if(tab==='gary'&&!talking&&!GSPK&&!GS.until&&!GB.sit)gMood(p[2],2600)}},4200);
+// ---------- What G.A.R.Y. is running on (header): ✦ Google, ⚡ Groq, waves = live voice, ◆ memory only; screen = PC. Green ok, yellow low, red out.
+const BR_ICON={google:'<svg viewBox="0 0 16 16"><path d="M8 1c.6 3.6 3.4 6.4 7 7-3.6.6-6.4 3.4-7 7-.6-3.6-3.4-6.4-7-7 3.6-.6 6.4-3.4 7-7z"/></svg>',
+ groq:'<svg viewBox="0 0 16 16"><path d="M9.5 1 3 9h4.2L6 15l7-8.4H8.6z"/></svg>',live:'<svg viewBox="0 0 16 16"><path d="M2 6.5v3M5 4v8M8 2v12M11 4v8M14 6.5v3" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>',
+ local:'<svg viewBox="0 0 16 16"><path d="M8 1.5 14.5 8 8 14.5 1.5 8z"/></svg>',pc:'<svg viewBox="0 0 16 16"><path d="M2 3h12v8H2zM6 14h4M8 11v3" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>'};
+let BR={src:'google',lvl:'ok',model:'',groqLeft:null,googleNote:'',pc:'off',pcName:'',at:0};try{Object.assign(BR,JSON.parse(store('garyBrain')||'{}'))}catch(e){}
+function brainSave(){store('garyBrain',JSON.stringify(BR))}
+function brainFrom(b){if(!b||!b.model)return;const tried=b.tried||[],groq=/^groq /.test(b.model);BR.model=b.model.replace(/^groq /,'');BR.at=Date.now();
+ const gFail=tried.filter(x=>/^gemini/.test(x)&&!/ 200$/.test(x));BR.groqLeft=b.groqLeft!=null?b.groqLeft:BR.groqLeft;
+ if(groq){BR.src='groq';BR.lvl=BR.groqLeft!=null&&BR.groqLeft<0.2?'low':'ok';BR.googleNote=gFail.length?'Google is full or busy right now':''}
+ else{BR.src='google';BR.lvl=gFail.length?'low':'ok';BR.googleNote=gFail.length?'Google\'s first choice was busy - running on a backup model':''}
+ if(/went quiet/.test(tried.join(' ')))BR.lvl='low';brainSave();brainDraw()}
+function brainDraw(){const e=$('brain');if(!e)return;let src=BR.src,lvl=BR.lvl;
+ if(!navigator.onLine||!CS){src='local';lvl='off'}else if(typeof LV!=='undefined'&&LV.on){src='live';lvl=LV.ready?'ok':'low'}
+ $('bsrc').innerHTML=BR_ICON[src];$('bsrc').className=lvl;$('bpc').innerHTML=BR_ICON.pc;$('bpc').className=BR.pc==='on'?'ok':'off'}
+async function brainPC(){if(!CS||!navigator.onLine)return;try{const a=await gdb('gary_agents?select=name,last_seen&order=last_seen.desc&limit=1');const on=a&&a[0]&&Date.now()-new Date(a[0].last_seen).getTime()<150000;
+ BR.pc=on?'on':'off';BR.pcName=a&&a[0]?a[0].name:'';brainSave();brainDraw()}catch(e){}}
+setInterval(brainPC,60000);setTimeout(brainPC,1500);addEventListener('online',brainDraw);addEventListener('offline',brainDraw);
+function brainInfo(){const names={google:'Google Gemini',groq:'Groq (backup brain)',live:'Gemini Live (voice)',local:'Memory only - no internet or not signed in'};
+ const src=!navigator.onLine||!CS?'local':(LV.on?'live':BR.src),lv={ok:'healthy',low:'running low or struggling - will switch if needed',off:'',out:'out'}[!navigator.onLine||!CS?'off':BR.lvl];
+ const L=['Thinking with: '+names[src]+(BR.model&&src!=='local'&&src!=='live'?' ('+BR.model+')':'')+(lv?' - '+lv:'')];
+ if(BR.googleNote&&src!=='local')L.push(BR.googleNote);if(BR.groqLeft!=null)L.push('Groq allowance left today: '+Math.round(BR.groqLeft*100)+'%');
+ L.push('PC'+(BR.pcName?' ('+BR.pcName+')':'')+': '+(BR.pc==='on'?'on - G.A.R.Y. can use it':'off or asleep'));L.push('Plan sync: '+($('sync').className==='ok'?'up to date':'waiting for a connection'));
+ const p=$('bpop');p.innerHTML=L.map(x=>'<div>'+x.replace(/</g,'&lt;')+'</div>').join('');p.classList.add('on');clearTimeout(p._t);p._t=setTimeout(()=>p.classList.remove('on'),6000)}
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
 async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new Error('signin');
  return fetch(CL.url+'/functions/v1/gary',{signal,method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
@@ -1082,7 +1136,7 @@ async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock()
   if(r.status===404)throw new Error('nofn');if(!r.ok)throw new Error('http '+r.status);
   const rd=r.body.getReader(),dec=new TextDecoder();
   for(;;){const{value,done}=await rd.read();if(done)break;pet();GTALK=true;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
-  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);GPOSE=j.pose||null;garyJobs(j.jobs,a)}catch(e){}}}
+  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);GPOSE=j.pose||null;brainFrom(j.brain);garyJobs(j.jobs,a)}catch(e){}}}
  catch(e){if(e.name==='AbortError'&&!got)a.textContent='That took far too long, sir - Google seems to have nodded off. Try me again.';else if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':'I can\'t reach the cloud just now, sir. Try again in a moment.'}
  clearTimeout(wd);a.classList.remove('wait');talking=false;GTALK=false;if(GPOSE)gPose(GPOSE);else if(got)gMood('happy',1600);else gMood('confused',3500);GPOSE=null;const said=got.split('\x1e')[0].trim();if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
 // Gary's voice: the device's own British male voice (free, swappable later)
