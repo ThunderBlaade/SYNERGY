@@ -456,11 +456,118 @@ body.guest #thread{padding-top:14px}
 #hmem,#hfid{-webkit-tap-highlight-color:transparent}
 
 #memBtn{order:0}#gnew{order:1}#chatsBtn{order:2}body.guest #chatsBtn{order:0}body.guest #gnew{order:2}
+
+/* ================= Tiimo-style layout (black & white) ================= */
+:root{--a:#f4f2ee;--card:#111113;--card2:#1b1b1e;--r:18px}
+/* bottom bar (phone/iPad): a floating pill of icons + Rodger's round button */
+@media (max-width:999px){
+nav{left:14px!important;right:14px!important;bottom:calc(12px + var(--safeB))!important;top:auto!important;width:auto!important;padding:0!important;background:none!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important}
+.nvpill{flex:1;display:flex;justify-content:space-between;align-items:center;height:58px;padding:5px;border-radius:29px;background:rgba(22,22,24,.86);border:1px solid rgba(255,255,255,.09);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 10px 30px rgba(0,0,0,.55)}
+nav button{flex:1;height:46px;padding:0!important;border-radius:23px;display:grid;place-items:center;color:rgba(244,242,238,.55)!important;letter-spacing:0!important;transition:background .25s,color .25s;position:relative}
+nav button::after{display:none!important}nav button.on{background:#2c2c30;color:var(--fg)!important}
+nav button svg{width:24px;height:24px;grid-area:1/1}nav .nl{display:none}
+#navday{grid-area:1/1;font:600 9.5px/1 var(--sans);font-style:normal;margin-top:4px;color:currentColor}
+nav .nvg{flex:none;width:58px;height:58px;border-radius:50%;background:rgba(22,22,24,.86);border:1px solid rgba(255,255,255,.12);overflow:hidden;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 10px 30px rgba(0,0,0,.55)}
+nav .nvg.on{background:#2c2c30;border-color:rgba(255,255,255,.5)}
+#navg{display:block;width:58px;height:58px;position:relative;overflow:hidden}#navg .gpx{position:absolute;width:84px!important;height:84px!important;left:-13px;top:2px;max-width:none}
+}
+@media (min-width:1000px){
+ nav{left:24px!important;width:190px!important;padding:0!important;gap:6px!important}
+ .nvpill{display:flex;flex-direction:column;gap:4px;width:100%}
+ nav button{display:flex!important;align-items:center;gap:12px;width:100%;height:44px;padding:0 14px!important;border-radius:14px;font:500 14px var(--sans)!important;letter-spacing:0!important;text-transform:none!important;color:rgba(244,242,238,.6)!important;position:relative}
+ nav button::after{display:none!important}nav button.on{background:#1f1f22;color:var(--fg)!important}nav button svg{width:21px;height:21px;flex:none}
+ #navday{position:absolute;left:14px;width:21px;text-align:center;font:600 8.5px/1 var(--sans);font-style:normal;margin-top:3px}
+ #navg{width:28px;height:28px;border-radius:50%;overflow:hidden;position:relative;flex:none;background:#1f1f22}#navg .gpx{position:absolute;width:42px!important;height:42px!important;left:-7px;top:1px;max-width:none}
+ #chl.sheet{transform:translateX(calc(-100% - 260px))}#chl.sheet.on{transform:none}
+}
+#fab{display:none!important}
+@media (max-width:999px){
+ #askbar{bottom:calc(76px + var(--safeB))!important}#gcut{bottom:calc(var(--askH,190px) + 90px + var(--safeB))!important}
+ .pane{padding-bottom:calc(110px + var(--safeB))!important}
+}
+#p-gary{padding-bottom:calc(var(--askH,190px) + 140px + var(--safeB))}
+/* page top-right pill buttons */
+.pane{position:absolute}.ptools{position:absolute;right:22px;top:calc(50px + var(--safeT));display:flex;gap:8px;z-index:3}
+.pt{width:44px;height:36px;border-radius:18px;display:grid;place-items:center;background:var(--card2);border:1px solid rgba(255,255,255,.07);color:var(--fg)}.pt svg{width:20px;height:20px}.pt:active{transform:scale(.94)}
+.pmore svg circle{stroke-width:2.6}
+#pmenu{position:fixed;z-index:90;min-width:210px;padding:6px;border-radius:18px;background:rgba(30,30,33,.94);border:1px solid rgba(255,255,255,.08);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);box-shadow:0 18px 50px rgba(0,0,0,.6);
+ opacity:0;transform:scale(.92) translateY(-6px);transform-origin:top right;pointer-events:none;transition:opacity .18s,transform .22s var(--ease)}
+#pmenu.on{opacity:1;transform:none;pointer-events:auto}
+#pmenu button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 12px;border-radius:12px;font:400 16px var(--sans);text-align:left}#pmenu button:active{background:rgba(255,255,255,.08)}
+#pmenu button+button{border-top:1px solid rgba(255,255,255,.06)}#pmenu svg{width:19px;height:19px;flex:none;color:var(--dim)}
+/* rounded everything */
+.btn{border-radius:999px!important;border-color:rgba(255,255,255,.16)!important;padding:12px 20px;letter-spacing:.1em}.btn.fill{background:var(--fg);border-color:var(--fg)!important;color:#000}.btn.ghost{background:var(--card2)}
+.chip{border-radius:999px!important;background:var(--card2);border-color:transparent!important;letter-spacing:.08em}.chip.on{background:var(--fg)!important;color:#000!important}
+.mic,#askbar .mic,.lvb{border-radius:50%!important}
+input[type=time],input[type=date]{border-radius:12px;background:var(--card2);border-color:transparent}
+textarea{border-radius:14px;background:var(--card);border-color:rgba(255,255,255,.08)}
+.tog{border-radius:13px!important;border:0!important;background:#2a2b31!important;width:46px;height:28px}.tog::after{border-radius:50%!important;top:3px;left:3px;width:22px;height:22px;background:#fff!important;box-shadow:0 1px 3px rgba(0,0,0,.4)}.tog.on{background:var(--fg)!important}.tog.on::after{background:#000!important;transform:translateX(18px)}
+.wd{border-radius:14px!important}.wd.on{background:#2c2c30!important;color:var(--fg)!important}.wd.on .lab{color:var(--dim)!important}.week{margin-top:12px}
+.bar{border-radius:3px;height:3px}
+/* task rows as cards */
+.row{background:var(--card)!important;border:0!important;border-radius:16px;padding:12px 14px;margin:6px 0}
+.row .ic.n{display:none}.row .tx b{font:500 16px/1.3 var(--sans)}.row .tx small{font-size:12px}
+.row.lift{background:#1d1d20!important}.ck svg{width:28px;height:28px}.ck{width:28px;height:28px}
+.sec{margin:20px 0 6px}.sec>.lab{display:inline-flex;align-items:center;gap:6px;background:var(--card2);border-radius:999px;padding:7px 12px;letter-spacing:.12em;font-size:10px}
+/* sheets */
+.sheet{background:#0c0c0e;border-top:0!important;border-radius:26px 26px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.6)}
+.grab{background:rgba(255,255,255,.22)!important;width:38px;height:5px;border-radius:3px}
+.big{border-bottom-color:rgba(255,255,255,.1)}
+.bcbox{border-radius:22px}#bconf .goacts .btn{flex:1}
+@media (min-width:1000px){.sheet{border-radius:26px 0 0 26px;border-left:0!important}}
+/* You: cards + Settings page */
+.nums{background:var(--card);border-radius:var(--r);padding:6px 0;gap:0;margin-top:14px}.num{border-top:0!important;padding:16px 18px;text-align:center}.num+.num{border-left:1px solid rgba(255,255,255,.07)}.num b{font-size:50px}
+.card{background:var(--card);border-radius:var(--r);padding:18px;margin:0 0 22px}.ctitle{font:400 22px/1.2 var(--serif);margin-bottom:2px}
+.card .moodrow{margin:14px 0 2px}.card .field{margin-top:14px}
+.li{border-bottom:0!important;background:var(--card);border-radius:14px;padding:12px 14px;margin:6px 0}
+.yshh{display:flex;align-items:center;gap:8px;margin:-2px 0 10px}.yshh b{font:600 17px var(--sans)}#yshx{width:38px;height:38px;border-radius:50%;background:var(--card2);display:grid;place-items:center;color:var(--fg)}#yshx svg{width:20px;height:20px}
+#ysh{height:92dvh}
+.glab{display:block;margin:22px 4px 8px;color:var(--dim)}
+.grp{background:var(--card);border-radius:var(--r);padding:0 16px}.grp .set{border-bottom:1px solid rgba(255,255,255,.07)}.grp .set:last-child{border-bottom:0}
+.grp .btn{padding:9px 14px}
+/* Focus */
+#p-focus .acts .btn{padding:14px 18px}
+/* ===== R.O.D.G.E.R. chat, Tiimo layout ===== */
+.gtop{display:grid!important;grid-template-columns:44px 1fr 44px;align-items:center;box-shadow:none!important;background:linear-gradient(#000 70%,transparent)!important}
+.gtop::before,.gtop::after{display:none!important}
+#chatsBtn{grid-column:1;grid-row:1;order:0!important;width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid rgba(255,255,255,.08);display:grid;place-items:center;color:var(--fg)}#chatsBtn svg{width:22px;height:22px}
+#memBtn{grid-column:2;grid-row:1;justify-self:center;order:0!important;height:34px;padding:0 16px;border-radius:17px;background:var(--card2);border:1px solid rgba(255,255,255,.08);font:600 11px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--fg)}
+#gnew{grid-column:3;grid-row:1;justify-self:end;order:0!important;width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid rgba(255,255,255,.08);place-items:center;color:var(--fg);padding:0}#gnew svg{width:20px;height:20px;display:block;margin:auto}
+body.guest #gnew,body.haschat #gnew{display:grid!important}
+#ask{border-radius:24px!important;background:var(--card)!important;border:1px solid rgba(255,255,255,.1)!important;padding-left:18px!important;padding-right:18px!important}
+#asksend{background:var(--fg)!important;color:#000!important;border-color:var(--fg)!important}
+#gsug{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin:18px 0 4px;animation:gin .35s var(--ease)}
+#gsug button{display:inline-flex;align-items:center;gap:8px;padding:9px 14px 9px 11px;border-radius:999px;background:var(--card2);border:1px solid rgba(255,255,255,.07);font:400 14px var(--sans);color:var(--fg)}#gsug svg{width:17px;height:17px;color:var(--dim)}
+#gsug button:active{background:#2c2c30}
+/* chat history: a drawer from the left that nudges the app across */
+@media (max-width:999px){
+ #chl{top:0;bottom:0;left:0;right:auto;width:min(82vw,340px);max-width:none;margin:0;height:100dvh;max-height:none;border-radius:0 26px 26px 0;transform:translateX(-104%);
+  padding:calc(16px + var(--safeT)) 14px calc(18px + var(--safeB));transition:transform .42s var(--ease);box-shadow:10px 0 40px rgba(0,0,0,.6)}
+ #chl.on{transform:none}#chl.drag{transition:none}#chl .grab{display:none}
+ #app{transition:left .42s var(--ease),right .42s var(--ease)}
+ body.chlon #app{left:min(82vw,340px);right:calc(-1 * min(82vw,340px))}
+ body.chlon .veil{background:rgba(0,0,0,.35)}
+}
+@media (min-width:1000px){.ptools{top:92px;right:max(48px,calc((100% - 760px)/2))}body.plan #p-today .ptools{right:44px}body.plan #p-todo .ptools{right:44px}
+ #chl{left:210px;right:auto;border-left:0!important;border-right:1px solid rgba(255,255,255,.08);border-radius:0 26px 26px 0;transform:translateX(-110%);width:400px}#chl.on{transform:none}}
+#chcl{font:400 26px/1.1 var(--serif);color:var(--fg);text-align:left;padding:4px 2px;white-space:nowrap;text-decoration:none!important}#chcl.sub{font:500 11px var(--sans);letter-spacing:.2em;text-transform:uppercase}
+#chfbtn,#newChat{width:40px;height:40px;border-radius:50%!important;background:var(--card2)!important;border:1px solid rgba(255,255,255,.08)!important;color:var(--fg)!important}#chfbtn.on{background:var(--fg)!important;color:#000!important}
+#chqbox{border-radius:14px;background:var(--card);border-color:transparent!important;height:42px}
+.chg{margin:16px 4px 4px!important}
+.chrow{border:0!important;margin:2px 0!important;border-radius:14px;overflow:hidden}.chrow .chi{background:#0c0c0e!important;padding:11px 12px!important;border-radius:0}
+.chrow .chi b{border-bottom:0!important;padding-bottom:0!important;margin-bottom:0!important;font:500 15px/1.3 var(--sans)!important}
+.chrow .chi .chd{display:block;margin-top:3px;font-size:12px;color:var(--dim)}
+.chrow .chs,.chrow .chf1,.chrow .chi small{display:none!important}
+.chrow:has(.chi.on) .chi{background:#1b1b1e!important}
+.chren{opacity:.5}
+.chrow .chact{opacity:0;transition:opacity .15s}.chrow:has(.chi[style*="translateX"]) .chact{opacity:1}
+header{background:linear-gradient(#000 62%,rgba(0,0,0,0));padding-bottom:14px!important}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><button id="hmem" aria-label="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button><button id="hfid" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
 
 <section class="pane on" id="p-today">
+ <div class="ptools" data-p="today"><button class="pt pmore" data-p="today" aria-label="Options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r=".6"/><circle cx="12" cy="12" r=".6"/><circle cx="18" cy="12" r=".6"/></svg></button><button class="pt padd" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button></div>
  <div class="lab" id="tlab">Today</div><h1 id="tday"></h1>
  <div class="week" id="week"></div>
  <div class="lab" style="margin-top:4px">Your day at a glance</div><p class="glance" id="glance" style="font-size:25px;margin-top:10px"></p><div class="bar"><i id="tbar"></i></div>
@@ -468,6 +575,7 @@ body.guest #thread{padding-top:14px}
 </section>
 
 <section class="pane" id="p-todo">
+ <div class="ptools" data-p="todo"><button class="pt pmore" data-p="todo" aria-label="Options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r=".6"/><circle cx="12" cy="12" r=".6"/><circle cx="18" cy="12" r=".6"/></svg></button><button class="pt padd" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button></div>
  <div class="lab">Everything else</div><h1>To-do</h1>
  <p class="sub">Things without a day yet. Pick one, give it a day, or just do it.</p>
  <button class="btn" id="dumpBtn">Brain dump ›</button>
@@ -485,14 +593,14 @@ body.guest #thread{padding-top:14px}
 </section>
 
 <section class="pane" id="p-you">
+ <div class="ptools" data-p="you"><button class="pt" id="yset" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
  <div class="lab">Past, present, future</div><h1>You</h1>
- <div class="subtabs"><button class="on" data-s="prog">Progress</button><button data-s="mood">Mood</button><button data-s="set">Settings</button></div>
  <div id="ybody"></div>
 </section>
 
 <section class="pane" id="p-gary">
- <div class="gtop"><button class="lab" id="memBtn" style="color:var(--fg)">Memories ›</button><div class="lab" id="ctitle" hidden>New chat</div><button class="lab" id="gfid">Use Face ID</button><span class="lab" id="gtname">R.O.D.G.E.R.</span>
- <button class="lab" id="chatsBtn" style="color:var(--fg)">Chat history ›</button><button class="lab" id="gnew" style="color:var(--fg)">New chat +</button></div><h1>R.O.D.G.E.R.</h1><div class="lab gsub">Respected Operator Designed for Growth, Empathy and Reasoning</div>
+ <div class="gtop"><button id="memBtn">Memories</button><div class="lab" id="ctitle" hidden>New chat</div><button class="lab" id="gfid">Use Face ID</button><span class="lab" id="gtname">R.O.D.G.E.R.</span>
+ <button id="chatsBtn" aria-label="Chat history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 9h14M5 15h9"/></svg></button><button id="gnew" aria-label="New chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/><path d="M17.5 3.5a2.1 2.1 0 0 1 3 3L13 14l-4 1 1-4z"/></svg></button></div><h1>R.O.D.G.E.R.</h1><div class="lab gsub">Respected Operator Designed for Growth, Empathy and Reasoning</div>
  <div id="chead"><button class="lab" id="gfid2" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg><span>Use Face ID</span></button><span id="chname">New chat</span><button class="lab" id="chnew">New chat +</button></div>
  <div id="chpick"><div class="cphead"><span class="lab">Your chats</span><button class="lab" id="cpnew">New chat +</button><button id="cpx" aria-label="Close">✕</button></div><div id="cplist"></div></div>
  <div id="thread"></div>
@@ -507,7 +615,7 @@ body.guest #thread{padding-top:14px}
 <button id="gcut">Tap to interrupt</button>
 <div id="gfloat" aria-label="Open Rodger"><div id="gfbub"></div><div id="gfsp"></div></div>
 <button id="fab" aria-label="Add">+</button>
-<nav><button class="on" data-t="today"><span class="nw">Today</span><span class="ww">Plan</span></button><button data-t="todo">To-do</button><button data-t="focus">Focus</button><button data-t="you">You</button><button data-t="gary">R.O.D.G.E.R.</button></nav>
+<nav><div class="nvpill"><button class="on" data-t="today" aria-label="Today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3.5"/><path d="M8 3.5v3M16 3.5v3"/></svg><em id="navday">1</em><span class="nl"><span class="nw">Today</span><span class="ww">Plan</span></span></button><button data-t="todo" aria-label="To-do"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.2l2.4 2.4 4.8-5"/></svg><span class="nl">To-do</span></button><button data-t="focus" aria-label="Focus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a8 8 0 1 1-7.4 5"/></svg><span class="nl">Focus</span></button><button data-t="you" aria-label="You"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 19v-5M12 19V9M18 19V5"/></svg><span class="nl">You</span></button></div><button data-t="gary" class="nvg" aria-label="R.O.D.G.E.R."><i id="navg"></i><span class="nl">R.O.D.G.E.R.</span></button></nav>
 </div>
 
 <div class="veil" id="veil"></div>
@@ -547,10 +655,12 @@ body.guest #thread{padding-top:14px}
  <div class="acts" style="margin-top:16px"><button class="btn ghost" id="vcuse">Use my voice: off</button><button class="btn fill" id="vcmake">Create Rodger's voice</button></div>
  <div class="hint" id="vcnote" style="margin-top:10px"></div></div>
 <div class="sheet" id="chl"><div class="grab"></div>
- <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><button class="lab" id="chcl" style="text-align:left;color:var(--fg);white-space:nowrap">‹ Back</button><span style="flex:1"></span><button id="chfbtn" aria-label="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button><button id="newChat" aria-label="New chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></div>
+ <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><button id="chcl">Chat history</button><span style="flex:1"></span><button id="chfbtn" aria-label="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button><button id="newChat" aria-label="New chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></div>
  <label id="chqbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><input id="chq" type="search" placeholder="Search" autocomplete="off" spellcheck="false" enterkeyhint="search"></label>
  <div class="chips" id="chf" style="margin-top:14px"></div>
  <div id="chlist" style="margin-top:14px"></div></div>
+<div class="sheet" id="ysh"><div class="grab"></div><div class="yshh"><button id="yshx" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><b>Settings</b></div><div id="ysetb"></div></div>
+<div id="pmenu" role="menu"></div>
 <div class="sheet" id="dump"><div class="grab"></div>
  <div class="lab">Brain dump</div><p class="glance" style="margin:10px 0 14px">Get it all out. Rodger will turn it into small steps.</p>
  <textarea id="dtext" placeholder="Everything on your mind..." style="min-height:150px"></textarea>
@@ -748,7 +858,7 @@ function renderTodo(){const all=looseItems(),open=all.filter(it=>!looseDone(it))
 let E=null;const opens=[];
 // sheets: drag down (from the top, or anywhere once the list is scrolled to the top) to close. Touch events, so the drag can stop the list scrolling.
 (function(){let S=null,y0=0,x0=0,dy=0,ok=false,live=false;
- document.addEventListener('touchstart',e=>{if(innerWidth>=1000||e.touches.length>1)return;const sh=e.target.closest('.sheet.on');if(!sh||e.target.closest('input,textarea,select,[contenteditable],.row')){S=null;return}
+ document.addEventListener('touchstart',e=>{if(innerWidth>=1000||e.touches.length>1)return;const sh=e.target.closest('.sheet.on');if(!sh||sh.id==='chl'||e.target.closest('input,textarea,select,[contenteditable],.row')){S=null;return}
   const t=e.touches[0];S=sh;y0=t.clientY;x0=t.clientX;dy=0;live=false;ok=sh.scrollTop<=0},{passive:true});
  document.addEventListener('touchmove',e=>{if(!S)return;const t=e.touches[0];dy=t.clientY-y0;const dx=Math.abs(t.clientX-x0);
   if(!live){if(!ok||dy<0||dx>Math.abs(dy)){if(Math.abs(dy)>6||dx>6)S=null;return}if(dy<8)return;live=true;S.classList.add('drag')}
@@ -812,44 +922,45 @@ $('fpick').onclick=()=>{const opts=dayItems(today()).filter(it=>!isDone(it,today
 setInterval(()=>{if(tab==='focus'||F.run)renderFocus()},1000);
 
 // ---------- YOU
-let ysub='prog';document.querySelectorAll('.subtabs button').forEach(b=>b.onclick=()=>{ysub=b.dataset.s;document.querySelectorAll('.subtabs button').forEach(x=>x.classList.toggle('on',x===b));buzz(5);renderYou()});
+$('yset').onclick=()=>{buzz(5);sheet('ysh',true);youPart('set',$('ysetb'))};$('yshx').onclick=()=>sheet('ysh',false);
 const MOODS=[['rough','#6b5b95'],['low','#7d84b2'],['okay','#9aa0a6'],['good','#c7b88a'],['great','#e8d48b']];
 function localStats(){const days={};let total=0;Object.values(S.items).forEach(it=>Object.keys(it.done||{}).forEach(d=>{days[d]=days[d]||[0,0];days[d][0]++;days[d][1]+=+it.dur||15;total++}));
  let st=0,d=today();if(!days[d])d=addDays(d,-1);while(days[d]){st++;d=addDays(d,-1)}const week=[];for(let i=6;i>=0;i--){const ds=addDays(today(),-i);week.push({date:ds,n:(days[ds]||[0])[0],mins:(days[ds]||[0,0])[1]})}
  return{streak:st,total,week}}
-function renderYou(){const b=$('ybody');
+function renderYou(){youPart('prog',$('ybody'));youPart('mood',$('ymood'));if($('ysh').classList.contains('on'))youPart('set',$('ysetb'))}
+function youPart(ysub,b){if(!b)return;
  if(ysub==='prog'){const s=localStats(),wk=s.week.reduce((a,x)=>a+x.n,0),wm=s.week.reduce((a,x)=>a+x.mins,0),mx=Math.max(1,...s.week.map(x=>x.n));
   const past=[];Object.values(S.items).forEach(it=>Object.entries(it.done||{}).forEach(([d,ts])=>past.push([ts,it.title,d])));past.sort((a,b)=>b[0]-a[0]);
   let fut=0;for(let i=1;i<=7;i++)fut+=dayItems(addDays(today(),i)).length;const nowT=new Date().toTimeString().slice(0,5),lefts=dayItems(today()).filter(it=>!isDone(it,today())).sort((a,b)=>((a.time&&a.time<nowT)-(b.time&&b.time<nowT))||0);
-  b.innerHTML='<div class="nums"><div class="num"><span class="lab">Day streak</span><b>'+s.streak+'</b><small>days in a row you did something</small></div><div class="num"><span class="lab">Completed</span><b>'+s.total+'</b><small>things done, all time</small></div></div>'+
+  b.innerHTML='<div class="nums"><div class="num"><span class="lab">Day streak</span><b>'+s.streak+'</b><small>days in a row you did something</small></div><div class="num"><span class="lab">Completed</span><b>'+s.total+'</b><small>things done, all time</small></div></div><div id="ymood" class="card"></div>'+
   '<p class="prose">'+(wk?'This week you finished '+wk+' thing'+(wk>1?'s':'')+', about '+fmtMins(wm)+' of your life sorted.':'This week is a clean page. One small thing starts it.')+'</p>'+
   '<span class="lab">Last 7 days</span><div class="cols">'+s.week.map(x=>'<div><i class="'+(x.n?'':'z')+'" style="height:'+(x.n?Math.max(6,x.n/mx*86):2)+'%"></i><span class="lab" style="font-size:9px">'+'SMTWTFS'[parseISO(x.date).getDay()]+'</span></div>').join('')+'</div>'+
   '<div class="sec" style="margin-top:28px"><span class="lab">Present you</span></div><p class="prose" style="font-size:17px">'+(lefts.length?lefts.length+' left today. Next up: '+esc(lefts[0].title)+'.':'Nothing left today.')+'</p>'+
   '<div class="sec"><span class="lab">Past you</span></div>'+(past.slice(0,8).map(([ts,t,d])=>'<div class="li"><span>'+esc(t)+'</span><span>'+(d===today()?'today':d===addDays(today(),-1)?'yesterday':parseISO(d).getDate()+' '+MON[parseISO(d).getMonth()].slice(0,3))+'</span></div>').join('')||'<p class="empty">What you finish shows up here.</p>')+
   '<div class="sec" style="margin-top:22px"><span class="lab">Future you</span></div><p class="prose" style="font-size:17px">'+(fut?fut+' thing'+(fut>1?'s':'')+' already planned for the next 7 days. Future you is looked after.':'Nothing planned past today yet. Two minutes now saves future you.')+'</p>'}
  else if(ysub==='mood'){const t=today(),m=S.moods[t]||{};let row='';for(let i=6;i>=0;i--){const d=addDays(t,-i),v=(S.moods[d]||{}).v;const c=v!=null?MOODS[v][1]:'';row+='<div class="md"><span class="lab">'+'SMTWTFS'[parseISO(d).getDay()]+'</span><i style="'+(c?'background:'+c+';border-color:'+c:'')+'"></i></div>'}
-  b.innerHTML='<p class="prose">How was today, honestly?</p><div class="chips" id="mpick">'+MOODS.map((x,i)=>'<button class="chip'+(m.v===i?' on':'')+'" data-v="'+i+'">'+x[0]+'</button>').join('')+'</div>'+
-  '<div class="field"><span class="lab">A line about it</span><textarea id="mnote" placeholder="What made it that way?">'+esc(m.note||'')+'</textarea></div>'+
+  b.innerHTML='<div class="ctitle">Mood and daily reflection</div><p class="prose" style="font-size:17px;margin:4px 0 12px">How was today, honestly?</p><div class="chips" id="mpick">'+MOODS.map((x,i)=>'<button class="chip'+(m.v===i?' on':'')+'" data-v="'+i+'">'+x[0]+'</button>').join('')+'</div>'+
+  '<div class="field"><span class="lab">A line about it</span><textarea id="mdnote" placeholder="What made it that way?">'+esc(m.note||'')+'</textarea></div>'+
   '<div class="sec" style="margin-top:26px"><span class="lab">This week</span></div><div class="moodrow">'+row+'</div>';
   const put=()=>{const cur_=S.moods[t]||{};S.moods[t]=Object.assign(cur_,{updated:Date.now()});S.dirty.moods[t]=1;save();scheduleSync()};
   b.querySelectorAll('#mpick .chip').forEach(c=>c.onclick=()=>{S.moods[t]=Object.assign(S.moods[t]||{},{v:+c.dataset.v});put();buzz(8);renderYou()});
-  $('mnote').onchange=()=>{S.moods[t]=Object.assign(S.moods[t]||{},{note:$('mnote').value});put();toast('Saved')}}
+  $('mdnote').onchange=()=>{S.moods[t]=Object.assign(S.moods[t]||{},{note:$('mdnote').value});put();toast('Saved')}}
  else{const st=S.settings,P=S.push||{},perm=('Notification' in window)?Notification.permission:'unsupported';
   const nstat=perm==='granted'&&P.phones?'On for '+P.phones+' device'+(P.phones>1?'s':''):!('PushManager' in window)?(/iPhone|iPad/.test(navigator.userAgent)?'Add Momentum to your Home Screen first (Share → Add to Home Screen), then open it from there':'This browser can\'t get notifications'):P.ready===false?'Needs a one-off setup on the PC':'Off';
-  b.innerHTML='<div class="set"><div>Notifications<small>'+nstat+'</small></div><button class="btn ghost" id="pushOn">'+(perm==='granted'&&P.phones?'Test':'Turn on')+'</button></div>'+
+  b.innerHTML='<div class="lab glab">Reminders</div><div class="grp"><div class="set"><div>Notifications<small>'+nstat+'</small></div><button class="btn ghost" id="pushOn">'+(perm==='granted'&&P.phones?'Test':'Turn on')+'</button></div>'+
   '<div class="set"><div>Daily nudges<small>A morning plan and an evening reflection</small></div><button class="tog'+(st.nudges?' on':'')+'" id="sn"></button></div>'+
   '<div class="set"><div>Morning plan<small>When Rodger asks you to shape the day</small></div><input type="time" id="smo" value="'+(st.morning||'08:30')+'"></div>'+
   '<div class="set"><div>Evening reflection<small>A look back at what counted</small></div><input type="time" id="sev" value="'+(st.evening||'21:00')+'"></div>'+
   '<div class="set"><div>Heads-up before tasks</div><div class="chips" id="srem"></div></div>'+
-  '<div class="set stack"><div>Rodger\'s voice<small>Play each one, then pick - it\'s used for voice chat and replies read aloud</small></div><div id="svoice"></div></div>'+
+  '</div><div class="lab glab">R.O.D.G.E.R.</div><div class="grp"><div class="set stack"><div>Rodger\'s voice<small>Play each one, then pick - it\'s used for voice chat and replies read aloud</small></div><div id="svoice"></div></div>'+
   '<div class="set"><div>Face ID for R.O.D.G.E.R.<small>Anyone else who opens him gets guest mode: nothing private, and he tells you who it was</small></div><button class="tog'+(gLockOn()?' on':'')+'" id="sfid"></button></div>'+
   '<div class="set"><div>Rodger\'s notes for Claude<small>What he can\'t do yet and anything that went wrong. Copy and paste to Claude to fix or improve him</small></div><button class="btn ghost" id="sgn" style="min-width:86px">Copy</button></div>'+
   '<div class="set"><div>Rodger wanders the other pages<small>Like the old Office assistant. Drag him anywhere; tap him to chat</small></div><button class="tog'+(store('garyFloat')!=='0'?' on':'')+'" id="sgf"></button></div>'+
   '<div class="set"><div>Your butler voice<small>'+(store('garyVoice')==='clone'?'On - Rodger reads replies in your butler impression':'Record your butler impression and Rodger will speak with it')+'</small></div><button class="btn ghost" id="svcl" style="min-width:86px">Record</button></div>'+
   '<div class="set"><div>Rodger speaks every reply<small>He always answers aloud when you talk to him</small></div><button class="tog'+(store('garySpeak')==='1'?' on':'')+'" id="ssp"></button></div>'+
-  '<div class="set"><div>Sync across devices<small>'+(CS?(S.cloud==='off'?'Can\'t reach the cloud right now - saved here':'On · '+esc(CS.email||'')):'Sign in with your Synergy login to keep phone, iPad and PC in step')+'</small></div><button class="btn ghost" id="scloud">'+(CS?'Sign out':'Sign in')+'</button></div>'+
+  '</div><div class="lab glab">Sync</div><div class="grp"><div class="set"><div>Sync across devices<small>'+(CS?(S.cloud==='off'?'Can\'t reach the cloud right now - saved here':'On · '+esc(CS.email||'')):'Sign in with your Synergy login to keep phone, iPad and PC in step')+'</small></div><button class="btn ghost" id="scloud">'+(CS?'Sign out':'Sign in')+'</button></div>'+
   '<div class="set"><div>Your PC<small>'+(!STATIC?'You\'re on the PC. Open Momentum anywhere: thunderblaade.github.io/synergy/momentum':PC?(S.online?'Connected - notifications and PC tasks are on':'Not reachable right now (is it on, with Tailscale?)'):'Connect it for notifications. Rodger works without it.')+'</small></div>'+(STATIC?'<button class="btn ghost" id="spc">'+(PC?'Change':'Connect')+'</button>':'<button class="btn ghost" id="slink">Copy link</button>')+'</div>'+
-  '<div class="set"><div>Sync now</div><button class="btn ghost" id="ssync">Sync</button></div>';
+  '<div class="set"><div>Sync now</div><button class="btn ghost" id="ssync">Sync</button></div></div>';
   const setS=(k,v)=>{S.settings[k]=v;S.settings.updated=Date.now();S.dirty.settings=true;save();scheduleSync()};
   $('sn').onclick=()=>{setS('nudges',!st.nudges);renderYou()};$('smo').onchange=e=>setS('morning',e.target.value);$('sev').onchange=e=>setS('evening',e.target.value);
   chips('srem',[[0,'Off'],[5,'5m'],[10,'10m'],[15,'15m']],st.remind==null?5:st.remind,v=>{setS('remind',+v);renderYou()});
@@ -955,19 +1066,20 @@ function chBin(){if(!CHB.length){$('chlist').innerHTML='<p class="empty">The Bin
   else chAsk('Delete for good?','"'+(c.title||'Chat')+'" will be gone forever. This can\'t be undone.','Delete',async()=>{CHB=CHB.filter(x=>x!==c);drawChats();const e=encodeURIComponent(c.id);try{await gdb('gary_messages?convo=eq.'+e,{method:'DELETE'});await gdb('gary_convos?id=eq.'+e,{method:'DELETE'})}catch(err){}})}))}
 function drawChats(){if($('chq').value.trim())return chSearch();const tags={};for(const c of CHS)for(const t of c.tags||[])tags[t]=(tags[t]||0)+1;const isG=c=>/^Guest:/i.test(c.title||''),ng=CHS.filter(isG).length,imp=CHS.filter(c=>c.crucial).length,np=CHS.reduce((a,c)=>a+((c.parts||[]).length),0);
  const F=[['all','All '+CHS.length]].concat(imp?[['crucial','Important '+imp]]:[]).concat(np?[['folders','Folders '+np]]:[]).concat(ng?[['guest','Guest '+ng]]:[]).concat(Object.keys(CHT).filter(t=>tags[t]).map(t=>[t,CHT[t]+' '+tags[t]])).concat([['claude','Claude ideas'],['bin','Bin'+(CHB.length?' '+CHB.length:'')]]);if(!F.some(f=>f[0]===CHF))CHF='all';$('chfbtn').classList.toggle('on',CHF!=='all');
- $('chf').innerHTML=F.map(f=>'<button class="chip'+(f[0]===CHF?' on':'')+'" data-f="'+f[0]+'">'+esc(f[1])+'</button>').join('');$('chf').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{CHF=b.dataset.f;drawChats()});
+ $('chcl').textContent=(CHF==='claude'||CHF==='bin')?'‹ Back':'Chat history';$('chcl').classList.toggle('sub',CHF==='claude'||CHF==='bin');$('chf').innerHTML=F.map(f=>'<button class="chip'+(f[0]===CHF?' on':'')+'" data-f="'+f[0]+'">'+esc(f[1])+'</button>').join('');$('chf').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{CHF=b.dataset.f;drawChats()});
  if(CHF==='folders')return chFolders();if(CHF==='claude')return chClaude();if(CHF==='bin')return chBin();
  const L=CHS.filter(c=>CHF==='all'||(CHF==='guest'?isG(c):CHF==='crucial'?c.crucial:(c.tags||[]).includes(CHF)));
  $('chlist').innerHTML=chRowsHTML(L)||'<p class="empty">No chats here.</p>';chWire($('chlist'),id=>{loadChat(id);sheet('chl',false)})}
 // a chat as a box: title (underlined), the summary, and the first couple of lines of the chat itself
 function chName(t){return String(t).replace(/\bGary\b/g,'Rodger').replace(/\bgary\b/g,'rodger').replace(/\bGazza\b/gi,'Rodge').replace(/G\.A\.R\.Y\./g,'R.O.D.G.E.R.')}
+function chWhen2(d){const t=new Date(d),n=new Date(),y=new Date(n);y.setDate(n.getDate()-1);const hm=t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});return t.toDateString()===n.toDateString()?'Today '+hm:t.toDateString()===y.toDateString()?'Yesterday '+hm:t.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+(t.getFullYear()!==n.getFullYear()?' '+t.getFullYear():'')}
 function chWhenShort(d){const t=new Date(d),n=new Date(),hm=t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),y=new Date(n);y.setDate(n.getDate()-1);
  return t.toDateString()===n.toDateString()?hm:t.toDateString()===y.toDateString()?'Yesterday '+hm:t.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+hm}
 let CHFIRST={};try{CHFIRST=JSON.parse(store('garyFirst')||'{}')}catch(e){}
 function chRowsHTML(L){const now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();L=L.slice().sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0));
  const grp=c=>{if(c.pinned)return 'Pinned';const t=new Date(c.updated_at).getTime();return t>=d0?'Today':t>=d0-6*864e5?'This week':t>=d0-30*864e5?'This month':'Earlier'};let last='',h='';
  for(const c of L){const g=grp(c);if(g!==last){h+='<div class="lab chg">'+g+'</div>';last=g}const f=CHFIRST[c.id];
-  h+='<div class="chrow" data-id="'+esc(c.id)+'"><button class="chact chpin">'+(c.pinned?'Unpin':'Pin')+'</button><button class="chact chdel">Delete</button><button class="ci chi'+(c.id===CHAT?' on':'')+'" data-id="'+esc(c.id)+'"><b><span class="cht">'+esc(chName(c.title||'Chat'))+'</span><em class="chd">'+chWhenShort(c.updated_at)+'</em><i class="chren" role="button" aria-label="Rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></i></b>'+(c.summary?'<span class="chs">'+esc(chName(c.summary))+'</span>':'')+
+  h+='<div class="chrow" data-id="'+esc(c.id)+'"><button class="chact chpin">'+(c.pinned?'Unpin':'Pin')+'</button><button class="chact chdel">Delete</button><button class="ci chi'+(c.id===CHAT?' on':'')+'" data-id="'+esc(c.id)+'"><b><span class="cht">'+esc(chName(c.title||'Chat'))+'</span><i class="chren" role="button" aria-label="Rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></i></b><em class="chd">'+chWhen2(c.updated_at)+'</em>'+(c.summary?'<span class="chs">'+esc(chName(c.summary))+'</span>':'')+
    '<small>'+[...(c.tags||[]).map(t=>CHT[t]||t),c.crucial?'kept word for word':c.archived?'summary only':''].filter(Boolean).map(esc).join(' · ')+'</small></button></div>'}
  return h}
 async function chFirstLoad(ids){const need=ids.filter(id=>CHFIRST[id]===undefined).slice(0,30);if(!need.length||chFirstLoad.busy)return;chFirstLoad.busy=true;
@@ -2175,7 +2287,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124191827';let UPD=false;
+const BUILD='20261124205510';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
@@ -2188,5 +2300,44 @@ addEventListener('resize',()=>{document.body.classList.toggle('plan',wide()&&tab
 document.body.classList.toggle('plan',wide()&&tab==='today');
 function render(){if(tab==='today'&&wide())renderTodo();if(tab==='today')renderToday();else if(tab==='todo')renderTodo();else if(tab==='focus')renderFocus();else if(tab==='you')renderYou()}
 let lastDay=today();setInterval(()=>{if(today()!==lastDay){if(cur===lastDay)cur=today();lastDay=today()}if(tab==='today')renderToday()},60000);
+
+// ---------- Tiimo-style layout: icon bar, ••• menus, + buttons, chat drawer, suggestions
+(function(){
+ const nd=()=>{const e=$('navday');if(e)e.textContent=new Date().getDate()};nd();setInterval(nd,60000);
+ try{gCanvas($('navg'))}catch(e){}
+ document.querySelectorAll('.padd').forEach(b=>b.onclick=()=>{buzz(8);openEd(null)});
+ const M=$('pmenu');let mfor=null;
+ const close=()=>{M.classList.remove('on');mfor=null};
+ const items=pg=>{const L=[['Add a task','<path d="M12 5v14M5 12h14"/>',()=>openEd(null)],['Brain dump','<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/>',()=>$('dumpBtn').click()]];
+  if(pg==='today')L.push(['Jump to today','<rect x="4" y="5" width="16" height="15" rx="3.5"/><path d="M8 3.5v3M16 3.5v3M9 13h6"/>',()=>{cur=today();renderToday()}]);
+  L.push(['Settings','<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',()=>{if(tab!=='you')go('you');setTimeout(()=>$('yset').click(),tab==='you'?0:350)}]);return L};
+ document.querySelectorAll('.pmore').forEach(b=>b.onclick=e=>{e.stopPropagation();if(mfor===b){close();return}buzz(5);const L=items(b.dataset.p);
+  M.innerHTML=L.map((x,i)=>'<button data-i="'+i+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+x[1]+'</svg>'+x[0]+'</button>').join('');
+  M.querySelectorAll('button').forEach(x=>x.onclick=ev=>{ev.stopPropagation();close();L[+x.dataset.i][2]()});
+  const r=b.getBoundingClientRect();M.style.top=(r.bottom+8)+'px';M.style.right=Math.max(12,innerWidth-r.right)+'px';M.classList.add('on');mfor=b});
+ document.addEventListener('pointerdown',e=>{if(mfor&&!e.target.closest('#pmenu,.pmore'))close()},true);
+ document.querySelectorAll('.pane').forEach(p=>p.addEventListener('scroll',close,{passive:true}));
+ // chat history drawer: slides in from the left and nudges the app across (like Tiimo)
+ const ch=$('chl');new MutationObserver(()=>{document.body.classList.toggle('chlon',ch.classList.contains('on'));if(!ch.classList.contains('on'))ch.style.transform=''}).observe(ch,{attributes:true,attributeFilter:['class']});
+ let x0=0,y0=0,dx=0,on=false,live=false;
+ document.addEventListener('touchstart',e=>{on=false;if(!ch.classList.contains('on')||innerWidth>=1000||e.touches.length>1)return;
+  if(e.target.closest('.chrow,input,textarea,#chf')&&e.target.closest('#chl'))return;if(!e.target.closest('#chl,#veil'))return;
+  x0=e.touches[0].clientX;y0=e.touches[0].clientY;dx=0;on=true;live=false},{passive:true});
+ document.addEventListener('touchmove',e=>{if(!on)return;const t=e.touches[0];dx=t.clientX-x0;const dy=t.clientY-y0;
+  if(!live){if(Math.abs(dy)>Math.abs(dx)||dx>0){if(Math.abs(dy)>8||dx>8)on=false;return}if(dx>-10)return;live=true;ch.classList.add('drag')}
+  e.preventDefault();ch.style.transform='translateX('+Math.min(0,dx)+'px)'},{passive:false});
+ const end=()=>{if(!on)return;on=false;if(!live)return;live=false;ch.classList.remove('drag');ch.style.transform='';if(dx<-80)sheet('chl',false)};
+ document.addEventListener('touchend',end);document.addEventListener('touchcancel',end);
+ // suggestions under Rodger's greeting on a fresh chat
+ const SUG=[['Plan my day','<rect x="4" y="5" width="16" height="15" rx="3.5"/><path d="M8 3.5v3M16 3.5v3M8 11h8M8 15h5"/>','Help me plan my day.'],
+  ['Sort my to-dos','<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.2l2.4 2.4 4.8-5"/>','Help me sort out my to-do list - what should I do first?'],
+  ['Clear my head','<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/>','I\'ve got loads on my mind. Help me get it all out and organised.']];
+ const th=$('thread');
+ const sync=()=>{const want=!!CS&&!GL.guest&&!th.querySelector('.q')&&!!th.querySelector('.a')&&!talking;let g=$('gsug');
+  if(!want){if(g)g.remove();return}if(g&&g===th.lastElementChild)return;if(g)g.remove();
+  g=document.createElement('div');g.id='gsug';g.innerHTML=SUG.map((x,i)=>'<button data-i="'+i+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+x[1]+'</svg>'+x[0]+'</button>').join('');
+  g.querySelectorAll('button').forEach(b=>b.onclick=()=>{buzz(6);const t=SUG[+b.dataset.i][2];g.remove();ask(t)});th.appendChild(g)};
+ new MutationObserver(()=>setTimeout(sync,0)).observe(th,{childList:true});setTimeout(sync,500);
+})();
 render();sync();gFloatInit();
 </script></body></html>
