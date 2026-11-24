@@ -1132,7 +1132,7 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
 function lvWhy(t){if(tab==='gary'){gBubble(t,6000);gMood('shrug',2500)}else toast(t)}
 async function liveStart(again){if(!gUse().live){lvWhy('Voice is switched off, sir - tap the symbols by Momentum to switch it on.');return}if(!gUse().google){lvWhy('I need Google Gemini switched on to talk - tap the symbols by Momentum.');return}let ctx0=null;if(!again){try{ctx0=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});ctx0.resume()}catch(e){}}if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){try{ctx0&&ctx0.close()}catch(e){}lvWhy('You\'ll need to sign in on this device first, sir.');sheet('signin',true);setTimeout(()=>$('siE').focus(),300);return}if(!navigator.onLine){lvWhy('No internet, sir - I can\'t talk out loud without it.');return}
  if(LV.on&&!again)return;if(!again){const sl=GSPK?spLeft():null;LV.carry=sl?{heard:sl[0],rest:sl[1]}:null;LV.streamCut=talking?((($('thread').lastElementChild||{}).textContent||'').replace(/^…/,'').length):null}speakStop();
- LV.ctx=ctx0||new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // created inside the tap, so iPhone allows sound
+ LV.ctx=ctx0||new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();LV.ctx.onstatechange=()=>{const c=LV.ctx;if(LV.on&&LV.ready&&c&&(c.state==='interrupted'||(c.state==='suspended'&&document.hidden)))lvYield('call')};   // created inside the tap, so iPhone allows sound
  lvRStop();LVR.quiet=0;LVR.t=0;$('live').classList.remove('typing');$('lvtype').classList.remove('on');LV.typed=false;LV.nomic=false;LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;LV.spoke=false;LV.uttAt=0;LV.unsaid='';$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open','entering','rack','rackgone');$('live').classList.toggle('curt',Math.random()<0.25);$('lvorb').className=''}lvStatus('Connecting…');
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
  catch(e){lvErr('microphone',{error:String(e&&e.name||e)});LV.stream=null;LV.nomic=true;LV.muted=true;$('lvmute').classList.add('on');$('lvmute').setAttribute('aria-label','Microphone unavailable');setTimeout(()=>{if(LV.on&&LV.nomic){$('live').classList.add('typing');$('lvtype').classList.add('on')}},2600)}
@@ -2023,10 +2023,13 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124162224';let UPD=false;
+const BUILD='20261124163001';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
+// a phone call (or leaving the app) mid voice chat: Gary hangs up at once and lets go of the mic and speaker, so your phone can ring and the call comes through
+function lvYield(why){if(!LV.on)return;lvStop();setTimeout(()=>{if(tab==='gary'){gBubble(why==='call'?'Something cut in - a call, I expect. Tap me when you\'re free, sir.':'We\'ll pick this up when you\'re back, sir.',8000);gMood('nodding',1200)}},400)}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&typeof LV!=='undefined'&&LV.on)setTimeout(()=>{if(document.hidden&&LV.on)lvYield('away')},1200)});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)updCheck()});setInterval(updCheck,300000);setTimeout(updCheck,4000);
 
 addEventListener('resize',()=>{document.body.classList.toggle('plan',wide()&&tab==='today');if(wide()&&tab==='todo')go('today');render()});
