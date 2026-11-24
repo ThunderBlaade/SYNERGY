@@ -1186,7 +1186,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
  for(let y=0;y<32;y++)for(let i=0;i<32;i++){const c=G_BODY[y][i];if(c!=='.')P[y*32+i]=c}
  [[13,18],[12,19],[12,20],[11,21],[11,22],[18,18],[19,19],[19,20],[20,21],[20,22]].forEach(([i,y])=>P[y*32+i]='G');
  for(let y=18;y<24;y++){if(P[y*32+9]==='G')P[y*32+9]='g';if(P[y*32+22]==='B')P[y*32+22]='a';if(y>18&&P[y*32+10]==='K')P[y*32+10]='k';if(y>18&&P[y*32+21]==='K')P[y*32+21]='j'}
- if(P[24*32+10]==='W'&&P[24*32+9]==='W')P[23*32+11]='W';if(P[24*32+21]==='W'&&P[24*32+22]==='W')P[23*32+20]='W';
+ if(P[24*32+10]==='W'&&P[24*32+9]==='W'){P[24*32+11]='W';P[25*32+12]='W'}if(P[24*32+21]==='W'&&P[24*32+22]==='W'){P[24*32+20]='W';P[25*32+19]='W'}
  if(GS.nocoat){for(let y=17;y<26;y++)for(let i=11;i<21;i++){const k=y*32+i;if(P[k]==='B'||P[k]==='s')P[k]='v';else if(P[k]==='G')P[k]='V'}for(const [i,y] of [[11,17],[20,17],[11,18],[20,18],[12,17],[19,17]])if(P[y*32+i])P[y*32+i]='a';if(P[19*32+9]&&!P[18*32+9])P[18*32+9]='h';if(P[19*32+22]&&!P[18*32+22])P[18*32+22]='h';if(P[18*32+10]==='g')P[18*32+10]='a';if(!P[17*32+10])P[17*32+10]='h';if(!P[17*32+21])P[17*32+21]='h';for(const [i,y] of [[14,20],[17,20],[14,19],[17,19]])if(P[y*32+i])P[y*32+i]='W';for(const y of [22,24])P[y*32+15]='Y';P[25*32+15]='B';P[25*32+16]='B';P[25*32+11]='B';P[25*32+20]='B';P[25*32+12]='V';P[25*32+19]='V'}if(P[18*32+10]==='G')P[18*32+10]='g';for(const i of [11,12,19,20])if(P[17*32+i]==='B')P[17*32+i]='s';if(P[18*32+21]==='B')P[18*32+21]='s';
  P[21*32+18]='W';P[21*32+19]='W';P[25*32+16]='G';P[23*32+16]='G';P[30*32+10]='G';P[30*32+18]='G';
  const put=(i,y,c)=>{i=Math.round(i);y=Math.round(y);if(i>=0&&i<32&&y>=0&&y<32)P[y*32+i]=c},del=(i,y)=>{delete P[y*32+i]};
@@ -1691,7 +1691,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124115948';let UPD=false;
+const BUILD='20261124120209';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
