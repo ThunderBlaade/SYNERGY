@@ -330,7 +330,7 @@ body.lvon #askbar{display:none!important}
 
 .gtop{padding-top:calc(70px + var(--safeT))!important;padding-bottom:16px!important}.gtop::after{animation:none!important;background:linear-gradient(90deg,#7ec8ff,#b59cff 30%,#ff9ecf 55%,#ffd59e 78%,#9effd6);background-size:100% 100%}
 .gtop::before{top:calc(52px + var(--safeT))}
-.chg{margin:18px 0 2px}.chi .chs{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--dim);font:400 14px/1.4 var(--serif);margin-top:4px}#chl{height:88dvh}
+.chg{margin:18px 0 2px}.chr mark{background:none;color:var(--fg);font-weight:600;text-decoration:underline;text-underline-offset:3px}.chr .chs{-webkit-line-clamp:3}.chw{display:flex;gap:10px;align-items:flex-start}.chw .chs{flex:1}#thread .hit{outline:1px solid #7B7EEA;outline-offset:6px;transition:outline-color 1.5s}#thread .hit.fade{outline-color:transparent}.sheet.drag{transition:none}.chi .chs{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--dim);font:400 14px/1.4 var(--serif);margin-top:4px}#chl{height:88dvh}
 #p-gary h1{margin-top:22px}
 
 .row.swiping{position:relative;overflow:visible;z-index:2}.swdel{position:absolute;left:100%;top:0;bottom:0;width:100vw;background:#3a1514;color:#e0605a;display:flex;align-items:center;padding-left:18px;font:500 12px var(--sans);letter-spacing:.14em;text-transform:uppercase;transition:background .15s}
@@ -454,6 +454,7 @@ body.kbup #gbar{height:72px}body.kbup #gdock{width:66px;height:66px;margin:0 0 -
  <div class="hint" id="vcnote" style="margin-top:10px"></div></div>
 <div class="sheet" id="chl"><div class="grab"></div>
  <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab">Chat history</div><button class="btn" id="newChat">New chat +</button></div>
+ <input class="big" id="chq" type="search" placeholder="Search everything you've said" autocomplete="off" spellcheck="false" enterkeyhint="search" style="margin-top:14px;font-size:17px">
  <div class="chips" id="chf" style="margin-top:14px"></div>
  <div id="chlist" style="margin-top:14px"></div></div>
 <div class="sheet" id="dump"><div class="grab"></div>
@@ -651,6 +652,15 @@ function renderTodo(){const all=looseItems(),open=all.filter(it=>!looseDone(it))
 
 // ---------- editor sheet
 let E=null;const opens=[];
+// sheets: drag down (from the top, or anywhere once the list is scrolled to the top) to close. Touch events, so the drag can stop the list scrolling.
+(function(){let S=null,y0=0,x0=0,dy=0,ok=false,live=false;
+ document.addEventListener('touchstart',e=>{if(innerWidth>=1000||e.touches.length>1)return;const sh=e.target.closest('.sheet.on');if(!sh||e.target.closest('input,textarea,select,[contenteditable],.row')){S=null;return}
+  const t=e.touches[0];S=sh;y0=t.clientY;x0=t.clientX;dy=0;live=false;ok=sh.scrollTop<=0},{passive:true});
+ document.addEventListener('touchmove',e=>{if(!S)return;const t=e.touches[0];dy=t.clientY-y0;const dx=Math.abs(t.clientX-x0);
+  if(!live){if(!ok||dy<0||dx>Math.abs(dy)){if(Math.abs(dy)>6||dx>6)S=null;return}if(dy<8)return;live=true;S.classList.add('drag')}
+  e.preventDefault();S.style.transform='translateY('+Math.max(0,dy)+'px)'},{passive:false});
+ const end=()=>{if(!S)return;const sh=S;S=null;if(!live)return;live=false;sh.classList.remove('drag');sh.style.transform='';if(dy>110)sheet(sh.id,false)};
+ document.addEventListener('touchend',end);document.addEventListener('touchcancel',end)})();
 function sheet(id,on){$(id).classList.toggle('on',on);$('veil').classList.toggle('on',on||!!document.querySelector('.sheet.on'))}
 $('veil').onclick=()=>{document.querySelectorAll('.sheet.on').forEach(s=>s.classList.remove('on'));$('veil').classList.remove('on')};
 function chips(box,opts,val,cb){$(box).innerHTML=opts.map(([v,l])=>'<button class="chip'+(String(v)===String(val)?' on':'')+'" data-v="'+v+'">'+l+'</button>').join('');
@@ -784,6 +794,13 @@ async function gdb(path,opt={}){const tok=await clTok();if(!tok)throw new Error(
 function showChat(title,msgs){$('thread').innerHTML='';$('ctitle').textContent=title||'New chat';
  if(!msgs||!msgs.length){bubble('gary',CS?GARY_HELLO:'Sign in under You → Settings and I\'m all yours, sir. Same login as Synergy.');return}
  msgs.forEach(m=>bubble(m.role==='user'?'you':'gary',m.content));garyBottom()}
+// open a chat at one message (from search or a folder): a few messages before it, the rest after, and that one highlighted
+async function loadChatAt(id,at){if(!at)return loadChat(id);CHAT=id;store('garyChat',id);try{const e=encodeURIComponent(id);
+  const [[c],pre,post]=await Promise.all([gdb('gary_convos?select=title&id=eq.'+e),gdb('gary_messages?select=id,role,content&convo=eq.'+e+'&id=lt.'+at+'&order=id.desc&limit=6'),gdb('gary_messages?select=id,role,content&convo=eq.'+e+'&id=gte.'+at+'&order=id.asc&limit=40')]);
+  const m=(pre||[]).reverse().concat(post||[]);$('thread').innerHTML='';$('ctitle').textContent=(c&&c.title)||'Chat';let hit=null;
+  m.forEach(x=>{const b=bubble(x.role==='user'?'you':'gary',x.content);if(x.id===at)hit=b});
+  if(hit){hit.classList.add('hit');setTimeout(()=>{const p=$('p-gary');p.scrollTop=Math.max(0,hit.offsetTop-p.clientHeight*0.3)},60);setTimeout(()=>hit.classList.add('fade'),2600)}else garyBottom()}
+ catch(err){loadChat(id)}}
 async function loadChat(id){CHAT=id;store('garyChat',id||'');if(!id||!CS){showChat();return}
  try{const [c]=await gdb('gary_convos?select=title&id=eq.'+encodeURIComponent(id));if(!c){CHAT=null;store('garyChat','');showChat();return}
   const m=((await gdb('gary_messages?select=role,content&convo=eq.'+encodeURIComponent(id)+'&order=id.desc&limit=10'))||[]).reverse();
@@ -791,15 +808,18 @@ async function loadChat(id){CHAT=id;store('garyChat',id||'');if(!id||!CS){showCh
  catch(e){let c=null;try{c=JSON.parse(store('garyCache')||'null')}catch(x){}c&&c.id===id?showChat(c.title,c.m):showChat()}}
 const CHT={plans:'Plans',feelings:'Feelings',people:'People',work:'Work',health:'Health',projects:'Projects',ideas:'Ideas',questions:'Questions',fun:'Fun',voice:'Voice'};
 let CHS=[],CHF='all';
-async function listChats(){sheet('chl',true);if(!CS){$('chf').innerHTML='';$('chlist').innerHTML='<p class="empty">Sign in under You → Settings to keep chats with Gary.</p>';return}
+async function listChats(){sheet('chl',true);$('chq').value='';if(!CS){$('chf').innerHTML='';$('chlist').innerHTML='<p class="empty">Sign in under You → Settings to keep chats with Gary.</p>';return}
  if(!CHS.length)$('chlist').innerHTML='<p class="empty">Loading…</p>';
- try{CHS=await gdb('gary_convos?select=id,title,updated_at,summary,tags,crucial,summed_at,archived&order=updated_at.desc&limit=300')||[];drawChats();
-  if(CHS.some(c=>!c.summed_at||new Date(c.summed_at)<new Date(c.updated_at))&&!listChats.busy){listChats.busy=true;
-   try{for(let k=0;k<8;k++){const r=await garyFetch({mode:'chatsum',text:'sum'});const j=await r.json();if(j.error)break;CHS=await gdb('gary_convos?select=id,title,updated_at,summary,tags,crucial,summed_at,archived&order=updated_at.desc&limit=300')||CHS;if($('chl').classList.contains('on'))drawChats();if(!j.left)break}}catch(e){}listChats.busy=false}}
+ try{CHS=await gdb('gary_convos?select=id,title,updated_at,summary,tags,crucial,summed_at,archived,parts&order=updated_at.desc&limit=300')||[];drawChats();
+  if(CHS.some(c=>!c.archived&&(!c.summed_at||new Date(c.summed_at)<new Date(c.updated_at)||c.parts==null))&&!listChats.busy){listChats.busy=true;
+   try{for(let k=0;k<12;k++){const r=await garyFetch({mode:'chatsum',text:'sum'});const j=await r.json();if(j.error)break;CHS=await gdb('gary_convos?select=id,title,updated_at,summary,tags,crucial,summed_at,archived,parts&order=updated_at.desc&limit=300')||CHS;if($('chl').classList.contains('on'))drawChats();if(!j.left)break}}catch(e){}listChats.busy=false}}
  catch(e){if(!CHS.length)$('chlist').innerHTML='<p class="empty">Can\'t reach your chats right now.</p>'}}
-function drawChats(){const tags={};for(const c of CHS)for(const t of c.tags||[])tags[t]=(tags[t]||0)+1;const imp=CHS.filter(c=>c.crucial).length;
- const F=[['all','All '+CHS.length]].concat(imp?[['crucial','Important '+imp]]:[]).concat(Object.keys(CHT).filter(t=>tags[t]).map(t=>[t,CHT[t]+' '+tags[t]]));if(!F.some(f=>f[0]===CHF))CHF='all';
+const CHFOLD=['People','Places','Experiences','Self','Knowledge','Other'];let CHW=null;
+function chWhen(d){const t=new Date(d);return t.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:t.getFullYear()===new Date().getFullYear()?undefined:'numeric'})+' · '+t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
+function drawChats(){if($('chq').value.trim())return chSearch();const tags={};for(const c of CHS)for(const t of c.tags||[])tags[t]=(tags[t]||0)+1;const imp=CHS.filter(c=>c.crucial).length,np=CHS.reduce((a,c)=>a+((c.parts||[]).length),0);
+ const F=[['all','All '+CHS.length]].concat(imp?[['crucial','Important '+imp]]:[]).concat(np?[['folders','Folders '+np]]:[]).concat([['claude','Claude suggestions']]).concat(Object.keys(CHT).filter(t=>tags[t]).map(t=>[t,CHT[t]+' '+tags[t]]));if(!F.some(f=>f[0]===CHF))CHF='all';
  $('chf').innerHTML=F.map(f=>'<button class="chip'+(f[0]===CHF?' on':'')+'" data-f="'+f[0]+'">'+esc(f[1])+'</button>').join('');$('chf').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{CHF=b.dataset.f;drawChats()});
+ if(CHF==='folders')return chFolders();if(CHF==='claude')return chClaude();
  const L=CHS.filter(c=>CHF==='all'||(CHF==='crucial'?c.crucial:(c.tags||[]).includes(CHF)));const now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
  const grp=c=>{const t=new Date(c.updated_at).getTime();return t>=d0?'Today':t>=d0-6*864e5?'This week':t>=d0-30*864e5?'This month':'Earlier'};let last='',h='';
  for(const c of L){const g=grp(c);if(g!==last){h+='<div class="lab chg">'+g+'</div>';last=g}
@@ -811,6 +831,29 @@ function drawChats(){const tags={};for(const c of CHS)for(const t of c.tags||[])
     try{if(v.trim().toUpperCase()==='DELETE'){await gdb('gary_messages?convo=eq.'+id,{method:'DELETE'});await gdb('gary_convos?id=eq.'+id,{method:'DELETE'});if(c.id===CHAT)loadChat(null)}
     else if(v.trim())await gdb('gary_convos?id=eq.'+id,{method:'PATCH',body:JSON.stringify({title:v.trim().slice(0,120)})})}catch(e){toast('Couldn\'t change that - are you online?')}listChats()},600)});
    b.addEventListener('pointerup',()=>{if(t!==-1)clearTimeout(t)});b.addEventListener('pointerleave',()=>{if(t!==-1)clearTimeout(t)})})}
+// parts of chats, sorted into the same folders as his memories; tap one to jump to where it was said
+function chFolders(){let h='';for(const f of CHFOLD){const P=[];for(const c of CHS)for(const p of c.parts||[])if(p.folder===f)P.push([p,c]);if(!P.length)continue;
+  P.sort((a,b)=>new Date(b[1].updated_at)-new Date(a[1].updated_at));h+='<div class="lab chg">'+f+' · '+P.length+'</div>';
+  for(const [p,c] of P)h+='<button class="ci chi chr" data-id="'+esc(c.id)+'" data-at="'+(p.at||'')+'"><b>'+esc(p.title)+'</b>'+(p.about?'<span class="chs">'+esc(p.about)+'</span>':'')+'<small>'+esc((c.title||'Chat')+' · '+chWhen(c.updated_at))+'</small></button>'}
+ $('chlist').innerHTML=h||'<p class="empty">Gary is still sorting your chats into folders - check back in a minute.</p>';chOpenWire()}
+// Gary's suggestions for Claude: things he wishes he could do or that are broken, newest first, ready to copy and send
+async function chClaude(){$('chlist').innerHTML='<p class="empty">Loading…</p>';try{CHW=await gdb('gary_audit?select=detail,at&action=eq.wish&order=at.desc&limit=60')||[]}catch(e){CHW=CHW||[]}
+ if(CHF!=='claude')return;if(!CHW.length){$('chlist').innerHTML='<p class="empty">No suggestions yet. When Gary notices something he can\'t do, or has an idea for himself, it lands here for you to pass to Claude.</p>';return}
+ $('chlist').innerHTML='<button class="btn ghost" id="chcopy" style="margin-bottom:6px">Copy all for Claude</button>'+CHW.map(w=>'<div class="ci chw"><span class="chs" style="-webkit-line-clamp:unset;color:var(--fg)">'+esc(w.detail&&w.detail.text||'')+'</span><small>'+esc(chWhen(w.at))+'</small></div>').join('');
+ $('chcopy').onclick=async()=>{const t='Suggestions from G.A.R.Y.:\n'+CHW.map(w=>'- ('+String(w.at).slice(0,10)+') '+(w.detail&&w.detail.text||'')).join('\n');try{await navigator.clipboard.writeText(t);$('chcopy').textContent='Copied ✓'}catch(e){prompt('Copy this:',t)}}}
+// search: every message, chat title and summary; newest first; tap to open the chat right where it was said
+let CHQT=null;$('chq').addEventListener('input',()=>{clearTimeout(CHQT);CHQT=setTimeout(()=>$('chq').value.trim()?chSearch():drawChats(),250)});
+$('chq').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('chq').blur()}});
+async function chSearch(){const q=$('chq').value.trim();if(!q)return drawChats();$('chf').innerHTML='';const want=q;
+ const pat=encodeURIComponent('*'+q.replace(/[*,()"\\]/g,' ').trim()+'*');let M=[],C=[];
+ try{[M,C]=await Promise.all([gdb('gary_messages?select=id,convo,role,content,created_at&content=ilike.'+pat+'&order=id.desc&limit=80'),gdb('gary_convos?select=id,title,summary,updated_at&or=(title.ilike.'+pat+',summary.ilike.'+pat+')&order=updated_at.desc&limit=30')])}catch(e){if($('chq').value.trim()===want)$('chlist').innerHTML='<p class="empty">Can\'t search right now - are you online?</p>';return}
+ if($('chq').value.trim()!==want)return;const T={};for(const c of CHS)T[c.id]=c.title;
+ const lc=q.toLowerCase(),snip=t=>{t=String(t||'');const i=t.toLowerCase().indexOf(lc),a=Math.max(0,i-60),s=(a?'…':'')+t.slice(a,i<0?160:i+q.length+100)+(t.length>(i<0?160:i+q.length+100)?'…':'');
+  return esc(s).replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),'ig'),m=>'<mark>'+m+'</mark>')};
+ const R=(M||[]).map(m=>({t:m.created_at,id:m.convo,at:m.id,who:m.role==='user'?'You':'Gary',text:m.content,title:T[m.convo]})).concat((C||[]).map(c=>({t:c.updated_at,id:c.id,at:null,who:'Summary',text:c.summary||c.title,title:c.title})));
+ R.sort((a,b)=>new Date(b.t)-new Date(a.t));
+ $('chlist').innerHTML=R.length?'<div class="lab chg">'+R.length+(R.length>=80?'+':'')+' found · newest first</div>'+R.map(r=>'<button class="ci chi chr" data-id="'+esc(r.id)+'" data-at="'+(r.at||'')+'"><span class="chs" style="color:var(--fg)"><b style="display:inline;font:inherit;font-weight:600">'+r.who+':</b> '+snip(r.text)+'</span><small>'+esc((r.title||'Chat')+' · '+chWhen(r.t))+'</small></button>').join(''):'<p class="empty">Nothing found for "'+esc(q)+'".</p>';chOpenWire()}
+function chOpenWire(){$('chlist').querySelectorAll('.chr').forEach(b=>b.onclick=()=>{sheet('chl',false);const at=+b.dataset.at||0;if(tab!=='gary')go('gary');loadChatAt(b.dataset.id,at)})}
 $('chatsBtn').onclick=listChats;$('newChat').onclick=()=>{loadChat(null);sheet('chl',false);setTimeout(()=>$('ask').focus(),300)};
 // What Gary can see of Momentum right now (no passwords, nothing hidden)
 function garyCtx(){const t=today(),its=Object.values(S.items).filter(i=>!i.deleted&&occurs(i,t));
@@ -1881,7 +1924,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124151134';let UPD=false;
+const BUILD='20261124151846';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}

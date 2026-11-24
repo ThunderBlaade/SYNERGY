@@ -317,26 +317,29 @@ export async function memFind(q, token) {
 // ---------- Chat history: every chat gets a summary and topic tags. Old ordinary chats are condensed to that summary to save space;
 // chats that matter (crucial) keep every word until storage is getting full.
 export const CHAT_TAGS = ["plans", "feelings", "people", "work", "health", "projects", "ideas", "questions", "fun", "voice"];
+const CHAT_FOLDERS = ["People", "Places", "Experiences", "Self", "Knowledge", "Other"];
 export async function chatSum(token, n = 6) {
-  const cs = await db("gary_convos?select=id,title,updated_at,summed_at,archived&archived=is.false&order=updated_at.desc&limit=200", token).catch(() => []);
-  const todo = cs.filter((c) => !c.summed_at || new Date(c.summed_at) < new Date(c.updated_at)).slice(0, n);
+  const cs = await db("gary_convos?select=id,title,updated_at,summed_at,archived,parts&archived=is.false&order=updated_at.desc&limit=200", token).catch(() => []);
+  const due = (c) => !c.summed_at || new Date(c.summed_at) < new Date(c.updated_at) || c.parts == null;   // parts: older chats get sorted into folders too
+  const todo = cs.filter(due).slice(0, n);
   for (const c of todo) {
-    const msgs = await db(`gary_messages?select=role,content,created_at&convo=eq.${encodeURIComponent(c.id)}&order=id.asc&limit=400`, token).catch(() => []);
-    if (!msgs.length) { await db(`gary_convos?id=eq.${encodeURIComponent(c.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ summed_at: new Date().toISOString() }) }).catch(() => {}); continue; }
-    const talk = msgs.map((m) => (m.role === "gary" ? "Gary: " : "Sam: ") + String(m.content).slice(0, 1500)).join("\n").slice(-24000);
+    const msgs = await db(`gary_messages?select=id,role,content,created_at&convo=eq.${encodeURIComponent(c.id)}&order=id.asc&limit=400`, token).catch(() => []);
+    if (!msgs.length) { await db(`gary_convos?id=eq.${encodeURIComponent(c.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ summed_at: new Date().toISOString(), parts: [] }) }).catch(() => {}); continue; }
+    const talk = msgs.map((m) => `[#${m.id}] ` + (m.role === "gary" ? "Gary: " : "Sam: ") + String(m.content).slice(0, 1500)).join("\n").slice(-24000);
     try {
       let out = "";
       for await (const t of gemini("You summarise Sam's chats with Gary, his butler. Reply with JSON only.", [{ role: "user", parts: [{ text:
         `Summarise this chat so it can stand in for the full conversation later. Be detailed enough that nothing important is lost: keep every name, date, place, number, decision, promise, plan, task, feeling, worry, boundary, and anything Gary said he'd do or remember - plus enough context to understand why. Drop greetings, filler and repetition. Plain British English, past tense, about Sam in the third person.\n` +
-        `Return {"title": a short, specific title (max 8 words), "summary": 2-8 sentences (longer only if the chat really needs it), "tags": up to 3 of ${JSON.stringify(CHAT_TAGS)}, "crucial": true only if it holds something Sam would be upset to lose word for word (a personal or emotional moment, an important decision, promise or record)}.\n\nCHAT:\n${talk}` }] }], true)) out += t;
+        `Return {"title": a short, specific title (max 8 words), "summary": 2-8 sentences (longer only if the chat really needs it), "tags": up to 3 of ${JSON.stringify(CHAT_TAGS)}, "crucial": true only if it holds something Sam would be upset to lose word for word (a personal or emotional moment, an important decision, promise or record), "parts": up to 6 parts of the chat worth finding again, each {"folder": one of People, Places, Experiences, Self, Knowledge, Other, "title": a short specific title (max 7 words), "about": one line on what was said, "at": the [#number] of the message where it starts, as a number} - People = someone in his life; Places = somewhere; Experiences = something that happened or is planned; Self = his feelings, health, goals, habits; Knowledge = facts, how-tos, answers, ideas; Other = anything else. Skip small talk; [] if nothing is worth it}.\n\nCHAT:\n${talk}` }] }], true)) out += t;
       const o = JSON.parse((out.match(/\{[\s\S]*\}/) || [out])[0]);
       const patch = { summary: String(o.summary || "").slice(0, 4000), tags: (Array.isArray(o.tags) ? o.tags : []).filter((x) => CHAT_TAGS.includes(x)).slice(0, 3),
-        crucial: o.crucial === true, summed_at: new Date().toISOString() };
+        crucial: o.crucial === true, summed_at: new Date().toISOString(),
+        parts: (Array.isArray(o.parts) ? o.parts : []).map((x) => ({ folder: CHAT_FOLDERS.includes(x?.folder) ? x.folder : "Other", title: String(x?.title || "").slice(0, 80), about: String(x?.about || "").slice(0, 240), at: msgs.some((m) => m.id === +x?.at) ? +x.at : null })).filter((x) => x.title).slice(0, 6) };
       if (o.title && (!c.title || /^(Talk with Gary|A chat G\.A\.R\.Y\. started|New chat)$/i.test(c.title) || c.title.length < 4)) patch.title = String(o.title).slice(0, 120);
       await db(`gary_convos?id=eq.${encodeURIComponent(c.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify(patch) });
     } catch { /* next time */ }
   }
-  return { left: Math.max(0, cs.filter((c) => !c.summed_at || new Date(c.summed_at) < new Date(c.updated_at)).length - todo.length) };
+  return { left: Math.max(0, cs.filter(due).length - todo.length) };
 }
 async function chatArchive(token, pct) {
   const d30 = new Date(Date.now() - 30 * 864e5).toISOString();
