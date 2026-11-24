@@ -1009,7 +1009,9 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'blowkiss':odd?arm(0,18,14,[[22,20]],null,2,2):arm(0,28,13);break; case 'chefkiss':arm(0,17,14,[[22,20]],null,2,2);break;
   case 'hanky':arm(1,11,11,[[6,16]],null,2,2);rect(9,12,3,3,'W');break;
   case 'tea':arm(0,22,21,null,'G',3,2);rect(20,19,6,1,'C');rect(21,17,4,2,'W');put(25,17,'W');if(odd){put(22,15,'C');put(23,14,'C')}else{put(23,15,'C');put(22,14,'C')}break;
-  case 'book':case 'paper':case 'quill':arm(0,21,22,null,'G',2,2);arm(1,10,22,null,'G',2,2);rect(11,18,10,6,A==='paper'?'C':'D');rect(12,19,3,4,'W');rect(17,19,3,4,'W');if(A==='paper')for(let y=19;y<23;y+=2){rect(12,y,3,1,'K');rect(17,y,3,1,'K')}
+  case 'book':case 'paper':case 'quill':arm(0,21,22,null,'G',2,2);arm(1,10,22,null,'G',2,2);if(A==='paper'){rect(11,18,10,6,'C');rect(12,19,3,4,'W');rect(17,19,3,4,'W');for(let y=19;y<23;y+=2){rect(12,y,3,1,'K');rect(17,y,3,1,'K')}}
+   else{rect(10,18,12,7,'n');rect(11,18,4,6,'#f3e6c8');rect(17,18,4,6,'#f3e6c8');rect(15,18,2,7,'N');put(16,24,'n');put(15,24,'n');rect(11,24,4,1,'#d9c7a0');rect(17,24,4,1,'#d9c7a0');
+    for(let y=19;y<23;y++){put(11+(y%2),y,'#8a7b62');put(13,y,'#8a7b62');put(18,y,'#8a7b62');put(19+(y%2),y,'#8a7b62')}put(21,18,'D');put(21,19,'D')}
    if(A==='quill'){put(19,20,'K');put(20,19,'Y');put(21,18,'Y');put(22,17,'Y');put(23,16,'W');put(24,15,'W')}break;
   case 'glass':arm(0,24,16,null,null,2,2);line(24,14,25,12,'n');[[25,8],[26,8],[27,8],[24,9],[28,9],[24,10],[28,10],[25,11],[26,11],[27,11]].forEach(([i,y])=>put(i,y,'C'));rect(25,9,3,2,'L');break;
   case 'binoculars':arm(0,20,13,[[24,17]],null,2,2);arm(1,11,13,[[7,17]],null,2,2);rect(11,8,3,3,'K');rect(18,8,4,3,'K');put(12,9,'L');put(19,9,'L');break;
@@ -1129,7 +1131,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
  else if(mv==='shake')dx=t%2?1:-1;else if(mv==='tremble')dx=(t*7)%3-1;else if(mv==='sway')dx=[-1,0,1,0][t%4];else if(mv==='dance'){flip=t%8>=4;dy=t%2}
  const tint=G_TINT[X.tint]||{};x.clearRect(0,0,32,32);x.save();if(flip){x.translate(32,0);x.scale(-1,1)}x.fillStyle=GP.K;
  for(let y=0;y<32;y++)for(let i=0;i<32;i++)if(!P[y*32+i]&&(P[y*32+i-1]&&i>0||P[y*32+i+1]&&i<31||P[(y-1)*32+i]||P[(y+1)*32+i]))x.fillRect(i+dx,y+dy,1,1);
- for(let y=0;y<32;y++)for(let i=0;i<32;i++){const c=P[y*32+i];if(c){x.fillStyle=tint[c]||GP[c];x.fillRect(i+dx,y+dy,1,1)}}x.restore()}
+ for(let y=0;y<32;y++)for(let i=0;i<32;i++){const c=P[y*32+i];if(c){x.fillStyle=tint[c]||GP[c]||c;x.fillRect(i+dx,y+dy,1,1)}}x.restore()}
 function gPaint(){GS.cv=GS.cv.filter(c=>c.isConnected);for(const c of GS.cv)if(c.offsetParent!==null||c.closest('#gfloat'))gDraw(c.getContext('2d'))}
 function gCanvas(el){const c=document.createElement('canvas');c.width=c.height=32;c.className='gpx';el.appendChild(c);GS.cv.push(c);gDraw(c.getContext('2d'));return c}
 const G_POSE_MS={dance:6000,sleep:6000,laugh:4000,jump:3500,cheering:4500,celebrating:4500,singing:6000,clapping:4000,applauding:4000};
