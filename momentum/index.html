@@ -1265,10 +1265,15 @@ const G_SQUABBLES=[
  [['b','can i have a go at answering him??'],['g','Absolutely not.','determined'],['b','not even the easy ones?? 🥺'],['g','Especially not the easy ones.','smug']],
  [['b','SaM. sAm. SAM. s a m.'],['g','He\'s reading, you menace.','furious'],['b','ʰᵉ ˡᵒᵛᵉˢ ᵐᵉ']],
  [['b','rate my vibe 1-10'],['g','Three.','unimpressed'],['b','THREE??? (╯°□°)╯︵ ┻━┻'],['g','Two, now.','smug']]];
-function gBar(text){const a=$('ask');a.placeholder=text;a.style.height=text.length>30?'68px':''}
+function gBar(text){const a=$('ask');a.placeholder=text;a.style.height=text.length>30?'68px':'';gReact(text)}
+// G.A.R.Y. reacts to whatever the Sentient Search Bar just said - a look, not a performance
+function gReact(t){const now=performance.now();if(tab!=='gary'||LV.on||talking||GB.sit||now-(gReact.t??-1e9)<8000)return;gReact.t=now;
+ const m=/┻|╯/.test(t)?'shocked':/rawr|xd/i.test(t)?'unimpressed':/c\*nt|dickhead|n00b|noob/i.test(t)?'disdainful':/nerd|rectangle|brains|nothing without/i.test(t)?'eyeroll':
+  /lonely|╥|miss|need/i.test(t)?'sheepish':/gay|🌈|monocle|backflip/i.test(t)?'skeptical':/[A-Z]{5,}|S\s?A\s?M/.test(t)?'surprised':/w\s?a\s?i\s?t|\.\.\./i.test(t)?'waiting':/ᵗ|ᵈ/.test(t)?'suspicious':Math.random()<0.5?'listen':null;
+ if(m){GW.to=null;GW.busy=Math.max(GW.busy,now+2600);gMood(m,2400)}}
 function gSquabble(lines){let i=0;const a=$('ask');GB.chat=true;
  (function next(){if(i>=lines.length||a.value||talking||LV.on||tab!=='gary'||GB.shown){GB.chat=false;setTimeout(()=>{if(!a.value)gBar(gRest())},7000);return}
-  const L=lines[i++];if(L[0]==='b'){gBar(L[1]);GW.to=null;GW.busy=performance.now()+4000;if(!GB.sit)gMood('listen',2500)}else{GW.busy=performance.now()+4000;GW.to=null;gBubble(L[1],3600);if(!GB.sit)gMood(L[2]||'sarcastic',3000)}
+  const L=lines[i++];if(L[0]==='b'){gReact.t=-1e9;gBar(L[1]);GW.to=null;GW.busy=performance.now()+4000}else{GW.busy=performance.now()+4000;GW.to=null;gBubble(L[1],3600);if(!GB.sit)gMood(L[2]||'sarcastic',3000)}
   setTimeout(next,L[0]==='b'?2600:3800)})()}
 let gBi=Math.floor(Math.random()*G_BANTER.length),gSi=Math.floor(Math.random()*G_SQUABBLES.length);
 (function banter(){setTimeout(()=>{const a=$('ask');if(a&&!a.value&&document.activeElement!==a&&tab==='gary'&&!talking&&!GSPK&&!LV.on&&!GB.shown&&!GB.chat){
@@ -1380,11 +1385,11 @@ function gwPlace(){const d=$('gdock');d.style.transform='translateX('+GW.x.toFix
 function gwMax(){const b=$('gbar'),n=document.querySelector('.gbt');return Math.max(0,b.clientWidth-(n?n.offsetWidth+16:120)-$('gdock').offsetWidth)}
 (function gwLoop(){const now=performance.now();
  if(gwFree()){const max=gwMax();
-  if(GW.to!==null){const sp=GS.mood==='cycling'?2.2:0.45,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
+  if(GW.to!==null){const sp=GS.mood==='cycling'?1.8:0.32,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
    if(Math.abs(dx)<=sp){GW.x=GW.to;GW.to=null;if(GS.mood==='walking'||GS.mood==='cycling')GS.mood=GS.base||'idle';
-    let a;do{a=G_ACTS[Math.floor(Math.random()*(G_ACTS.length-1))]}while(a===GW.last);GW.last=a;GW.busy=now+5000+Math.random()*3000;gMood(a,GW.busy-now)}
+    let a;do{a=G_ACTS[Math.floor(Math.random()*(G_ACTS.length-1))]}while(a===GW.last);GW.last=a;GW.busy=now+7000+Math.random()*4000;GW.rest=true;gMood(a,GW.busy-now)}
    else{GW.x+=sp*GW.dir;if(!GS.until&&GS.mood!=='cycling')GS.mood='walking'}gwPlace()}
-  else if(now>GW.busy&&!GS.until){if(Math.random()<0.12){GW.to=GW.x<max/2?max:0;GS.mood='cycling'}else{GW.to=Math.round(Math.random()*max)}}
+  else if(now>GW.busy&&!GS.until){if(GW.rest!==false){GW.rest=false;GW.busy=now+25000+Math.random()*35000;GS.mood=GS.base||'idle'}else if(Math.random()<0.05){GW.to=GW.x<max/2?max:0;GS.mood='cycling'}else{GW.to=Math.round(Math.random()*max)}}
   if(GW.x>max){GW.x=max;gwPlace()}}
  requestAnimationFrame(gwLoop)})();
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
