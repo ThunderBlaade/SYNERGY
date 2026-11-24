@@ -840,7 +840,7 @@ $('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini'
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
-const G_BODY=['................................','................................','............SSSSSSSS............','..........SSSSSSSSSSHH..........','.........SSSSSSSSSSSSHH.........','.........SSSSSSSSSSSSSH.........','........SSSSSSSSSSSSSSHH........','........SSSSSSSSSSSSSSSH........','........MMSSSSSSSSSSSSMM........','.......SMMSSSSSSSSSSSSMMH.......','.......SMMSSSSSSSSSSSSMMH.......','........SSSSSSSSSSSSSSSH........','........SSSSSSSSSSSSSSSH........','.........SSSSSSSSSSSSHH.........','..........SSSSSSSSSSHH..........','...........SSSSSSSSHH...........','.............HHHHHH.............','........GBBBBBWWWWBBBBBB........','.......GBBBBBBWWWWBBBBBBB.......','.......GBBBBBBWWWWBBBBBBB.......','.......GBBBBBBBWWBBBBBBBB.......','.......GBBBBBBBWWBBBBBBBB.......','.......GBBBBBBBBBBBBBBBBB.......','.......GBBBBBBBBBBBBBBBBB.......','....WWWGBBBBBBBBBBBBBBBBBWWW....','....WWWGBBBBBBBBBBBBBBBBBWWW....','.......GBBBBBBBBBBBBBBBBB.......','.......GBBBBBBBBBBBBBBBBB.......','..........BBBBB..BBBBB..........','..........BBBBB..BBBBB..........','.........BBBBBB..BBBBBB.........','................................'];
+const G_BODY=['................................','................................','............SSSSSSSS............','..........SSSSSSSSSSHH..........','.........SSSSSSSSSSSSHH.........','.........SSSSSSSSSSSSSH.........','........SSSSSSSSSSSSSSHH........','........SSSSSSSSSSSSSSSH........','........MMSSSSSSSSSSSSMM........','.......SMMSSSSSSSSSSSSMMH.......','.......SMMSSSSSSSSSSSSMMH.......','........SSSSSSSSSSSSSSSH........','........SSSSSSSSSSSSSSSH........','.........SSSSSSSSSSSSHH.........','..........SSSSSSSSSSHH..........','...........SSSSSSSSHH...........','.............HHHHHH.............','.......GBBBBBBWWWWBBBBBBB.......','......GBBKBBBBWWWWBBBBKBBB......','......GBBKBBBBWWWWBBBBKBBB......','......GBBKBBBBBWWBBBBBKBBB......','......GBBKBBBBBWWBBBBBKBBB......','......GBBKBBBBBBBBBBBBKBBB......','......GBBKBBBBBBBBBBBBKBBB......','......WWW.BBBBBBBBBBBB.WWW......','......WWW.BBBBBBBBBBBB.WWW......','..........BBBBBBBBBBBB..........','..........BBBBBBBBBBBB..........','..........BBBBB..BBBBB..........','..........BBBBB..BBBBB..........','.........BBBBBB..BBBBBB.........','................................'];
 // name: eyes brows mouth arms fx motion tint posture
 const G_EX={};`idle open n smile rest - bob
 happy u n grin upR blush bob
@@ -872,12 +872,12 @@ terrified wide high shout upBoth sweat2 tremble pale
 surprised wide high gasp rest exclaim+shock still
 shocked wide high open upBoth exclaim+shock jump
 skeptical squint quirk smirk cross - still
-suspicious look angry flat chin - still
+suspicious look angry flat chin dots still
 disdainful line up frown cross - still
 smug tired up smirk cross - still
 proud u up grin hips sparkle still
 determined angry angry grit fist - still
-bored line n flat rest - still
+bored line n flat rest puff still
 yawning closed up yawn mouthcover - still
 sleepy line worried small rest zzz sway
 sick tired worried wavy belly sweat tremble green
@@ -897,15 +897,15 @@ cheering u high open upBoth confetti+blush jump
 celebrating happy up grin trophy confetti jump
 victorious closed up grin trophy sparkle still
 tea closed n smile tea - still
-sipping closed up small tea - still
+sipping closed up small sip - still
 reading down n flat book - still
 detective squint angry flat glass - still
 idea up high open pointUp bulb bounce
 eureka wide high grin upBoth bulb jump
 pointing open n smile point - still
 explaining open up talk point - still
-nodding closed n smile rest - nod
-headshake closed n flat rest - shake
+nodding closed n smile rest yes nod
+headshake closed n flat rest no shake
 sigh line worried o rest puff still
 exasperated closed angry frown facepalm vein still
 eyeroll up n flat cross - still
@@ -925,7 +925,7 @@ texting down n small phone - still
 phonecall look up talk phoneEar - still
 watch down n flat watch - still
 impatient tired angry flat watch vein nod
-waiting right n flat behind - sway
+waiting right n flat behind dots sway
 umbrella open worried flat umbrella rain still
 shivering closed worried grit cross snow tremble blue
 hot tired worried open wave sweat still flush
@@ -977,10 +977,10 @@ function gState(){const now=performance.now();if(GS.until&&now>GS.until){GS.mood
 function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.tick,P=[];
  for(let y=0;y<32;y++)for(let i=0;i<32;i++){const c=G_BODY[y][i];if(c!=='.')P[y*32+i]=c}
  [[13,18],[12,19],[12,20],[11,21],[11,22],[18,18],[19,19],[19,20],[20,21],[20,22]].forEach(([i,y])=>P[y*32+i]='G');
- P[20*32+21]='W';P[20*32+22]='W';P[21*32+22]='W';P[25*32+16]='G';P[23*32+16]='G';P[30*32+10]='G';P[30*32+18]='G';
+ P[21*32+18]='W';P[21*32+19]='W';P[25*32+16]='G';P[23*32+16]='G';P[30*32+10]='G';P[30*32+18]='G';
  const put=(i,y,c)=>{i=Math.round(i);y=Math.round(y);if(i>=0&&i<32&&y>=0&&y<32)P[y*32+i]=c},del=(i,y)=>{delete P[y*32+i]};
  const rect=(x0,y0,w,h,c)=>{for(let y=y0;y<y0+h;y++)for(let i=x0;i<x0+w;i++)put(i,y,c)};
- const clr=s=>{for(let y=24;y<26;y++)for(let i=s?4:25;i<(s?7:28);i++)del(i,y)};
+ const clr=s=>{for(let y=18;y<26;y++)for(let i=s?6:22;i<(s?10:26);i++)del(i,y)};
  const line=(a,b,c,d,col)=>{const n=Math.max(Math.abs(c-a),Math.abs(d-b))||1;for(let k=0;k<=n;k++){const px=a+(c-a)*k/n,py=b+(d-b)*k/n;put(px,py,col);put(px,py+1,col)}};
  // an arm from the shoulder (via optional elbow) to a glove; L = left side of the picture
  const arm=(L,gx,gy,via,col,gw,gh)=>{clr(L);const sx=L?7:24,sy=19;col=col||'B';let px=sx,py=sy;for(const [vx,vy] of via||[]){line(px,py,vx,vy,col);px=vx;py=vy}line(px,py,gx,gy,col);gw=gw||3;gh=gh||3;rect(Math.round(gx-(gw-1)/2),Math.round(gy-(gh-1)/2),gw,gh,'W')};
@@ -1010,22 +1010,22 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'hanky':arm(1,11,11,[[6,16]],null,2,2);rect(9,12,3,3,'W');break;
   case 'tea':arm(0,22,21,null,'G',3,2);rect(20,19,6,1,'C');rect(21,17,4,2,'W');put(25,17,'W');if(odd){put(22,15,'C');put(23,14,'C')}else{put(23,15,'C');put(22,14,'C')}break;
   case 'book':case 'paper':case 'quill':arm(0,21,22,null,'G',2,2);arm(1,10,22,null,'G',2,2);if(A==='paper'){rect(11,18,10,6,'C');rect(12,19,3,4,'W');rect(17,19,3,4,'W');for(let y=19;y<23;y+=2){rect(12,y,3,1,'K');rect(17,y,3,1,'K')}}
-   else{rect(10,18,12,7,'n');rect(11,18,4,6,'#f3e6c8');rect(17,18,4,6,'#f3e6c8');rect(15,18,2,7,'N');put(16,24,'n');put(15,24,'n');rect(11,24,4,1,'#d9c7a0');rect(17,24,4,1,'#d9c7a0');
-    for(let y=19;y<23;y++){put(11+(y%2),y,'#8a7b62');put(13,y,'#8a7b62');put(18,y,'#8a7b62');put(19+(y%2),y,'#8a7b62')}put(21,18,'D');put(21,19,'D')}
+   else{rect(10,18,12,7,'N');rect(10,18,12,1,'n');rect(10,24,12,1,'n');rect(15,18,2,7,'n')}
    if(A==='quill'){put(19,20,'K');put(20,19,'Y');put(21,18,'Y');put(22,17,'Y');put(23,16,'W');put(24,15,'W')}break;
   case 'glass':arm(0,24,16,null,null,2,2);line(24,14,25,12,'n');[[25,8],[26,8],[27,8],[24,9],[28,9],[24,10],[28,10],[25,11],[26,11],[27,11]].forEach(([i,y])=>put(i,y,'C'));rect(25,9,3,2,'L');break;
   case 'binoculars':arm(0,20,13,[[24,17]],null,2,2);arm(1,11,13,[[7,17]],null,2,2);rect(11,8,3,3,'K');rect(18,8,4,3,'K');put(12,9,'L');put(19,9,'L');break;
   case 'flower':arm(0,23,20,null,null,2,2);line(23,14,23,18,'V');rect(22,11,3,3,'P');put(23,12,'Y');break;
   case 'trophy':arm(0,20,21,null,'G',2,2);arm(1,11,21,null,'G',2,2);rect(13,15,6,4,'Y');put(12,16,'Y');put(19,16,'Y');rect(15,19,2,2,'Y');rect(14,21,4,1,'n');break;
   case 'umbrella':arm(0,25,18,null,null,2,2);line(25,4,25,16,'K');rect(18,2,14,2,'D');rect(20,1,10,1,'D');for(let i=18;i<32;i+=3)put(i,4,'D');break;
-  case 'watch':arm(1,10,20,[[6,23]],null,3,2);put(12,20,'Y');put(12,21,'Y');break;
+  case 'watch':arm(1,12,21,[[7,23]],null,3,2);rect(14,20,3,3,'Y');put(15,21,'K');put(15,20,'K');break;
   case 'mic':arm(0,19,17,[[23,21]],null,2,2);rect(18,14,2,2,'K');put(18,16,'G');break;
   case 'balloon':arm(0,26,21,null,null,2,2);line(26,8,27,19,'C');rect(25,2,4,5,'D');put(24,3,'D');put(29,3,'D');put(24,4,'D');put(29,4,'D');put(26,3,'W');break;
   case 'cake':arm(0,21,22,null,'G',2,2);arm(1,10,22,null,'G',2,2);rect(11,18,10,1,'P');rect(11,19,10,4,'W');rect(11,21,10,1,'P');put(15,16,'Y');put(15,17,'Y');put(15,15,odd?'F':'Y');break;
-  case 'phone':arm(0,20,22,null,'G',2,2);rect(18,18,3,4,'K');rect(19,19,1,2,'L');break;
+  case 'phone':arm(0,20,23,null,'G',2,2);rect(16,17,5,6,'K');rect(17,18,3,4,'L');put(18,22,'C');break;
+  case 'sip':arm(0,19,17,[[23,21]],null,2,2);rect(15,13,4,3,'W');put(19,14,'W');put(19,13,'W');rect(14,16,6,1,'C');if(odd){put(16,11,'C');put(17,10,'C')}else{put(17,11,'C');put(16,10,'C')}break;
   case 'phoneEar':arm(0,24,12,[[27,18]],null,2,2);rect(23,8,2,5,'K');break;
   case 'cup':arm(1,6,10,[[4,16]],null,2,3);put(8,9,'W');break;
-  case 'walk':{const st=Math.floor((GW.step||0)/7)%2===0;clr(0);clr(1);rect(st?26:24,23,3,2,'W');rect(st?4:6,23,3,2,'W');if(st){del(10,30);del(11,30);put(10,29,'K')}else{del(20,30);del(21,30);put(21,29,'K')}break}
+  case 'walk':{const st=Math.floor((GW.step||0)/7)%2===0;const L0=st?6:23,L1=st?23:6;rect(L0,23,3,1,'W');rect(L0,25,3,1,'B');rect(L1,25,3,1,'W');rect(L1,26,3,1,'W');if(st){del(10,30);del(11,30);put(10,29,'K')}else{del(20,30);del(21,30);put(21,29,'K')}break}
   case 'bike':{for(let y=28;y<31;y++)for(let i=8;i<24;i++)del(i,y);arm(0,24,21,null,'G',2,2);arm(1,21,22,[[11,22]],'G',2,2);
    const c=(cx)=>{for(let a=0;a<16;a++)put(cx+Math.round(Math.cos(a/16*6.283)*3.4),28+Math.round(Math.sin(a/16*6.283)*3.4),'C');put(cx,28,'K');const sa=(GW.step||t*3)/3.4;put(cx+Math.round(Math.cos(sa)*2),28+Math.round(Math.sin(sa)*2),'W');put(cx-Math.round(Math.cos(sa)*2),28-Math.round(Math.sin(sa)*2),'W')};
    line(7,27,16,26,'D');line(16,26,24,27,'D');line(16,26,15,24,'D');line(24,27,24,22,'K');rect(23,21,3,1,'K');c(7);c(24);
@@ -1116,6 +1116,8 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'twinkle':for(let j=0;j<4;j++)if((t+j)%3)put([3,27,6,29][j],[2,1,5,6][j],'Y');break;
   case 'bird':{const bx=(t*2)%34-2;Le([[bx,3,'K'],[bx+1,2+(odd?0:1),'K'],[bx-1,2+(odd?0:1),'K']]);break}
   case 'drool':put(17,15,'Q');put(17,16+(t%2),'Q');break;
+  case 'yes':Le([[24,3,'V'],[25,4,'V'],[26,5,'V'],[27,4,'V'],[28,3,'V'],[29,2,'V'],[30,1,'V']]);break;
+  case 'no':Le([[25,1,'D'],[29,1,'D'],[26,2,'D'],[28,2,'D'],[27,3,'D'],[26,4,'D'],[28,4,'D'],[25,5,'D'],[29,5,'D']]);break;
   case 'whoosh':for(let j=0;j<4;j++)put((t*3+j*2)%4,18+j*2,'C'),put((t*3+j*2)%4+1,18+j*2,'C');break;
   case 'gloom':for(let i=10;i<22;i+=2)for(let y=3;y<6;y++)if(P[y*32+i])put(i,y,'Q');Le([[25,1,'Q'],[25,2,'Q'],[25,3,'Q'],[27,0,'Q'],[27,1,'Q'],[27,2,'Q'],[29,1,'Q'],[29,2,'Q'],[29,3,'Q']]);break;
   case 'shock':Le([[5,4,'C'],[4,3,'C'],[26,4,'C'],[27,3,'C'],[16,0,'C'],[16,1,'C'],[8,1,'C'],[24,1,'C']]);break;
