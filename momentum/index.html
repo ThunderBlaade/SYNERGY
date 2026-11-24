@@ -576,7 +576,7 @@ header{background:linear-gradient(#000 62%,rgba(0,0,0,0));padding-bottom:14px!im
 /* chat page: top row higher; Rodger's box fades in at the top; nothing shows through under the search bar or behind the bottom bar */
 .gtop{padding-top:calc(46px + var(--safeT))!important;padding-bottom:12px!important}
 @media (max-width:999px){
- #askbar{background:linear-gradient(rgba(0,0,0,0),#000 34px)!important;padding-top:24px!important}
+ #askbar{background:linear-gradient(rgba(0,0,0,0) 22px,#000 40px)!important;padding-top:24px!important}
  #askbar::before{display:none!important}
  #askbar::after{content:"";position:absolute;left:-40px;right:-40px;top:100%;height:calc(90px + var(--safeB));background:#000;pointer-events:none}
  nav::before{content:"";position:absolute;left:-14px;right:-14px;top:-22px;bottom:calc(-12px - var(--safeB));background:linear-gradient(rgba(0,0,0,0),#000 22px);z-index:-1;pointer-events:none}
@@ -584,7 +584,7 @@ header{background:linear-gradient(#000 62%,rgba(0,0,0,0));padding-bottom:14px!im
 /* keyboard up: Rodger only shrinks a little */
 body.kbup #gbar{height:104px!important}body.kbup #gdock{width:100px!important;height:100px!important;margin:0 0 -6px -8px!important}body.kbup #gsay{bottom:106px!important}
 .gtop{background:#000!important;box-shadow:0 10px 14px 4px #000!important}
-@media (max-width:999px){#p-gary{padding-bottom:calc(var(--askH,190px) + 64px + var(--safeB))!important}}
+@media (max-width:999px){#p-gary{padding-bottom:calc(var(--askH,190px) + 44px + var(--safeB))!important}}
 #thread .a{font-size:17.5px!important;line-height:1.45!important}#thread .q{font-size:15px!important;line-height:1.45!important}
 /* search bar and send button stay one size: a circle and a fixed box */
 #ask{height:46px!important;min-height:46px!important;max-height:46px!important;line-height:22px}
@@ -1547,7 +1547,7 @@ setInterval(()=>{if(!document.body.classList.contains('kbup')&&!kbFit.was)return
  if(document.activeElement!==t||tab!=='gary'){kbWd.n=(kbWd.n||0)+1;if(kbWd.n>=2){kbWd.n=0;kbFit.pre=false;kbSlide(null);kbFit.was=false}return}kbWd.n=0;
  if(v&&FULLH-v.height<=120&&Date.now()-(kbFit.t0||0)>1200){kbFit.pre=false;kbSlide(null);kbFit.was=false}},400);function kbWd(){}
 // slide the bar (with transform, so it glides with the keyboard) so its bottom sits at y; null = back home
-function kbPad(){const a=$('askbar'),p=$('p-gary');if(!document.body.classList.contains('kbup')){p.style.removeProperty('padding-bottom');return}p.style.setProperty('padding-bottom',Math.max(40,Math.round(p.getBoundingClientRect().bottom-a.getBoundingClientRect().top-16))+'px','important');garyBottom()}
+function kbPad(){const a=$('askbar'),p=$('p-gary');if(!document.body.classList.contains('kbup')){p.style.removeProperty('padding-bottom');return}p.style.setProperty('padding-bottom',Math.max(40,Math.round(p.getBoundingClientRect().bottom-a.getBoundingClientRect().top-22))+'px','important');garyBottom()}
 function kbSlide(y){const a=$('askbar');clearTimeout(kbSlide.t);kbSlide.t=setTimeout(kbPad,320);if(y==null){a.style.transform='';document.body.classList.remove('kbup');document.documentElement.style.setProperty('--kb','0px');setTimeout(garyBottom,300);return}
  document.body.classList.add('kbup');const home=a.offsetTop+a.offsetHeight,dy=Math.round(y-home);a.style.transform='translateY('+dy+'px)';document.documentElement.style.setProperty('--kb',Math.max(0,-dy)+'px')}
 {const vv=VV();if(vv){vv.addEventListener('resize',kbFit);vv.addEventListener('scroll',kbFit);vv.addEventListener('resize',()=>{lvKb();setTimeout(lvKb,300)})}}
@@ -2408,7 +2408,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124225543';let UPD=false;
+const BUILD='20261124225917';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
