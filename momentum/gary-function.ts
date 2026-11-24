@@ -357,9 +357,53 @@ async function chatArchive(token, pct) {
   return n;
 }
 
+
+// ---------- How Sam likes to be talked to: a guide G.A.R.Y. keeps learning from how Sam talks and reacts.
+// It lives as a memory file (Self › "How Sam likes to be talked to") so Sam can read or correct it; every reply follows it.
+const STYLE_TITLE = "How Sam likes to be talked to";
+async function styleFile(token) {
+  const [f] = await db(`gary_memories?select=id,text,history,updated_at&deleted=is.false&folder=eq.self&title=eq.${encodeURIComponent(STYLE_TITLE)}&limit=1`, token).catch(() => []);
+  return f || null;
+}
+export async function styleLearn(token, force = false) {
+  const f = await styleFile(token);
+  const since = f ? `&created_at=gt.${encodeURIComponent(f.updated_at)}` : "";
+  const fresh = await db(`gary_messages?select=id&role=eq.user${since}&limit=25`, token).catch(() => []);
+  if (!force && fresh.length < (f ? 20 : 8)) return { learned: false, waiting: fresh.length };
+  const msgs = (await db("gary_messages?select=role,content,created_at&order=id.desc&limit=140", token).catch(() => [])).reverse();
+  if (msgs.filter((m) => m.role === "user").length < 5) return { learned: false };
+  const talk = msgs.map((m) => `[${String(m.created_at).slice(5, 16).replace("T", " ")}] ${m.role === "gary" ? "Gary" : "Sam"} (${String(m.content).length} chars): ${String(m.content).slice(0, 600)}`).join("\n").slice(-30000);
+  let out = "";
+  for await (const t of gemini("You study how Sam talks and reacts so his butler G.A.R.Y. can talk to him better. Reply with JSON only.", [{ role: "user", parts: [{ text:
+    `Current guide (may be empty):\n${f?.text || "(none yet)"}\n\nRecent conversation (oldest first):\n${talk}\n\n` +
+    `Weigh the evidence: how long Sam's own messages are; his register, slang, swearing, emoji and punctuation; when he asks for shorter, longer or more detail; ` +
+    `when he cuts Gary off (a reply ending "(Didn't get to say: ...)" means Gary talked too long out loud); what he engages with (follow-up questions, laughing - lol, haha, 😂) ` +
+    `versus what falls flat (one-word answers, changing the subject, ignoring Gary's question); time-of-day patterns; how voice differs from typing.\n` +
+    `Keep what is still true in the current guide and change only what the evidence shows - evolve gradually, never swing on a single message. Be concrete and practical.\n` +
+    `Return {"guide": 6-10 short lines each starting "- " (typical reply length when typed and when talking out loud, tone and humour, words or register to mirror, what to avoid, what lands well), "changed": true or false, "what": one short line on what changed and why}.` }] }], true)) out += t;
+  const o = JSON.parse((out.match(/\{[\s\S]*\}/) || [out])[0]);
+  const guide = String(o.guide || "").trim().slice(0, 1500);
+  const now = new Date().toISOString();
+  if (!guide) return { learned: false };
+  if (!f) {
+    await db("gary_memories", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ id: "style" + Date.now().toString(36), folder: "self", title: STYLE_TITLE,
+      summary: "What G.A.R.Y. has learned about talking with you - tone, length, humour.", text: guide, meaning: "So Gary matches his tone and reply length to how Sam actually talks and reacts.",
+      keys: "tone, reply length, humour, style, how to talk", kind: "preference", importance: 5, source: "gary", basis: "inferred", sensitive: false, history: [], links: [] }) });
+  } else if (o.changed && guide !== f.text) {
+    const hist = (Array.isArray(f.history) ? f.history : []).slice(-15); hist.push({ was: f.text, until: now.slice(0, 10), why: String(o.what || "learned from recent chats").slice(0, 200) });
+    await db(`gary_memories?id=eq.${encodeURIComponent(f.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ text: guide, history: hist, updated_at: now }) });
+  } else {
+    await db(`gary_memories?id=eq.${encodeURIComponent(f.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ updated_at: now }) });
+  }
+  await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "style_learned", detail: { changed: !f || !!o.changed, what: String(o.what || "").slice(0, 200) } }) }).catch(() => {});
+  return { learned: true, changed: !f || !!o.changed };
+}
+const styleBlock = (st) => st ? `\n\nHow Sam likes you to talk to him (you learned this from how he talks and reacts - follow it; on length, tone and humour it overrides your general defaults, and keep noticing what works):\n${st}` : "";
+
 // --- memories: who he is always (Self), plus the files that relate to what's being said, and the files those connect to
 async function recall(text, token) {
-  const profile = await db("gary_memories?select=title,summary,text&deleted=is.false&or=(folder.eq.self,kind.in.(profile,preference))&order=importance.desc,updated_at.desc&limit=14", token).catch(() => []);
+  const [profileAll, sf] = await Promise.all([db("gary_memories?select=title,summary,text&deleted=is.false&or=(folder.eq.self,kind.in.(profile,preference))&order=importance.desc,updated_at.desc&limit=15", token).catch(() => []), styleFile(token)]);
+  const profile = profileAll.filter((m) => m.title !== STYLE_TITLE).slice(0, 14);
   const words = memWords(text).slice(0, 14);
   let hits = [];
   if (words.length) {
@@ -375,7 +419,7 @@ async function recall(text, token) {
   for (const m of [...hits, ...linked, ...recent]) if (!seen.has(m.id)) { seen.add(m.id); all.push(m); }
   const line = (m) => `- ${m.title ? m.title + " (" + (m.folder || "other") + ")" : ""}${m.summary ? " - " + m.summary : ""}: ${m.happened ? m.happened.slice(0, 7) + ": " : ""}${(m.text || "").slice(0, 600)}${m.meaning ? " Why it matters: " + m.meaning : ""}${m.basis === "inferred" ? " (his guess, unconfirmed)" : ""}`;
   return { profile: profile.map((m) => "- " + (m.title && m.summary ? m.title + ": " + m.summary + " " : "") + (m.text || "").slice(0, 500)).join("\n"),
-           moments: all.map(line).join("\n") };
+           moments: all.filter((m) => m.title !== STYLE_TITLE).map(line).join("\n"), style: sf?.text || "" };
 }
 
 function contextLine(ctx) {
@@ -745,7 +789,8 @@ export async function handle(req) {
     const sys = guest ? IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + LIVE_STYLE + GUEST.replace(/- Log every reply[\s\S]*$/, "- Use the guest_note tool once you know who they are, and whenever they ask about Sam's private things.") :
       IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
       `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
-      await pcState(token) + await guestReport(token) + LIVE_STYLE;
+      await pcState(token) + await guestReport(token) + LIVE_STYLE + styleBlock(mem.style);
+    if (!guest) { try { globalThis.EdgeRuntime?.waitUntil?.(styleLearn(token).catch(() => {})); } catch { /* fine */ } }
     const models = LIVE_MODELS.slice(Math.max(0, Math.min(LIVE_MODELS.length - 1, +body.try || 0)));
     for (const model of models) {
       const setup = { model: "models/" + model,
@@ -780,7 +825,7 @@ export async function handle(req) {
       cv ? db(`gary_messages?select=role,content&convo=eq.${cv}&order=id.desc&limit=8`, token).catch(() => []) : []]);
     const sys = IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
       `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
-      (recent.length ? `\n\nThe conversation so far (newest last):\n${recent.reverse().map((m) => (m.role === "gary" ? "You: " : "Sam: ") + m.content.slice(0, 300)).join("\n")}` : "") +
+      styleBlock(mem.style) + (recent.length ? `\n\nThe conversation so far (newest last):\n${recent.reverse().map((m) => (m.role === "gary" ? "You: " : "Sam: ") + m.content.slice(0, 300)).join("\n")}` : "") +
       `\n\nRead the mood first. If he seems busy, low, upset or focused, or the moment just isn't right, reply with exactly SKIP.` +
       `\n\nSam has had your page open for a while without saying anything - you're a little bored and sitting in your chair. Start a conversation:
 ONE short opener (under 30 words). Pick something real - a thing you've been curious about, something on his plan or in his life you know about,
@@ -870,9 +915,9 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
     `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) +
     `\n\nHis plan in Momentum:\n${plan}` +
     `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` +
-    (mem.moments ? `\n\nMemories that may relate to this (dated where known; only use if relevant):\n${mem.moments}` : "") +
+    (mem.moments ? `\n\nMemories that may relate to this (dated where known; only use if relevant):\n${mem.moments}` : "") + styleBlock(mem.style) +
     TOOLS + (USE.pc === false ? "\n\nSam has switched off your access to his PC in the app - you can't do anything on it right now; if asked, say so and that he can switch it back on by tapping the PC symbol next to Momentum." : await pcState(token)) + await selfCheck(token) + await health(token) + await guestReport(token);
-  const chores = tidy(token).catch(() => {});
+  const chores = tidy(token).catch(() => {}).then(() => styleLearn(token)).catch(() => {});
   try { globalThis.EdgeRuntime?.waitUntil?.(chores); } catch { /* runs alongside anyway */ }
 
   await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "user", content: text, ctx: body.ctx || null }) });
