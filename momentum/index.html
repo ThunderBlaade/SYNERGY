@@ -940,7 +940,7 @@ async function lvTool(fc){const a=fc.args||{};let res={result:'done'};
    await gdb('gary_memories',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(m)});lvLine('act','Remembered: '+m.text);garyFetch({mode:'curate',text:'curate',ids:[m.id]}).catch(()=>{})}
   else if(fc.name==='guest_note'){await gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action:'guest',detail:{name:a.name||null,personal:a.personal===true,note:String(a.note||'').slice(0,400),voice:true}})})}
   else if(fc.name==='note_for_claude'&&a.text){await gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action:'wish',detail:{text:String(a.text).slice(0,600)}})});lvLine('act','Noted for Claude')}
-  else if(fc.name==='strike_pose'&&a.name){gPose(String(a.name));GS.until=performance.now()+(G_POSE_MS[a.name]||3500)}
+  else if(fc.name==='strike_pose'&&a.name){const now=performance.now(),n=String(a.name).toLowerCase(),asked=/pose|dance|bow|show|do a|do the/i.test(LV.inT||'');if(G_EX[n]&&LV.ready&&!$('lvorb').className&&now>(LV.poseEnd||0)&&(asked||now-(LV.poseAt??-1e9)>45000)){LV.poseAt=now;LV.poseEnd=now+(G_POSE_MS[n]||3500)+2500;gPose(n);GS.until=now+(G_POSE_MS[n]||3500)}}
   else res={error:'not available'}}catch(e){res={error:'failed'}}
  if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({toolResponse:{functionResponses:[{id:fc.id,name:fc.name,response:res}]}}))}
 async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.text():new Response(d).text());let m;try{m=JSON.parse(d)}catch(e){return}
@@ -1306,7 +1306,7 @@ function gProp(x,pat,sx,sy){for(let y=0;y<pat.length;y++)for(let i=0;i<pat[y].le
 let GOFF=null;
 function gScene(x,amb){const name=gState(),X=G_EX[name]||G_EX.idle,mini=amb&&$('live').classList.contains('mini');
  let pr=G_PROPS[name]||null,chair=X.post==='sit'?0:X.post==='pull'?Math.max(0,Math.round(28*(1-Math.min(1,(performance.now()-(GS.chairT0||0))/1100)))):null;
- if(!pr&&chair===null&&amb&&!mini)pr='lamp';
+ if(amb&&(!LV.ready||$('lvorb').className)){if(pr!=='bike')pr=null;chair=null}else if(!pr&&chair===null&&amb&&!mini)pr='lamp';
  if(!GOFF){GOFF=document.createElement('canvas');GOFF.width=GOFF.height=32}
  GS.scene=true;try{gDraw(GOFF.getContext('2d'),name)}finally{GS.scene=false}
  const dy=(GS.ldy||0)+(X.post==='sit'?3:0),lift=pr==='bike'?-4:0;x.clearRect(0,0,64,64);
@@ -1525,7 +1525,7 @@ function lvRack(coat){const c=$('lvrack').getContext('2d');c.clearRect(0,0,32,32
 function lvRun(o,cls,ms){o.className=cls;$('live').classList.add('entering');return new Promise(r=>setTimeout(r,ms))}
 async function lvEnter(ms){const L=$('live'),o=$('lvorb'),curt=L.classList.contains('curt');
  if(curt){o.className='';L.classList.add('entering');gMood('bow',1400);await new Promise(r=>setTimeout(r,60));L.classList.add('open');await new Promise(r=>setTimeout(r,1400));
-  if(!LV.on)return;LV.ready=true;lvStatus('Listening… just talk');gMood('flourish',1800);brainDraw();return}
+  if(!LV.on)return;LV.ready=true;lvStatus('Listening… just talk');brainDraw();return}
  const coatRack=!curt&&ms<4000&&Math.random()<0.5;
  if(coatRack){lvRack(false);L.classList.add('rack');gMood('walking');GW.anim=true;await lvRun(o,'lvToRack',1900);
   GW.anim=false;gMood('happy',1200);await new Promise(r=>setTimeout(r,500));lvRack(true);await new Promise(r=>setTimeout(r,700));
@@ -1623,7 +1623,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124013647';let UPD=false;
+const BUILD='20261124013838';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
