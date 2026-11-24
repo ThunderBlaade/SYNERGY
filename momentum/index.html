@@ -1416,8 +1416,15 @@ function gHas(m){const amb=typeof LV!=='undefined'&&LV.on;return gNeed(m,amb).ev
 function gMood(m,ms){if(!G_EX[m])return;if(!gHas(m)){m=G_ITEMALT[m]||'idle';if(!G_EX[m]||!gHas(m))m='idle'}GS.mood=m;GS.until=ms?performance.now()+ms:0}
 function gState(){const now=performance.now();if(GS.until&&now>GS.until){GS.mood=GS.base;GS.until=0}
  if(GS.until)return GS.mood;
- if(typeof LV!=='undefined'&&LV.on)return $('live').classList.contains('speaking')?'talk':(LV.ready&&!LV.muted&&LV.open>0?'listening':'listen');
- if(talking)return GTALK?'talk':'think';if(GSPK)return 'talk';return GS.mood}
+ if(typeof LV!=='undefined'&&LV.on)return $('live').classList.contains('speaking')?gTalkFace():(LV.ready&&!LV.muted&&LV.open>0?'listening':'listen');
+ if(talking)return GTALK?gTalkFace():'think';if(GSPK)return gTalkFace();return GS.mood}
+// polite and composed when he first greets you; once he's actually talking to you his face gets going - shaped by how he feels
+const GTF={cur:'talk',next:0};
+function gTalkFace(){const now=performance.now();if(now<GTF.next)return GTF.cur;let fe={};try{fe=JSON.parse(store('garyFeel')||'{}')}catch(e){}
+ const base=['talk','talk','explaining','pointing','happy','skeptical','surprised','nodding','sarcastic','proud','cheeky','laugh'];
+ const lean={cheerful:['happy','laugh','cheeky'],playful:['cheeky','laugh','sarcastic'],proud:['proud','smug'],irritated:['sarcastic','eyeroll','unimpressed'],worried:['nervous','pondering'],sad:['sad','sigh'],
+  excited:['excited','surprised','happy'],smug:['smug','proud'],bored:['sarcastic','sigh'],curious:['pondering','skeptical'],affectionate:['happy','grateful'],tired:['sigh','yawning'],nervous:['nervous','sheepish'],wistful:['daydreaming','sigh']}[fe.mood]||[];
+ const pool=base.concat(lean,lean).filter(m=>G_EX[m]&&gHas(m)&&m!==GTF.cur);GTF.cur=GTF.cur!=='talk'&&Math.random()<0.45?'talk':pool[Math.floor(Math.random()*pool.length)]||'talk';GTF.next=now+(GTF.cur==='talk'?900:1300)+Math.random()*1300;return GTF.cur}
 function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.tick,P=[];
  for(let y=0;y<32;y++)for(let i=0;i<32;i++){const c=G_BODY[y][i];if(c!=='.')P[y*32+i]=c}
  [[13,18],[12,19],[12,20],[11,21],[11,22],[18,18],[19,19],[19,20],[20,21],[20,22]].forEach(([i,y])=>P[y*32+i]='G');
@@ -1647,7 +1654,7 @@ function gfPick(from){const b=gFloatBounds(),T=gfText();let best=null,bs=1e18;
   c+=Math.random()*400;if(c<bs){bs=c;best={x,y}}}return best}
 function gFloatSync(){const f=$('gfloat');if(!f)return;const show=gFloatOn()&&tab!=='gary'&&!(typeof LV!=='undefined'&&LV.on);GS.base=gIdleBase();if(!GS.until)GS.mood=GS.base;
  if(show&&!f.classList.contains('on')){if(!GF.placed){GF.placed=true;const p=gfPick(null);GF.x=p.x;GF.y=p.y}GF.to=null;GF.pause=performance.now()+1200;gFloatPlace();f.classList.add('on');
-  if(Date.now()-GF.last>150000){GF.last=Date.now();setTimeout(()=>gSay((G_LINES[tab]||G_LINES.today)[Math.floor(Math.random()*2)],'wave'),700)}}
+  if(Date.now()-GF.last>150000){GF.last=Date.now();setTimeout(()=>gSay((G_LINES[tab]||G_LINES.today)[Math.floor(Math.random()*2)],'nodding'),700)}}
  if(!show)f.classList.remove('on')}
 function gSay(text,mood,moved){const f=$('gfloat');if(!f.classList.contains('on'))return;$('gfbub').textContent=text;f.classList.toggle('left',GF.x<innerWidth/2);
  if(gfBubPlace()>1500&&!moved&&!GF.drag){f.classList.remove('say');GF.sayQ=[text,mood];{const b=gFloatBounds(),T=gfText();let bt=null,bc=1e18;for(let k=0;k<50;k++){const x=b.x0+Math.random()*Math.max(1,b.x1-b.x0),y=b.y0+Math.random()*Math.max(1,b.y1-b.y0),c=gfBubPlace(x,y,T)+gfCost(T,x,y)+Math.hypot(x-GF.x,y-GF.y)*2;if(c<bc){bc=c;bt={x,y}}}GF.to=bt}GF.pause=0;return}GF.sayQ=null;f.classList.add('say');gMood(mood||'wave',2400);clearTimeout(GF.sayT);GF.sayT=setTimeout(()=>f.classList.remove('say'),5200)}
@@ -1666,7 +1673,7 @@ function gFloatPlace(){const b=gFloatBounds();GF.x=Math.max(b.x0,Math.min(b.x1,G
 const GB={last:Date.now(),sit:false,next:0,asked:0,shown:false};
 const G_SITBORED=['sitbored','sityawn','sitwatch','sittea','sitread','sitdoze','sittwiddle','sitwhistle'];
 const G_OPEN=['I\'ve been wondering, sir - does tea genuinely taste better from a proper cup? I\'m firmly of the view it does.','Penny for your thoughts, Sam?','Did you know a group of owls is called a parliament? I find that enormously satisfying.','How\'s the day really treating you, Mr Fice?','I was thinking about the stars just now. Have you ever seen the Milky Way properly, away from the lights?','Anything on your mind you\'d like a second pair of eyes on, sir?'];
-function gPoke(){GB.last=Date.now();if(GB.bored){GB.bored=false;GW.to=null;if(GS.mood==='strut')GS.mood=GS.base||'idle'}if(GB.sit){GB.sit=false;GS.base=gIdleBase();gMood('wave',1500)}}
+function gPoke(){GB.last=Date.now();if(GB.bored){GB.bored=false;GW.to=null;if(GS.mood==='strut')GS.mood=GS.base||'idle'}if(GB.sit){GB.sit=false;GS.base=gIdleBase();gMood('nodding',1300)}}
 ['pointerdown','keydown','input'].forEach(ev=>addEventListener(ev,gPoke,{passive:true}));
 setInterval(()=>{if(tab!=='gary'||talking||GSPK||LV.on||document.hidden)return;const idle=Date.now()-GB.last;
  if(idle>35000&&!GB.bored&&!GB.sit){GB.bored=true;GW.busy=0;GW.rest=false}
@@ -1856,7 +1863,7 @@ async function gFace(){if(!window.PublicKeyCredential)return false;try{const c=a
 async function gGate(){if(!gLockOn()||GL.ok||GL.busy)return;GL.busy=true;const ok=await gFace();GL.busy=false;if(ok)gUnlock();else gGuestOn()}
 function gUnlock(){GL.ok=Date.now();if(GL.guest){GL.guest=false;document.body.classList.remove('guest');store('garyChat',GL.save||'');loadChat(GL.save||null);gMood('happy',1800)}}
 function gGuestOn(){if(GL.guest)return;GL.guest=true;GL.save=store('garyChat')||'';CHAT=null;document.body.classList.add('guest');$('gopen').classList.remove('on');
- $('thread').innerHTML='';$('ctitle').textContent='New chat';bubble('gary',['Evening. What can I do for you?','Hello there. What are we after today?','Good evening. How can I help?'][Math.floor(Math.random()*3)]);gMood('wave',2000)}
+ $('thread').innerHTML='';$('ctitle').textContent='New chat';bubble('gary',['Evening. What can I do for you?','Hello there. What are we after today?','Good evening. How can I help?'][Math.floor(Math.random()*3)]);gMood('nodding',1300)}
 async function gLockSet(on){if(on){if(!window.PublicKeyCredential||!(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(()=>false))){toast('Face ID isn\'t available on this device');return}
   try{const c=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Momentum - G.A.R.Y.',id:location.hostname},
    user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'sam-gary',displayName:'G.A.R.Y. lock'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
@@ -1879,7 +1886,7 @@ async function lvEnter(ms){const L=$('live'),o=$('lvorb'),curt=L.classList.conta
   gMood('walking');GW.anim=true;await lvRun(o,'lvFromRack',1300);GW.anim=false;o.className='lvTurn';L.classList.add('rackgone');gMood('dapper',1500);await new Promise(r=>setTimeout(r,900))}
  else{const pick=ms<1500?['lvBike','cycling',1300]:ms<4000?(Math.random()<.5?['lvStroll','walking',2200]:['lvPara','parachute',3200]):['lvPant','exhausted',2300];
   if(pick[1]==='walking')GW.anim=true;gMood(pick[1],pick[2]+300);await lvRun(o,pick[0],pick[2]);GW.anim=false}
- if(!LV.on)return;o.className='';LV.ready=true;lvStatus('Listening… just talk');gMood('wave',1600);brainDraw()}
+ if(!LV.on)return;o.className='';LV.ready=true;lvStatus('Listening… just talk');gMood('nodding',1300);brainDraw()}
 setInterval(()=>{if(!LV.on||!LV.ready||LV.muted||LV.srcs.length||!LV.ws||LV.ws.readyState!==1)return;const now=Date.now();if(!LV.act)LV.act=now;if(!LV.nudgeAt)LV.nudgeAt=LV.act+90000+Math.random()*210000;
  if(now<LV.nudgeAt||now-LV.act<60000)return;LV.nudgeAt=now+120000+Math.random()*300000;if(Math.random()<0.45)return;
  LV.ws.send(JSON.stringify({realtimeInput:{text:'(Quiet moment: Sam has not said anything for a while. Only if it suits the mood, say ONE short thing to start a conversation - a thought, a question, something you are curious about. If he seems busy, low or focused, stay silent.)'}}))},5000);
@@ -1995,7 +2002,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124161150';let UPD=false;
+const BUILD='20261124161436';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
