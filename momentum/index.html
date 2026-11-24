@@ -1889,7 +1889,7 @@ const gBeat=()=>Math.random()<0.15?14000+Math.random()*3500:8000+Math.random()*4
 function gSquabble(lines){let i=0;const a=$('ask');GB.chat=true;if(Math.random()<0.15)lines=lines.concat(G_MORE[Math.floor(Math.random()*G_MORE.length)]);let beat=gBeat();
  (function next(){if(i>=lines.length||a.value||talking||LV.on||tab!=='gary'||GB.shown){const done=i>=lines.length&&!a.value&&!talking&&!LV.on&&tab==='gary'&&!GB.shown;GB.chat=false;setTimeout(()=>{if(!a.value)gBar(gRest())},7000);
    if(done&&Math.random()<0.22&&!GL.guest)setTimeout(()=>{if(GB.chat||GB.shown||a.value||talking||LV.on||tab!=='gary')return;const q=G_ASKSAM[Math.floor(Math.random()*G_ASKSAM.length)];GB.pending=q;GB.shown=true;GB.asked=Date.now();gBubble(q,30000);if(!GB.sit)gMood('explaining',2600)},2200);return}
-  const L=lines[i++];beat=gBeat();if(L[0]==='b'){gReact.t=-1e9;gBar(L[1]);gwHold(beat)}else{gwHold(beat);gBubble(L[1],beat-600);if(!GB.sit)gMood(L[2]||'sarcastic',Math.min(5000,beat-800))}
+  const L=lines[i++];beat=gBeat();if(L[0]==='b'){gReact.t=-1e9;gBar(L[1]);gwHold(beat)}else{gwHold(beat,true);gBubble(L[1],beat-600);if(!GB.sit)gMood(L[2]||'sarcastic',Math.min(5000,beat-800))}
   setTimeout(next,beat)})()}
 let gBi=Math.floor(Math.random()*G_BANTER.length),gSi=Math.floor(Math.random()*G_SQUABBLES.length);
 (function banter(wait){setTimeout(()=>{const a=$('ask');
@@ -2025,7 +2025,9 @@ const GW={x:0,to:null,dir:1,busy:0,last:''};
 function gwFree(){return tab==='gary'&&!document.hidden&&!talking&&!GSPK&&!LV.on&&!GB.sit&&!$('gbar').classList.contains('drag')&&!matchMedia('(prefers-reduced-motion: reduce)').matches}
 function gwPlace(){const d=$('gdock');d.style.transform='translateX('+GW.x.toFixed(1)+'px)';d.classList.toggle('flip',GW.dir<0);d.classList.toggle('peek',!!GW.peek)}
 // the search bar's talking: he stops to answer. If he's off on an errand he pops his head back in from the edge, has his say, then carries on
-function gwHold(ms){const now=performance.now();if(GW.plan){if(GW.x<0){GW.holdUntil=now+ms;GW.leaving=0;GW.x=-Math.round($('gdock').offsetWidth*0.62);GW.dir=1;GW.peek=true;gwPlace()}}   // walking about on screen with something: he just carries on
+function gwHold(ms,mine){const now=performance.now();if(GW.plan){   // out on an errand: he never stops for the search bar
+  // when it's his turn to answer while he's off-screen: half the time he pops his head in (3 seconds at most), otherwise he answers from out of sight
+  if(mine&&GW.x<0&&!GW.peek&&Math.random()<0.5){GW.holdUntil=now+Math.min(ms,3000);GW.leaving=0;GW.x=-Math.round($('gdock').offsetWidth*0.62);GW.dir=1;GW.peek=true;gwPlace()}}
  else{GW.to=null;GW.busy=Math.max(GW.busy,now+ms)}}
 function gwOff(){return -Math.round($('gdock').offsetWidth*1.5+14)}
 function gwMax(){const b=$('gbar'),n=document.querySelector('.gbt');return Math.max(0,b.clientWidth-(n?n.offsetWidth+16:120)-$('gdock').offsetWidth)}
@@ -2123,7 +2125,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124183220';let UPD=false;
+const BUILD='20261124183621';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
