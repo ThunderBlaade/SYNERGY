@@ -1952,14 +1952,21 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)GL.hid=Date
 async function gFace(){if(!window.PublicKeyCredential)return false;try{const c=await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rpId:location.hostname,
  allowCredentials:[{type:'public-key',id:unb64u(store('garyLockId'))}],userVerification:'required',timeout:60000}});return !!c}catch(e){return false}}
 async function gGate(){if(!gLockOn()||GL.ok||GL.busy)return;GL.busy=true;const ok=await gFace();GL.busy=false;if(ok)gUnlock();else gGuestOn()}
-function gUnlock(){GL.ok=Date.now();if(GL.guest){GL.guest=false;document.body.classList.remove('guest');store('garyChat',GL.save||'');loadChat(GL.save||null);gMood('happy',1800)}}
+// Face ID keys made before the rename still carry the old name: after a good scan, make a fresh key under Rodger's name (once)
+async function gLockRename(){if(!gLockOn()||store('garyLockName')==='rodger'||gLockRename.tried)return;gLockRename.tried=true;
+ if(tab==='gary')gBubble('Quick one, sir - I\'m renewing your Face ID key under my proper name. One more scan, if you would.',6000);await new Promise(r=>setTimeout(r,2200));
+ try{const c=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Momentum - R.O.D.G.E.R.',id:location.hostname},
+  user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'sam-rodger',displayName:'Rodger - Face ID'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+  authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},timeout:60000}});
+  store('garyLockId',b64u(c.rawId));store('garyLockName','rodger');if(tab==='gary')gBubble('Done. Your Face ID key now says Rodger.',4000)}catch(e){}}
+function gUnlock(){GL.ok=Date.now();setTimeout(gLockRename,1500);if(GL.guest){GL.guest=false;document.body.classList.remove('guest');store('garyChat',GL.save||'');loadChat(GL.save||null);gMood('happy',1800)}}
 function gGuestOn(){if(GL.guest)return;GL.guest=true;GL.save=store('garyChat')||'';CHAT=null;document.body.classList.add('guest');$('gopen').classList.remove('on');
  $('thread').innerHTML='';$('ctitle').textContent='New chat';bubble('gary',['Evening. What can I do for you?','Hello there. What are we after today?','Good evening. How can I help?'][Math.floor(Math.random()*3)]);gMood('nodding',1300)}
 async function gLockSet(on){if(on){if(!window.PublicKeyCredential||!(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(()=>false))){toast('Face ID isn\'t available on this device');return}
   try{const c=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Momentum - R.O.D.G.E.R.',id:location.hostname},
-   user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'sam-gary',displayName:'R.O.D.G.E.R. lock'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+   user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'sam-rodger',displayName:'Rodger - Face ID'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
    authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},timeout:60000}});
-   store('garyLockId',b64u(c.rawId));store('garyLock','1');GL.ok=Date.now();toast('Face ID is on. Only you get the real R.O.D.G.E.R.')}catch(e){toast('Face ID wasn\'t set up')}}
+   store('garyLockId',b64u(c.rawId));store('garyLock','1');store('garyLockName','rodger');GL.ok=Date.now();toast('Face ID is on. Only you get the real R.O.D.G.E.R.')}catch(e){toast('Face ID wasn\'t set up')}}
  else{if(!(await gFace())){toast('Face ID needed to turn this off');return}store('garyLock','0');GL.ok=Date.now();if(GL.guest)gUnlock();toast('Face ID lock is off')}
  renderYou()}
 // ---------- the show: curtains while connecting, a silly entrance once he can hear you, a sulky exit if he can't
@@ -2098,7 +2105,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124175631';let UPD=false;
+const BUILD='20261124180447';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
