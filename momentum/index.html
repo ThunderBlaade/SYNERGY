@@ -344,9 +344,11 @@ body.lvon #askbar{display:none!important}
 #gfloat #gfbub[data-at=sideR]::after{bottom:auto;top:var(--ty,18px);left:-7px!important;border-left:0;border-right-color:#fff}
 
 #lvstat,#lvtx{display:none!important}
-#live.typing{justify-content:flex-start;padding-top:calc(14px + env(safe-area-inset-top))}
-#live.typing .lvwrap{flex:none;height:min(310px,37vh);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
-#live.typing #lvorb{width:min(150px,38vw);height:min(150px,38vw)}#live.typing #lvtyp{margin-top:26px}#live.typing .lvacts{margin-top:14px}#live.typing #lvcut{display:none!important}
+@media (hover:none) and (pointer:coarse){#live.typing{justify-content:flex-start;padding-top:calc(14px + env(safe-area-inset-top))}
+#live.typing .lvwrap{flex:none;height:min(280px,33vh);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
+#live.typing #lvorb{width:min(150px,38vw);height:min(150px,38vw)}#live.typing #lvtyp{margin-top:26px}#live.typing .lvacts{margin-top:14px}#live.typing #lvcut{display:none!important}}
+#lvorb[data-flip="1"] .gpx.scene{transform:scaleX(-1)}
+.lvhead{text-align:center}.lvname{font:400 26px/1.1 var(--serif);letter-spacing:.04em}.lvhead .lab{margin-top:6px;font-size:9.5px}#live.mini .lvhead{display:none}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -417,7 +419,7 @@ body.lvon #askbar{display:none!important}
  <input class="big" id="siP" type="password" placeholder="Password" autocomplete="current-password" style="font-size:20px;margin-top:10px">
  <p class="hint">Your plan goes to a private table only your account can read. Gary's chats and memories are private to your account too.</p>
  <div class="acts"><button class="btn ghost" id="siX">Cancel</button><button class="btn fill" id="siGo">Sign in</button></div></div>
-<div id="live"><div class="lab lvlab" style="text-align:center">Talking to G.A.R.Y.</div>
+<div id="live"><div class="lvhead"><div class="lvname">G.A.R.Y.</div><div class="lab">General Assistant for Reasoning and You</div></div>
  <div class="lvwrap"><div id="lvstage"><canvas id="lvrack" width="32" height="32"></canvas><div id="lvorb"><svg class="chute" viewBox="0 0 120 110" aria-hidden="true"><path d="M4 34Q60-14 116 34z" fill="#c0392b"/><path d="M36 34Q46 2 60 2L60 34z" fill="#f4f4f6"/><path d="M84 34Q74 2 60 2L60 34z" fill="#f4f4f6"/><path d="M4 34h112" stroke="#7a2a2a" stroke-width="2"/><path d="M6 35 22 109M42 35 23 109M78 35 95 109M114 35 96 109" stroke="#c9ced8" stroke-width="1" fill="none"/></svg></div><div id="lvcurt"><i class="cl"></i><i class="cr"></i><b class="val"></b></div></div><button id="lvcut">Tap to interrupt</button></div>
  <div id="lvstat">Connecting…</div><div id="lvtx"></div>
  <form id="lvtyp" autocomplete="off"><input id="lvtin" placeholder="Type to G.A.R.Y." enterkeyhint="send" autocapitalize="sentences" autocorrect="on" spellcheck="true"><button class="mic" id="lvtsend" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button></form>
@@ -995,7 +997,7 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
 async function liveStart(again){if(!gUse().live){toast('Live voice is switched off - tap the symbols by Momentum to switch it on');return}if(!gUse().google){toast('Live voice needs Google Gemini - tap the symbols by Momentum to switch it on');return}let ctx0=null;if(!again){try{ctx0=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});ctx0.resume()}catch(e){}}if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=ctx0||new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // created inside the tap, so iPhone allows sound
- $('live').classList.remove('typing');$('lvtype').classList.remove('on');LV.typed=false;LV.nomic=false;LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;LV.spoke=false;LV.uttAt=0;LV.unsaid='';$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open','entering','rack','rackgone');$('live').classList.toggle('curt',Math.random()<0.25);$('lvorb').className=''}lvStatus('Connecting…');
+ lvRStop();LVR.quiet=0;LVR.t=0;$('live').classList.remove('typing');$('lvtype').classList.remove('on');LV.typed=false;LV.nomic=false;LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;LV.spoke=false;LV.uttAt=0;LV.unsaid='';$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open','entering','rack','rackgone');$('live').classList.toggle('curt',Math.random()<0.25);$('lvorb').className=''}lvStatus('Connecting…');
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
  catch(e){lvErr('microphone',{error:String(e&&e.name||e)});LV.stream=null;LV.nomic=true;LV.muted=true;$('lvmute').classList.add('on');$('lvmute').setAttribute('aria-label','Microphone unavailable');setTimeout(()=>{if(LV.on&&LV.nomic){$('live').classList.add('typing');$('lvtype').classList.add('on')}},2600)}
  if(LV.stream)lvMicWire();
@@ -1023,6 +1025,21 @@ if(window.visualViewport){visualViewport.addEventListener('resize',lvVV);visualV
 async function lvMicWire(){const src=LV.ctx.createMediaStreamSource(LV.stream);
  try{await LV.ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([LIVE_WORKLET],{type:'application/javascript'})));LV.node=new AudioWorkletNode(LV.ctx,'gmic');LV.node.port.onmessage=e=>lvMic(e.data);src.connect(LV.node)}
  catch(e){LV.node=LV.ctx.createScriptProcessor(2048,1,1);LV.node.onaudioprocess=e=>lvMic(e.inputBuffer.getChannelData(0));src.connect(LV.node);const z=LV.ctx.createGain();z.gain.value=0;LV.node.connect(z);z.connect(LV.ctx.destination)}}
+
+// ---------- G.A.R.Y. while he waits for you in a call: the same human routine, on his stage; any word from either of you stops it
+const LVR={on:null,t:0,x:0};
+function lvRStop(){if(!LVR.on&&!LVR.x)return;const was=LVR.on;LVR.on=null;if(was){GS.until=0;GS.mood='listen'}const o=$('lvorb');o.style.transition='transform .7s cubic-bezier(.4,0,.2,1)';o.style.transform='';o.dataset.flip='';LVR.x=0}
+function lvRWalk(to,ms,mood){const o=$('lvorb'),x0=LVR.x;o.dataset.flip=to<x0?'1':'';o.style.transition='transform '+(ms/1000)+'s linear';o.style.transform='translateX('+to+'px)';LVR.x=to;gMood(mood,ms+200);
+ const st=setInterval(()=>{if(!LVR.on){clearInterval(st);return}GW.step=(GW.step||0)+1.1},50);setTimeout(()=>clearInterval(st),ms)}
+setInterval(()=>{const L=$('live');if(!LV.on||!LV.ready||L.classList.contains('mini')||L.classList.contains('typing')||$('lvorb').classList.contains('lvPara'))return;
+ const now=Date.now(),busy=L.classList.contains('speaking')||LV.open>0||LV.srcs.length||performance.now()<(LV.poseEnd||0);
+ if(busy){lvRStop();LVR.quiet=now;return}if(!LVR.quiet)LVR.quiet=now;
+ if(LVR.on){if(now<LVR.t)return;LVR.on=null;GS.until=0;GS.mood='listen';LVR.t=now+3000+Math.random()*4000;LVR.rest=true;return}
+ if(now-LVR.quiet<9000||now<LVR.t)return;
+ const W=Math.min(110,innerWidth*0.28),r=Math.random();
+ if(r<0.22){const to=Math.round((Math.random()*2-1)*W),ms=Math.max(1800,Math.abs(to-LVR.x)*28);LVR.on='walk';LVR.t=now+ms+200;lvRWalk(to,ms,'walking')}
+ else if(r<0.3){const to=LVR.x<=0?W:-W,ms=6000;LVR.on='bike';LVR.t=now+ms+300;lvRWalk(to,ms,'cycling')}
+ else{const p=gRoutinePick(LVR.last);LVR.last=p[0];const ms=(p[1]+Math.random()*(p[2]-p[1]))*1000;LVR.on=p[0];LVR.t=now+ms;gMood(p[0],ms)}},500);
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
@@ -1083,6 +1100,8 @@ cheering u high open upBoth confetti+blush jump
 celebrating happy up grin trophy confetti jump
 victorious closed up grin trophy sparkle still
 tea closed n smile tea - still
+twiddle right n flat twiddle - still
+lookabout left n flat behind - still
 sipping closed up small sip - still
 reading down n flat book - still
 detective squint angry flat glass - still
@@ -1173,7 +1192,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
  const clr=s=>{for(let y=18;y<26;y++)for(let i=s?8:21;i<(s?11:24);i++)del(i,y)};
  const line=(a,b,c,d,col,thick)=>{const n=Math.max(Math.abs(c-a),Math.abs(d-b))||1;for(let k=0;k<=n;k++){const px=a+(c-a)*k/n,py=b+(d-b)*k/n;put(px,py,col);if(thick)put(px,py+1,col)}};
  // an arm from the shoulder (via optional elbow) to a glove; L = left side of the picture
- const arm=(L,gx,gy,via,col,gw,gh)=>{clr(L);const sx=L?9:22,sy=19;col=col==='G'?'g':'a';let px=sx,py=sy;for(const [vx,vy] of via||[]){line(px,py,vx,vy,col,1);px=vx;py=vy}line(px,py,gx,gy,col,1);gw=gw||2;gh=gh||2;rect(Math.round(gx-(gw-1)/2),Math.round(gy-(gh-1)/2),gw,gh,'W')};
+ const arm=(L,gx,gy,via,col,gw,gh)=>{clr(L);const sx=L?9:22,sy=19;col=col==='G'?'g':'a';if(!GS.noshort){const k=Math.hypot(gx-sx,gy-sy)>6?0.8:1;gx=Math.round(sx+(gx-sx)*k);gy=Math.round(sy+(gy-sy)*k);via=(via||[]).map(([vx,vy])=>[Math.round(sx+(vx-sx)*k),Math.round(sy+(vy-sy)*k)])}let px=sx,py=sy;for(const [vx,vy] of via||[]){line(px,py,vx,vy,col,1);px=vx;py=vy}line(px,py,gx,gy,col,1);gw=gw||2;gh=gh||2;rect(Math.round(gx-(gw-1)/2),Math.round(gy-(gh-1)/2),gw,gh,'W')};
  const A=X.a,odd=t%4<2;
  switch(A){
   case 'wave':arm(0,27+(odd?0:1),13);break; case 'upR':arm(0,27,12);break; case 'upL':arm(1,4,12);break;
@@ -1188,6 +1207,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'cross':clr(0);clr(1);put(9,19,'g');rect(22,19,1,3,'a');rect(9,20,12,2,'g');rect(21,20,2,2,'W');rect(11,22,11,2,'a');rect(9,22,2,2,'W');for(let i=11;i<21;i++)put(i,21,i%2?'G':'K');break;
   case 'clap':if(t%2){arm(0,17,20,null,'G',2,3);arm(1,14,20,null,'G',2,3)}else{arm(0,20,20,null,'G',2,3);arm(1,11,20,null,'G',2,3)}break;
   case 'clasp':arm(0,17,21,null,'G',2,3);arm(1,14,21,null,'G',2,3);break;
+  case 'twiddle':arm(0,17,22,null,'G',2,2);arm(1,14,22,null,'G',2,2);put((GS.tick||0)%4<2?15:16,21,'W');put((GS.tick||0)%4<2?16:15,20,'W');break;
   case 'mouthcover':arm(0,16,14,[[22,20]],null,4,2);break;
   case 'point':arm(0,29,19,null,null,2,2);put(31,19,'W');break; case 'pointUp':arm(0,26,10,null,null,2,3);put(26,7,'W');put(26,8,'W');break;
   case 'spread':arm(0,29,17,null,null,2,3);arm(1,2,17,null,null,2,3);break;
@@ -1350,7 +1370,7 @@ function gScene(x,amb){const name=gState(),X=G_EX[name]||G_EX.idle,mini=amb&&$('
  let pr=G_PROPS[name]||null,chair=X.post==='sit'?0:X.post==='pull'?Math.max(0,Math.round(28*(1-Math.min(1,(performance.now()-(GS.chairT0||0))/1100)))):null;
  if(amb&&(!LV.ready||$('lvorb').className)){if(pr!=='bike')pr=null;chair=null}else if(!pr&&chair===null&&amb&&!mini)pr='lamp';
  if(!GOFF){GOFF=document.createElement('canvas');GOFF.width=GOFF.height=32}
- GS.scene=true;GS.nobob=!amb;try{gDraw(GOFF.getContext('2d'),name)}finally{GS.scene=false;GS.nobob=false}
+ GS.scene=true;GS.nobob=!amb;GS.noshort=['umbrella','teacup','bike','cane'].includes(pr);try{gDraw(GOFF.getContext('2d'),name)}finally{GS.scene=false;GS.nobob=false;GS.noshort=false}
  const sit=X.post==='sit',dy=(GS.ldy||0)+(sit?-2:0),lift=pr==='bike'?-4:sit?-5:0;x.clearRect(0,0,64,64);
  if(chair!==null)gProp(x,PROP_CHAIR,16+chair,33);if(pr==='bike')gProp(x,PROP_BIKE,10,34);if(pr==='lamp')gProp(x,PROP_LAMP,5,13);if(pr==='briefcase')gProp(x,PROP_BRIEFCASE,46,46);
  x.drawImage(GOFF,16,24+lift);
@@ -1393,7 +1413,7 @@ function gfBubPlace(px,py,T0){const X0=px??GF.x,Y0=py??GF.y,bub=$('gfbub'),T=T0|
 function gFloatPlace(){const b=gFloatBounds();GF.x=Math.max(b.x0,Math.min(b.x1,GF.x));GF.y=Math.max(b.y0,Math.min(b.y1,GF.y));const f=$('gfloat');f.style.left=GF.x+'px';f.style.top=GF.y+'px'}
 (function drift(){const f=$('gfloat'),now=performance.now();if(f&&f.classList.contains('on')&&!GF.drag&&!f.classList.contains('say')&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&now>GF.hold){
   if(!GF.to&&now>(GF.pause||0))GF.to=gfPick({x:GF.x,y:GF.y});if(GF.to){const dx=GF.to.x-GF.x,dy=GF.to.y-GF.y,d=Math.hypot(dx,dy);if(d<1.5){GF.to=null;GF.pause=now+4000+Math.random()*4000;if(GF.sayQ){const q=GF.sayQ;GF.sayQ=null;gSay(q[0],q[1],1)}}else{const sp=GF.sayQ?Math.min(2.4,0.4+d/50):Math.min(0.6,0.12+d/140);GF.x+=dx/d*sp;GF.y+=dy/d*sp+Math.sin(now/900)*0.08}}gFloatPlace()}
- if(f&&f.classList.contains('on')&&!GS.until&&now>GF.next){if(GF.next)gMood(G_FLOATFUN[Math.floor(Math.random()*G_FLOATFUN.length)],3500);GF.next=now+9000+Math.random()*8000}
+ if(f&&f.classList.contains('on')&&!LV.on&&!GS.until&&now>GF.next){if(GF.next)gMood(G_FLOATFUN[Math.floor(Math.random()*G_FLOATFUN.length)],3500);GF.next=now+9000+Math.random()*8000}
  requestAnimationFrame(drift)})();
 // --- on his page: stands; gets bored and sits; then starts a conversation you can answer
 const GB={last:Date.now(),sit:false,next:0,asked:0,shown:false};
@@ -1586,6 +1606,9 @@ function lvNoShow(){if(LV.noshow)return;LV.noshow=true;const L=$('live'),o=$('lv
  setTimeout(()=>{lvLine('box',q)},700);
  setTimeout(()=>{lvStop();LV.noshow=false;go('gary');$('ask').placeholder=q.replace('Sentient search bar: ','');setTimeout(()=>$('ask').focus(),250)},4200)}
 // ---------- G.A.R.Y. lives in his bar: wanders up and down and gets on with things (20 activities)
+// what a person does while waiting: [mood, min s, max s, weight]
+const G_ROUTINE=[['twiddle',5,8,4],['lookabout',3,5,3],['sitread',10,15,3],['tea',8,11,2],['watch',3,5,2],['stretching',5,7,1],['sitting',8,12,1]];
+function gRoutinePick(last){const tot=G_ROUTINE.reduce((a,r)=>a+r[3],0);for(let k=0;k<6;k++){let x=Math.random()*tot;for(const r of G_ROUTINE){x-=r[3];if(x<=0){if(r[0]!==last)return r;break}}}return G_ROUTINE[0]}
 const G_ACTS=['sitting','cane','tea','reading','newspaper','writing','texting','phonecall','watch','stretching','dance','singing','stargazing','birdwatching','detective','zen','umbrella','balloon','flower','dapper','tiphat','cycling'];
 const GW={x:0,to:null,dir:1,busy:0,last:''};
 function gwFree(){return tab==='gary'&&!document.hidden&&!talking&&!GSPK&&!LV.on&&!GB.sit&&!$('gbar').classList.contains('drag')&&!matchMedia('(prefers-reduced-motion: reduce)').matches}
@@ -1595,9 +1618,9 @@ function gwMax(){const b=$('gbar'),n=document.querySelector('.gbt');return Math.
  if(gwFree()){const max=gwMax();
   if(GW.to!==null){const sp=GS.mood==='cycling'?Math.max(0.5,gwMax()/360):GS.mood==='strut'?0.26:0.32,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
    if(Math.abs(dx)<=sp){GW.x=GW.to;GW.to=null;if(GS.mood==='walking'||GS.mood==='cycling'||GS.mood==='strut')GS.mood=GS.base||'idle';
-    if(GB.bored){GW.busy=now+1500+Math.random()*2500;GS.mood='idle';gwPlace()}else{let a;do{a=G_ACTS[Math.floor(Math.random()*(G_ACTS.length-1))]}while(a===GW.last);GW.last=a;GW.busy=now+8000+Math.random()*4000;GW.rest=true;gMood(a,GW.busy-now)}}
+    if(GB.bored){GW.busy=now+1500+Math.random()*2500;GS.mood='idle';gwPlace()}else{let a,ms;if(Math.random()<0.75){const r=gRoutinePick(GW.last);a=r[0];ms=(r[1]+Math.random()*(r[2]-r[1]))*1000}else{do{a=G_ACTS[Math.floor(Math.random()*(G_ACTS.length-1))]}while(a===GW.last);ms=8000+Math.random()*4000}GW.last=a;GW.busy=now+ms;GW.rest=true;gMood(a,GW.busy-now)}}
    else{GW.x+=sp*GW.dir;if(!GS.until&&GS.mood!=='cycling')GS.mood=GB.bored?'strut':'walking'}gwPlace()}
-  else if(now>GW.busy&&!GS.until){if(GB.bored){const mn=Math.round(max*0.15),mx=Math.round(max*0.85);GW.to=GW.x<max/2?mx+Math.round(Math.random()*(max-mx)):Math.round(Math.random()*mn)}else if(GW.rest!==false){GW.rest=false;GW.busy=now+25000+Math.random()*35000;GS.mood=GS.base||'idle'}else if(Math.random()<0.05){GW.to=GW.x<max/2?max:0;GS.mood='cycling'}else{GW.to=Math.round(Math.random()*max)}}
+  else if(now>GW.busy&&!GS.until){if(GB.bored){const mn=Math.round(max*0.15),mx=Math.round(max*0.85);GW.to=GW.x<max/2?mx+Math.round(Math.random()*(max-mx)):Math.round(Math.random()*mn)}else if(GW.rest!==false){GW.rest=false;GW.busy=now+6000+Math.random()*8000;GS.mood=GS.base||'idle'}else if(Math.random()<0.08){GW.to=GW.x<max/2?max:0;GS.mood='cycling'}else{GW.to=Math.round(Math.random()*max)}}
   if(GW.x>max){GW.x=max;gwPlace()}}
  requestAnimationFrame(gwLoop)})();
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
@@ -1666,7 +1689,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124103150';let UPD=false;
+const BUILD='20261124112046';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
