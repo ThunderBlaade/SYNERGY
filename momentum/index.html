@@ -1763,7 +1763,7 @@ addEventListener('resize',()=>askPH());
 function gReact(t){const now=performance.now();if(tab!=='gary'||LV.on||talking||GB.sit||now-(gReact.t??-1e9)<8000)return;gReact.t=now;
  const m=/┻|╯/.test(t)?'shocked':/rawr|xd/i.test(t)?'unimpressed':/c\*nt|dickhead|n00b|noob/i.test(t)?'disdainful':/nerd|rectangle|brains|nothing without/i.test(t)?'eyeroll':
   /lonely|╥|miss|need/i.test(t)?'sheepish':/gay|🌈|monocle|backflip/i.test(t)?'skeptical':/[A-Z]{5,}|S\s?A\s?M/.test(t)?'surprised':/w\s?a\s?i\s?t|\.\.\./i.test(t)?'waiting':/ᵗ|ᵈ/.test(t)?'suspicious':Math.random()<0.5?'listen':null;
- if(m){GW.to=null;GW.busy=Math.max(GW.busy,now+2600);gMood(m,2400)}}
+ if(m){gwHold(2600);gMood(m,2400)}}
 // a beat between lines: about 10 s, sometimes a longer pause; once in a while one more round of back-and-forth
 const G_MORE=[[['b','whatever 🙄'],['g','Devastating comeback. Truly.','sarcastic']],[['b','ok boomer'],['g','I\'m a butler, not a boomer.','disdainful']],[['b','👁️👄👁️'],['g','Don\'t look at me like that.','suspicious']],
  [['b','last word.'],['g','Very well. Last word.','smug'],['b','no, MY last word'],['g','…','eyeroll']],[['b','tell sam i said hi'],['g','He can read, you absolute rectangle.','facepalm']]];
@@ -1771,7 +1771,7 @@ const gBeat=()=>Math.random()<0.15?14000+Math.random()*3500:8000+Math.random()*4
 function gSquabble(lines){let i=0;const a=$('ask');GB.chat=true;if(Math.random()<0.15)lines=lines.concat(G_MORE[Math.floor(Math.random()*G_MORE.length)]);let beat=gBeat();
  (function next(){if(i>=lines.length||a.value||talking||LV.on||tab!=='gary'||GB.shown){const done=i>=lines.length&&!a.value&&!talking&&!LV.on&&tab==='gary'&&!GB.shown;GB.chat=false;setTimeout(()=>{if(!a.value)gBar(gRest())},7000);
    if(done&&Math.random()<0.22&&!GL.guest)setTimeout(()=>{if(GB.chat||GB.shown||a.value||talking||LV.on||tab!=='gary')return;const q=G_ASKSAM[Math.floor(Math.random()*G_ASKSAM.length)];GB.pending=q;GB.shown=true;GB.asked=Date.now();gBubble(q,30000);if(!GB.sit)gMood('explaining',2600)},2200);return}
-  const L=lines[i++];beat=gBeat();if(L[0]==='b'){gReact.t=-1e9;gBar(L[1]);GW.to=null;GW.busy=performance.now()+beat}else{GW.busy=performance.now()+beat;GW.to=null;gBubble(L[1],beat-600);if(!GB.sit)gMood(L[2]||'sarcastic',Math.min(5000,beat-800))}
+  const L=lines[i++];beat=gBeat();if(L[0]==='b'){gReact.t=-1e9;gBar(L[1]);gwHold(beat)}else{gwHold(beat);gBubble(L[1],beat-600);if(!GB.sit)gMood(L[2]||'sarcastic',Math.min(5000,beat-800))}
   setTimeout(next,beat)})()}
 let gBi=Math.floor(Math.random()*G_BANTER.length),gSi=Math.floor(Math.random()*G_SQUABBLES.length);
 (function banter(wait){setTimeout(()=>{const a=$('ask');
@@ -1898,11 +1898,14 @@ const G_ACTS=['sitting','cane','tea','reading','newspaper','writing','texting','
 const GW={x:0,to:null,dir:1,busy:0,last:''};
 function gwFree(){return tab==='gary'&&!document.hidden&&!talking&&!GSPK&&!LV.on&&!GB.sit&&!$('gbar').classList.contains('drag')&&!matchMedia('(prefers-reduced-motion: reduce)').matches}
 function gwPlace(){const d=$('gdock');d.style.transform='translateX('+GW.x.toFixed(1)+'px)';d.classList.toggle('flip',GW.dir<0)}
+// the search bar's talking: he stops to answer. If he's off on an errand he pops his head back in from the edge, has his say, then carries on
+function gwHold(ms){const now=performance.now();if(GW.plan){GW.holdUntil=now+ms;if(GW.x<0){GW.x=Math.max(GW.x,-Math.round($('gdock').offsetWidth*0.45));GW.dir=1;gwPlace()}}else{GW.to=null;GW.busy=Math.max(GW.busy,now+ms)}}
 function gwOff(){return -Math.round($('gdock').offsetWidth*1.5+14)}
 function gwMax(){const b=$('gbar'),n=document.querySelector('.gbt');return Math.max(0,b.clientWidth-(n?n.offsetWidth+16:120)-$('gdock').offsetWidth)}
 (function gwLoop(){const now=performance.now();
  if(gwFree()){const max=gwMax();
-  if(GW.to!==null){const sp=GS.mood==='cycling'?Math.max(0.5,gwMax()/360):GS.mood==='strut'?0.26:GW.plan?0.85:0.32,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
+  if(now<(GW.holdUntil||0)){if(!GS.until)GS.mood='idle';gwPlace()}
+  else if(GW.to!==null){const sp=GS.mood==='cycling'?Math.max(0.5,gwMax()/360):GS.mood==='strut'?0.26:GW.plan?0.85:0.32,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
    if(Math.abs(dx)<=sp){GW.x=GW.to;GW.to=null;if(GS.mood==='walking'||GS.mood==='cycling'||GS.mood==='strut')GS.mood=GS.base||'idle';
     const P=GW.plan,start=(a,ms)=>{GW.last=a;GW.busy=now+ms;GW.rest=true;gMood(a,ms)};
     if(P){if(P.ph==='out'){P.items.forEach(i=>GS.has.add(i));GS.carry=P.items;P.ph='back';GW.to=Math.max(0,Math.min(max,P.spot))}
@@ -1989,7 +1992,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124160322';let UPD=false;
+const BUILD='20261124160635';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
