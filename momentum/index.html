@@ -311,7 +311,7 @@ body.lvon #askbar{display:none!important}
 @keyframes chuteK{0%{opacity:1;transform:none}82%{opacity:1;transform:none}90%{opacity:1;transform:translate(14px,-6px) rotate(10deg)}100%{opacity:0;transform:translate(60px,30px) rotate(40deg) scale(.7)}}
 #lvorb.lvPara{animation:lvParaK 3.2s linear both;transform-origin:50% -40%}
 @keyframes lvParaK{0%{transform:translateY(-100vh) rotate(-7deg)}10%{transform:translateY(-88vh) rotate(-3deg)}20%{transform:translateY(-76vh) rotate(4deg)}30%{transform:translateY(-64vh) rotate(7deg)}40%{transform:translateY(-52vh) rotate(3deg)}50%{transform:translateY(-40vh) rotate(-4deg)}60%{transform:translateY(-29vh) rotate(-6deg)}70%{transform:translateY(-18vh) rotate(-2deg)}78%{transform:translateY(-9vh) rotate(3deg)}84%{transform:translateY(-2vh) rotate(2deg)}88%{transform:translateY(0) rotate(0)}92%{transform:translateY(3px)}96%{transform:translateY(-1px)}100%{transform:none}}
-#gfloat,#gfsp{width:100px!important;height:100px!important}#gfbub{bottom:104px}
+#gfloat,#gfsp{width:80px!important;height:80px!important}#gfbub{bottom:90px}
 
 #gdock{position:relative;overflow:visible}#gbar{clip-path:inset(-100vh -100vw -100vh 0)}#gdock .gpx.scene{position:absolute;left:-50%;top:-75%;width:200%!important;height:200%!important;max-width:none;pointer-events:none}
 #lvorb{width:min(190px,50vw);height:min(190px,50vw)}#lvorb .gpx.scene{position:absolute;left:-50%;top:-75%;width:200%!important;height:200%!important;max-width:none;pointer-events:none}
@@ -1556,16 +1556,7 @@ function gScene(x,amb){const name=gState(),X=G_EX[name]||G_EX.idle,mini=amb&&$('
  if(sit){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h)};P(GPP.K,25,46,14,4);P(GPP.B,26,46,12,3);P(GPP.G,31,47,2,1);P(GPP.K,26,49,5,7);P(GPP.K,33,49,5,7);P(GPP.B,27,49,3,5);P(GPP.B,34,49,3,5);P(GPP.K,25,54,6,2);P(GPP.K,33,54,6,2)}
  if(pr==='cane')gProp(x,PROP_CANE,36,43+dy);if(pr==='umbrella')gProp(x,PROP_UMBRELLA,26,5+dy);if(pr==='teacup')gProp(x,PROP_TEACUP,32,38+dy);if(pr==='tophat')gProp(x,PROP_TOPHAT,23,15+dy)
  if(GS.carry&&(name==='walking'||name==='strut'||name==='cycling'))gCarry(x,GS.carry)}
-// floating about the other pages he wears an astronaut's helmet: a glass bubble round his head and a collar ring
-let GHOFF=null;
-function gHelmet(x){if(!GHOFF){GHOFF=document.createElement('canvas');GHOFF.width=GHOFF.height=32}const g=GHOFF.getContext('2d');gDraw(g);x.clearRect(0,0,40,40);x.drawImage(GHOFF,4,6);
- const im=x.getImageData(0,0,40,40),d=im.data,cx=20.5,cy=15.2,col=(i,c)=>{const v=parseInt(c.slice(1),16);d[i]=v>>16;d[i+1]=v>>8&255;d[i+2]=v&255;d[i+3]=255};
- for(let y=0;y<40;y++)for(let x0=0;x0<40;x0++){const r=Math.hypot(x0+.5-cx,y+.5-cy),i=(y*40+x0)*4;if(y>cy+7.5)continue;
-  if(r>=11.7&&r<12.6&&!d[i+3])col(i,'#c9d3e0');else if(r>=12.6&&r<13.5&&!d[i+3])col(i,GPP.K)}
- for(const [a,b] of [[11,6],[10,7],[10,8],[12,5],[13,5]])col((b*40+a)*4,'#ffffff');
- for(let x0=11;x0<=30;x0++){col((23*40+x0)*4,'#c9d3e0');col((24*40+x0)*4,'#8a94a6')}col((23*40+10)*4,GPP.K);col((24*40+10)*4,GPP.K);col((23*40+31)*4,GPP.K);col((24*40+31)*4,GPP.K);
- x.putImageData(im,0,0)}
-function gPaint(){GS.cv=GS.cv.filter(c=>c.isConnected);for(const c of GS.cv)if(c.offsetParent!==null||c.closest('#gfloat')){if(c._helm)gHelmet(c.getContext('2d'));else if(c._scene)gScene(c.getContext('2d'),c._amb);else gDraw(c.getContext('2d'))}}
+function gPaint(){GS.cv=GS.cv.filter(c=>c.isConnected);for(const c of GS.cv)if(c.offsetParent!==null||c.closest('#gfloat')){if(c._scene)gScene(c.getContext('2d'),c._amb);else gDraw(c.getContext('2d'))}}
 function gCanvas(el,scene,amb){const c=document.createElement('canvas');c.width=c.height=scene?64:32;c.className='gpx'+(scene?' scene':'');c._scene=!!scene;c._amb=!!amb;el.appendChild(c);GS.cv.push(c);if(scene)gScene(c.getContext('2d'),c._amb);else gDraw(c.getContext('2d'));return c}
 const G_POSE_MS={dance:6000,sleep:6000,laugh:4000,jump:3500,cheering:4500,celebrating:4500,singing:6000,clapping:4000,applauding:4000};
 function gPose(n){n=String(n||'').toLowerCase();if(!G_EX[n])return;gMood(n,G_POSE_MS[n]||3800);GB.last=Date.now();if(GB.sit&&G_EX[n].post!=='sit'){GB.sit=false;GS.base=gIdleBase()}if($('gfloat').classList.contains('on'))GF.hold=performance.now()+(G_POSE_MS[n]||3800)}
@@ -1624,7 +1615,7 @@ function gBubble(text,ms){const g=$('gsay');g.textContent=text;const gl=Math.max
 async function gOpenSave(){const text=GB.pending;GB.pending=null;GB.shown=false;$('gsay').classList.remove('on');if(!text)return;bubble('gary',text);
  try{if(!CHAT){CHAT='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);store('garyChat',CHAT);await gdb('gary_convos',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id:CHAT,title:'A chat G.A.R.Y. started'})});$('ctitle').textContent='A chat G.A.R.Y. started'}
   await gdb('gary_messages',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({convo:CHAT,role:'gary',content:text.slice(0,2000)})})}catch(e){}}
-function gFloatInit(){const f=$('gfloat');{const hc=gCanvas($('gfsp'));hc.width=hc.height=40;hc._helm=true;gHelmet(hc.getContext('2d'))}let sx,sy,ox,oy;
+function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
  f.addEventListener('pointerdown',e=>{GF.drag=true;GF.moved=false;GF.to=null;sx=e.clientX;sy=e.clientY;ox=GF.x;oy=GF.y;f.setPointerCapture(e.pointerId)});
  f.addEventListener('pointermove',e=>{if(!GF.drag)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>6)GF.moved=true;if(GF.moved){GF.x=ox+dx;GF.y=oy+dy;gFloatPlace();f.classList.remove('say');
   const t=performance.now();GF.trail=(GF.trail||[]).filter(p=>t-p[2]<90);GF.trail.push([e.clientX,e.clientY,t])}});
@@ -1924,7 +1915,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124153451';let UPD=false;
+const BUILD='20261124153735';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
