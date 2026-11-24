@@ -936,7 +936,7 @@ function chWire(box,open){box.querySelectorAll('.chrow').forEach(chSwipe);box.qu
 function chPickDraw(){const P=$('chpick');if(!P||!P.classList.contains('on'))return;const L=CHS.slice(0,40);
  $('cplist').innerHTML=L.length?chRowsHTML(L):'<p class="empty">No chats yet - start one below.</p>';chWire($('cplist'),id=>{chPickClose();loadChat(id)})}
 function chPickClose(){$('chpick').classList.remove('on')}
-let CHPICKED=false;setTimeout(()=>{if(tab==='gary')chPickMaybe()},1500);function chPickMaybe(){if(CHPICKED||tab!=='gary'||!CS)return;CHPICKED=true;setTimeout(chPickOpen,250)}
+let CHPICKED=true;function chPickMaybe(){if(CHPICKED||tab!=='gary'||!CS)return;CHPICKED=true;setTimeout(chPickOpen,250)}
 async function chPickOpen(){if(!CS||GL.guest||(typeof LV!=='undefined'&&LV.on))return;const P=$('chpick');P.classList.add('on');$('cplist').innerHTML='<p class="empty">Loading…</p>';
  try{CHS=await gdb('gary_convos?select=id,title,updated_at,summary,tags,crucial,summed_at,archived,parts,pinned,deleted_at&order=updated_at.desc&limit=300')||[];chSplit();chPickDraw()}catch(e){chPickClose()}}
 // parts of chats, sorted into the same folders as his memories; tap one to jump to where it was said
@@ -2070,7 +2070,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124172342';let UPD=false;
+const BUILD='20261124172725';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
