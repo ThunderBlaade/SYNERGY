@@ -593,6 +593,7 @@ body.kbup #gbar{height:104px!important}body.kbup #gdock{width:100px!important;he
 /* smaller top bar, steady Wi-Fi symbol */
 header>.lab{font-size:10.5px!important;letter-spacing:.32em!important}#hdate{font-size:10.5px!important;letter-spacing:.16em!important}
 #brain #bwifi,#brain #bwifi svg{width:16px!important;height:16px!important}#bwifi.live,#bwifi.low,#brain i.low{animation:none!important}
+#thread .a.gwarn{font:400 14px/1.45 var(--sans)!important;color:var(--dim);border-left:2px solid #e8c25a;padding-left:10px}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><button id="hmem" aria-label="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button><button id="hfid" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -1380,7 +1381,7 @@ async function lvTool(fc){const a=fc.args||{};let res={result:'done'};
 async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.text():new Response(d).text());let m;try{m=JSON.parse(d)}catch(e){return}
  if(m.setupComplete){LV.tries=0;if(LV.carry){const C=LV.carry;LV.carry=null;setTimeout(()=>lvCarry(C.heard,C.rest),LV.shown?300:2600)}if(LV.shown){LV.ready=true;lvStatus('Listening… just talk');brainDraw()}else{LV.shown=true;lvStatus('He\'s coming…');lvEnter(performance.now()-LV.t0)}return}
  if(m.toolCall){(m.toolCall.functionCalls||[]).forEach(lvTool);return}
- if(m.goAway){lvStatus('One moment…');setTimeout(()=>{if(LV.on){lvStop(true);liveStart(true)}},300);return}
+ if(m.goAway){gWarn('live_limit','Heads up, sir - Google ends a voice call after a while, so I\'m reconnecting. Carry on talking in a second.',{timeLeft:m.goAway.timeLeft||''});lvStatus('One moment…');setTimeout(()=>{if(LV.on){lvStop(true);liveStart(true)}},300);return}
  const c=m.serverContent;if(!c)return;
  if(c.interrupted){LV.turnOpen=false;LV.cap=null;lvNoteCut();lvHush();LV.drop=false;lvStatus('Listening…')}
  if(c.inputTranscription&&c.inputTranscription.text){LV.act=Date.now();LV.inT+=c.inputTranscription.text;lvStatus('Listening…')}
@@ -1394,13 +1395,14 @@ async function liveStart(again){if(!gUse().live){lvWhy('Voice is switched off, s
  LV.ctx=ctx0||new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();LV.ctx.onstatechange=()=>{const c=LV.ctx;if(LV.on&&LV.ready&&c&&(c.state==='interrupted'||(c.state==='suspended'&&document.hidden)))lvYield('call')};   // created inside the tap, so iPhone allows sound
  lvRStop();LVR.quiet=0;LVR.t=0;$('live').classList.remove('typing');$('lvtype').classList.remove('on');LV.typed=false;LV.nomic=false;LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;LV.spoke=false;LV.uttAt=0;LV.unsaid='';$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open','entering','rack','rackgone');$('live').classList.toggle('curt',Math.random()<0.25);$('lvorb').className=''}lvStatus('Connecting…');
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:false,channelCount:1}})}
- catch(e){lvErr('microphone',{error:String(e&&e.name||e)});LV.stream=null;LV.nomic=true;LV.muted=true;$('lvmute').classList.add('on');$('lvmute').setAttribute('aria-label','Microphone unavailable');setTimeout(()=>{if(LV.on&&LV.nomic){$('live').classList.add('typing');$('lvtype').classList.add('on')}},2600)}
+ catch(e){lvErr('microphone',{error:String(e&&e.name||e)});gWarn('mic',(e&&e.name)==='NotAllowedError'?'I can\'t hear you, sir - the iPhone has blocked the microphone for Momentum. Type to me for now, or allow it in Settings → Safari (or Momentum) → Microphone.':'I can\'t use the microphone right now ('+String(e&&e.name||e)+'). Type to me instead.',{error:String(e&&e.name||e)});LV.stream=null;LV.nomic=true;LV.muted=true;$('lvmute').classList.add('on');$('lvmute').setAttribute('aria-label','Microphone unavailable');setTimeout(()=>{if(LV.on&&LV.nomic){$('live').classList.add('typing');$('lvtype').classList.add('on')}},2600)}
  if(LV.stream)lvMicWire();
  let j;try{const r=await garyFetch({mode:'live',text:'Talk with Rodger',convo:CHAT||'',ctx:garyCtx(),items:garyItems(),voice:vxCur().v,vstyle:vxStyle(vxCur()),try:LV.tries});j=await r.json();if(!j.url)throw 0}
- catch(e){lvErr('pass',{error:String(e&&e.message||e)});lvNoShow();return}
+ catch(e){lvErr('pass',{error:String(e&&e.message||e)});gWarn('live_pass','Sorry, sir - I couldn\'t start the voice call because my cloud server didn\'t answer properly.',{error:String(e&&e.message||e)});lvNoShow();return}
  const ws=new WebSocket(j.url);LV.ws=ws;
  ws.onopen=()=>ws.send(JSON.stringify({setup:j.setup}));ws.onmessage=lvMsg;
  ws.onclose=e=>{if(LV.ws!==ws)return;if(e.code!==1000||!LV.ready)lvErr(LV.ready?'dropped':'connect',{code:e.code,reason:String(e.reason||'').slice(0,200),ready:LV.ready,tries:LV.tries});if(LV.on&&!LV.ready&&LV.tries<2){LV.tries++;lvStop(true);liveStart(true);return}
+  if(LV.on&&e.code!==1000)gWarn(LV.ready?'live_drop':'live_connect',(LV.ready?'Sorry, sir - our voice call cut out: ':'Sorry, sir - I couldn\'t start the voice call: ')+lvCode(e.code,e.reason)+'.',{code:e.code,reason:String(e.reason||'').slice(0,200)});
   if(LV.on){lvSaveTurn();if(e.code===1000)lvStatus('Ended');else lvNoShow()}}
  }
 // leaving voice while he's mid-sentence: whatever he hadn't said yet carries on in the typed chat
@@ -2156,7 +2158,10 @@ function gUse(){let u={};try{u=JSON.parse(store('garyUse')||'{}')}catch(e){}retu
 function brainFrom(b){if(!b||!b.model)return;const tried=b.tried||[],groq=/^groq /.test(b.model);BR.model=b.model.replace(/^groq /,'');BR.at=Date.now();
  const gFail=tried.filter(x=>/^gemini/.test(x)&&!/ 200$/.test(x));BR.groqLeft=b.groqLeft!=null?b.groqLeft:BR.groqLeft;
  BR.src=groq?'groq':'google';BR.g=gFail.length?(groq?'out':'low'):(groq&&tried.some(x=>/^gemini/.test(x))?'out':'ok');BR.q=BR.groqLeft!=null&&BR.groqLeft<0.2?'low':'ok';
- BR.googleNote=gFail.length||(groq&&tried.some(x=>/^gemini/.test(x)))?(groq?'Google was busy or full - Groq took over':'Google\'s first choice was busy - running on a backup model'):'';brainSave();brainDraw()}
+ BR.googleNote=gFail.length||(groq&&tried.some(x=>/^gemini/.test(x)))?(groq?'Google was busy or full - Groq took over':'Google\'s first choice was busy - running on a backup model'):'';brainSave();brainDraw();
+ if(BR.g==='out')gWarn('brain_out','Heads up, sir - Google has run out or is too busy, so I\'m on my backup brain (Groq) for now. I may be a bit less sharp.',{tried});
+ else if(BR.g==='low')gWarn('brain_low','Heads up, sir - Google\'s main model was busy, so I\'m using a backup one for now.',{tried});
+ if(BR.groqLeft!=null&&BR.groqLeft<0.2&&BR.src==='groq')gWarn('groq_low','I\'m running low on today\'s free Groq allowance - about '+Math.round(BR.groqLeft*100)+'% left.',{left:BR.groqLeft})}
 function brainDraw(){const e=$('brain');if(!e)return;const U=gUse(),off=!navigator.onLine||!CS,live=typeof LV!=='undefined'&&LV.on;
  const set=(id,icon,cls)=>{$(id).innerHTML=BR_ICON[icon];$(id).className=cls};
  set('bgo','google',off?'off':!U.google?'dis':(BR.g==='ok'?'ok':BR.g)+(BR.src==='google'||live?' act':''));
@@ -2255,6 +2260,14 @@ async function lvEnter(ms){const L=$('live'),o=$('lvorb'),curt=L.classList.conta
 setInterval(()=>{if(!LV.on||!LV.ready||LV.muted||LV.srcs.length||!LV.ws||LV.ws.readyState!==1)return;const now=Date.now();if(!LV.act)LV.act=now;if(!LV.nudgeAt)LV.nudgeAt=LV.act+90000+Math.random()*210000;
  if(now<LV.nudgeAt||now-LV.act<60000)return;LV.nudgeAt=now+120000+Math.random()*300000;if(Math.random()<0.45)return;
  LV.ws.send(JSON.stringify({realtimeInput:{text:'(Quiet moment: Sam has not said anything for a while. Only if it suits the mood, say ONE short thing to start a conversation - a thought, a question, something you are curious about. If he seems busy, low or focused, stay silent.)'}}))},5000);
+// Rodger owns up when something goes wrong or is running low - says it plainly, and files it under "Rodger's notes for Claude"
+const GWN={};
+function gWarn(kind,msg,detail){const now=Date.now();if(GWN[kind]&&now-GWN[kind]<10*60e3)return;GWN[kind]=now;
+ try{if(CS)gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action:'warn_'+kind,ok:false,detail:Object.assign({msg},detail||{})})}).catch(()=>{})}catch(e){}
+ const show=()=>{try{const b=bubble('gary',msg+' (Noted for Claude: Settings → Rodger\'s notes for Claude.)');b.classList.add('gwarn');if(tab==='gary'){garyBottom();gBubble(msg,8000);gMood('shrug',2500)}else gSay(msg,'shrug')}catch(e){}};
+ if(typeof LV!=='undefined'&&LV.on&&!document.body.classList.contains('lvmini'))setTimeout(show,1500);else show()}
+function lvCode(c,r){r=String(r||'');if(/quota|exhaust|limit|429|resource/i.test(r))return 'I\'ve run out of free voice time with Google for now';
+ return c===1006?'the line dropped - usually weak signal or the phone switching between Wi-Fi and data':c===1011?'Google\'s voice server had a problem':c===1008||c===1007?'Google refused the voice session'+(r?' ('+r.slice(0,80)+')':''):'the connection closed unexpectedly (code '+c+(r?': '+r.slice(0,80):'')+')'}
 function lvErr(stage,detail){try{gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action:'live_error',ok:false,detail:Object.assign({stage,ua:navigator.userAgent.slice(0,120)},detail||{})})}).catch(()=>{})}catch(e){}}
 function lvNoShow(){if(LV.noshow)return;LV.noshow=true;const L=$('live'),o=$('lvorb');
  if(L.classList.contains('entering')){gMood('sulking',2000);o.className='lvExit'}lvStatus('R.O.D.G.E.R. can\'t hear you');
@@ -2316,7 +2329,7 @@ async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock()
   const rd=r.body.getReader(),dec=new TextDecoder();
   for(;;){const{value,done}=await rd.read();if(done)break;pet();GTALK=true;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
   const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);setTimeout(chHead,0);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);GPOSE=j.pose||(j.feel&&j.feel.pose&&j.feel.pose!=='idle'?j.feel.pose:null);if(j.feel)store('garyFeel',JSON.stringify(j.feel));brainFrom(j.brain);garyJobs(j.jobs,a)}catch(e){}}}
- catch(e){if(e.name==='AbortError'&&!got)a.textContent='That took far too long, sir - Google seems to have nodded off. Try me again.';else if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':garyOffline(text,1)||'I can\'t reach the cloud just now, sir. Try again in a moment.'}
+ catch(e){if(e.name==='AbortError'&&!got)a.textContent='That took far too long, sir - Google seems to have nodded off. Try me again.';else if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':garyOffline(text,1)||'I can\'t reach the cloud just now, sir. Try again in a moment.';if(!got)gWarn('reply',e.name==='AbortError'?'My reply timed out - Google took over 30 seconds.':'I couldn\'t get a reply out: '+String(e&&e.message||e).slice(0,120),{error:String(e&&e.message||e).slice(0,200)})}
  clearTimeout(wd);a.classList.remove('wait');talking=false;GTALK=false;if(GPOSE)gPose(GPOSE);else if(got)gMood('happy',1600);else gMood('confused',3500);GPOSE=null;const said=got.split('\x1e')[0].trim();if(said&&typeof LV!=='undefined'&&LV.on&&LV.streamCut!=null){const k=Math.min(said.length,LV.streamCut);LV.streamCut=null;if(said.slice(k).trim())lvCarry(said.slice(0,k),said.slice(k).trim())}else if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
 // Rodger's voice: the device's own British male voice (free, swappable later)
 function garyVoice(){const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]GB/i.test(v.lang));
@@ -2375,7 +2388,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124214532';let UPD=false;
+const BUILD='20261124214708';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
@@ -2426,5 +2439,6 @@ let lastDay=today();setInterval(()=>{if(today()!==lastDay){if(cur===lastDay)cur=
   g.querySelectorAll('button').forEach(b=>b.onclick=()=>{buzz(6);const t=SUG[+b.dataset.i][2];g.remove();ask(t)});th.appendChild(g)};
  new MutationObserver(()=>setTimeout(sync,0)).observe(th,{childList:true});setTimeout(sync,500);
 })();
+addEventListener('offline',()=>gWarn('offline','I\'ve lost the internet connection, sir. I\'ll pick up again once it\'s back.'));
 render();sync();gFloatInit();
 </script></body></html>
