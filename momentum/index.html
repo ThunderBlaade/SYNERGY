@@ -585,6 +585,10 @@ header{background:linear-gradient(#000 62%,rgba(0,0,0,0));padding-bottom:14px!im
 body.kbup #gbar{height:104px!important}body.kbup #gdock{width:100px!important;height:100px!important;margin:0 0 -6px -8px!important}body.kbup #gsay{bottom:106px!important}
 .gtop{background:#000!important;box-shadow:0 10px 14px 4px #000!important}
 @media (max-width:999px){#p-gary{padding-bottom:calc(var(--askH,190px) + 84px + var(--safeB))!important}body.kbup #p-gary{padding-bottom:calc(var(--askH,190px) + var(--kb,0px) + 24px)!important}}
+/* search bar and send button stay one size: a circle and a fixed box */
+#ask{height:46px!important;min-height:46px!important;max-height:46px!important;line-height:22px}
+#ask::placeholder{font-size:var(--phfs,14.5px)!important;line-height:var(--phlh,22px)!important}
+#asksend{width:46px!important;height:46px!important;min-height:46px!important;flex:none;align-self:center!important;border-radius:50%!important;padding:0;display:grid;place-items:center}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><button id="hmem" aria-label="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button><button id="hfid" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -2097,12 +2101,17 @@ const G_SQUABBLES=[
  [['b','rate my vibe 1-10'],['g','Three.','unimpressed'],['b','THREE??? (╯°□°)╯︵ ┻━┻'],['g','Two, now.','smug']]];
 // the search bar's words always fit: measure the placeholder text and grow the box to hold all of it
 let ASKM=null;
-function askPH(){const a=$('ask');if(!a||a.value)return;const cs=getComputedStyle(a),ps=getComputedStyle(a,'::placeholder');
- if(!ASKM){ASKM=document.createElement('div');ASKM.style.cssText='position:absolute;left:-9999px;top:0;visibility:hidden;white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word';document.body.appendChild(ASKM)}
- const pad=parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight),bw=parseFloat(cs.borderLeftWidth)+parseFloat(cs.borderRightWidth);
- ASKM.style.width=(a.offsetWidth-pad-bw)+'px';ASKM.style.font=ps.font||cs.font;ASKM.style.letterSpacing=ps.letterSpacing;ASKM.style.textTransform=ps.textTransform;ASKM.textContent=a.placeholder||' ';
- const h=Math.ceil(ASKM.offsetHeight+parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom)+parseFloat(cs.borderTopWidth)+parseFloat(cs.borderBottomWidth)),min=parseFloat(cs.minHeight)||46;
- a.style.height=h>min+2?Math.min(160,h)+'px':''}
+// the search bar never changes size: its words shrink to fit on one line, then two smaller lines, then get cut short
+function askPH(){const a=$('ask');if(!a||a.value)return;a.style.height='';const cs=getComputedStyle(a);
+ if(!ASKM){ASKM=document.createElement('div');ASKM.style.cssText='position:absolute;left:-9999px;top:0;visibility:hidden;overflow-wrap:break-word;word-break:break-word';document.body.appendChild(ASKM)}
+ const full=a._pht&&a.placeholder===a._pht&&a._ph?a._ph:a.placeholder;a._ph=full;
+ const avail=a.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-8;if(avail<40)return;const H=a.clientHeight||46;
+ const ps=getComputedStyle(a,'::placeholder');ASKM.style.fontFamily=ps.fontFamily||cs.fontFamily;ASKM.style.fontWeight=ps.fontWeight;ASKM.style.letterSpacing=ps.letterSpacing;ASKM.style.lineHeight='normal';ASKM.style.whiteSpace='nowrap';ASKM.style.width='auto';ASKM.style.fontSize='14.5px';ASKM.textContent=full;const w=ASKM.offsetWidth;
+ let fs=14.5,lh=22,lines=1,txt=full;
+ if(w>avail){fs=14.5*avail/w;if(fs<12.5){fs=11.5;lh=14;lines=2;ASKM.style.whiteSpace='normal';ASKM.style.width=avail+'px';ASKM.style.fontSize=fs+'px';ASKM.style.lineHeight=lh+'px';
+   const fits=t=>{ASKM.textContent=t;return ASKM.offsetHeight<=lh*2+1};if(!fits(txt)){let ws=full.split(' ');while(ws.length>1&&!fits(ws.join(' ')+'…'))ws.pop();txt=ws.join(' ')+'…'}}}
+ a.style.setProperty('--phfs',fs.toFixed(2)+'px');a.style.setProperty('--phlh',lh+'px');
+ const pv=Math.max(2,(H-lines*lh)/2);a.style.paddingTop=a.style.paddingBottom=pv+'px';a._pht=txt;if(a.placeholder!==txt)a.placeholder=txt}
 function gBar(text){const a=$('ask');a.placeholder=text;askPH();gReact(text)}
 addEventListener('resize',()=>askPH());
 // R.O.D.G.E.R. reacts to whatever the Sentient Search Bar just said - a look, not a performance
@@ -2332,7 +2341,7 @@ async function speak(t,vo){t=String(t||'').replace(/[*_#`]/g,'').trim();if(!t)re
  const txts=[first].concat(rest?[rest]:[]);SPQ=[];SPQ.full=t;try{for(let k=0;k<parts.length;k++){const ab=await parts[k];if(gen!==talkGen)return;playBuf(ab,txts[k])}}
  catch(e){if(gen===talkGen){speakStop();speakDevice(t)}}}
 if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{};
-const grow=()=>{const t=$('ask');if(!t.value){t.style.height='';askPH();return}t.style.height='auto';t.style.height=Math.min(160,t.scrollHeight)+'px'};
+const grow=()=>{const t=$('ask');t.style.height='';if(!t.value){askPH();return}t.style.paddingTop=t.style.paddingBottom='';t.classList.toggle('ovf',t.scrollHeight>t.clientHeight+2);t.scrollTop=t.scrollHeight};
 $('ask').addEventListener('input',grow);
 $('ask').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const v=$('ask').value;$('ask').value='';grow();askAny(v)}});
 $('asksend').onclick=()=>{const v=$('ask').value,keep=Date.now()-(window.__askFocusAt||0)<1500||document.activeElement===$('ask');$('ask').value='';grow();if(keep)$('ask').focus({preventScroll:true});askAny(v)};
@@ -2362,7 +2371,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124214025';let UPD=false;
+const BUILD='20261124214219';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
