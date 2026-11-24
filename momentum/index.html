@@ -932,7 +932,7 @@ $('fpick').onclick=()=>{const opts=dayItems(today()).filter(it=>!isDone(it,today
 setInterval(()=>{if(tab==='focus'||F.run)renderFocus()},1000);
 
 // ---------- YOU
-$('yset').onclick=()=>{buzz(5);sheet('ysh',true);youPart('set',$('ysetb'))};$('yshx').onclick=()=>sheet('ysh',false);
+$('yset').onclick=()=>{buzz(5);sheet('ysh',true);youPart('set',$('ysetb'))};$('yshx').onclick=()=>sheet('ysh',false);new MutationObserver(()=>{if(!$('ysh').classList.contains('on')&&GVP.v)gvStop()}).observe($('ysh'),{attributes:true,attributeFilter:['class']});
 const MOODS=[['rough','#6b5b95'],['low','#7d84b2'],['okay','#9aa0a6'],['good','#c7b88a'],['great','#e8d48b']];
 function localStats(){const days={};let total=0;Object.values(S.items).forEach(it=>Object.keys(it.done||{}).forEach(d=>{days[d]=days[d]||[0,0];days[d][0]++;days[d][1]+=+it.dur||15;total++}));
  let st=0,d=today();if(!days[d])d=addDays(d,-1);while(days[d]){st++;d=addDays(d,-1)}const week=[];for(let i=6;i>=0;i--){const ds=addDays(today(),-i);week.push({date:ds,n:(days[ds]||[0])[0],mins:(days[ds]||[0,0])[1]})}
@@ -1521,14 +1521,39 @@ function kbPre(){kbFit.t0=Date.now();if(tab!=='gary'||!matchMedia('(pointer:coar
 $('ask').addEventListener('focus',()=>{kbPre();kbFit();setTimeout(kbFit,60);setTimeout(kbFit,320);setTimeout(kbFit,650)});$('ask').addEventListener('blur',()=>{setTimeout(kbFit,60);setTimeout(kbFit,320)});
 
 // five voices to audition for R.O.D.G.E.R.: play each, pick one (used for live voice chat and replies read aloud)
-const GV5=[['usual','His usual voice (default)','The Rodger you know: smooth, deep, older English gentleman'],['highland','The Highlander','Broad Scottish brogue, gravelly as an old whisky cask'],['ancient','The Ancient','Ninety-odd, papery and quavering, terribly proper'],['dublin','The Dubliner','Soft Irish lilt, a born storyteller with a wink'],['major','The Sergeant-Major','Ex-army: clipped, gruff, barks the important bits'],['thespian','The Thespian','Booming old stage actor, savours every word'],['mainframe','The Mainframe','Smooth, calm and precise - a refined English AI']];
+const GV5=[['usual','His usual voice (default)','The Rodger you know: smooth, deep, older English gentleman'],['highland','The Highlander','Broad Scottish brogue, gravelly as an old whisky cask'],['ancient','The Ancient','Ninety-odd, papery and quavering, terribly proper'],['dublin','The Dubliner','Soft Irish lilt, a born storyteller with a wink'],['major','The Sergeant-Major','Ex-army: clipped, gruff, barks the important bits'],['thespian','The Thespian','Booming old stage actor, savours every word'],['mainframe','Vision','Calm, smooth and precise, like a thoughtful AI being. The closest built-in voice to Vision (not the actor\'s real voice)']];
 const GV_IDS=GV5.map(x=>x[0]);function gvCur(){const v=store('garyVoice');return v==='clone'||GV_IDS.includes(v)?v:'usual'}
 const GV_LINE='Good evening, sir. Rodger, at your service. Your tea is on the side, the diary is clear, and I have taken the liberty of tidying your plans.';
 function voicePicker(){const el=$('svoice');if(!el)return;const cur=gvCur();
  el.innerHTML=GV5.map(([v,name,desc])=>'<div class="gvrow'+(cur===v?' on':'')+'"><div><b>'+name+'</b><small>'+desc+(cur===v?' · in use':'')+'</small></div><button class="btn ghost" data-play="'+v+'">▶ Play</button><button class="btn'+(cur===v?' fill':' ghost')+'" data-use="'+v+'">'+(cur===v?'Chosen':'Use')+'</button></div>').join('')+
   (vcMap().calm?'<div class="gvrow'+(cur==='clone'?' on':'')+'"><div><b>Your butler voice</b><small>Your own recording'+(cur==='clone'?' · in use':'')+' (read-aloud only)</small></div><button class="btn ghost" data-play="clone">▶ Play</button><button class="btn'+(cur==='clone'?' fill':' ghost')+'" data-use="clone">'+(cur==='clone'?'Chosen':'Use')+'</button></div>':'');
- el.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>{audioUnlock();speak(GV_LINE,b.dataset.play);b.textContent='♪ Playing';setTimeout(()=>{if(b.isConnected)b.textContent='▶ Play'},6000)});
- el.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{store('garyVoice',b.dataset.use);voicePicker()})}
+ el.querySelectorAll('[data-play]').forEach(b=>{b.dataset.v=b.dataset.play;b.onclick=()=>gvToggle(b.dataset.play)});gvBtns();
+ el.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{const v=b.dataset.use;store('garyVoice',v);voicePicker();if(GVP.v!==v||GVP.st!=='play')gvToggle(v,true)})}
+// voice samples: every voice says the same short line; tap to play, tap again to pause, again to carry on
+const GV_SAMPLE='The quick brown fox jumps over the lazy dog.';const GVP={v:null,st:'',el:null,url:{}};
+// plays through an <audio> element, so it still works with the iPhone's silent switch on
+function gvWav(ab){const d=ab.getChannelData(0),n=d.length,r=ab.sampleRate,b=new DataView(new ArrayBuffer(44+n*2));const w=(o,t)=>{for(let k=0;k<t.length;k++)b.setUint8(o+k,t.charCodeAt(k))};
+ w(0,'RIFF');b.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');b.setUint32(16,16,true);b.setUint16(20,1,true);b.setUint16(22,1,true);b.setUint32(24,r,true);b.setUint32(28,r*2,true);b.setUint16(32,2,true);b.setUint16(34,16,true);w(36,'data');b.setUint32(40,n*2,true);
+ for(let k=0;k<n;k++)b.setInt16(44+k*2,Math.max(-1,Math.min(1,d[k]))*32767,true);return URL.createObjectURL(new Blob([b],{type:'audio/wav'}))}
+const GV_SILENT='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=';
+function gvBtns(){document.querySelectorAll('#svoice [data-play]').forEach(b=>{const me=GVP.v===b.dataset.play;
+ b.textContent=!me?'▶ Play':GVP.st==='load'?'Loading…':GVP.st==='play'?'❚❚ Pause':GVP.st==='pause'?'▶ Resume':GVP.st==='err'?'Try again':'▶ Play';b.classList.toggle('fill',me&&(GVP.st==='play'||GVP.st==='pause'))})}
+function gvDone(){GVP.v=null;GVP.st='';gvBtns()}
+function gvStop(){try{if(GVP.el)GVP.el.pause()}catch(e){}try{speechSynthesis.cancel()}catch(e){}gvDone()}
+function gvPlay(v){const el=GVP.el;el.onended=()=>{if(GVP.v===v)gvDone()};el.src=GVP.url[v];el.currentTime=0;GVP.st='play';gvBtns();
+ const p=el.play();if(p&&p.catch)p.catch(()=>{if(GVP.v===v){GVP.st='pause';gvBtns()}})}
+async function gvToggle(v,fresh){if(!fresh&&GVP.v===v){
+  if(GVP.st==='play'){if(GVP.el)GVP.el.pause();try{speechSynthesis.pause()}catch(e){}GVP.st='pause';gvBtns();return}
+  if(GVP.st==='pause'){GVP.st='play';gvBtns();if(GVP.url[v])GVP.el.play().catch(()=>{});else try{speechSynthesis.resume()}catch(e){}return}
+  if(GVP.st==='load')return}
+ gvStop();speakStop();GVP.v=v;
+ if(!GVP.el){GVP.el=new Audio();GVP.el.playsInline=true;GVP.el.setAttribute('playsinline','')}
+ if(GVP.url[v]){gvPlay(v);return}
+ try{GVP.el.src=GV_SILENT;const p=GVP.el.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}   // unlocks the player inside the tap
+ if(!CS||!navigator.onLine){GVP.st='play';gvBtns();try{const u=new SpeechSynthesisUtterance(GV_SAMPLE);u.lang='en-GB';u.onend=()=>{if(GVP.v===v)gvDone()};speechSynthesis.speak(u)}catch(e){}return}
+ GVP.st='load';gvBtns();
+ try{audioUnlock();const ab=await ttsFetch(GV_SAMPLE,v);GVP.url[v]=gvWav(ab);if(GVP.v!==v||GVP.st!=='load')return;gvPlay(v)}
+ catch(e){if(GVP.v===v){GVP.st='err';gvBtns();setTimeout(()=>{if(GVP.v===v&&GVP.st==='err')gvDone()},4000)}}}
 // ---------- Rodger in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={X:'#9ea6b3',S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
@@ -2297,7 +2322,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124210728';let UPD=false;
+const BUILD='20261124211451';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
