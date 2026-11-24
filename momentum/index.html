@@ -919,6 +919,10 @@ async function chSearch(){const q=$('chq').value.trim();if(!q)return drawChats()
  R.sort((a,b)=>new Date(b.t)-new Date(a.t));
  $('chlist').innerHTML=R.length?'<div class="lab chg">'+R.length+(R.length>=80?'+':'')+' found · newest first</div>'+R.map(r=>'<button class="ci chi chr" data-id="'+esc(r.id)+'" data-at="'+(r.at||'')+'"><span class="chs" style="color:var(--fg)"><b style="display:inline;font:inherit;font-weight:600">'+r.who+':</b> '+snip(r.text)+'</span><small>'+esc((r.title||'Chat')+' · '+chWhen(r.t))+'</small></button>').join(''):'<p class="empty">Nothing found for "'+esc(q)+'".</p>';chOpenWire()}
 function chOpenWire(){$('chlist').querySelectorAll('.chr').forEach(b=>b.onclick=()=>{sheet('chl',false);const at=+b.dataset.at||0;if(tab!=='gary')go('gary');loadChatAt(b.dataset.id,at)})}
+// the up-arrow sits right above the search bar's magnifier button, centred on it
+function gbAlign(){const u=$('gbup'),sb=$('asksend');if(!u||!sb||!u.offsetWidth||!sb.offsetWidth)return;const s=sb.getBoundingClientRect(),r=u.getBoundingClientRect(),cur=parseFloat(u.style.marginRight)||0;
+ const d=(r.left+r.width/2)-(s.left+s.width/2);if(Math.abs(d)>0.5)u.style.marginRight=(cur+d)+'px'}
+addEventListener('resize',()=>setTimeout(gbAlign,50));if(window.ResizeObserver){const ro=new ResizeObserver(()=>gbAlign());ro.observe($('askbar'));ro.observe($('asksend'))}setTimeout(gbAlign,300);setTimeout(gbAlign,1500);
 $('gbmute').onclick=e=>{e.stopPropagation();$('lvmute').click();setTimeout(lvCallDraw,50)};$('gbend').onclick=e=>{e.stopPropagation();lvStop()};$('chatsBtn').onclick=listChats;$('chnew').onclick=()=>{loadChat(null);setTimeout(()=>$('ask').focus(),300)};new MutationObserver(chHead).observe($('ctitle'),{childList:true,characterData:true,subtree:true});$('newChat').onclick=()=>{loadChat(null);sheet('chl',false);setTimeout(()=>$('ask').focus(),300)};
 // What Gary can see of Momentum right now (no passwords, nothing hidden)
 function garyCtx(){const t=today(),its=Object.values(S.items).filter(i=>!i.deleted&&occurs(i,t));
@@ -1860,7 +1864,7 @@ function brainToggle(k){const U=gUse();if(!U[k]){U[k]=true;store('garyUse',JSON.
  $('bconf').classList.add('on');$('bcyes').onclick=()=>{U[k]=false;store('garyUse',JSON.stringify(U));$('bconf').classList.remove('on');brainDraw();brainMenu(true);toast('Switched off')};$('bcno').onclick=()=>$('bconf').classList.remove('on')}
 // voice screen: swipe it away (down, left or right) to hang up and go back to the search bar; it follows your finger and springs back if you let go early
 function lvMini(on){$('live').classList.toggle('mini',on);document.body.classList.toggle('lvmini',!!on&&LV.on);lvCallDraw();setTimeout(garyBottom,320)}
-function lvCallDraw(){const m=$('gbmute');if(!m)return;m.classList.toggle('on',!!LV.muted);$('gbs').textContent=document.body.classList.contains('lvmini')?(LV.muted?'In a call · muted':'In a call · tap to open'):'Tap to talk'}
+function lvCallDraw(){const m=$('gbmute');if(!m)return;setTimeout(gbAlign,60);m.classList.toggle('on',!!LV.muted);$('gbs').textContent=document.body.classList.contains('lvmini')?(LV.muted?'In a call · muted':'In a call · tap to open'):'Tap to talk'}
 (function(){const L=$('live');let x0=null,y0=0,dx=0,dy=0,ax=0;
  const put=(x,y,t)=>{L.style.transition=t||'none';L.style.transform=x||y?'translate('+x+'px,'+y+'px)':'';L.style.opacity=x||y?String(Math.max(.35,1-Math.hypot(x,y)/700)):''};
  L.addEventListener('pointerdown',e=>{if(e.target.closest('button,input,textarea,#lvtype')||L.classList.contains('mini')||!L.classList.contains('on'))return;x0=e.clientX;y0=e.clientY;dx=dy=0;ax=0});
@@ -2023,7 +2027,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124163441';let UPD=false;
+const BUILD='20261124163520';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
