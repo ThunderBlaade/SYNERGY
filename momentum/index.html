@@ -412,6 +412,12 @@ body.lvon.lvmini #askbar{display:flex!important;animation:barback .35s var(--eas
 .cphead{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}#cpx{background:none;border:0;color:var(--fg);font-size:16px;width:34px;height:34px}
 #cplist{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;margin:0 -2px}.cphead{gap:10px}.cphead .lab:first-child{flex:1}#cpnew{color:var(--fg)}
 body.lvon #chpick{display:none!important}
+
+/* smaller chat boxes: two-line summary, pencil to rename */
+.chrow{margin:8px 0}.chrow .chi{padding:10px 12px 9px}.chrow .chi b{display:flex;align-items:center;gap:8px;font-size:16px;padding-bottom:6px;margin-bottom:6px}.cht{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chren{flex:none;width:26px;height:26px;display:grid;place-items:center;color:var(--dim)}.chren svg{width:15px;height:15px}
+.chrin{position:absolute;z-index:2;left:12px;right:12px;top:8px;background:#000;border:0;border-bottom:1px solid var(--fg);color:var(--fg);font:400 16px var(--serif);padding:4px 0}
+.chrow .chs{-webkit-line-clamp:2!important;font-size:13.5px;margin-top:0}.chrow .chf1{-webkit-line-clamp:2;font-size:12px;margin-top:5px}.chrow .chi small{font-size:11px;margin-top:5px}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -920,7 +926,7 @@ let CHFIRST={};try{CHFIRST=JSON.parse(store('garyFirst')||'{}')}catch(e){}
 function chRowsHTML(L){const now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();L=L.slice().sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0));
  const grp=c=>{if(c.pinned)return 'Pinned';const t=new Date(c.updated_at).getTime();return t>=d0?'Today':t>=d0-6*864e5?'This week':t>=d0-30*864e5?'This month':'Earlier'};let last='',h='';
  for(const c of L){const g=grp(c);if(g!==last){h+='<div class="lab chg">'+g+'</div>';last=g}const f=CHFIRST[c.id];
-  h+='<div class="chrow" data-id="'+esc(c.id)+'"><button class="chact chpin">'+(c.pinned?'Unpin':'Pin')+'</button><button class="chact chdel">Delete</button><button class="ci chi'+(c.id===CHAT?' on':'')+'" data-id="'+esc(c.id)+'"><b>'+esc(c.title||'Chat')+'</b>'+(c.summary?'<span class="chs">'+esc(c.summary)+'</span>':'')+
+  h+='<div class="chrow" data-id="'+esc(c.id)+'"><button class="chact chpin">'+(c.pinned?'Unpin':'Pin')+'</button><button class="chact chdel">Delete</button><button class="ci chi'+(c.id===CHAT?' on':'')+'" data-id="'+esc(c.id)+'"><b><span class="cht">'+esc(c.title||'Chat')+'</span><i class="chren" role="button" aria-label="Rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></i></b>'+(c.summary?'<span class="chs">'+esc(c.summary)+'</span>':'')+
    '<span class="chf1" data-f="'+esc(c.id)+'">'+(f?esc(f):'')+'</span><small>'+[new Date(c.updated_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}),...(c.tags||[]).map(t=>CHT[t]||t),c.crucial?'kept word for word':c.archived?'summary only':''].filter(Boolean).map(esc).join(' · ')+'</small></button></div>'}
  setTimeout(()=>chFirstLoad(L.map(c=>c.id)),50);return h}
 async function chFirstLoad(ids){const need=ids.filter(id=>CHFIRST[id]===undefined).slice(0,30);if(!need.length||chFirstLoad.busy)return;chFirstLoad.busy=true;
@@ -928,10 +934,12 @@ async function chFirstLoad(ids){const need=ids.filter(id=>CHFIRST[id]===undefine
    CHFIRST[id]=m.map(x=>(x.role==='user'?'You: ':'Gary: ')+String(x.content).replace(/\s+/g,' ').slice(0,110)).join('\n');document.querySelectorAll('.chf1[data-f="'+id+'"]').forEach(e=>e.textContent=CHFIRST[id])}catch(e){}}));
   store('garyFirst',JSON.stringify(CHFIRST))}finally{chFirstLoad.busy=false}}
 // rows: tap opens, swipe for Pin / Delete, hold to rename
-function chWire(box,open){box.querySelectorAll('.chrow').forEach(chSwipe);box.querySelectorAll('.chi').forEach(b=>{b.onclick=()=>{if(b._sw)return;open(b.dataset.id)};
-   let t=null;b.addEventListener('pointerdown',()=>{t=setTimeout(async()=>{t=-1;if(b._sw)return;buzz(14);const c=CHS.find(x=>x.id===b.dataset.id);if(!c)return;
-    const v=prompt('Rename this chat:',c.title);if(v===null||!v.trim())return;c.title=v.trim().slice(0,120);try{await chPatch(c.id,{title:c.title})}catch(e){}drawChats();chPickDraw()},600)});
-   b.addEventListener('pointerup',()=>{if(t!==-1)clearTimeout(t)});b.addEventListener('pointerleave',()=>{if(t!==-1)clearTimeout(t)});b.addEventListener('pointermove',e=>{if(b._sw&&t!==-1)clearTimeout(t)})})}
+function chWire(box,open){box.querySelectorAll('.chrow').forEach(chSwipe);box.querySelectorAll('.chi').forEach(b=>{b.onclick=e=>{if(b._sw)return;if(e.target.closest('.chren')){e.stopPropagation();chRename(b);return}if(e.target.closest('.chrin')||Date.now()-(chRename.t||0)<500)return;open(b.dataset.id)}})}
+// the pencil after a chat's title: rename it right there (Enter or tap away saves, Esc cancels)
+function chRename(b){const c=CHS.find(x=>x.id===b.dataset.id);if(!c)return;const t=b.querySelector('.cht');if(!t||b.querySelector('.chrin'))return;
+ const inp=document.createElement('input');inp.className='chrin';inp.value=c.title||'';inp.maxLength=120;inp.setAttribute('enterkeyhint','done');t.style.visibility='hidden';b.querySelector('.chren').style.visibility='hidden';b.parentNode.appendChild(inp);inp.focus();inp.select();   // kept outside the button, so typing a space can't open the chat
+ let done=false;const fin=async keep=>{if(done)return;done=true;chRename.t=Date.now();const v=inp.value.trim();if(keep&&v&&v!==c.title){c.title=v.slice(0,120);if(c.id===CHAT)$('ctitle').textContent=c.title;chPatch(c.id,{title:c.title})}drawChats();chPickDraw()};
+ inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();fin(true)}else if(e.key==='Escape')fin(false)});inp.addEventListener('blur',()=>fin(true));inp.addEventListener('click',e=>e.stopPropagation())}
 // opening the app: a small chat picker in the middle of Gary's page - carry on a chat, start a new one, or pin / delete
 function chPickDraw(){const P=$('chpick');if(!P||!P.classList.contains('on'))return;const L=CHS.slice(0,40);
  $('cplist').innerHTML=L.length?chRowsHTML(L):'<p class="empty">No chats yet - start one below.</p>';chWire($('cplist'),id=>{chPickClose();loadChat(id)})}
@@ -2070,7 +2078,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124172725';let UPD=false;
+const BUILD='20261124173011';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
