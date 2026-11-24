@@ -11,6 +11,12 @@ create table if not exists public.gary_convos (
   updated_at timestamptz not null default now(),
   primary key (uid, id)
 );
+alter table public.gary_convos
+  add column if not exists summary   text,
+  add column if not exists tags      text[]      not null default '{}',
+  add column if not exists crucial   boolean     not null default false,
+  add column if not exists summed_at timestamptz,
+  add column if not exists archived  boolean     not null default false;
 create table if not exists public.gary_messages (
   id         bigint generated always as identity primary key,
   uid        uuid        not null default auth.uid(),

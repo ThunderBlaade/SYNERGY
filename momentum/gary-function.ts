@@ -313,6 +313,50 @@ export async function memFind(q, token) {
   return (Array.isArray(o.hits) ? o.hits : []).filter((h) => h && ok.has(h.id)).slice(0, 8).map((h) => ({ id: h.id, why: clip(h.why, 120) }));
 }
 
+
+// ---------- Chat history: every chat gets a summary and topic tags. Old ordinary chats are condensed to that summary to save space;
+// chats that matter (crucial) keep every word until storage is getting full.
+export const CHAT_TAGS = ["plans", "feelings", "people", "work", "health", "projects", "ideas", "questions", "fun", "voice"];
+export async function chatSum(token, n = 6) {
+  const cs = await db("gary_convos?select=id,title,updated_at,summed_at,archived&archived=is.false&order=updated_at.desc&limit=200", token).catch(() => []);
+  const todo = cs.filter((c) => !c.summed_at || new Date(c.summed_at) < new Date(c.updated_at)).slice(0, n);
+  for (const c of todo) {
+    const msgs = await db(`gary_messages?select=role,content,created_at&convo=eq.${encodeURIComponent(c.id)}&order=id.asc&limit=400`, token).catch(() => []);
+    if (!msgs.length) { await db(`gary_convos?id=eq.${encodeURIComponent(c.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ summed_at: new Date().toISOString() }) }).catch(() => {}); continue; }
+    const talk = msgs.map((m) => (m.role === "gary" ? "Gary: " : "Sam: ") + String(m.content).slice(0, 1500)).join("\n").slice(-24000);
+    try {
+      let out = "";
+      for await (const t of gemini("You summarise Sam's chats with Gary, his butler. Reply with JSON only.", [{ role: "user", parts: [{ text:
+        `Summarise this chat so it can stand in for the full conversation later. Be detailed enough that nothing important is lost: keep every name, date, place, number, decision, promise, plan, task, feeling, worry, boundary, and anything Gary said he'd do or remember - plus enough context to understand why. Drop greetings, filler and repetition. Plain British English, past tense, about Sam in the third person.\n` +
+        `Return {"title": a short, specific title (max 8 words), "summary": 2-8 sentences (longer only if the chat really needs it), "tags": up to 3 of ${JSON.stringify(CHAT_TAGS)}, "crucial": true only if it holds something Sam would be upset to lose word for word (a personal or emotional moment, an important decision, promise or record)}.\n\nCHAT:\n${talk}` }] }], true)) out += t;
+      const o = JSON.parse((out.match(/\{[\s\S]*\}/) || [out])[0]);
+      const patch = { summary: String(o.summary || "").slice(0, 4000), tags: (Array.isArray(o.tags) ? o.tags : []).filter((x) => CHAT_TAGS.includes(x)).slice(0, 3),
+        crucial: o.crucial === true, summed_at: new Date().toISOString() };
+      if (o.title && (!c.title || /^(Talk with Gary|A chat G\.A\.R\.Y\. started|New chat)$/i.test(c.title) || c.title.length < 4)) patch.title = String(o.title).slice(0, 120);
+      await db(`gary_convos?id=eq.${encodeURIComponent(c.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify(patch) });
+    } catch { /* next time */ }
+  }
+  return { left: Math.max(0, cs.filter((c) => !c.summed_at || new Date(c.summed_at) < new Date(c.updated_at)).length - todo.length) };
+}
+async function chatArchive(token, pct) {
+  const d30 = new Date(Date.now() - 30 * 864e5).toISOString();
+  const full = pct >= 70;   // getting full: even crucial chats are condensed (oldest first)
+  const old = await db(`gary_convos?select=id,summary,summed_at,updated_at,crucial&archived=is.false&summary=not.is.null&updated_at=lt.${d30}${full ? "" : "&crucial=is.false"}&order=updated_at.asc&limit=10`, token).catch(() => []);
+  let n = 0;
+  for (const c of old) {
+    if (!c.summed_at || new Date(c.summed_at) < new Date(c.updated_at) || String(c.summary || "").length < 40) continue;
+    const id = encodeURIComponent(c.id);
+    try {
+      await db("gary_messages", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ convo: c.id, role: "gary", content: "Summary of this chat (the word-for-word messages were condensed to save space):\n" + c.summary }) });
+      const keep = await db(`gary_messages?select=id&convo=eq.${id}&order=id.desc&limit=1`, token);
+      await db(`gary_messages?convo=eq.${id}&id=lt.${keep[0].id}`, token, { method: "DELETE", headers: { Prefer: "return=minimal" } });
+      await db(`gary_convos?id=eq.${id}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ archived: true }) });
+      n++;
+    } catch { /* leave it whole */ }
+  }
+  return n;
+}
+
 // --- memories: who he is always (Self), plus the files that relate to what's being said, and the files those connect to
 async function recall(text, token) {
   const profile = await db("gary_memories?select=title,summary,text&deleted=is.false&or=(folder.eq.self,kind.in.(profile,preference))&order=importance.desc,updated_at.desc&limit=14", token).catch(() => []);
@@ -533,9 +577,11 @@ async function tidy(token) {
   gone.logs = ((await db(`gary_audit?at=lt.${d30}&action=not.in.(wish,tidy)&select=id`, token, { method: "DELETE", headers: { Prefer: "return=representation" } }).catch(() => [])) || []).length;
   gone.jobs = ((await db(`gary_jobs?updated_at=lt.${d7}&status=in.(done,failed,denied)&select=id`, token, { method: "DELETE", headers: { Prefer: "return=representation" } }).catch(() => [])) || []).length;
   await memSort(token, 15).catch(() => {});
+  await chatSum(token, 6).catch(() => {});
   await memCompress(token).catch(() => {});
   const [msgs, mems, logs, jobs] = await Promise.all(["gary_messages", "gary_memories", "gary_audit", "gary_jobs"].map((t) => rowCount(t, token)));
   const mb = +((msgs * 900 + mems * 700 + logs * 400 + jobs * 500) / 1e6 + 2).toFixed(1);   // rough size incl. indexes, plus the plan
+  gone.chats = await chatArchive(token, mb / 500 * 100).catch(() => 0);
   await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "tidy", detail: { gone, rows: { msgs, mems, logs, jobs }, mb, pct: +(mb / 500 * 100).toFixed(1) } }) }).catch(() => {});
 }
 async function health(token) {
@@ -544,7 +590,7 @@ async function health(token) {
     db("gary_agents?select=name,info&order=last_seen.desc&limit=1", token).catch(() => []),
   ]);
   const lines = [];
-  if (t[0]) { const d = t[0].detail || {}; lines.push(`Your storage (Supabase free plan, 500 MB): about ${d.mb} MB used (${d.pct}%). Last tidy ${t[0].at.slice(0, 10)} cleared ${d.gone?.logs || 0} old logs and ${d.gone?.jobs || 0} old PC job slips - chats and memories are never deleted.` +
+  if (t[0]) { const d = t[0].detail || {}; lines.push(`Your storage (Supabase free plan, 500 MB): about ${d.mb} MB used (${d.pct}%). Last tidy ${t[0].at.slice(0, 10)} cleared ${d.gone?.logs || 0} old logs and ${d.gone?.jobs || 0} old PC job slips, and condensed ${d.gone?.chats || 0} old chats to their summaries. Memories are never deleted; ordinary chats are condensed to detailed summaries after 30 days; crucial chats keep every word until storage passes 70%.` +
     (d.pct >= 70 ? " WARNING: you're getting full - tell Sam plainly, and that the fix is either moving old chats to an archive or upgrading the storage plan (which costs money - he must decide)." : "")); }
   const drives = ag[0]?.info?.drives || {};
   for (const [k, v] of Object.entries(drives)) if (v.free_gb < 15) lines.push(`WARNING: his PC's ${k} drive is nearly full (${v.free_gb} GB free of ${v.total_gb}). Tell him, suggest clearing big files or Downloads, and if it keeps happening, a bigger drive.`);
@@ -781,12 +827,13 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
   }
 
   // Memories: fold freshly saved rows (e.g. from live voice) into files, sort old ones, or search
-  if (body.mode === "curate" || body.mode === "memsort" || body.mode === "memfind") {
+  if (body.mode === "curate" || body.mode === "memsort" || body.mode === "memfind" || body.mode === "chatsum") {
     const J = (o, st = 200) => new Response(JSON.stringify(o), { status: st, headers: { ...CORS, "Content-Type": "application/json" } });
     if (body.guest === true) return J({ error: "no" }, 403);
     try {
       if (body.mode === "memfind") return J({ hits: await memFind(text, token) });
       if (body.mode === "memsort") return J(await memSort(token, 15));
+      if (body.mode === "chatsum") return J(await chatSum(token, 6));
       const ids = (Array.isArray(body.ids) ? body.ids : []).map(String).filter((x) => /^[a-z0-9]{1,60}$/i.test(x)).slice(0, 10);
       const raw = ids.length ? await db(`gary_memories?select=${MEM_SEL}&deleted=is.false&meaning=is.null&id=in.(${ids.join(",")})`, token).catch(() => []) : [];
       return J(await memFold(raw, token));
