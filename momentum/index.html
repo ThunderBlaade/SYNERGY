@@ -533,7 +533,7 @@ textarea{border-radius:14px;background:var(--card);border-color:rgba(255,255,255
 #chatsBtn{grid-column:1;grid-row:1;order:0!important;width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid rgba(255,255,255,.08);display:grid;place-items:center;color:var(--fg)}#chatsBtn svg{width:22px;height:22px}
 #memBtn{grid-column:2;grid-row:1;justify-self:center;order:0!important;height:34px;padding:0 16px;border-radius:17px;background:var(--card2);border:1px solid rgba(255,255,255,.08);font:600 11px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--fg)}
 #gnew{grid-column:3;grid-row:1;justify-self:end;order:0!important;width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid rgba(255,255,255,.08);place-items:center;color:var(--fg);padding:0}#gnew svg{width:20px;height:20px;display:block;margin:auto}
-body.guest #gnew,body.haschat #gnew{display:grid!important}
+body.haschat #gnew{display:grid!important}
 #ask{border-radius:24px!important;background:var(--card)!important;border:1px solid rgba(255,255,255,.1)!important;padding-left:18px!important;padding-right:18px!important}
 #asksend{background:var(--fg)!important;color:#000!important;border-color:var(--fg)!important}
 #gsug{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin:18px 0 4px;animation:gin .35s var(--ease)}
@@ -594,6 +594,7 @@ body.kbup #gbar{height:104px!important}body.kbup #gdock{width:100px!important;he
 header>.lab{font-size:10.5px!important;letter-spacing:.32em!important}#hdate{font-size:10.5px!important;letter-spacing:.16em!important}
 #brain #bwifi,#brain #bwifi svg{width:16px!important;height:16px!important}#bwifi.live,#bwifi.low,#brain i.low{animation:none!important}
 #thread .a.gwarn{font:400 14px/1.45 var(--sans)!important;color:var(--dim);border-left:2px solid #e8c25a;padding-left:10px}
+body.guest:not(.haschat) #gnew{display:none!important}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><button id="hmem" aria-label="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button><button id="hfid" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -1059,7 +1060,8 @@ function chView(){const P=$('p-gary');if(P.scrollHeight-P.scrollTop-P.clientHeig
  for(const b of $('thread').querySelectorAll('p.q,p.a')){const q=b.getBoundingClientRect();if(q.bottom<r.top+40||q.top>r.bottom-60)continue;out+=(b.classList.contains('q')?'You: ':'Rodger: ')+b.textContent.trim()+'\n'}
  return out.slice(0,3000)}
 // the chat you're in, and a new-chat button, under R.O.D.G.E.R.
-function chHead(){const n=$('chname');if(n)n.textContent=CHAT?chName($('ctitle').textContent||'Chat'):'New chat';document.body.classList.toggle('haschat',!!CHAT&&$('thread').querySelector('p.q')!==null)}
+function chHead(){const n=$('chname');if(n)n.textContent=CHAT?chName($('ctitle').textContent||'Chat'):'New chat';document.body.classList.toggle('haschat',(!!CHAT||(typeof GL!=='undefined'&&GL.guest))&&$('thread').querySelector('p.q')!==null)}
+new MutationObserver(()=>chHead()).observe($('thread'),{childList:true});
 const CHT={plans:'Plans',feelings:'Feelings',people:'People',work:'Work',health:'Health',projects:'Projects',ideas:'Ideas',questions:'Questions',fun:'Fun',voice:'Voice'};
 let CHS=[],CHF='all';
 async function listChats(){sheet('chl',true);$('chq').value='';if(!CS){$('chf').innerHTML='';$('chlist').innerHTML='<p class="empty">Sign in under You → Settings to keep chats with Rodger.</p>';return}
@@ -2388,7 +2390,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124214708';let UPD=false;
+const BUILD='20261124214759';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
