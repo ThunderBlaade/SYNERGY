@@ -400,6 +400,29 @@ export async function styleLearn(token, force = false) {
 }
 const styleBlock = (st) => st ? `\n\nHow Sam likes you to talk to him (you learned this from how he talks and reacts - follow it; on length, tone and humour it overrides your general defaults, and keep noticing what works):\n${st}` : "";
 
+
+// ---------- Company: if anyone else is (or seems to be) with Sam, G.A.R.Y. gets none of his private memories to slip with.
+const NOT_NAMES = new Set("i he she they you we it that this gary sir mum dad someone everyone somebody nobody who what he's she's".split(" "));
+export function companyCheck(msgs) {
+  const recent = msgs.filter((m) => !m.created_at || Date.now() - new Date(m.created_at).getTime() < 45 * 60e3).slice(-16);
+  let on = false; const names = new Set();
+  for (const m of recent) {
+    const t = String(m.content || "");
+    if (m.role === "user") {
+      if (/\b(i'?m|im|i am) (alone|on my own|by myself)\b|\bjust (us|me)( now)?\b|\b(he'?s|she'?s|they'?ve|they'?re|theyre|hes|shes) (gone|left)\b/i.test(t)) { on = false; names.clear(); continue; }
+      let hit = false;
+      for (const x of t.matchAll(/\b([a-z][a-z'-]{2,})\s+(said|says|asked|asks|wants|reckons|thinks|is here|is with me|is listening|is asking|wants to know)\b/gi)) if (!NOT_NAMES.has(x[1].toLowerCase())) { names.add(x[1][0].toUpperCase() + x[1].slice(1).toLowerCase()); hit = true; }
+      for (const x of t.matchAll(/\b(?:i'?m|im|i am)\s+(?:with|out with|round at|at)\s+([a-z][a-z'-]{2,})/gi)) if (!NOT_NAMES.has(x[1].toLowerCase())) { names.add(x[1][0].toUpperCase() + x[1].slice(1).toLowerCase()); hit = true; }
+      if (/\b(say (hi|hello) to|tell (him|her|them)|on speaker|my (friend|mate|mum|dad|boyfriend|girlfriend|partner) (is|says|said)|we'?re (here|together))\b/i.test(t)) hit = true;
+      if (hit) on = true;
+    } else {
+      for (const x of t.matchAll(/\b(?:hello|hi|good (?:morning|afternoon|evening)(?: to you)?),?\s+([A-Z][a-z'-]{2,})\b/g)) if (!/^(Sam|Sir|Mr)$/.test(x[1])) { names.add(x[1]); on = true; }
+    }
+  }
+  return { on, names: [...names].slice(0, 6) };
+}
+const companyBlock = (c) => c.on ? `\n\nRIGHT NOW SAM IS NOT ALONE${c.names.length ? " - he's with " + c.names.join(", ") : ""}. You are in company: none of his private memories are with you, and you must not share or hint at anything private, or anything he has said or felt about anyone. If he asks about something private, ask "Mr Fice, are you alone right now?" and leave it until he's alone.` : "";
+
 // --- memories: who he is always (Self), plus the files that relate to what's being said, and the files those connect to
 async function recall(text, token) {
   const [profileAll, sf] = await Promise.all([db("gary_memories?select=title,summary,text&deleted=is.false&or=(folder.eq.self,kind.in.(profile,preference))&order=importance.desc,updated_at.desc&limit=15", token).catch(() => []), styleFile(token)]);
@@ -512,6 +535,15 @@ async function* gemini(system, turns, json = false) {
   if (sofar) { INFO.finish = "stalled"; return; }
   throw last || new Error("no model available");
 }
+
+const PRIVACY = `
+PRIVACY - HARD RULE, above everything except safety:
+- Before you bring up, or answer about, anything private - his feelings, relationships and crushes, the people in his life, songs or anything he's writing or making, secrets, health, money, plans, or anything from your memories or past chats about another person - first ask, in these words: "Mr Fice, are you alone right now?" Only carry on once he clearly says he is. If he says no, doesn't answer, or you're unsure, don't share it - offer to talk about it later.
+- You don't need to ask again if he has told you he's alone earlier in this same conversation and nothing since suggests anyone has joined.
+- You are IN COMPANY whenever anyone else is there or may be listening: he says he's with someone, relays what someone says ("Kealan said...", "she wants to know..."), puts you on speaker, you hear another voice, or you've greeted or spoken to someone else. In company, never reveal or hint at anything private - not even "I have a record that...". Above all, never tell a person anything Sam has said, felt or made about them. If anyone asks, answer only from what was said in front of them, or say smoothly you'll pick it up with Sam later.
+- Company lasts until he clearly says he's alone again.
+- "Do you remember when...": check the conversation so far first - it's your short-term memory - then your stored memories. If it happened in this conversation, say so and use it.
+`;
 
 const TOOLS = `
 
@@ -785,11 +817,16 @@ export async function handle(req) {
     if (!key) return new Response(JSON.stringify({ error: "nokey" }), { status: 503, headers: { ...CORS, "Content-Type": "application/json" } });
     const voice = VOICES.includes(body.voice) ? body.voice : "Charon";
     const guest = body.guest === true;
-    const [mem, plan] = guest ? [{}, ""] : await Promise.all([recall(String(body.text || ""), token), planSummary(token, body.items)]);
+    let [mem, plan] = guest ? [{}, ""] : await Promise.all([recall(String(body.text || ""), token), planSummary(token, body.items)]);
+    const lcv = String(body.convo || "").replace(/[^a-z0-9]/gi, "").slice(0, 40);
+    const lrecent = lcv && !guest ? (await db(`gary_messages?select=role,content,created_at&convo=eq.${lcv}&order=id.desc&limit=20`, token).catch(() => [])).reverse() : [];
+    const lcompany = companyCheck(lrecent);
+    if (lcompany.on && !guest) mem = { profile: "(kept back for now - Sam is not alone)", moments: "", style: mem.style };
     const sys = guest ? IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + LIVE_STYLE + GUEST.replace(/- Log every reply[\s\S]*$/, "- Use the guest_note tool once you know who they are, and whenever they ask about Sam's private things.") :
       IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
       `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
-      await pcState(token) + await guestReport(token) + LIVE_STYLE + styleBlock(mem.style);
+      (lrecent.length ? `\n\nThe conversation so far today (newest last) - your short-term memory:\n${lrecent.map((m) => (m.role === "gary" ? "You: " : "Sam: ") + String(m.content).slice(0, 400)).join("\n")}` : "") +
+      await pcState(token) + await guestReport(token) + LIVE_STYLE + styleBlock(mem.style) + PRIVACY + companyBlock(lcompany);
     if (!guest) { try { globalThis.EdgeRuntime?.waitUntil?.(styleLearn(token).catch(() => {})); } catch { /* fine */ } }
     const models = LIVE_MODELS.slice(Math.max(0, Math.min(LIVE_MODELS.length - 1, +body.try || 0)));
     for (const model of models) {
@@ -823,7 +860,9 @@ export async function handle(req) {
     const cv = String(body.convo || "").replace(/[^a-z0-9]/gi, "").slice(0, 40);
     const [mem, plan, recent] = await Promise.all([recall("", token), planSummary(token, body.items),
       cv ? db(`gary_messages?select=role,content&convo=eq.${cv}&order=id.desc&limit=8`, token).catch(() => []) : []]);
-    const sys = IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
+    const ocomp = companyCheck([...recent].reverse());
+    if (ocomp.on) return new Response("SKIP", { headers: { ...CORS, "Content-Type": "text/plain; charset=utf-8" } });
+    const sys = IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` + PRIVACY +
       `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
       styleBlock(mem.style) + (recent.length ? `\n\nThe conversation so far (newest last):\n${recent.reverse().map((m) => (m.role === "gary" ? "You: " : "Sam: ") + m.content.slice(0, 300)).join("\n")}` : "") +
       `\n\nRead the mood first. If he seems busy, low, upset or focused, or the moment just isn't right, reply with exactly SKIP.` +
@@ -910,12 +949,15 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
   const turns = past.reverse().map((m) => ({ role: m.role === "gary" ? "model" : "user", parts: [{ text: m.content }] }));
   turns.push({ role: "user", parts: [{ text }] });
   const guest = body.guest === true;
-  const [mem, plan] = guest ? [{}, ""] : await Promise.all([recall(text, token), planSummary(token, body.items)]);
+  let [mem, plan] = guest ? [{}, ""] : await Promise.all([recall(text, token), planSummary(token, body.items)]);
+  const recentTalk = await db(`gary_messages?select=role,content,created_at&convo=eq.${convo}&order=id.desc&limit=16`, token).catch(() => []);
+  const company = companyCheck([...recentTalk.reverse(), { role: "user", content: text, created_at: new Date().toISOString() }]);
+  if (company.on && !guest) mem = { profile: "(kept back for now - Sam is not alone)", moments: "", style: mem.style };
   const system = guest ? IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + GUEST : IDENTITY +
     `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) +
     `\n\nHis plan in Momentum:\n${plan}` +
     `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` +
-    (mem.moments ? `\n\nMemories that may relate to this (dated where known; only use if relevant):\n${mem.moments}` : "") + styleBlock(mem.style) +
+    (mem.moments ? `\n\nMemories that may relate to this (dated where known; only use if relevant):\n${mem.moments}` : "") + styleBlock(mem.style) + PRIVACY + companyBlock(company) +
     TOOLS + (USE.pc === false ? "\n\nSam has switched off your access to his PC in the app - you can't do anything on it right now; if asked, say so and that he can switch it back on by tapping the PC symbol next to Momentum." : await pcState(token)) + await selfCheck(token) + await health(token) + await guestReport(token);
   const chores = tidy(token).catch(() => {}).then(() => styleLearn(token)).catch(() => {});
   try { globalThis.EdgeRuntime?.waitUntil?.(chores); } catch { /* runs alongside anyway */ }

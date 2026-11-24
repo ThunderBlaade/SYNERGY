@@ -1001,7 +1001,7 @@ async function liveStart(again){if(!gUse().live){toast('Live voice is switched o
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
  catch(e){lvErr('microphone',{error:String(e&&e.name||e)});LV.stream=null;LV.nomic=true;LV.muted=true;$('lvmute').classList.add('on');$('lvmute').setAttribute('aria-label','Microphone unavailable');setTimeout(()=>{if(LV.on&&LV.nomic){$('live').classList.add('typing');$('lvtype').classList.add('on')}},2600)}
  if(LV.stream)lvMicWire();
- let j;try{const r=await garyFetch({mode:'live',text:'Talk with Gary',ctx:garyCtx(),items:garyItems(),voice:store('garyVoice')||'Charon',try:LV.tries});j=await r.json();if(!j.url)throw 0}
+ let j;try{const r=await garyFetch({mode:'live',text:'Talk with Gary',convo:CHAT||'',ctx:garyCtx(),items:garyItems(),voice:store('garyVoice')||'Charon',try:LV.tries});j=await r.json();if(!j.url)throw 0}
  catch(e){lvErr('pass',{error:String(e&&e.message||e)});lvNoShow();return}
  const ws=new WebSocket(j.url);LV.ws=ws;
  ws.onopen=()=>ws.send(JSON.stringify({setup:j.setup}));ws.onmessage=lvMsg;
@@ -1689,7 +1689,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124112046';let UPD=false;
+const BUILD='20261124113815';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
