@@ -320,7 +320,7 @@ export async function memFind(q, token) {
 export const CHAT_TAGS = ["plans", "feelings", "people", "work", "health", "projects", "ideas", "questions", "fun", "voice"];
 const CHAT_FOLDERS = ["People", "Places", "Experiences", "Self", "Knowledge", "Other"];
 export async function chatSum(token, n = 6) {
-  const cs = await db("gary_convos?select=id,title,updated_at,summed_at,archived,parts&archived=is.false&order=updated_at.desc&limit=200", token).catch(() => []);
+  const cs = await db("gary_convos?select=id,title,updated_at,summed_at,archived,parts&archived=is.false&deleted_at=is.null&order=updated_at.desc&limit=200", token).catch(() => []);
   const due = (c) => !c.summed_at || new Date(c.summed_at) < new Date(c.updated_at) || c.parts == null;   // parts: older chats get sorted into folders too
   const todo = cs.filter(due).slice(0, n);
   for (const c of todo) {
