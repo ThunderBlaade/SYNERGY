@@ -187,7 +187,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 #bpc svg{stroke-width:1.5;fill:none}@keyframes blink{50%{opacity:.35}}
 #bpop{position:absolute;z-index:70;top:calc(40px + var(--safeT));left:22px;right:22px;max-width:420px;background:#0d0e12;border:1px solid var(--line);padding:12px 14px;font:400 13px/1.55 var(--sans);color:var(--fg);display:none;letter-spacing:0;text-transform:none}
 #bpop.on{display:block;animation:gin .25s var(--ease)}
-#lvorb{width:auto;height:auto;border:0!important;border-radius:0;background:none!important}#lvorb .gpx{width:min(240px,62vw);height:min(240px,62vw)}
+#lvorb{width:auto;height:auto;border:0!important;border-radius:0;background:none!important}#lvorb .gpx{width:min(190px,50vw);height:min(190px,50vw)}
 #live.speaking #lvorb{animation:none}
 .lvb{width:64px;height:64px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;background:none;color:var(--fg)}.lvb svg{width:24px;height:24px}
 .lvb .slash{display:none}#lvmute.on{background:none;color:var(--fg);border-color:#e0605a}#lvmute.on .slash{display:inline}
@@ -220,7 +220,7 @@ body.lvon #askbar{display:none!important}
 @keyframes lvExitK{0%{transform:none}20%{transform:translateX(-3vw)}100%{transform:translateX(115vw)}}
 #lvorb.lvBike{animation:lvBike 1.3s cubic-bezier(.2,.8,.3,1) both}#lvorb.lvStroll{animation:lvStroll 1.7s linear both}#lvorb.lvPara{animation:lvPara 1.6s ease-out both}#lvorb.lvPant{animation:lvPant 2.3s linear both}
 #lvorb.lvExit{animation:lvExitK 1.4s ease-in both}
-#lvtx p.box{font:500 13px/1.4 var(--sans);color:#e8c25a}
+#lvtx p.cut{font:italic 400 14px/1.4 var(--serif);color:var(--dim)}#lvtx p.box{font:500 13px/1.4 var(--sans);color:#e8c25a}
 #ask{box-sizing:border-box;border-bottom:0;background:#0d0e12;border:1px solid var(--line);padding:13px 14px;min-height:52px;height:52px;font:17px/1.4 var(--sans)}
 #ask::placeholder{font:400 15px/1.4 var(--sans);letter-spacing:0;text-transform:none}
 #askbar .mic{width:52px;height:52px;align-self:flex-end}#askbar .mic svg{width:21px;height:21px}#askbar{align-items:flex-end}
@@ -788,7 +788,7 @@ function lvPlay(b64s,rate){const bin=atob(b64s),n=bin.length>>1,ab=LV.ctx.create
 // When Sam cuts in: tell Gary exactly how far Sam heard, so he can answer first and then pick up where he left off.
 function lvNoteCut(){const full=(LV.outT||'').trim();if(!full||!LV.ctx)return;const queued=Math.max(0,LV.playAt-LV.ctx.currentTime),rec=LV.recv||0;
  const frac=rec?Math.max(0,Math.min(1,(rec-queued)/rec)):1;let heard=full.slice(0,Math.floor(full.length*frac)).replace(/\S*$/,'').trim();const rest=full.slice(heard.length).trim();
- LV.outT=heard?heard+' -':'';LV.recv=0;if(!rest)return;
+ LV.outT=(heard?heard+' -':'')+(rest?' [didn\'t get to say: '+rest+']':'');LV.recv=0;if(!rest)return;lvLine('cut','…didn\'t get to say: '+rest);
  const note='(Note: Sam cut in while you were speaking. He heard you up to: "'+heard.slice(-240)+'". He did not hear the rest: "'+rest.slice(0,300)+'". Answer what he says next first. Then, if it still matters, pick up where you left off in your own way.)';
  if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:note}]}],turnComplete:false}}))}
 function lvHush(){for(const s of LV.srcs){try{s.stop()}catch(e){}}LV.srcs=[];LV.playAt=0;$('live').classList.remove('speaking')}
@@ -843,7 +843,7 @@ const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale
 const G_BODY=["................................","................................","............SSSSSSSS............","..........SSSSSSSSSSHH..........",".........SSSSSSSSSSSSHH.........",".........SSSSSSSSSSSSSH.........","........SSSSSSSSSSSSSSHH........","........SSSSSSSSSSSSSSSH........","........MMSSSSSSSSSSSSMM........",".......SMMSSSSSSSSSSSSMMH.......",".......SMMSSSSSSSSSSSSMMH.......","........SSSSSSSSSSSSSSSH........","........SSSSSSSSSSSSSSSH........",".........SSSSSSSSSSSSHH.........","..........SSSSSSSSSSHH..........","...........SSSSSSSSHH...........",".............HHHHHH.............",".........GBBBBWWWWBBBBG.........","........GBBBBBWWWWBBBBBB........",".......GBBBBBBWWWWBBBBBBB.......",".......GBBBBBBBWWBBBBBBBB.......","......GBBBBBBBBWWBBBBBBBBB......","......GBBBBBBBBBBBBBBBBBBB......","......GBBBBBBBBBBBBBBBBBBB......",".....WWWBBBBBBBBBBBBBBBBBWWW....",".....WWWBBBBBBBBBBBBBBBBBWWW....",".......GBBBBBBBBBBBBBBBBBB......","........GBBBBBBBBBBBBBBBB.......","..........BBBBB..BBBBB..........","..........BBBBB..BBBBB..........",".........BBBBBB..BBBBBB.........","................................"];
 // name: eyes brows mouth arms fx motion tint posture
 const G_EX={};`idle open n smile rest - bob
-happy happy n grin upR - bob
+happy u n grin upR blush bob
 wave open n grin wave - bob
 think up up flat chin dots still
 talk open n talk rest - still
@@ -856,44 +856,44 @@ thumbsup wink n grin thumbs - bob
 dance happy n grin dance notes dance
 salute open low flat salute - still
 shrug open up wavy shrug - still
-laugh happy up open rest tears shake
+laugh gt up open rest tears+blush shake
 tiphat wink n grin tiphat - still
 facepalm hidden n flat facepalm - still
 jump happy up open upBoth - jump
 sleep closed n o rest zzz bob
-excited wide high open upBoth sparkle bounce
-angry angry angry grit rest steam shake red
-furious angry angry shout fists vein tremble red
-sad down worried frown rest - still
-crying closed worried frown rest tears tremble
-sobbing closed worried open hanky tears tremble
-scared wide worried gasp clasp sweat tremble pale
+excited spark high open upBoth sparkle+blush bounce
+angry gt angry grit rest steam+vein shake red
+furious gt angry shout fists vein+steam tremble red
+sad down worried frown rest gloom still
+crying gt worried frown rest tears+gloom tremble
+sobbing gt worried open hanky tears+gloom tremble
+scared wide worried gasp clasp sweat+gloom tremble pale
 terrified wide high shout upBoth sweat2 tremble pale
-surprised wide high gasp rest exclaim still
-shocked wide high open upBoth exclaim jump
+surprised wide high gasp rest exclaim+shock still
+shocked wide high open upBoth exclaim+shock jump
 skeptical squint quirk smirk cross - still
 suspicious look angry flat chin - still
-disdainful closed up frown cross - still
+disdainful line up frown cross - still
 smug tired up smirk cross - still
-proud closed up grin hips sparkle still
+proud u up grin hips sparkle still
 determined angry angry grit fist - still
-bored tired n flat rest - still
+bored line n flat rest - still
 yawning closed up yawn mouthcover - still
-sleepy tired worried small rest zzz sway
+sleepy line worried small rest zzz sway
 sick tired worried wavy belly sweat tremble green
 dizzy spiral n wavy rest stars sway
-lovestruck hearts up smile heart hearts bob
-blushing down worried small rest blush still
-shy down worried smile clasp blush still
-starstruck stars high open upBoth sparkle bounce
+lovestruck hearts up smile heart hearts+blush bob
+blushing u worried small rest blush still
+shy dot worried smile clasp blush still
+starstruck spark high open upBoth sparkle+blush bounce
 mischievous wink angry smirk clasp - still
-cheeky wink n tongue rest - bob
+cheeky wink n tongue rest blush bob
 whistling right up whistle behind notes still
 humming closed n small behind notes sway
 singing closed up open mic notes sway
 clapping happy n grin clap - bounce
 applauding happy up open clap sparkle bounce
-cheering happy high open upBoth confetti jump
+cheering u high open upBoth confetti+blush jump
 celebrating happy up grin trophy confetti jump
 victorious closed up grin trophy sparkle still
 tea closed n smile tea - still
@@ -906,21 +906,21 @@ pointing open n smile point - still
 explaining open up talk point - still
 nodding closed n smile rest - nod
 headshake closed n flat rest - shake
-sigh closed worried o rest puff still
+sigh line worried o rest puff still
 exasperated closed angry frown facepalm vein still
 eyeroll up n flat cross - still
 sarcastic tired quirk smirk hipL - still
-unimpressed tired low flat cross - still
-nervous look worried wavy clasp sweat tremble
+unimpressed line low flat cross - still
+nervous dot worried wavy clasp sweat tremble
 panicking wide worried shout upBoth sweat2 shake
-embarrassed down worried wavy scratch blush still flush
-sheepish closed worried smile scratch sweat still
-grateful closed up smile clasp hearts still - bow
+embarrassed gt worried wavy scratch blush+sweat still flush
+sheepish u worried smile scratch sweat+blush still
+grateful u up smile clasp hearts+blush still - bow
 flourish happy up grin spread sparkle still
 welcoming happy n grin spread - bob
 hug closed up smile hug hearts bob
 blowkiss wink n kiss blowkiss hearts still
-pondering closed angry flat temple dots still
+pondering line angry flat temple dots still
 texting down n small phone - still
 phonecall look up talk phoneEar - still
 watch down n flat watch - still
@@ -935,11 +935,11 @@ birthday happy high open cake confetti bounce
 announcer open up talk mic exclaim still
 writing down n small quill - still
 newspaper down up flat paper - still
-zen closed n smile clasp zen still
+zen line n smile clasp zen still
 knockedout x n o rest stars still
-exhausted closed worried open rest sweat nod
+exhausted gt worried open rest sweat nod
 hungry up n tongue belly drool still
-satisfied closed n smile belly - bob
+satisfied u n smile belly blush bob
 glitch open n flat rest glitch tremble
 dapper closed up smirk bowtie sparkle still
 astonished wide high gasp rest exclaim still - pop
@@ -1056,6 +1056,11 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'spiral':Le([[11,8,'K'],[12,8,'K'],[13,8,'K'],[13,9,'K'],[13,10,'K'],[12,10,'K'],[11,10,'K'],[11,9,'K'],[12,9,'W']]);Re(odd?'K':'L',odd?'L':'K',odd?'L':'K',odd?'K':'L');break;
   case 'x':Le([[11,8,'K'],[13,8,'K'],[12,9,'K'],[11,10,'K'],[13,10,'K']]);Re('K','L','L','K');break;
   case 'hidden':Re('K','L','K','K');break;
+  case 'u':Le([[11,10,'K'],[12,9,'K'],[13,10,'K']]);Re('L','L','K','K');put(19,9,'K');put(20,9,'K');put(19,10,'L');put(20,10,'L');break;
+  case 'gt':Le([[11,8,'K'],[12,9,'K'],[11,10,'K'],[13,9,'K']]);Re('K','L','L','K');put(20,8,'C');break;
+  case 'dot':Le([[12,9,'K']]);Re('L','L','K','L');break;
+  case 'line':Le([[11,9,'K'],[12,9,'K'],[13,9,'K']]);Re('K','K','L','L');break;
+  case 'spark':Le([[11,8,'W'],[12,8,'K'],[13,8,'W'],[11,9,'K'],[12,9,'W'],[13,9,'K'],[12,10,'K']]);Re('W','K','K','W');break;
   case 'hidden2':if(odd){}else{Le([[12,9,'W'],[13,9,'K'],[12,10,'K'],[13,10,'K']])}break;
   default:Le([[12,9,'W'],[13,9,'K'],[12,10,'K'],[13,10,'K']]);Re('K','L','K','K')}
  if(pop){Re(E==='wide'?'W':'K','K','K','K');[[23,16],[24,16],[25,16],[26,16],[23,19],[24,19],[25,19],[26,19],[23,17],[23,18],[26,17],[26,18]].forEach(([i,y])=>put(i,y,'C'))}else{put(22,12,'Y');put(22,13,'Y');put(23,14,'Y')}
@@ -1081,8 +1086,8 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'kiss':put(16,14,'P');put(16,15,'P');put(15,14,'R');break;
   default:put(13,13,'R');rect(14,14,4,1,'R');put(18,13,'R')}
  // effects
- const f=X.f,k=t%6;
- switch(f){
+ const k=t%6;
+ for(const f of String(X.f).split('+'))switch(f){
   case 'dots':for(let j=0;j<3;j++)put(24+j*2,3,j<=(t>>1)%3?'C':'G');break;
   case 'question':Le([[26,1,'Q'],[27,0,'Q'],[28,0,'Q'],[29,1,'Q'],[29,2,'Q'],[28,3,'Q'],[27,4,'Q'],[27,6,'Q']]);break;
   case 'exclaim':rect(27,0,2,4,'Y');rect(27,5,2,1,'Y');break;
@@ -1110,6 +1115,8 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'bird':{const bx=(t*2)%34-2;Le([[bx,3,'K'],[bx+1,2+(odd?0:1),'K'],[bx-1,2+(odd?0:1),'K']]);break}
   case 'drool':put(17,15,'Q');put(17,16+(t%2),'Q');break;
   case 'whoosh':for(let j=0;j<4;j++)put((t*3+j*2)%4,18+j*2,'C'),put((t*3+j*2)%4+1,18+j*2,'C');break;
+  case 'gloom':for(let i=10;i<22;i+=2)for(let y=3;y<6;y++)if(P[y*32+i])put(i,y,'Q');Le([[25,1,'Q'],[25,2,'Q'],[25,3,'Q'],[27,0,'Q'],[27,1,'Q'],[27,2,'Q'],[29,1,'Q'],[29,2,'Q'],[29,3,'Q']]);break;
+  case 'shock':Le([[5,4,'C'],[4,3,'C'],[26,4,'C'],[27,3,'C'],[16,0,'C'],[16,1,'C'],[8,1,'C'],[24,1,'C']]);break;
   case 'spray':if(odd)for(let j=0;j<5;j++)put(20+j,13+(j%3)-1,'Q');break}
  // posture
  if(X.post==='bow'){const Q=[];for(const kk in P){const y=kk>>5,i=kk&31;if(y<17)Q[((y+3)<<5)+i]=P[kk];else if(Q[kk]===undefined)Q[kk]=P[kk]}for(const kk in P)delete P[kk];for(const kk in Q)P[kk]=Q[kk]}
