@@ -134,6 +134,8 @@ function occurs(it, day) {
   const r = it.repeat || "none", st = it.date;
   if (r === "none") return st === day;
   if (st && day < st) return false;
+  if (it.until && day > it.until) return false;
+  if (Array.isArray(it.skip) && it.skip.includes(day)) return false;
   const wd = new Date(day + "T12:00:00Z").getUTCDay();
   if (r === "daily") return true;
   if (r === "weekdays") return wd > 0 && wd < 6;
@@ -1113,6 +1115,29 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
     return new Response(JSON.stringify({ ok: true, pose: FEEL_POSE[fe.mood] }), { headers: { ...CORS, "Content-Type": "application/json" } });
   }
   // Fresh squabbles between Rodger and the search bar. The search bar talks the way Sam types (learned from his own messages); Rodger talks like Rodger.
+  // The significance of today: a few short pages for Momentum's little spell book (history, observances, sky, season, an intention)
+  if (body.mode === "sig") {
+    const J = (o, st = 200) => new Response(JSON.stringify(o), { status: st, headers: { ...CORS, "Content-Type": "application/json" } });
+    const day = /^\d{4}-\d\d-\d\d$/.test(String(body.date || "")) ? String(body.date) : new Date().toISOString().slice(0, 10);
+    const facts = String(body.facts || "").replace(/[\u0000-\u001f]/g, " ").slice(0, 700);
+    const PICS = ["moon", "sun", "stars", "leaf", "snow", "flower", "candle", "scroll", "quill", "crown", "tree", "wave", "mountain", "key", "eye", "compass", "book", "heart", "bird", "castle", "ship", "flame", "hourglass", "planet"];
+    const long = new Date(day + "T12:00:00Z").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+    try {
+      let out = "";
+      for await (const t of gemini("You write a calm, beautiful little daily spell book for a planner app. Reply with JSON only.", [{ role: "user", parts: [{ text:
+        `Today is ${long} (the reader lives in the UK). Facts already worked out for today (true, use them): ${facts}\n` +
+        `Write "the significance of today" as 4-6 short book pages. Cover, in this order where you have something real: notable things that truly happened on this calendar date in history (well-known, certain, with the year); ` +
+        `observances, saints' days, festivals or awareness days that fall today or in the next few days (UK first, then worldwide); the moon and the season, using the facts above; old folklore or traditions for this time of year; ` +
+        `and finish with a short, gentle intention for the day.\n` +
+        `Never invent or guess facts, dates or quotes - if you are not sure, leave it out. Plain, warm, slightly mystical words. British spelling. No emojis.\n` +
+        `Return {"line":"the single most significant thing about today in one short sentence, max 14 words","pages":[{"title":"2-4 words","pic":"one of: ${PICS.join(", ")}","text":"35-70 words"}]}` }] }], true)) out += t;
+      const o = JSON.parse((out.match(/\{[\s\S]*\}/) || [out])[0]);
+      const pages = (Array.isArray(o.pages) ? o.pages : []).map((x) => ({ title: String(x?.title || "").trim().slice(0, 40), pic: PICS.includes(x?.pic) ? x.pic : "stars", text: String(x?.text || "").trim().slice(0, 600) }))
+        .filter((x) => x.title && x.text).slice(0, 7);
+      return J({ date: day, line: String(o.line || "").trim().slice(0, 120), pages });
+    } catch (e) { return J({ date: day, pages: [], error: MISHAP?.[e?.kind] || "no" }, 503); }
+  }
+
   if (body.mode === "banter") {
     const J = (o, st = 200) => new Response(JSON.stringify(o), { status: st, headers: { ...CORS, "Content-Type": "application/json" } });
     if (body.guest === true) return J({ squabbles: [] });
