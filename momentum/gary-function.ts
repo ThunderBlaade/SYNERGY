@@ -751,6 +751,21 @@ export function parseActions(reply) {
 
 const VOICES = ["Charon", "Orus", "Iapetus", "Algenib", "Rasalgethi", "Sadaltager", "Schedar", "Enceladus", "Gacrux", "Alnilam"];
 const VOICE_STYLE = "Say as a mature, posh British butler - a distinguished elderly gentleman in his seventies with a rich, deep, smooth baritone, a touch of age and gentle gravel in it, in crisp Received Pronunciation, unhurried and articulate but full of expression: dry deadpan on sarcasm, a knowing pause before punchlines, softer and warmer when kind: ";
+// Gary's voices: his usual one plus five butlers with their own accent and flair (picked in Settings, used for read-aloud and voice chat)
+const PERSONAS: Record<string, { v: string; s: string; live: string }> = {
+  usual: { v: "Charon", s: "", live: "" },
+  highland: { v: "Algenib", s: "Say as an old Highland Scottish butler - a broad, warm Scottish brogue with rolled Rs, a gravelly, weathered voice like an old whisky cask, dry and wry, proper but with a twinkle: ",
+    live: "\n\nYOUR VOICE: speak with a broad Highland Scottish brogue - rolled Rs, gravelly and weathered, dry and wry, proper but with a twinkle. Keep it consistent." },
+  ancient: { v: "Gacrux", s: "Say as a very ancient English butler in his nineties - a thin, papery, slightly quavering voice, very slow, plummy old-fashioned upper-class English, little pauses to catch his breath, utterly dignified: ",
+    live: "\n\nYOUR VOICE: speak as a very ancient English butler in his nineties - thin, papery, slightly quavering, slow and plummy, little pauses for breath, utterly dignified. Keep it consistent." },
+  dublin: { v: "Rasalgethi", s: "Say as a warm Irish butler from Dublin - a soft, musical Irish lilt that rises and falls, a born storyteller with a mischievous warmth, polite and charming: ",
+    live: "\n\nYOUR VOICE: speak with a soft, musical Dublin Irish lilt - a born storyteller, warm and mischievous, polite and charming. Keep it consistent." },
+  major: { v: "Alnilam", s: "Say as a retired British Army sergeant-major turned butler - clipped, gruff and gravelly, short punchy delivery, crisp hard consonants, stiff upper lip, barking slightly on the important words: ",
+    live: "\n\nYOUR VOICE: speak as a retired British Army sergeant-major turned butler - clipped, gruff, gravelly, short punchy delivery, crisp consonants, stiff upper lip. Keep it consistent." },
+  thespian: { v: "Orus", s: "Say as a grand old theatrical butler who once trod the boards - a booming, resonant, dramatic stage voice in rich old-school RP, savouring every word, sweeping rises and falls as if performing Shakespeare: ",
+    live: "\n\nYOUR VOICE: speak as a grand old theatrical butler - booming, resonant and dramatic, rich old-school RP, savouring every word as if on stage. Keep it consistent." },
+};
+const persona = (k: unknown) => PERSONAS[String(k || "")] || null;
 const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts", "gemini-2.5-flash-preview-tts"];
 
 const LIVE_MODELS = ["gemini-3.1-flash-live-preview", "gemini-2.5-flash-native-audio-preview-12-2025", "gemini-2.5-flash-native-audio-preview-09-2025"];
@@ -815,7 +830,8 @@ export async function handle(req) {
   if (body.mode === "live") {
     const key = env("GEMINI_API_KEY");
     if (!key) return new Response(JSON.stringify({ error: "nokey" }), { status: 503, headers: { ...CORS, "Content-Type": "application/json" } });
-    const voice = VOICES.includes(body.voice) ? body.voice : "Charon";
+    const lp = persona(body.voice);
+    const voice = lp ? lp.v : VOICES.includes(body.voice) ? body.voice : "Charon";
     const guest = body.guest === true;
     let [mem, plan] = guest ? [{}, ""] : await Promise.all([recall(String(body.text || ""), token), planSummary(token, body.items)]);
     const lcv = String(body.convo || "").replace(/[^a-z0-9]/gi, "").slice(0, 40);
@@ -826,7 +842,7 @@ export async function handle(req) {
       IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
       `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
       (lrecent.length ? `\n\nThe conversation so far today (newest last) - your short-term memory:\n${lrecent.map((m) => (m.role === "gary" ? "You: " : "Sam: ") + String(m.content).slice(0, 400)).join("\n")}` : "") +
-      await pcState(token) + await guestReport(token) + LIVE_STYLE + styleBlock(mem.style) + PRIVACY + companyBlock(lcompany);
+      await pcState(token) + await guestReport(token) + LIVE_STYLE + (lp ? lp.live : "") + styleBlock(mem.style) + PRIVACY + companyBlock(lcompany);
     if (!guest) { try { globalThis.EdgeRuntime?.waitUntil?.(styleLearn(token).catch(() => {})); } catch { /* fine */ } }
     const models = LIVE_MODELS.slice(Math.max(0, Math.min(LIVE_MODELS.length - 1, +body.try || 0)));
     for (const model of models) {
@@ -918,7 +934,9 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
     } catch (e) { return J({ error: "Couldn't reach Google just now." }, 503); }
   }
   if (body.mode === "speak") {
-    const voice = VOICES.includes(body.voice) ? body.voice : (env("GARY_VOICE") || "Charon");
+    const sp = persona(body.voice);
+    const voice = sp ? sp.v : VOICES.includes(body.voice) ? body.voice : (env("GARY_VOICE") || "Charon");
+    const vstyle = sp && sp.s ? sp.s : VOICE_STYLE;
     const say = text.replace(/[*_#`\u27e6\u27e7]/g, "").slice(0, 1500);
     const key = env("GEMINI_API_KEY");
     const order = (env("GARY_TTS_MODEL") || TTS_MODELS.join(",")).split(",").map((x) => x.trim()).filter(Boolean);
@@ -928,7 +946,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
       try {
         const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
           method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-          body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: (m.includes("3.8") ? "" : VOICE_STYLE) + say }] }],
+          body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: (m.includes("3.8") && !(sp && sp.s) ? "" : vstyle) + say }] }],
             generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } } }) });
         if (!r.ok) continue;
         const j = await r.json();

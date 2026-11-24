@@ -1023,7 +1023,7 @@ async function liveStart(again){if(!gUse().live){toast('Live voice is switched o
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
  catch(e){lvErr('microphone',{error:String(e&&e.name||e)});LV.stream=null;LV.nomic=true;LV.muted=true;$('lvmute').classList.add('on');$('lvmute').setAttribute('aria-label','Microphone unavailable');setTimeout(()=>{if(LV.on&&LV.nomic){$('live').classList.add('typing');$('lvtype').classList.add('on')}},2600)}
  if(LV.stream)lvMicWire();
- let j;try{const r=await garyFetch({mode:'live',text:'Talk with Gary',convo:CHAT||'',ctx:garyCtx(),items:garyItems(),voice:(store('garyVoice')==='clone'?'Charon':store('garyVoice'))||'Charon',try:LV.tries});j=await r.json();if(!j.url)throw 0}
+ let j;try{const r=await garyFetch({mode:'live',text:'Talk with Gary',convo:CHAT||'',ctx:garyCtx(),items:garyItems(),voice:gvCur()==='clone'?'usual':gvCur(),try:LV.tries});j=await r.json();if(!j.url)throw 0}
  catch(e){lvErr('pass',{error:String(e&&e.message||e)});lvNoShow();return}
  const ws=new WebSocket(j.url);LV.ws=ws;
  ws.onopen=()=>ws.send(JSON.stringify({setup:j.setup}));ws.onmessage=lvMsg;
@@ -1109,7 +1109,7 @@ $('vcmake').onclick=async()=>{if(!CS){$('vcnote').textContent='Sign in first (Yo
   try{const r=await garyFetch({mode:'voiceclone',text:'clone',tone:k,sample:vcB64(vcWav(VC.rec[k].pcm)),consent});const j=await r.json();if(j.id){m[k]=j.id;ok++}else err=j.error||'Google said no'}catch(e){err='Couldn\'t reach Gary'}}
  store('garyClone',JSON.stringify(m));if(ok&&m.calm){store('garyVoice','clone');$('vcnote').textContent='Done - '+ok+' tone'+(ok>1?'s':'')+' made. Listen:';speak('Good evening, sir. I must say, I sound rather distinguished.')}
  else $('vcnote').textContent='Google didn\'t accept it: '+err+(/consent/i.test(err)?' - read the consent line word for word, clearly.':'');vcDraw()};
-$('vcuse').onclick=()=>{const on=store('garyVoice')!=='clone';store('garyVoice',on?'clone':'Charon');vcDraw();if(on){audioUnlock();speak('Right you are, sir. My voice is yours.')}};
+$('vcuse').onclick=()=>{const on=store('garyVoice')!=='clone';store('garyVoice',on?'clone':'usual');vcDraw();if(on){audioUnlock();speak('Right you are, sir. My voice is yours.')}};
 // which recorded tone fits how Gary feels right now
 function vcTone(){const m=String(GPOSE||GS.mood||'').toLowerCase();
  return /sad|cry|tear|gloom|sorry|sympath|hug|comfort/.test(m)?'sad':/angry|furious|sarcas|eyeroll|disdain|annoy|grump|unimpressed|facepalm|smug/.test(m)?'cross':/excit|surpris|celebrat|party|shock|amazed|cheer|confetti/.test(m)?'excited':/happy|laugh|grin|proud|joy|wave|delight|thumbs/.test(m)?'happy':'calm'}
@@ -1137,9 +1137,10 @@ function kbPre(){kbFit.t0=Date.now();if(tab!=='gary'||!matchMedia('(pointer:coar
 $('ask').addEventListener('focus',()=>{kbPre();kbFit();setTimeout(kbFit,60);setTimeout(kbFit,320);setTimeout(kbFit,650)});$('ask').addEventListener('blur',()=>{setTimeout(kbFit,60);setTimeout(kbFit,320)});
 
 // five voices to audition for G.A.R.Y.: play each, pick one (used for live voice chat and replies read aloud)
-const GV5=[['Charon','His current voice','Smooth, measured, informative'],['Gacrux','The elder','Mature and seasoned'],['Algenib','The gravelly one','Deep with a bit of grit'],['Rasalgethi','The storyteller','Rich, warm, knowing'],['Sadaltager','The scholar','Learned and precise']];
+const GV5=[['usual','His usual voice (default)','The Gary you know: smooth, deep, older English gentleman'],['highland','The Highlander','Broad Scottish brogue, gravelly as an old whisky cask'],['ancient','The Ancient','Ninety-odd, papery and quavering, terribly proper'],['dublin','The Dubliner','Soft Irish lilt, a born storyteller with a wink'],['major','The Sergeant-Major','Ex-army: clipped, gruff, barks the important bits'],['thespian','The Thespian','Booming old stage actor, savours every word']];
+const GV_IDS=GV5.map(x=>x[0]);function gvCur(){const v=store('garyVoice');return v==='clone'||GV_IDS.includes(v)?v:'usual'}
 const GV_LINE='Good evening, sir. Gary, at your service. Your tea is on the side, the diary is clear, and I have taken the liberty of tidying your plans.';
-function voicePicker(){const el=$('svoice');if(!el)return;const cur=store('garyVoice')||'Charon';
+function voicePicker(){const el=$('svoice');if(!el)return;const cur=gvCur();
  el.innerHTML=GV5.map(([v,name,desc])=>'<div class="gvrow'+(cur===v?' on':'')+'"><div><b>'+name+'</b><small>'+desc+(cur===v?' · in use':'')+'</small></div><button class="btn ghost" data-play="'+v+'">▶ Play</button><button class="btn'+(cur===v?' fill':' ghost')+'" data-use="'+v+'">'+(cur===v?'Chosen':'Use')+'</button></div>').join('')+
   (vcMap().calm?'<div class="gvrow'+(cur==='clone'?' on':'')+'"><div><b>Your butler voice</b><small>Your own recording'+(cur==='clone'?' · in use':'')+' (read-aloud only)</small></div><button class="btn ghost" data-play="clone">▶ Play</button><button class="btn'+(cur==='clone'?' fill':' ghost')+'" data-use="clone">'+(cur==='clone'?'Chosen':'Use')+'</button></div>':'');
  el.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>{audioUnlock();speak(GV_LINE,b.dataset.play);b.textContent='♪ Playing';setTimeout(()=>{if(b.isConnected)b.textContent='▶ Play'},6000)});
@@ -1769,7 +1770,7 @@ const GVOICES=['Charon','Gacrux','Algenib','Rasalgethi','Sadaltager','Orus','Iap
 let AC=null,acEnd=0,talkGen=0;
 function audioUnlock(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
  const b=AC.createBuffer(1,1,22050),s=AC.createBufferSource();s.buffer=b;s.connect(AC.destination);s.start(0)}catch(e){}}
-function ttsBody(text,vo){const gv=vo||store('garyVoice');if(gv==='clone'){const m=vcMap(),t=vcTone(),id=m[t]||m.calm;if(id)return {mode:'speak',text,voice:id,style:VC_STYLE[m[t]?t:'calm']}}return {mode:'speak',text,voice:gv==='clone'?'Charon':(gv||'Charon')}}
+function ttsBody(text,vo){const gv=vo||gvCur();if(gv==='clone'){const m=vcMap(),t=vcTone(),id=m[t]||m.calm;if(id)return {mode:'speak',text,voice:id,style:VC_STYLE[m[t]?t:'calm']}}return {mode:'speak',text,voice:gv==='clone'?'usual':gv}}
 async function ttsFetch(text,vo){const tok=await clTok();if(!tok)throw 0;
  const r=await fetch(CL.url+'/functions/v1/gary',{method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(ttsBody(text,vo))});
  if(!r.ok)throw 0;const buf=await r.arrayBuffer();
@@ -1815,7 +1816,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124141852';let UPD=false;
+const BUILD='20261124142641';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
