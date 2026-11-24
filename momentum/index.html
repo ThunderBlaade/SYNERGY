@@ -1029,7 +1029,7 @@ function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;try{ws&&ws.close(
 $('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini')){lvMini(false);return}if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>{if(performance.now()-LV.t0<900)return;lvStop()};$('lvmin').onclick=()=>{if(performance.now()-LV.t0<900)return;lvMini(true)};$('lvmute').onclick=async()=>{if(LV.nomic){try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});LV.nomic=false;await lvMicWire()}catch(e){buzz(20);lvStatus('Microphone still unavailable - type to him');return}}LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvStatus(LV.muted?'Muted':'Listening…')};
 
 // type to G.A.R.Y. during a call: he reads it and answers out loud
-$('lvtype').onclick=()=>{if(performance.now()-LV.t0<900)return;const on=!$('live').classList.contains('typing');$('live').classList.toggle('typing',on);$('lvtype').classList.toggle('on',on);if(on){const t=$('lvtin');t.focus({preventScroll:true});t.click()}else $('lvtin').blur()};
+$('lvtype').onclick=()=>{if(performance.now()-LV.t0<900)return;const on=!$('live').classList.contains('typing');$('live').classList.toggle('typing',on);$('lvtype').classList.toggle('on',on);if(on){const t=$('lvtin');t.focus({preventScroll:true});t.click();LV.preMute=LV.muted;LV.muted=true;LV.open=0}else{$('lvtin').blur();if(!LV.nomic)LV.muted=!!LV.preMute}$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute')};
 $('lvtyp').onsubmit=e=>{e.preventDefault();const t=$('lvtin').value.trim();if(!t)return;if(!LV.ws||LV.ws.readyState!==1||!LV.ready){lvStatus('One moment - he\'s not quite here yet');return}
  if(LV.srcs.length){lvNoteCut();lvHush();LV.drop=false}LV.inT+=(LV.inT?' ':'')+t;LV.typed=true;LV.act=Date.now();lvLine('you',t);$('lvtin').value='';
  LV.ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:t}]}],turnComplete:true}}));lvStatus('Gary');gMood('think',1500)};
@@ -1755,7 +1755,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124122644';let UPD=false;
+const BUILD='20261124122713';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
