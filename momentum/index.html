@@ -313,7 +313,7 @@ body.lvon #askbar{display:none!important}
 @keyframes lvParaK{0%{transform:translateY(-100vh) rotate(-7deg)}10%{transform:translateY(-88vh) rotate(-3deg)}20%{transform:translateY(-76vh) rotate(4deg)}30%{transform:translateY(-64vh) rotate(7deg)}40%{transform:translateY(-52vh) rotate(3deg)}50%{transform:translateY(-40vh) rotate(-4deg)}60%{transform:translateY(-29vh) rotate(-6deg)}70%{transform:translateY(-18vh) rotate(-2deg)}78%{transform:translateY(-9vh) rotate(3deg)}84%{transform:translateY(-2vh) rotate(2deg)}88%{transform:translateY(0) rotate(0)}92%{transform:translateY(3px)}96%{transform:translateY(-1px)}100%{transform:none}}
 #gfloat,#gfsp{width:80px!important;height:80px!important}#gfbub{bottom:90px}
 
-#gdock{position:relative;overflow:visible}#gdock .gpx.scene{position:absolute;left:-50%;top:-75%;width:200%!important;height:200%!important;max-width:none;pointer-events:none}
+#gdock{position:relative;overflow:visible}#gbar{clip-path:inset(-100vh -100vw -100vh 0)}#gdock .gpx.scene{position:absolute;left:-50%;top:-75%;width:200%!important;height:200%!important;max-width:none;pointer-events:none}
 #lvorb{width:min(190px,50vw);height:min(190px,50vw)}#lvorb .gpx.scene{position:absolute;left:-50%;top:-75%;width:200%!important;height:200%!important;max-width:none;pointer-events:none}
 #live.mini #lvorb{width:60px;height:60px}
 
@@ -1054,18 +1054,30 @@ async function lvMicWire(){const src=LV.ctx.createMediaStreamSource(LV.stream);
 
 // ---------- G.A.R.Y. while he waits for you in a call: the same human routine, on his stage; any word from either of you stops it
 const LVR={on:null,t:0,x:0};
-function lvRStop(){if(!LVR.on&&!LVR.x)return;const was=LVR.on;LVR.on=null;if(was){GS.until=0;GS.mood='listen'}const o=$('lvorb');o.style.transition='transform .7s cubic-bezier(.4,0,.2,1)';o.style.transform='';o.dataset.flip='';LVR.x=0}
+function lvRStop(){if(!LVR.on&&!LVR.x)return;const was=LVR.on;LVR.on=null;LVR.seq=null;GS.carry=null;if(was){GS.until=0;GS.mood='listen'}const o=$('lvorb');o.style.transition='transform '+Math.max(.7,Math.abs(LVR.x)/450).toFixed(2)+'s cubic-bezier(.4,0,.2,1)';o.style.transform='';o.dataset.flip='';LVR.x=0}
 function lvRWalk(to,ms,mood){const o=$('lvorb'),x0=LVR.x;o.dataset.flip=to<x0?'1':'';o.style.transition='transform '+(ms/1000)+'s linear';o.style.transform='translateX('+to+'px)';LVR.x=to;gMood(mood,ms+200);
  const st=setInterval(()=>{if(!LVR.on){clearInterval(st);return}GW.step=(GW.step||0)+1.1},50);setTimeout(()=>clearInterval(st),ms)}
 setInterval(()=>{const L=$('live');if(!LV.on||!LV.ready||L.classList.contains('mini')||L.classList.contains('typing')||$('lvorb').classList.contains('lvPara'))return;
  const now=Date.now(),busy=L.classList.contains('speaking')||LV.open>0||LV.srcs.length||performance.now()<(LV.poseEnd||0);
  if(busy){lvRStop();LVR.quiet=now;return}if(!LVR.quiet)LVR.quiet=now;
+ if(LVR.on==='seq'){if(now<LVR.t)return;lvSeqStep(now);return}
  if(LVR.on){if(now<LVR.t)return;LVR.on=null;GS.until=0;GS.mood='listen';LVR.t=now+3000+Math.random()*4000;LVR.rest=true;return}
  if(now-LVR.quiet<9000||now<LVR.t)return;
  const W=Math.min(110,innerWidth*0.28),r=Math.random();
  if(r<0.22){const to=Math.round((Math.random()*2-1)*W),ms=Math.max(1800,Math.abs(to-LVR.x)*28);LVR.on='walk';LVR.t=now+ms+200;lvRWalk(to,ms,'walking')}
- else if(r<0.3){const to=LVR.x<=0?W:-W,ms=6000;LVR.on='bike';LVR.t=now+ms+300;lvRWalk(to,ms,'cycling')}
- else{const p=gRoutinePick(LVR.last);LVR.last=p[0];const ms=(p[1]+Math.random()*(p[2]-p[1]))*1000;LVR.on=p[0];LVR.t=now+ms;gMood(p[0],ms)}},500);
+ const side=LVR.x>0?1:LVR.x<0?-1:(Math.random()<.5?-1:1),off=side*Math.round(innerWidth/2+90);
+ if(GS.has.size)lvSeq([{w:off,c:[...GS.has]},{drop:1},{w:Math.round((Math.random()*2-1)*W)}]);   // put away whatever he still has
+ else if(r<0.3)lvSeq([{w:off},{grab:['bike']},{w:-off,c:['bike'],ms:6000},{drop:1},{w:Math.round(-side*W*Math.random())}]);   // fetches the bike, rides across, leaves it the other side
+ else{const p=gRoutinePick(LVR.last);LVR.last=p[0];const ms=(p[1]+Math.random()*(p[2]-p[1]))*1000,need=gNeed(p[0],true);
+  if(need.length){const at=Math.round((Math.random()*2-1)*W);lvSeq([{w:off},{grab:need},{w:at,c:need},{act:p[0],ms},{w:off,c:need},{drop:1},{w:Math.round((Math.random()*2-1)*W)}])}
+  else{LVR.on=p[0];LVR.t=now+ms;gMood(p[0],ms)}}},500);
+// a little errand: walk off, pick something up, bring it back, use it, take it away again
+function lvSeq(steps){LVR.seq=steps;LVR.on='seq';LVR.t=0;lvSeqStep(Date.now())}
+function lvSeqStep(now){const st=LVR.seq&&LVR.seq.shift();if(!st){LVR.on=null;LVR.seq=null;GS.carry=null;GS.until=0;GS.mood='listen';LVR.t=now+3000+Math.random()*4000;LVR.rest=true;return}
+ if('w' in st){const bike=st.c&&st.c.includes('bike'),ms=st.ms||Math.max(1200,Math.abs(st.w-LVR.x)*(bike?6:12));GS.carry=st.c||null;lvRWalk(st.w,ms,bike?'cycling':'walking');LVR.t=now+ms+120}
+ else if(st.grab){st.grab.forEach(i=>GS.has.add(i));LVR.t=now+500}
+ else if(st.drop){GS.has.clear();GS.carry=null;LVR.t=now+500}
+ else if(st.act){GS.carry=null;gMood(st.act,st.ms);LVR.t=now+st.ms}}
 
 // the message box only scrolls once what you've typed goes past what it can show
 (function(){const a=$('ask');const fit=()=>{a.classList.toggle('ovf',a.scrollHeight>a.clientHeight+3)};a.addEventListener('input',fit);addEventListener('resize',fit);setTimeout(fit,300)})();
@@ -1282,7 +1294,15 @@ sulking down worried frown behind - still`.split('\n').forEach(l=>{const a=l.tri
 const G_NAMES=Object.keys(G_EX);
 const GS={mood:'idle',until:0,tick:0,cv:[],base:'idle'};
 let GTALK=false,GPOSE=null,GSPK=false;
-function gMood(m,ms){if(!G_EX[m])return;GS.mood=m;GS.until=ms?performance.now()+ms:0}
+// things he holds or uses must come from somewhere: a mood that needs an item he hasn't fetched becomes a similar one without it
+const G_ARMITEM={tea:'tea',sip:'tea',book:'book',glass:'glass',phone:'phone',phoneEar:'phone',umbrella:'umbrella',balloon:'balloon',cake:'cake',quill:'quill',paper:'paper',binoculars:'binoculars',mic:'mic',bike:'bike'};
+const G_PROPITEM={teacup:'tea',tophat:'tophat',briefcase:'briefcase',cane:'cane',umbrella:'umbrella',bike:'bike'};
+const G_ITEMALT={party:'celebrating',birthday:'cheering',announcer:'explaining',singing:'humming',tea:'satisfied',sipping:'satisfied',reading:'pondering',detective:'suspicious',texting:'pondering',phonecall:'talk',umbrella:'shivering',writing:'pondering',newspaper:'pondering',birdwatching:'lookabout',cycling:'walking',dapper:'proud',flourish:'bow',welcoming:'wave',waiting:'bored',watch:'idle',impatient:'exasperated',cane:'idle',pullchair:'idle',sitting:'idle',sitbored:'bored',sityawn:'yawning',sitwatch:'idle',sittea:'satisfied',sitread:'pondering',sitdoze:'sleepy',sittwiddle:'twiddle',sitwhistle:'whistling'};
+GS.has=new Set();GS.carry=null;
+function gNeed(m,amb){const X=G_EX[m];if(!X)return [];const it=new Set();if(X.post==='sit'||X.post==='pull')it.add('chair');if(G_ARMITEM[X.a])it.add(G_ARMITEM[X.a]);
+ const pr=G_PROPS[m];if(pr&&G_PROPITEM[pr]&&!(pr==='lamp'&&amb))it.add(G_PROPITEM[pr]);return [...it]}
+function gHas(m){const amb=typeof LV!=='undefined'&&LV.on;return gNeed(m,amb).every(i=>GS.has.has(i))}
+function gMood(m,ms){if(!G_EX[m])return;if(!gHas(m)){m=G_ITEMALT[m]||'idle';if(!G_EX[m]||!gHas(m))m='idle'}GS.mood=m;GS.until=ms?performance.now()+ms:0}
 function gState(){const now=performance.now();if(GS.until&&now>GS.until){GS.mood=GS.base;GS.until=0}
  if(GS.until)return GS.mood;
  if(typeof LV!=='undefined'&&LV.on)return $('live').classList.contains('speaking')?'talk':(LV.ready&&!LV.muted&&LV.open>0?'listening':'listen');
@@ -1472,17 +1492,25 @@ const PROP_LAMP=["....KKKKKKKK....","..KKYYYYYYYYKK..",".KYYLLLLLLLLYYK.",".KYYD
 const PROP_TOPHAT=["....KKKKKKKKKK....","...KBBBBBBBBBBK...","...KBGGGGGGGGGBK..","...KBBBBBBBBBBK...","...KBBBBBBBBBBK...","...KBBBBBBBBBBK...","...KRRRRRRRRRRK...","...KBBBBBBBBBBK...",".KKKKKKKKKKKKKKKK.","KBBBBBBBBBBBBBBBBK","KGGGGGGGGGGGGGGGGK",".KKKKKKKKKKKKKKKK."];
 const G_PROPS={cycling:'bike',umbrella:'umbrella',tea:'teacup',reading:'lamp',newspaper:'lamp',writing:'lamp',dapper:'tophat',flourish:'tophat',welcoming:'tophat',waiting:'briefcase',watch:'briefcase',impatient:'briefcase',cane:'cane',sitread:'lamp',sittea:'teacup'};
 function gProp(x,pat,sx,sy){for(let y=0;y<pat.length;y++)for(let i=0;i<pat[y].length;i++){const c=pat[y][i];if(c==='.'||!GPP[c])continue;x.fillStyle=GPP[c];x.fillRect(sx+i,sy+y,1,1)}}
+// small things he carries in his hand while walking in or out with them
+const G_CARRY={tea:[PROP_TEACUP,30,44],book:[["KKKKKKK","KDDDDDK","KDLLLDK","KDDDDDK","KKKKKKK"],35,45],phone:[["KKKK","KAAK","KAAK","KAAK","KKKK"],36,45],glass:[[".KKKK.","KAAAAK","KAWAAK","KAAAAK",".KKKK.","....KD","....KD"],35,41],
+ umbrella:[["..K..",".KTK.",".KTK.",".KTK.",".KTK.","..K..","..K..","..K..",".KK.."],36,41],cane:[PROP_CANE,36,43],balloon:[[".KKKK.","KRRRRK","KRWRRK","KRRRRK","KRRRRK",".KKKK.","..KK..","...K..","...K..","..K...","..K...","...K..","...K..","..K...","..K...","...K..","...K..","..K...","..K...","..K...","..K..."],37,26],
+ cake:[["...Y...","...K...","KKKKKKK","KWWWWWK","KRRRRRK","KKKKKKK"],34,43],quill:[[".....WW","....WWW","...WWW.","..WWE..",".KE....","K......"],35,41],paper:[["KKKKKK","KWEWEK","KWWWWK","KWEWEK","KKKKKK"],35,45],
+ binoculars:[["KKK.KKK","KGGKGGK","KGGKGGK","KEEKEEK","KKK.KKK"],35,45],mic:[[".KKK.","KEEEK","KEWEK","KEEEK",".KKK.","..K..","..K..","..K.."],36,41],tophat:[["..KKKKKK..","..KGGGGK..","..KGGGGK..","..KGGGGK..","..KRRRRK..","KKKKKKKKKK","KGGGGGGGGK","KKKKKKKKKK"],33,43],briefcase:[PROP_BRIEFCASE,37,46]};
+function gCarry(x,items){for(const i of items){const c=G_CARRY[i];if(c)gProp(x,c[0],c[1],c[2])}}
 let GOFF=null;
 function gScene(x,amb){const name=gState(),X=G_EX[name]||G_EX.idle,mini=amb&&$('live').classList.contains('mini');
- let pr=G_PROPS[name]||null,chair=X.post==='sit'?0:X.post==='pull'?Math.max(0,Math.round(28*(1-Math.min(1,(performance.now()-(GS.chairT0||0))/1100)))):null;
+ let pr=G_PROPS[name]||null;if(pr&&!(pr==='lamp'&&amb)&&!GS.has.has(G_PROPITEM[pr]||pr))pr=null;let chair=!GS.has.has('chair')?null:X.post==='sit'?0:X.post==='pull'?Math.max(0,Math.round(28*(1-Math.min(1,(performance.now()-(GS.chairT0||0))/1100)))):null;
  if(amb&&(!LV.ready||$('lvorb').className)){if(pr!=='bike')pr=null;chair=null}else if(!pr&&chair===null&&amb&&!mini)pr='lamp';
  if(!GOFF){GOFF=document.createElement('canvas');GOFF.width=GOFF.height=32}
  GS.scene=true;GS.nobob=!amb;GS.noshort=['umbrella','teacup','bike','cane'].includes(pr);try{gDraw(GOFF.getContext('2d'),name)}finally{GS.scene=false;GS.nobob=false;GS.noshort=false}
  const sit=X.post==='sit',dy=(GS.ldy||0)+(sit?-2:0),lift=pr==='bike'?-4:sit?-5:0;x.clearRect(0,0,64,64);
+ if(GS.carry&&(name==='walking'||name==='strut')){if(GS.carry.includes('chair'))gProp(x,PROP_CHAIR,1,33);if(GS.carry.includes('lamp'))gProp(x,PROP_LAMP,3,13)}
  if(chair!==null)gProp(x,PROP_CHAIR,16+chair,33);if(pr==='bike')gProp(x,PROP_BIKE,10,34);if(pr==='lamp')gProp(x,PROP_LAMP,5,13);if(pr==='briefcase')gProp(x,PROP_BRIEFCASE,46,46);
  x.drawImage(GOFF,16,24+lift);
  if(sit){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h)};P(GPP.K,25,46,14,4);P(GPP.B,26,46,12,3);P(GPP.G,31,47,2,1);P(GPP.K,26,49,5,7);P(GPP.K,33,49,5,7);P(GPP.B,27,49,3,5);P(GPP.B,34,49,3,5);P(GPP.K,25,54,6,2);P(GPP.K,33,54,6,2)}
- if(pr==='cane')gProp(x,PROP_CANE,36,43+dy);if(pr==='umbrella')gProp(x,PROP_UMBRELLA,26,5+dy);if(pr==='teacup')gProp(x,PROP_TEACUP,32,38+dy);if(pr==='tophat')gProp(x,PROP_TOPHAT,23,15+dy)}
+ if(pr==='cane')gProp(x,PROP_CANE,36,43+dy);if(pr==='umbrella')gProp(x,PROP_UMBRELLA,26,5+dy);if(pr==='teacup')gProp(x,PROP_TEACUP,32,38+dy);if(pr==='tophat')gProp(x,PROP_TOPHAT,23,15+dy)
+ if(GS.carry&&(name==='walking'||name==='strut'||name==='cycling'))gCarry(x,GS.carry)}
 function gPaint(){GS.cv=GS.cv.filter(c=>c.isConnected);for(const c of GS.cv)if(c.offsetParent!==null||c.closest('#gfloat')){if(c._scene)gScene(c.getContext('2d'),c._amb);else gDraw(c.getContext('2d'))}}
 function gCanvas(el,scene,amb){const c=document.createElement('canvas');c.width=c.height=scene?64:32;c.className='gpx'+(scene?' scene':'');c._scene=!!scene;c._amb=!!amb;el.appendChild(c);GS.cv.push(c);if(scene)gScene(c.getContext('2d'),c._amb);else gDraw(c.getContext('2d'));return c}
 const G_POSE_MS={dance:6000,sleep:6000,laugh:4000,jump:3500,cheering:4500,celebrating:4500,singing:6000,clapping:4000,applauding:4000};
@@ -1736,15 +1764,23 @@ const G_ACTS=['sitting','cane','tea','reading','newspaper','writing','texting','
 const GW={x:0,to:null,dir:1,busy:0,last:''};
 function gwFree(){return tab==='gary'&&!document.hidden&&!talking&&!GSPK&&!LV.on&&!GB.sit&&!$('gbar').classList.contains('drag')&&!matchMedia('(prefers-reduced-motion: reduce)').matches}
 function gwPlace(){const d=$('gdock');d.style.transform='translateX('+GW.x.toFixed(1)+'px)';d.classList.toggle('flip',GW.dir<0)}
+function gwOff(){return -Math.round($('gdock').offsetWidth*1.5+14)}
 function gwMax(){const b=$('gbar'),n=document.querySelector('.gbt');return Math.max(0,b.clientWidth-(n?n.offsetWidth+16:120)-$('gdock').offsetWidth)}
 (function gwLoop(){const now=performance.now();
  if(gwFree()){const max=gwMax();
-  if(GW.to!==null){const sp=GS.mood==='cycling'?Math.max(0.5,gwMax()/360):GS.mood==='strut'?0.26:0.32,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
+  if(GW.to!==null){const sp=GS.mood==='cycling'?Math.max(0.5,gwMax()/360):GS.mood==='strut'?0.26:GW.plan?0.85:0.32,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
    if(Math.abs(dx)<=sp){GW.x=GW.to;GW.to=null;if(GS.mood==='walking'||GS.mood==='cycling'||GS.mood==='strut')GS.mood=GS.base||'idle';
-    if(GB.bored){GW.busy=now+1500+Math.random()*2500;GS.mood='idle';gwPlace()}else{let a,ms;if(Math.random()<0.75){const r=gRoutinePick(GW.last);a=r[0];ms=(r[1]+Math.random()*(r[2]-r[1]))*1000}else{do{a=G_ACTS[Math.floor(Math.random()*(G_ACTS.length-1))]}while(a===GW.last);ms=8000+Math.random()*4000}GW.last=a;GW.busy=now+ms;GW.rest=true;gMood(a,GW.busy-now)}}
-   else{GW.x+=sp*GW.dir;if(!GS.until&&GS.mood!=='cycling')GS.mood=GB.bored?'strut':'walking'}gwPlace()}
-  else if(now>GW.busy&&!GS.until){if(GB.bored){const mn=Math.round(max*0.15),mx=Math.round(max*0.85);GW.to=GW.x<max/2?mx+Math.round(Math.random()*(max-mx)):Math.round(Math.random()*mn)}else if(GW.rest!==false){GW.rest=false;GW.busy=now+6000+Math.random()*8000;GS.mood=GS.base||'idle'}else if(Math.random()<0.08){GW.to=GW.x<max/2?max:0;GS.mood='cycling'}else{GW.to=Math.round(Math.random()*max)}}
+    const P=GW.plan,start=(a,ms)=>{GW.last=a;GW.busy=now+ms;GW.rest=true;gMood(a,ms)};
+    if(P){if(P.ph==='out'){P.items.forEach(i=>GS.has.add(i));GS.carry=P.items;P.ph='back';GW.to=Math.max(0,Math.min(max,P.spot))}
+     else if(P.ph==='back'){GS.carry=null;if(P.a){GW.plan=null;start(P.a,P.ms)}else{P.ph='stow';GS.carry=[...GS.has];GW.to=gwOff()}}
+     else if(P.ph==='stow'){GS.has.clear();GS.carry=null;P.ph='ret';GW.to=Math.round(Math.random()*max*0.6)}
+     else{GW.plan=null;GW.rest=false;GW.busy=now+1500+Math.random()*2500;GS.mood=GS.base||'idle'}}
+    else if(GB.bored){GW.busy=now+1500+Math.random()*2500;GS.mood='idle';gwPlace()}else{let a,ms;if(Math.random()<0.75){const r=gRoutinePick(GW.last);a=r[0];ms=(r[1]+Math.random()*(r[2]-r[1]))*1000}else{do{a=G_ACTS[Math.floor(Math.random()*(G_ACTS.length-1))]}while(a===GW.last);ms=8000+Math.random()*4000}
+     const need=gNeed(a,false).filter(i=>!GS.has.has(i));if(need.length){GW.last=a;GW.plan={a,ms,items:need,ph:'out',spot:GW.x};GW.to=gwOff()}else start(a,ms)}}
+   else{GW.x+=sp*GW.dir;if(GS.carry&&GS.carry.includes('bike'))GS.mood='cycling';else if(!GS.until&&GS.mood!=='cycling')GS.mood=GB.bored?'strut':'walking'}gwPlace()}
+  else if(now>GW.busy&&!GS.until){if(GS.has.size&&!GW.plan){GW.plan={ph:'stow'};GS.carry=[...GS.has];GW.to=gwOff()}else if(GB.bored){const mn=Math.round(max*0.15),mx=Math.round(max*0.85);GW.to=GW.x<max/2?mx+Math.round(Math.random()*(max-mx)):Math.round(Math.random()*mn)}else if(GW.rest!==false){GW.rest=false;GW.busy=now+6000+Math.random()*8000;GS.mood=GS.base||'idle'}else if(Math.random()<0.08){GW.plan={a:null,items:['bike'],ph:'out',spot:max};GW.to=gwOff()}else{GW.to=Math.round(Math.random()*max)}}
   if(GW.x>max){GW.x=max;gwPlace()}}
+ else if(GW.x<0&&tab==='gary'){GW.plan=null;GW.to=null;GS.carry=null;GW.x=Math.min(0,GW.x+2.5);GW.dir=1;gwPlace()}   // called back while off fetching something: hurry back in
  requestAnimationFrame(gwLoop)})();
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
 async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new Error('signin');if(gGuest())body=Object.assign({},body,{guest:true});body=Object.assign({},body,{use:gUse()});
@@ -1816,7 +1852,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124142641';let UPD=false;
+const BUILD='20261124143430';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
