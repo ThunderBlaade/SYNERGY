@@ -312,6 +312,10 @@ body.lvon #askbar{display:none!important}
 #lvorb.lvPara{animation:lvParaK 3.2s linear both;transform-origin:50% -40%}
 @keyframes lvParaK{0%{transform:translateY(-100vh) rotate(-7deg)}10%{transform:translateY(-88vh) rotate(-3deg)}20%{transform:translateY(-76vh) rotate(4deg)}30%{transform:translateY(-64vh) rotate(7deg)}40%{transform:translateY(-52vh) rotate(3deg)}50%{transform:translateY(-40vh) rotate(-4deg)}60%{transform:translateY(-29vh) rotate(-6deg)}70%{transform:translateY(-18vh) rotate(-2deg)}78%{transform:translateY(-9vh) rotate(3deg)}84%{transform:translateY(-2vh) rotate(2deg)}88%{transform:translateY(0) rotate(0)}92%{transform:translateY(3px)}96%{transform:translateY(-1px)}100%{transform:none}}
 #gfloat,#gfsp{width:80px!important;height:80px!important}#gfbub{bottom:90px}
+
+#gdock{position:relative;overflow:visible}#gdock .gpx.scene{position:absolute;left:-50%;top:-75%;width:200%!important;height:200%!important;max-width:none;pointer-events:none}
+#lvorb{width:min(190px,50vw);height:min(190px,50vw)}#lvorb .gpx.scene{position:absolute;left:-50%;top:-75%;width:200%!important;height:200%!important;max-width:none;pointer-events:none}
+#live.mini #lvorb{width:60px;height:60px}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -1073,6 +1077,7 @@ stargazing up up o pointUp twinkle still
 birdwatching right up small binoculars bird still
 fistpump happy angry grin fist sparkle jump
 pullchair open up grin point - still - pull
+cane open n smile rest - still
 sitting open n smile rest - bob - sit
 sitbored tired n flat rest - still - sit
 sityawn closed up yawn mouthcover - still - sit
@@ -1129,7 +1134,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'dance':odd?arm(0,27,12):arm(1,4,12);break;
   case 'blowkiss':odd?arm(0,18,14,[[22,20]],null,2,2):arm(0,28,13);break; case 'chefkiss':arm(0,17,14,[[22,20]],null,2,2);break;
   case 'hanky':arm(1,11,11,[[6,16]],null,2,2);rect(9,12,3,3,'W');break;
-  case 'tea':arm(0,22,21,null,'G',3,2);rect(20,19,6,1,'C');rect(21,17,4,2,'W');put(25,17,'W');if(odd){put(22,15,'C');put(23,14,'C')}else{put(23,15,'C');put(22,14,'C')}break;
+  case 'tea':arm(0,22,21,null,'G',3,2);if(GS.scene)break;rect(20,19,6,1,'C');rect(21,17,4,2,'W');put(25,17,'W');if(odd){put(22,15,'C');put(23,14,'C')}else{put(23,15,'C');put(22,14,'C')}break;
   case 'book':case 'paper':case 'quill':arm(0,21,22,null,'G',2,2);arm(1,10,22,null,'G',2,2);if(A==='paper'){rect(11,18,10,6,'C');rect(12,19,3,4,'W');rect(17,19,3,4,'W');for(let y=19;y<23;y+=2){rect(12,y,3,1,'K');rect(17,y,3,1,'K')}}
    else{rect(10,18,12,7,'N');rect(10,18,12,1,'n');rect(10,24,12,1,'n');rect(15,18,2,7,'n')}
    if(A==='quill'){put(19,20,'K');put(20,19,'Y');put(21,18,'Y');put(22,17,'Y');put(23,16,'W');put(24,15,'W')}break;
@@ -1137,7 +1142,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'binoculars':arm(0,20,13,[[24,17]],null,2,2);arm(1,11,13,[[7,17]],null,2,2);rect(11,8,3,3,'K');rect(18,8,4,3,'K');put(12,9,'L');put(19,9,'L');break;
   case 'flower':arm(0,23,20,null,null,2,2);line(23,14,23,18,'V');rect(22,11,3,3,'P');put(23,12,'Y');break;
   case 'trophy':arm(0,20,21,null,'G',2,2);arm(1,11,21,null,'G',2,2);rect(13,15,6,4,'Y');put(12,16,'Y');put(19,16,'Y');rect(15,19,2,2,'Y');rect(14,21,4,1,'n');break;
-  case 'umbrella':arm(0,25,18,null,null,2,2);line(25,4,25,16,'K');rect(18,2,14,2,'D');rect(20,1,10,1,'D');for(let i=18;i<32;i+=3)put(i,4,'D');break;
+  case 'umbrella':arm(0,25,18,null,null,2,2);if(GS.scene)break;line(25,4,25,16,'K');rect(18,2,14,2,'D');rect(20,1,10,1,'D');for(let i=18;i<32;i+=3)put(i,4,'D');break;
   case 'watch':arm(1,12,21,[[7,23]],null,3,2);rect(14,20,3,3,'Y');put(15,21,'K');put(15,20,'K');break;
   case 'mic':arm(0,19,17,[[23,21]],null,2,2);rect(18,14,2,2,'K');put(18,16,'G');break;
   case 'balloon':arm(0,26,21,null,null,2,2);line(26,8,27,19,'C');rect(25,2,4,5,'D');put(24,3,'D');put(29,3,'D');put(24,4,'D');put(29,4,'D');put(26,3,'W');break;
@@ -1147,7 +1152,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'phoneEar':arm(0,24,12,[[27,18]],null,2,2);rect(23,8,2,5,'K');break;
   case 'cup':arm(1,6,10,[[4,16]],null,2,3);put(8,9,'W');break;
   case 'walk':{const st=Math.floor((GW.step||0)/7)%2===0;const L0=st?9:21,L1=st?21:9;rect(L0,23,2,2,'W');del(L0,25);del(L0+1,25);put(L0===9?9:22,22,L0===9?'G':'B');rect(L1,25,2,2,'W');put(L1===9?9:22,24,L1===9?'G':'B');put(L1===9?10:21,24,'K');if(st){del(10,30);del(11,30);put(10,29,'K')}else{del(20,30);del(21,30);put(21,29,'K')}break}
-  case 'bike':{for(let y=28;y<31;y++)for(let i=8;i<24;i++)del(i,y);arm(0,24,21,null,'G',2,2);arm(1,21,22,[[11,22]],'G',2,2);
+  case 'bike':{if(GS.scene){arm(0,24,21,null,'G',2,2);arm(1,21,22,[[11,22]],'G',2,2);break}for(let y=28;y<31;y++)for(let i=8;i<24;i++)del(i,y);arm(0,24,21,null,'G',2,2);arm(1,21,22,[[11,22]],'G',2,2);
    const c=(cx)=>{for(let a=0;a<16;a++)put(cx+Math.round(Math.cos(a/16*6.283)*3.4),28+Math.round(Math.sin(a/16*6.283)*3.4),'C');put(cx,28,'K');const sa=(GW.step||t*3)/3.4;put(cx+Math.round(Math.cos(sa)*2),28+Math.round(Math.sin(sa)*2),'W');put(cx-Math.round(Math.cos(sa)*2),28-Math.round(Math.sin(sa)*2),'W')};
    line(7,27,16,26,'D');line(16,26,24,27,'D');line(16,26,15,24,'D');line(24,27,24,22,'K');rect(23,21,3,1,'K');c(7);c(24);
    if(odd){put(14,27,'B');put(14,28,'B');put(13,29,'K')}else{put(17,27,'B');put(17,28,'B');put(18,29,'K')}break}
@@ -1252,8 +1257,8 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   for(let y=17;y<27;y++)for(const i of [5,6,7,24,25,26])add(i,y,y===17||i===5||i===26?'n':'D');
   for(let y=24;y<28;y++)for(let i=6;i<26;i++)add(i,y,y===24?'D':y===27?'n':'R');
   for(const i of [6,7,24,25])for(let y=28;y<32;y++)add(i,y,'n');return A};
- if(X.post==='pull'){const off=Math.max(0,Math.round(14*(1-Math.min(1,(performance.now()-(GS.chairT0||0))/1100))));for(const [i,y,c] of chairPix(off))if(!P[y*32+i])P[y*32+i]=c}
- if(X.post==='sit'){const Q=[];for(const [i,y,c] of chairPix(0))Q[(y<<5)+i]=c;
+ if(X.post==='pull'&&!GS.scene){const off=Math.max(0,Math.round(14*(1-Math.min(1,(performance.now()-(GS.chairT0||0))/1100))));for(const [i,y,c] of chairPix(off))if(!P[y*32+i])P[y*32+i]=c}
+ if(X.post==='sit'){const Q=[];if(!GS.scene)for(const [i,y,c] of chairPix(0))Q[(y<<5)+i]=c;
   for(const kk in P){const y=kk>>5,i=kk&31;if(y<=25&&y+3<32)Q[((y+3)<<5)+i]=P[kk]}
   for(const i of [11,12,13,18,19,20])for(const y of [29,30])Q[(y<<5)+i]='B';for(const i of [10,11,12,13,18,19,20,21])Q[(31<<5)+i]='K';
   for(const kk in P)delete P[kk];for(const kk in Q)P[kk]=Q[kk]}
@@ -1261,11 +1266,33 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
  let dx=0,dy=0,flip=false;const mv=X.mv;
  if(mv==='bob')dy=X.a==='walk'?Math.floor((GW.step||0)/7)%2:(t%8>=4?1:0);else if(mv==='jump')dy=odd?-2:0;else if(mv==='bounce')dy=t%2?-1:0;else if(mv==='nod')dy=t%2;
  else if(mv==='shake')dx=t%2?1:-1;else if(mv==='tremble')dx=(t*7)%3-1;else if(mv==='sway')dx=[-1,0,1,0][t%4];else if(mv==='dance'){flip=t%8>=4;dy=t%2}
- const tint=G_TINT[X.tint]||{};x.clearRect(0,0,32,32);x.save();if(flip){x.translate(32,0);x.scale(-1,1)}x.fillStyle=GP.K;
+ GS.ldy=dy;const tint=G_TINT[X.tint]||{};x.clearRect(0,0,32,32);x.save();if(flip){x.translate(32,0);x.scale(-1,1)}x.fillStyle=GP.K;
  for(let y=0;y<32;y++)for(let i=0;i<32;i++)if(!P[y*32+i]&&(P[y*32+i-1]&&i>0||P[y*32+i+1]&&i<31||P[(y-1)*32+i]||P[(y+1)*32+i]))x.fillRect(i+dx,y+dy,1,1);
  for(let y=0;y<32;y++)for(let i=0;i<32;i++){const c=P[y*32+i];if(c){x.fillStyle=tint[c]||GP[c]||c;x.fillRect(i+dx,y+dy,1,1)}}x.restore()}
-function gPaint(){GS.cv=GS.cv.filter(c=>c.isConnected);for(const c of GS.cv)if(c.offsetParent!==null||c.closest('#gfloat'))gDraw(c.getContext('2d'))}
-function gCanvas(el){const c=document.createElement('canvas');c.width=c.height=32;c.className='gpx';el.appendChild(c);GS.cv.push(c);gDraw(c.getContext('2d'));return c}
+// ---------- Props in G.A.R.Y.'s own space (voice screen and his bar): a 64x64 scene with him at (16,24), props behind and in front
+const GPP={K:'#090d16',D:'#92400e',L:'#d97706',T:'#0284c7',A:'#38bdf8',E:'#94a3b8',Y:'#e8c25a',W:'#f4f4f6',R:'#7a2a2a',B:'#1d1e26',G:'#3b3d4c'};
+const PROP_CANE=["KYYK","YLLY","KYYK",".KK.",".DL.",".DL.",".DL.",".DL.",".DL.",".DL.",".DL.",".DL.",".KK.",".WW."];
+const PROP_UMBRELLA=["...............KK...............","..............KYYK..............","..........KKKKAAAAKKKK..........",".......KKKAAAAAAAAAAAAKKK.......",".....KKAAAAAAAAAAAAAAAAAAKK.....","...KKAAATTTTAAAAAAAATTTTAAAKK...","..KAAAAATTTTAAAAAAAATTTTAAAAAK..",".KAAAAAAAAAAAAAAAAAAAAAAAAAAAAK.","KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK",...Array(28).fill("...............KD..............."),"..............KYYK..............","..............KY.K..............","..............KK................"];
+const PROP_CHAIR=["....KKKKKKKKKKKKKKKKKKKKKKKK....","..KKRRRRRRRRRRRRRRRRRRRRRRRRKK..",".KRRRRRRRRRRRRRRRRRRRRRRRRRRRRK.",".KRRDDDDDDDDDDDDDDDDDDDDDDDDRRK.",...Array(8).fill(".KRRDRRRRRRRRRRRRRRRRRRRRRRDRRK."),"KKKKDRRRRRRRRRRRRRRRRRRRRRRDKKKK","KLLKDRRRRRRRRRRRRRRRRRRRRRRDKLLK","KLLKDDDDDDDDDDDDDDDDDDDDDDDDKLLK","KLLKKKKKKKKKKKKKKKKKKKKKKKKKKLLK","KLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLK","KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","..KDDK....................KDDK..","..KDDK....................KDDK..","..KKKK....................KKKK.."];
+const PROP_BIKE=["..............................KKKKKK........",".............................KYYYYYYK.......","..............................KKYYKK........","................................YY..........",".........................KKKKKK.YY..........",".......................KK......KYY..........",".....................KK........YYY..........","...................KK.........KYYK..........","........KKKK.....KK..........KYYYYK.........",".......KYYYYK..KK...........KYYEEYYK........","........KKKK.KK............KYYE..EYYK.......","...........KK.............KYYE.EE.EYYK......",".........KK..KKKK.........KYE.E..E.EYK......",".......KK..KK....KK.......KYE.E..E.EYK......","......K..KK..EEEE..KK.....KYE.E..E.EYK......",".....K..K..EE.KK.EE..K....KYYE.EE.EYYK......",".....K..K.E..K..K..E.K.....KYYE..EYYK.......",".....K..K.E..K..K..E.K......KYYYYYYK........","......K..K.EE.KK.EE.K........KKKKKK.........",".......KK..KK....KK.........................","...........KKKKKK..........................."];
+const PROP_TEACUP=["....KKKK....","...KWWWWK...","..KWWAWWKK..","..KWWWWWWK..","...KWWWWK...","....KKKK....","KKKKKKKKKKKK","KLLLLLLLLLLK",".KKKKKKKKKK."];
+const PROP_BRIEFCASE=["....KKKKKK....","...KLLLLLLK...",".KKKKKKKKKKKK.","KDDDDDDDDDDDDK","KDLLLLLLLLLLDK","KDDDDDYYDDDDDK","KDDDDDDDDDDDDK","KDDDDDDDDDDDDK","KKKKKKKKKKKKKK"];
+const PROP_LAMP=["....KKKKKKKK....","..KKYYYYYYYYKK..",".KYYLLLLLLLLYYK.",".KYYDDDDDDDDYYK.","KKKKKKKKKKKKKKKK",...Array(35).fill(".......KL......."),".....KKKKKK.....","....KLLLLLLK....","....KKKKKKKK...."];
+const PROP_TOPHAT=["....KKKKKKKKKK....","...KBBBBBBBBBBK...","...KBGGGGGGGGGBK..","...KBBBBBBBBBBK...","...KBBBBBBBBBBK...","...KBBBBBBBBBBK...","...KRRRRRRRRRRK...","...KBBBBBBBBBBK...",".KKKKKKKKKKKKKKKK.","KBBBBBBBBBBBBBBBBK","KGGGGGGGGGGGGGGGGK",".KKKKKKKKKKKKKKKK."];
+const G_PROPS={cycling:'bike',umbrella:'umbrella',tea:'teacup',reading:'lamp',newspaper:'lamp',writing:'lamp',dapper:'tophat',flourish:'tophat',welcoming:'tophat',waiting:'briefcase',watch:'briefcase',impatient:'briefcase',cane:'cane',sitread:'lamp',sittea:'teacup'};
+function gProp(x,pat,sx,sy){for(let y=0;y<pat.length;y++)for(let i=0;i<pat[y].length;i++){const c=pat[y][i];if(c==='.'||!GPP[c])continue;x.fillStyle=GPP[c];x.fillRect(sx+i,sy+y,1,1)}}
+let GOFF=null;
+function gScene(x,amb){const name=gState(),X=G_EX[name]||G_EX.idle,mini=amb&&$('live').classList.contains('mini');
+ let pr=G_PROPS[name]||null,chair=X.post==='sit'?0:X.post==='pull'?Math.max(0,Math.round(28*(1-Math.min(1,(performance.now()-(GS.chairT0||0))/1100)))):null;
+ if(!pr&&chair===null&&amb&&!mini)pr='lamp';
+ if(!GOFF){GOFF=document.createElement('canvas');GOFF.width=GOFF.height=32}
+ GS.scene=true;try{gDraw(GOFF.getContext('2d'),name)}finally{GS.scene=false}
+ const dy=(GS.ldy||0)+(X.post==='sit'?3:0),lift=pr==='bike'?-4:0;x.clearRect(0,0,64,64);
+ if(chair!==null)gProp(x,PROP_CHAIR,16+chair,33);if(pr==='bike')gProp(x,PROP_BIKE,10,34);if(pr==='lamp')gProp(x,PROP_LAMP,5,13);if(pr==='briefcase')gProp(x,PROP_BRIEFCASE,46,46);
+ x.drawImage(GOFF,16,24+lift);
+ if(pr==='cane')gProp(x,PROP_CANE,36,43+dy);if(pr==='umbrella')gProp(x,PROP_UMBRELLA,26,5+dy);if(pr==='teacup')gProp(x,PROP_TEACUP,32,38+dy);if(pr==='tophat')gProp(x,PROP_TOPHAT,23,15+dy)}
+function gPaint(){GS.cv=GS.cv.filter(c=>c.isConnected);for(const c of GS.cv)if(c.offsetParent!==null||c.closest('#gfloat')){if(c._scene)gScene(c.getContext('2d'),c._amb);else gDraw(c.getContext('2d'))}}
+function gCanvas(el,scene,amb){const c=document.createElement('canvas');c.width=c.height=scene?64:32;c.className='gpx'+(scene?' scene':'');c._scene=!!scene;c._amb=!!amb;el.appendChild(c);GS.cv.push(c);if(scene)gScene(c.getContext('2d'),c._amb);else gDraw(c.getContext('2d'));return c}
 const G_POSE_MS={dance:6000,sleep:6000,laugh:4000,jump:3500,cheering:4500,celebrating:4500,singing:6000,clapping:4000,applauding:4000};
 function gPose(n){n=String(n||'').toLowerCase();if(!G_EX[n])return;gMood(n,G_POSE_MS[n]||3800);GB.last=Date.now();if(GB.sit&&G_EX[n].post!=='sit'){GB.sit=false;GS.base=gIdleBase()}if($('gfloat').classList.contains('on'))GF.hold=performance.now()+(G_POSE_MS[n]||3800)}
 setInterval(()=>{GS.tick++;if(GW.anim)GW.step=(GW.step||0)+3.2;try{GSPK=(typeof AC!=='undefined'&&AC&&acEnd>AC.currentTime+0.05)||(window.speechSynthesis&&speechSynthesis.speaking)}catch(e){GSPK=false}
@@ -1321,7 +1348,7 @@ function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
  const end=()=>{if(!GF.drag)return;GF.drag=false;if(GF.moved){store('garyPos',Math.round(GF.x)+','+Math.round(GF.y));GF.hold=performance.now()+8000;gMood('happy',900)}else go('gary')};
  f.addEventListener('pointerup',end);f.addEventListener('pointercancel',end);
  addEventListener('resize',()=>{if(f.classList.contains('on'))gFloatPlace()});
- gCanvas($('gdock'));gCanvas($('lvorb'));$('gfid').onclick=()=>gGate();$('brain').onclick=e=>{e.stopPropagation();brainMenu()};$('bdlist').onclick=e=>{const t=e.target.closest('[data-bk]');if(t)brainToggle(t.dataset.bk)};$('bdx').onclick=brainClose;$('veil').addEventListener('click',brainClose);(function(){const d=$('bdrop');let y0=null;d.addEventListener('pointerdown',e=>{if(!e.target.closest('button'))y0=e.clientY});d.addEventListener('pointermove',e=>{if(y0!==null&&e.clientY-y0<-50){y0=null;brainClose()}});d.addEventListener('pointerup',()=>y0=null)})();brainDraw();
+ gCanvas($('gdock'),1);gCanvas($('lvorb'),1,1);$('gfid').onclick=()=>gGate();$('brain').onclick=e=>{e.stopPropagation();brainMenu()};$('bdlist').onclick=e=>{const t=e.target.closest('[data-bk]');if(t)brainToggle(t.dataset.bk)};$('bdx').onclick=brainClose;$('veil').addEventListener('click',brainClose);(function(){const d=$('bdrop');let y0=null;d.addEventListener('pointerdown',e=>{if(!e.target.closest('button'))y0=e.clientY});d.addEventListener('pointermove',e=>{if(y0!==null&&e.clientY-y0<-50){y0=null;brainClose()}});d.addEventListener('pointerup',()=>y0=null)})();brainDraw();
  $('gsay').onclick=()=>$('ask').focus();$('gcut').onclick=()=>{speakStop();gMood('idle')};gFloatSync()}
 async function gNotesCopy(){if(!CS){toast('Sign in first');return}
  try{const since=new Date(Date.now()-14*864e5).toISOString();const rows=await gdb('gary_audit?select=action,detail,at&or=(ok.eq.false,action.eq.wish)&at=gte.'+since+'&order=at.desc&limit=40')||[];
@@ -1487,7 +1514,7 @@ function lvNoShow(){if(LV.noshow)return;LV.noshow=true;const L=$('live'),o=$('lv
  setTimeout(()=>{lvLine('box',q)},700);
  setTimeout(()=>{lvStop();LV.noshow=false;go('gary');$('ask').placeholder=q.replace('Sentient search bar: ','');setTimeout(()=>$('ask').focus(),250)},4200)}
 // ---------- G.A.R.Y. lives in his bar: wanders up and down and gets on with things (20 activities)
-const G_ACTS=['tea','reading','newspaper','writing','texting','phonecall','watch','stretching','dance','singing','stargazing','birdwatching','detective','zen','umbrella','balloon','flower','dapper','tiphat','cycling'];
+const G_ACTS=['cane','tea','reading','newspaper','writing','texting','phonecall','watch','stretching','dance','singing','stargazing','birdwatching','detective','zen','umbrella','balloon','flower','dapper','tiphat','cycling'];
 const GW={x:0,to:null,dir:1,busy:0,last:''};
 function gwFree(){return tab==='gary'&&!document.hidden&&!talking&&!GSPK&&!LV.on&&!GB.sit&&!$('gbar').classList.contains('drag')&&!matchMedia('(prefers-reduced-motion: reduce)').matches}
 function gwPlace(){const d=$('gdock');d.style.transform='translateX('+GW.x.toFixed(1)+'px)';d.classList.toggle('flip',GW.dir<0)}
