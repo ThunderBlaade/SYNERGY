@@ -43,6 +43,26 @@ create table if not exists public.gary_memories (
   primary key (uid, id)
 );
 create index if not exists gary_memories_fts on public.gary_memories using gin (fts);
+-- G.A.R.Y. Memories as files (safe to re-run; adds columns only, deletes nothing)
+alter table public.gary_memories
+  add column if not exists folder  text   not null default 'other',
+  add column if not exists title   text,
+  add column if not exists summary text,
+  add column if not exists meaning text,
+  add column if not exists keys    text   not null default '',
+  add column if not exists links   text[] not null default '{}',
+  add column if not exists history jsonb  not null default '[]'::jsonb;
+alter table public.gary_memories drop constraint if exists gary_memories_folder_chk;
+alter table public.gary_memories add constraint gary_memories_folder_chk
+  check (folder in ('people','places','experiences','self','knowledge','other'));
+alter table public.gary_memories add column if not exists fts2 tsvector generated always as (
+  to_tsvector('english', coalesce(title,'') || ' ' || coalesce(summary,'') || ' ' || text || ' ' || coalesce(meaning,'') || ' ' || keys)) stored;
+create index if not exists gary_memories_fts2 on public.gary_memories using gin (fts2);
+-- first sort: existing memories go to the closest folder (Gary refines them afterwards)
+update public.gary_memories set folder = case kind when 'profile' then 'self' when 'preference' then 'self'
+  when 'episodic' then 'experiences' when 'operational' then 'knowledge' else 'other' end
+  where title is null and folder = 'other';
+
 
 -- What Gary did, for you to check (audit log)
 create table if not exists public.gary_audit (
