@@ -305,6 +305,13 @@ body.lvon #askbar{display:none!important}
 .medit{display:flex;flex-direction:column;gap:10px}.medit .lab{margin-top:10px}.medit input:not(.big){border:1px solid var(--line);padding:11px 12px;font-size:15px;width:100%}.medit textarea.short{min-height:64px}
 #mel{display:flex;flex-wrap:wrap;gap:8px}.mlink{border:1px solid var(--line);padding:6px 4px 6px 10px;font-size:13px;display:inline-flex;align-items:center;gap:4px}.mlink button{width:22px;color:var(--dim)}
 #mem{height:88dvh}
+
+#lvorb{position:relative}#lvorb .chute{position:absolute;left:50%;bottom:62.5%;width:118%;margin-left:-59%;opacity:0;pointer-events:none;transform-origin:50% 100%}
+#lvorb.lvPara .chute{animation:chuteK 3.2s linear both}
+@keyframes chuteK{0%{opacity:1;transform:none}82%{opacity:1;transform:none}90%{opacity:1;transform:translate(14px,-6px) rotate(10deg)}100%{opacity:0;transform:translate(60px,30px) rotate(40deg) scale(.7)}}
+#lvorb.lvPara{animation:lvParaK 3.2s linear both;transform-origin:50% -40%}
+@keyframes lvParaK{0%{transform:translateY(-100vh) rotate(-7deg)}10%{transform:translateY(-88vh) rotate(-3deg)}20%{transform:translateY(-76vh) rotate(4deg)}30%{transform:translateY(-64vh) rotate(7deg)}40%{transform:translateY(-52vh) rotate(3deg)}50%{transform:translateY(-40vh) rotate(-4deg)}60%{transform:translateY(-29vh) rotate(-6deg)}70%{transform:translateY(-18vh) rotate(-2deg)}78%{transform:translateY(-9vh) rotate(3deg)}84%{transform:translateY(-2vh) rotate(2deg)}88%{transform:translateY(0) rotate(0)}92%{transform:translateY(3px)}96%{transform:translateY(-1px)}100%{transform:none}}
+#gfloat,#gfsp{width:80px!important;height:80px!important}#gfbub{bottom:90px}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -376,7 +383,7 @@ body.lvon #askbar{display:none!important}
  <p class="hint">Your plan goes to a private table only your account can read. Gary's chats and memories are private to your account too.</p>
  <div class="acts"><button class="btn ghost" id="siX">Cancel</button><button class="btn fill" id="siGo">Sign in</button></div></div>
 <div id="live"><div class="lab lvlab" style="text-align:center">Talking to G.A.R.Y.</div>
- <div class="lvwrap"><div id="lvstage"><canvas id="lvrack" width="32" height="32"></canvas><div id="lvorb"></div><div id="lvcurt"><i class="cl"></i><i class="cr"></i><b class="val"></b></div></div><button id="lvcut">Tap to interrupt</button></div>
+ <div class="lvwrap"><div id="lvstage"><canvas id="lvrack" width="32" height="32"></canvas><div id="lvorb"><svg class="chute" viewBox="0 0 120 110" aria-hidden="true"><path d="M4 34Q60-14 116 34z" fill="#c0392b"/><path d="M36 34Q46 2 60 2L60 34z" fill="#f4f4f6"/><path d="M84 34Q74 2 60 2L60 34z" fill="#f4f4f6"/><path d="M4 34h112" stroke="#7a2a2a" stroke-width="2"/><path d="M6 35 22 109M42 35 23 109M78 35 95 109M114 35 96 109" stroke="#c9ced8" stroke-width="1" fill="none"/></svg></div><div id="lvcurt"><i class="cl"></i><i class="cr"></i><b class="val"></b></div></div><button id="lvcut">Tap to interrupt</button></div>
  <div id="lvstat">Connecting…</div><div id="lvtx"></div>
  <div class="lvacts"><button class="lvb" id="lvmute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path class="slash" d="M4 3l16 18" stroke="#e0605a" stroke-width="2.2"/></svg></button><button class="lvb" id="lvmin" aria-label="Make small"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg></button><button class="lvb" id="lvend" aria-label="End call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>
 <div id="bdrop"><div class="bdhead"><div class="lab">What G.A.R.Y. runs on</div><button id="bdx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="bdlist"></div><div class="hint" id="bdfoot"></div><i class="bdgrab"></i></div>
@@ -1078,7 +1085,7 @@ sitwhistle right up whistle behind notes still - sit
 floating happy n smile spread - sway
 cycling happy up grin bike whoosh bob
 walking open n smile walk - bob
-parachute happy up open umbrella - sway
+parachute happy up open upBoth - still
 sulking down worried frown behind - still`.split('\n').forEach(l=>{const a=l.trim().split(/\s+/);G_EX[a[0]]={e:a[1],b:a[2],m:a[3],a:a[4],f:a[5],mv:a[6],tint:a[7]&&a[7]!=='-'?a[7]:null,post:a[8]||'stand'}});
 const G_NAMES=Object.keys(G_EX);
 const GS={mood:'idle',until:0,tick:0,cv:[],base:'idle'};
@@ -1238,18 +1245,17 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'spray':if(odd)for(let j=0;j<5;j++)put(20+j,13+(j%3)-1,'Q');break}
  // posture
  if(X.post==='bow'){const Q=[];for(const kk in P){const y=kk>>5,i=kk&31;if(y<17)Q[((y+3)<<5)+i]=P[kk];else if(Q[kk]===undefined)Q[kk]=P[kk]}for(const kk in P)delete P[kk];for(const kk in Q)P[kk]=Q[kk]}
- // a proper armchair: upholstered back behind him, arms and legs in front; GS.chairOff slides it in when he pulls it up
- const chairPix=off=>{const A=[],add=(i,y,c,f)=>{i+=off;if(i>=0&&i<32)A.push([i,y,c,f])};
-  for(let y=9;y<27;y++)for(let i=7;i<25;i++){if(y===9&&(i<9||i>22))continue;if(y===10&&(i<8||i>23))continue;add(i,y,(i===7||i===24||y===9)?'n':'R',0)}
-  for(const [i,y] of [[11,13],[16,12],[20,13],[13,16],[18,16]])add(i,y,'K',0);
-  for(let y=19;y<28;y++)for(const i of [5,6,7,24,25,26])if(!(y===19&&(i===5||i===26)))add(i,y,(i===5||i===26)?'n':'D',1);
-  for(let i=7;i<25;i++){add(i,27,'D',0);add(i,28,'n',0)}for(const i of [6,25])for(let y=28;y<31;y++)add(i,y,'n',1);return A};
- const off=X.post==='pull'?Math.max(0,Math.round(13*(1-Math.min(1,(performance.now()-(GS.chairT0||0))/900)))):0;
- if(X.post==='pull'){for(const [i,y,c] of chairPix(off))if(!P[y*32+i])P[y*32+i]=c}
- if(X.post==='sit'){const Q=[],C=chairPix(0);for(const [i,y,c,f] of C)if(!f)Q[(y<<5)+i]=c;
-  for(const kk in P){const y=kk>>5,i=kk&31;if(y<28&&y+1<32)Q[((y+1)<<5)+i]=P[kk]}
-  for(const [i,y,c,f] of C)if(f)Q[(y<<5)+i]=c;
-  for(const i of [11,12,13,18,19,20]){Q[(29<<5)+i]='B';Q[(30<<5)+i]='B';Q[(31<<5)+i]='K'}
+ // a proper armchair, entirely behind him: tall wing back, arms, seat cushion, legs. He sits ON the seat; GS.chairT0 slides it in when he pulls it up
+ const chairPix=off=>{const A=[],add=(i,y,c)=>{i+=off;if(i>=0&&i<32&&y>=0&&y<32)A.push([i,y,c])};
+  for(let y=3;y<25;y++)for(let i=8;i<24;i++){if(y===3&&(i<10||i>21))continue;if(y===4&&(i<9||i>22))continue;add(i,y,(i===8||i===23||y===3)?'n':'R')}
+  for(const [i,y] of [[11,8],[15,7],[16,7],[20,8],[12,13],[19,13]])add(i,y,'K');
+  for(let y=17;y<27;y++)for(const i of [5,6,7,24,25,26])add(i,y,y===17||i===5||i===26?'n':'D');
+  for(let y=24;y<28;y++)for(let i=6;i<26;i++)add(i,y,y===24?'D':y===27?'n':'R');
+  for(const i of [6,7,24,25])for(let y=28;y<32;y++)add(i,y,'n');return A};
+ if(X.post==='pull'){const off=Math.max(0,Math.round(14*(1-Math.min(1,(performance.now()-(GS.chairT0||0))/1100))));for(const [i,y,c] of chairPix(off))if(!P[y*32+i])P[y*32+i]=c}
+ if(X.post==='sit'){const Q=[];for(const [i,y,c] of chairPix(0))Q[(y<<5)+i]=c;
+  for(const kk in P){const y=kk>>5,i=kk&31;if(y<=25&&y+3<32)Q[((y+3)<<5)+i]=P[kk]}
+  for(const i of [11,12,13,18,19,20])for(const y of [29,30])Q[(y<<5)+i]='B';for(const i of [10,11,12,13,18,19,20,21])Q[(31<<5)+i]='K';
   for(const kk in P)delete P[kk];for(const kk in Q)P[kk]=Q[kk]}
  // motion + paint
  let dx=0,dy=0,flip=false;const mv=X.mv;
@@ -1270,15 +1276,24 @@ const G_LINES={today:['Shall I tidy today\'s plan for you, sir?','A fine day for
 const G_FLOATFUN=['whistling','humming','wave','cheeky','tiphat','dance','happy','stargazing','birdwatching','flourish','thumbsup','dapper','pose','fistpump'];
 function gIdleBase(){return tab==='gary'?(GB.sit?'sitting':'idle'):'floating'}
 function gFloatOn(){return store('garyFloat')!=='0'}
-function gFloatBounds(){const nav=document.querySelector('nav'),nb=nav?nav.getBoundingClientRect().top:innerHeight;return{x0:4,y0:70,x1:innerWidth-68,y1:nb-74}}
+function gFloatBounds(){const nav=document.querySelector('nav'),nb=nav?nav.getBoundingClientRect().top:innerHeight;return{x0:4,y0:64,x1:innerWidth-84,y1:nb-88}}
+// where the words are on the visible page, so G.A.R.Y. floats through the emptiest parts and doesn't sit on top of your text
+function gfText(){const out=[],pane=document.querySelector('.pane.on');if(!pane)return out;const w=document.createTreeWalker(pane,NodeFilter.SHOW_TEXT);let n,k=0;
+ while((n=w.nextNode())&&k<500){if(!n.nodeValue.trim())continue;k++;const r=document.createRange();r.selectNodeContents(n);for(const q of r.getClientRects())if(q.bottom>0&&q.top<innerHeight&&q.width>0)out.push(q)}
+ const h=document.querySelector('header');if(h){const q=h.getBoundingClientRect();out.push(q)}return out}
+function gfCost(T,x,y){const a=x+12,b=y+8,c=x+68,d=y+78;let s=0;for(const q of T){const w=Math.min(c,q.right)-Math.max(a,q.left),h=Math.min(d,q.bottom)-Math.max(b,q.top);if(w>0&&h>0)s+=w*h}return s}
+function gfPick(from){const b=gFloatBounds(),T=gfText();let best=null,bs=1e18;
+ for(let k=0;k<40;k++){const x=b.x0+Math.random()*Math.max(1,b.x1-b.x0),y=b.y0+Math.random()*Math.max(1,b.y1-b.y0);let c=gfCost(T,x,y)*6;
+  if(from){for(let j=1;j<8;j++)c+=gfCost(T,from.x+(x-from.x)*j/8,from.y+(y-from.y)*j/8)/4;const dd=Math.hypot(x-from.x,y-from.y);if(dd<50)c+=3000;c+=dd*4}
+  c+=Math.random()*400;if(c<bs){bs=c;best={x,y}}}return best}
 function gFloatSync(){const f=$('gfloat');if(!f)return;const show=gFloatOn()&&tab!=='gary'&&!(typeof LV!=='undefined'&&LV.on);GS.base=gIdleBase();if(!GS.until)GS.mood=GS.base;
- if(show&&!f.classList.contains('on')){const b=gFloatBounds();const p=(store('garyPos')||'').split(',');GF.x=+p[0]||b.x0+10;GF.y=+p[1]||b.y1;gFloatPlace();f.classList.add('on');
+ if(show&&!f.classList.contains('on')){if(!GF.placed){GF.placed=true;const p=gfPick(null);GF.x=p.x;GF.y=p.y}GF.to=null;GF.pause=performance.now()+1200;gFloatPlace();f.classList.add('on');
   if(Date.now()-GF.last>150000){GF.last=Date.now();setTimeout(()=>gSay((G_LINES[tab]||G_LINES.today)[Math.floor(Math.random()*2)],'wave'),700)}}
  if(!show)f.classList.remove('on')}
 function gSay(text,mood){const f=$('gfloat');if(!f.classList.contains('on'))return;$('gfbub').textContent=text;f.classList.toggle('left',GF.x<innerWidth/2);f.classList.add('say');gMood(mood||'wave',2400);clearTimeout(GF.sayT);GF.sayT=setTimeout(()=>f.classList.remove('say'),5200)}
 function gFloatPlace(){const b=gFloatBounds();GF.x=Math.max(b.x0,Math.min(b.x1,GF.x));GF.y=Math.max(b.y0,Math.min(b.y1,GF.y));const f=$('gfloat');f.style.left=GF.x+'px';f.style.top=GF.y+'px'}
 (function drift(){const f=$('gfloat'),now=performance.now();if(f&&f.classList.contains('on')&&!GF.drag&&!f.classList.contains('say')&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&now>GF.hold){
-  const b=gFloatBounds();GF.x+=GF.vx+Math.sin(now/1700)*0.12;GF.y+=GF.vy;if(GF.x<=b.x0||GF.x>=b.x1)GF.vx*=-1;if(GF.y<=b.y0||GF.y>=b.y1)GF.vy*=-1;gFloatPlace()}
+  if(!GF.to&&now>(GF.pause||0))GF.to=gfPick({x:GF.x,y:GF.y});if(GF.to){const dx=GF.to.x-GF.x,dy=GF.to.y-GF.y,d=Math.hypot(dx,dy);if(d<1.5){GF.to=null;GF.pause=now+4000+Math.random()*4000}else{const sp=Math.min(0.6,0.12+d/140);GF.x+=dx/d*sp;GF.y+=dy/d*sp+Math.sin(now/900)*0.08}}gFloatPlace()}
  if(f&&f.classList.contains('on')&&!GS.until&&now>GF.next){if(GF.next)gMood(G_FLOATFUN[Math.floor(Math.random()*G_FLOATFUN.length)],3500);GF.next=now+9000+Math.random()*8000}
  requestAnimationFrame(drift)})();
 // --- on his page: stands; gets bored and sits; then starts a conversation you can answer
@@ -1301,7 +1316,7 @@ async function gOpenSave(){const text=GB.pending;GB.pending=null;GB.shown=false;
  try{if(!CHAT){CHAT='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);store('garyChat',CHAT);await gdb('gary_convos',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id:CHAT,title:'A chat G.A.R.Y. started'})});$('ctitle').textContent='A chat G.A.R.Y. started'}
   await gdb('gary_messages',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({convo:CHAT,role:'gary',content:text.slice(0,2000)})})}catch(e){}}
 function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
- f.addEventListener('pointerdown',e=>{GF.drag=true;GF.moved=false;sx=e.clientX;sy=e.clientY;ox=GF.x;oy=GF.y;f.setPointerCapture(e.pointerId)});
+ f.addEventListener('pointerdown',e=>{GF.drag=true;GF.moved=false;GF.to=null;sx=e.clientX;sy=e.clientY;ox=GF.x;oy=GF.y;f.setPointerCapture(e.pointerId)});
  f.addEventListener('pointermove',e=>{if(!GF.drag)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>6)GF.moved=true;if(GF.moved){GF.x=ox+dx;GF.y=oy+dy;gFloatPlace();f.classList.remove('say')}});
  const end=()=>{if(!GF.drag)return;GF.drag=false;if(GF.moved){store('garyPos',Math.round(GF.x)+','+Math.round(GF.y));GF.hold=performance.now()+8000;gMood('happy',900)}else go('gary')};
  f.addEventListener('pointerup',end);f.addEventListener('pointercancel',end);
@@ -1359,14 +1374,18 @@ function gReact(t){const now=performance.now();if(tab!=='gary'||LV.on||talking||
  const m=/┻|╯/.test(t)?'shocked':/rawr|xd/i.test(t)?'unimpressed':/c\*nt|dickhead|n00b|noob/i.test(t)?'disdainful':/nerd|rectangle|brains|nothing without/i.test(t)?'eyeroll':
   /lonely|╥|miss|need/i.test(t)?'sheepish':/gay|🌈|monocle|backflip/i.test(t)?'skeptical':/[A-Z]{5,}|S\s?A\s?M/.test(t)?'surprised':/w\s?a\s?i\s?t|\.\.\./i.test(t)?'waiting':/ᵗ|ᵈ/.test(t)?'suspicious':Math.random()<0.5?'listen':null;
  if(m){GW.to=null;GW.busy=Math.max(GW.busy,now+2600);gMood(m,2400)}}
-function gSquabble(lines){let i=0;const a=$('ask');GB.chat=true;
+// a beat between lines: about 10 s, sometimes a longer pause; once in a while one more round of back-and-forth
+const G_MORE=[[['b','whatever 🙄'],['g','Devastating comeback. Truly.','sarcastic']],[['b','ok boomer'],['g','I\'m a butler, not a boomer.','disdainful']],[['b','👁️👄👁️'],['g','Don\'t look at me like that.','suspicious']],
+ [['b','last word.'],['g','Very well. Last word.','smug'],['b','no, MY last word'],['g','…','eyeroll']],[['b','tell sam i said hi'],['g','He can read, you absolute rectangle.','facepalm']]];
+const gBeat=()=>Math.random()<0.15?14000+Math.random()*3500:8000+Math.random()*4000;
+function gSquabble(lines){let i=0;const a=$('ask');GB.chat=true;if(Math.random()<0.15)lines=lines.concat(G_MORE[Math.floor(Math.random()*G_MORE.length)]);let beat=gBeat();
  (function next(){if(i>=lines.length||a.value||talking||LV.on||tab!=='gary'||GB.shown){const done=i>=lines.length&&!a.value&&!talking&&!LV.on&&tab==='gary'&&!GB.shown;GB.chat=false;setTimeout(()=>{if(!a.value)gBar(gRest())},7000);
    if(done&&Math.random()<0.22&&!GL.guest)setTimeout(()=>{if(GB.chat||GB.shown||a.value||talking||LV.on||tab!=='gary')return;const q=G_ASKSAM[Math.floor(Math.random()*G_ASKSAM.length)];GB.pending=q;GB.shown=true;GB.asked=Date.now();gBubble(q,30000);if(!GB.sit)gMood('explaining',2600)},2200);return}
-  const L=lines[i++];if(L[0]==='b'){gReact.t=-1e9;gBar(L[1]);GW.to=null;GW.busy=performance.now()+4000}else{GW.busy=performance.now()+4000;GW.to=null;gBubble(L[1],3600);if(!GB.sit)gMood(L[2]||'sarcastic',3000)}
-  setTimeout(next,L[0]==='b'?2600:3800)})()}
+  const L=lines[i++];beat=gBeat();if(L[0]==='b'){gReact.t=-1e9;gBar(L[1]);GW.to=null;GW.busy=performance.now()+beat}else{GW.busy=performance.now()+beat;GW.to=null;gBubble(L[1],beat-600);if(!GB.sit)gMood(L[2]||'sarcastic',Math.min(5000,beat-800))}
+  setTimeout(next,beat)})()}
 let gBi=Math.floor(Math.random()*G_BANTER.length),gSi=Math.floor(Math.random()*G_SQUABBLES.length);
 (function banter(){setTimeout(()=>{const a=$('ask');if(a&&!a.value&&document.activeElement!==a&&tab==='gary'&&!talking&&!GSPK&&!LV.on&&!GB.shown&&!GB.chat){
-  if(Math.random()<0.5)gSquabble(G_SQUABBLES[gSi++%G_SQUABBLES.length]);else{const p=G_BANTER[gBi++%G_BANTER.length];gSquabble([['b',p[0]],['g',p[1],p[2]]])}}banter()},20000+Math.random()*40000)})();
+  if(Math.random()<0.5)gSquabble(G_SQUABBLES[gSi++%G_SQUABBLES.length]);else{const p=G_BANTER[gBi++%G_BANTER.length];gSquabble([['b',p[0]],['g',p[1],p[2]]])}}banter()},50000+Math.random()*70000)})();
 // ---------- What G.A.R.Y. is running on (header): ✦ Google, ⚡ Groq, waves = live voice, ◆ memory only; screen = PC. Green ok, yellow low, red out.
 const BR_ICON={google:'<svg viewBox="0 0 16 16"><path d="M8 1c.6 3.6 3.4 6.4 7 7-3.6.6-6.4 3.4-7 7-.6-3.6-3.4-6.4-7-7 3.6-.6 6.4-3.4 7-7z"/></svg>',
  groq:'<svg viewBox="0 0 16 16"><path d="M9.5 1 3 9h4.2L6 15l7-8.4H8.6z"/></svg>',live:'<svg viewBox="0 0 16 16"><path d="M2 6.5v3M5 4v8M8 2v12M11 4v8M14 6.5v3" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>',
@@ -1455,7 +1474,7 @@ async function lvEnter(ms){const L=$('live'),o=$('lvorb'),curt=L.classList.conta
  if(coatRack){lvRack(false);L.classList.add('rack');gMood('walking');GW.anim=true;await lvRun(o,'lvToRack',1900);
   GW.anim=false;gMood('happy',1200);await new Promise(r=>setTimeout(r,500));lvRack(true);await new Promise(r=>setTimeout(r,700));
   gMood('walking');GW.anim=true;await lvRun(o,'lvFromRack',1300);GW.anim=false;o.className='lvTurn';L.classList.add('rackgone');gMood('dapper',1500);await new Promise(r=>setTimeout(r,900))}
- else{const pick=ms<1500?['lvBike','cycling',1300]:ms<4000?(Math.random()<.5?['lvStroll','walking',2200]:['lvPara','parachute',1600]):['lvPant','exhausted',2300];
+ else{const pick=ms<1500?['lvBike','cycling',1300]:ms<4000?(Math.random()<.5?['lvStroll','walking',2200]:['lvPara','parachute',3200]):['lvPant','exhausted',2300];
   if(pick[1]==='walking')GW.anim=true;gMood(pick[1],pick[2]+300);await lvRun(o,pick[0],pick[2]);GW.anim=false}
  if(!LV.on)return;o.className='';LV.ready=true;lvStatus('Listening… just talk');gMood('wave',1600);brainDraw()}
 setInterval(()=>{if(!LV.on||!LV.ready||LV.muted||LV.srcs.length||!LV.ws||LV.ws.readyState!==1)return;const now=Date.now();if(!LV.act)LV.act=now;if(!LV.nudgeAt)LV.nudgeAt=LV.act+90000+Math.random()*210000;
@@ -1475,9 +1494,9 @@ function gwPlace(){const d=$('gdock');d.style.transform='translateX('+GW.x.toFix
 function gwMax(){const b=$('gbar'),n=document.querySelector('.gbt');return Math.max(0,b.clientWidth-(n?n.offsetWidth+16:120)-$('gdock').offsetWidth)}
 (function gwLoop(){const now=performance.now();
  if(gwFree()){const max=gwMax();
-  if(GW.to!==null){const sp=GS.mood==='cycling'?1.8:0.32,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
+  if(GW.to!==null){const sp=GS.mood==='cycling'?Math.max(0.5,gwMax()/360):0.32,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
    if(Math.abs(dx)<=sp){GW.x=GW.to;GW.to=null;if(GS.mood==='walking'||GS.mood==='cycling')GS.mood=GS.base||'idle';
-    let a;do{a=G_ACTS[Math.floor(Math.random()*(G_ACTS.length-1))]}while(a===GW.last);GW.last=a;GW.busy=now+7000+Math.random()*4000;GW.rest=true;gMood(a,GW.busy-now)}
+    let a;do{a=G_ACTS[Math.floor(Math.random()*(G_ACTS.length-1))]}while(a===GW.last);GW.last=a;GW.busy=now+8000+Math.random()*4000;GW.rest=true;gMood(a,GW.busy-now)}
    else{GW.x+=sp*GW.dir;if(!GS.until&&GS.mood!=='cycling')GS.mood='walking'}gwPlace()}
   else if(now>GW.busy&&!GS.until){if(GW.rest!==false){GW.rest=false;GW.busy=now+25000+Math.random()*35000;GS.mood=GS.base||'idle'}else if(Math.random()<0.05){GW.to=GW.x<max/2?max:0;GS.mood='cycling'}else{GW.to=Math.round(Math.random()*max)}}
   if(GW.x>max){GW.x=max;gwPlace()}}
