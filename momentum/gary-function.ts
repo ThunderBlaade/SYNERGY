@@ -495,15 +495,15 @@ export function companyCheck(msgs) {
 const companyBlock = (c) => c.on ? `\n\nRIGHT NOW SAM IS NOT ALONE${c.names.length ? " - he's with " + c.names.join(", ") : ""}. You are in company: none of his private memories are with you, and you must not share or hint at anything private, or anything he has said or felt about anyone. If he asks about something private, ask "Mr Fice, are you alone right now?" and leave it until he's alone.` : "";
 
 // --- memories: who he is always (Self), plus the files that relate to what's being said, and the files those connect to
-async function recall(text, token) {
+async function recall(text, token, extra = "") {
   const [profileAll, sf, gf] = await Promise.all([db("gary_memories?select=title,summary,text&deleted=is.false&or=(folder.eq.self,kind.in.(profile,preference))&order=importance.desc,updated_at.desc&limit=16", token).catch(() => []), styleFile(token), growFile(token)]);
   const profile = profileAll.filter((m) => m.title !== STYLE_TITLE && m.title !== GROW_TITLE).slice(0, 14);
-  const words = memWords(text).slice(0, 14);
+  const own = memWords(text).slice(0, 14), words = [...new Set([...own, ...memWords(extra).filter((w) => !own.includes(w)).slice(0, 10)])];   // his words first, then what this chat is about
   let hits = [];
   if (words.length) {
     const q = encodeURIComponent(words.join(" | "));
     hits = await db(`gary_memories?select=id,folder,title,summary,text,meaning,keys,links,happened,basis&deleted=is.false&folder=neq.self&fts2=fts(english).${q}&limit=30`, token).catch(() => []);
-    const score = (m) => words.filter((w) => (m.title + " " + m.keys + " " + m.summary).toLowerCase().includes(w)).length * 3 + words.filter((w) => (m.text || "").toLowerCase().includes(w)).length;
+    const wt = (w) => own.includes(w) ? 2 : 1, score = (m) => words.filter((w) => (m.title + " " + m.keys + " " + m.summary).toLowerCase().includes(w)).reduce((a, w) => a + 3 * wt(w), 0) + words.filter((w) => (m.text || "").toLowerCase().includes(w)).reduce((a, w) => a + wt(w), 0);
     hits = hits.map((m) => [score(m), m]).sort((a, b) => b[0] - a[0]).slice(0, 7).map((x) => x[1]);
   }
   const linkIds = [...new Set(hits.flatMap((m) => m.links || []))].filter((id) => !hits.some((h) => h.id === id)).slice(0, 5);
@@ -1078,10 +1078,14 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
     await db("gary_convos", token, { method: "POST", body: JSON.stringify({ id: convo, title }) });
   }
   const past = await db(`gary_messages?select=role,content&convo=eq.${convo}&order=id.desc&limit=30`, token).catch(() => []);
+  // this chat's own background: its summary and the parts sorted into folders (older than the last 30 messages), so memories that fit this chat come first
+  const [cinfo] = title ? [null] : await db(`gary_convos?select=title,summary,parts&id=eq.${convo}`, token).catch(() => [null]);
+  const chatCtx = [cinfo?.title, cinfo?.summary, ...(Array.isArray(cinfo?.parts) ? cinfo.parts.map((x) => x.title + " " + x.about) : []), ...past.slice(0, 6).map((m) => m.content)].filter(Boolean).join(" ").slice(0, 3000);
+  const view = String(body.view || "").slice(0, 3000);
   const turns = past.reverse().map((m) => ({ role: m.role === "gary" ? "model" : "user", parts: [{ text: m.content }] }));
   turns.push({ role: "user", parts: [{ text }] });
   const guest = body.guest === true;
-  let [mem, plan] = guest ? [{}, ""] : await Promise.all([recall(text, token), planSummary(token, body.items)]);
+  let [mem, plan] = guest ? [{}, ""] : await Promise.all([recall(text, token, (view ? view + " " : "") + chatCtx), planSummary(token, body.items)]);
   const recentTalk = await db(`gary_messages?select=role,content,created_at&convo=eq.${convo}&order=id.desc&limit=16`, token).catch(() => []);
   const company = companyCheck([...recentTalk.reverse(), { role: "user", content: text, created_at: new Date().toISOString() }]);
   if (company.on && !guest) mem = { profile: "(kept back for now - Sam is not alone)", moments: "", style: mem.style, grow: mem.grow };
@@ -1089,7 +1093,9 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
     `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) +
     `\n\nHis plan in Momentum:\n${plan}` +
     `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` +
-    (mem.moments ? `\n\nMemories that may relate to this (dated where known; only use if relevant):\n${mem.moments}` : "") + styleBlock(mem.style) + growBlock(mem.grow) + PRIVACY + companyBlock(company) +
+    (cinfo?.summary && past.length >= 30 ? `\n\nWhat this chat has covered so far (earlier than the messages you can see):\n${String(cinfo.summary).slice(0, 2500)}` : "") +
+    (view ? `\n\nSam is looking at this earlier part of the chat on his screen right now. If he says "this", "that", "here" or asks about what he's reading, he means this:\n${view}` : "") +
+    (mem.moments ? `\n\nMemories that may relate to this (dated where known; ones that fit this chat's topic are likely why it came up - use them when relevant):\n${mem.moments}` : "") + styleBlock(mem.style) + growBlock(mem.grow) + PRIVACY + companyBlock(company) +
     TOOLS + (USE.pc === false ? "\n\nSam has switched off your access to his PC in the app - you can't do anything on it right now; if asked, say so and that he can switch it back on by tapping the PC symbol next to Momentum." : await pcState(token)) + await selfCheck(token) + await health(token) + await guestReport(token);
   const fb = !guest && FEEDBACK_CUE.test(text);   // he just told Gary how he wants things: learn from it now, not in 25 messages
   const chores = tidy(token).catch(() => {}).then(() => styleLearn(token, fb)).catch(() => {}).then(() => guest ? null : selfGrow(token, fb)).catch(() => {});

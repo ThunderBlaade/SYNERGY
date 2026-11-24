@@ -374,6 +374,9 @@ header{padding-top:calc(4px + var(--safeT))!important}header>.lab{font-size:12.5
 /* tap to interrupt: just grey words under Gary, no pill */
 #gcut,#lvcut{background:none!important;border:0!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;color:var(--faint)!important;font:400 12.5px var(--sans)!important;letter-spacing:.04em!important;text-transform:none!important;padding:6px 10px!important}
 #gcut::before,#lvcut::before{display:none!important}
+
+#chead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0 4px;padding:10px 0;border-bottom:1px solid var(--line)}#chname{font:400 16px/1.3 var(--serif);color:var(--fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#chnew{color:var(--fg);flex:none}
+#thread.chin{animation:chin .35s var(--ease)}@keyframes chin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -411,6 +414,7 @@ header{padding-top:calc(4px + var(--safeT))!important}header>.lab{font-size:12.5
 <section class="pane" id="p-gary">
  <div class="gtop"><button class="lab" id="memBtn" style="color:var(--fg)">Memory ›</button><div class="lab" id="ctitle" hidden>New chat</div><button class="lab" id="gfid">Use Face ID</button>
  <button class="lab" id="chatsBtn" style="color:var(--fg)">Chat history ›</button></div><h1>G.A.R.Y.</h1><div class="lab gsub">General Assistant for Reasoning and You</div>
+ <div id="chead"><span id="chname">New chat</span><button class="lab" id="chnew">New chat +</button></div>
  <div id="thread"></div>
 </section>
 
@@ -801,21 +805,39 @@ function bubble(role,text){const e=document.createElement('p');e.className=role=
 async function gdb(path,opt={}){const tok=await clTok();if(!tok)throw new Error('signin');
  const r=await fetch(CL.url+'/rest/v1/'+path,Object.assign({},opt,{headers:Object.assign({apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},opt.headers||{})}));
  if(!r.ok)throw new Error('db '+r.status);const t=await r.text();return t?JSON.parse(t):null}
-function showChat(title,msgs){$('thread').innerHTML='';$('ctitle').textContent=title||'New chat';
+// chats work like ChatGPT: open one and carry on in it, scroll up for older messages, or start a new one
+const CHO={oldest:null,more:false,busy:false};
+function msgB(x){const b=bubble(x.role==='user'?'you':'gary',x.content);if(x.id)b.dataset.id=x.id;return b}
+function chIn(){const t=$('thread');t.classList.remove('chin');void t.offsetWidth;t.classList.add('chin')}
+function showChat(title,msgs){$('thread').innerHTML='';$('ctitle').textContent=title||'New chat';CHO.oldest=null;CHO.more=false;chIn();
  if(!msgs||!msgs.length){bubble('gary',CS?GARY_HELLO:'Sign in under You → Settings and I\'m all yours, sir. Same login as Synergy.');return}
- msgs.forEach(m=>bubble(m.role==='user'?'you':'gary',m.content));garyBottom()}
-// open a chat at one message (from search or a folder): a few messages before it, the rest after, and that one highlighted
+ msgs.forEach(msgB);CHO.oldest=msgs[0].id||null;CHO.more=!!CHO.oldest&&msgs.length>=10;chHead();garyBottom()}
+// open a chat at one message (from search or a folder): a few messages before it and everything after, that one highlighted
 async function loadChatAt(id,at){if(!at)return loadChat(id);CHAT=id;store('garyChat',id);try{const e=encodeURIComponent(id);
-  const [[c],pre,post]=await Promise.all([gdb('gary_convos?select=title&id=eq.'+e),gdb('gary_messages?select=id,role,content&convo=eq.'+e+'&id=lt.'+at+'&order=id.desc&limit=6'),gdb('gary_messages?select=id,role,content&convo=eq.'+e+'&id=gte.'+at+'&order=id.asc&limit=40')]);
+  const [[c],pre,post]=await Promise.all([gdb('gary_convos?select=title&id=eq.'+e),gdb('gary_messages?select=id,role,content&convo=eq.'+e+'&id=lt.'+at+'&order=id.desc&limit=8'),gdb('gary_messages?select=id,role,content&convo=eq.'+e+'&id=gte.'+at+'&order=id.asc&limit=300')]);
   const m=(pre||[]).reverse().concat(post||[]);$('thread').innerHTML='';$('ctitle').textContent=(c&&c.title)||'Chat';let hit=null;
-  m.forEach(x=>{const b=bubble(x.role==='user'?'you':'gary',x.content);if(x.id===at)hit=b});
-  if(hit){hit.classList.add('hit');setTimeout(()=>{const p=$('p-gary');p.scrollTop=Math.max(0,hit.offsetTop-p.clientHeight*0.3)},60);setTimeout(()=>hit.classList.add('fade'),2600)}else garyBottom()}
+  chHead();m.forEach(x=>{const b=msgB(x);if(x.id===at)hit=b});CHO.oldest=m[0]&&m[0].id||null;CHO.more=(pre||[]).length>=8;CHO.busy=true;chIn();
+  const P=$('p-gary');if(hit){hit.classList.add('hit');const put=()=>{P.scrollTop=Math.max(0,hit.offsetTop-P.clientHeight*0.28)};put();requestAnimationFrame(put);setTimeout(put,120);setTimeout(()=>hit.classList.add('fade'),2600)}else garyBottom();
+  setTimeout(()=>CHO.busy=false,500)}
  catch(err){loadChat(id)}}
 async function loadChat(id){CHAT=id;store('garyChat',id||'');if(!id||!CS){showChat();return}
  try{const [c]=await gdb('gary_convos?select=title&id=eq.'+encodeURIComponent(id));if(!c){CHAT=null;store('garyChat','');showChat();return}
-  const m=((await gdb('gary_messages?select=role,content&convo=eq.'+encodeURIComponent(id)+'&order=id.desc&limit=10'))||[]).reverse();
-  store('garyCache',JSON.stringify({id,title:c.title,m}));showChat(c.title,m)}
+  const m=((await gdb('gary_messages?select=id,role,content&convo=eq.'+encodeURIComponent(id)+'&order=id.desc&limit=10'))||[]).reverse();
+  store('garyCache',JSON.stringify({id,title:c.title,m}));CHO.busy=true;showChat(c.title,m);setTimeout(()=>CHO.busy=false,800)}
  catch(e){let c=null;try{c=JSON.parse(store('garyCache')||'null')}catch(x){}c&&c.id===id?showChat(c.title,c.m):showChat()}}
+// scroll to the top of a chat and the earlier messages slide in above, keeping your place
+$('p-gary').addEventListener('scroll',async()=>{const P=$('p-gary');if(P.scrollTop>120||!CHO.more||CHO.busy||!CHAT||!CO_OK())return;CHO.busy=true;const want=CHAT;
+ try{const older=((await gdb('gary_messages?select=id,role,content&convo=eq.'+encodeURIComponent(CHAT)+'&id=lt.'+CHO.oldest+'&order=id.desc&limit=20'))||[]).reverse();
+  if(want===CHAT&&older.length){const T=$('thread'),h=P.scrollHeight,first=T.firstChild,frag=document.createDocumentFragment();
+   older.forEach(x=>{const b=msgB(x);frag.appendChild(b)});T.insertBefore(frag,first);P.scrollTop+=P.scrollHeight-h;CHO.oldest=older[0].id}
+  CHO.more=older.length>=20}catch(e){}setTimeout(()=>CHO.busy=false,250)},{passive:true});
+function CO_OK(){return !!CS&&navigator.onLine}
+// what's on his screen when he's scrolled back up the chat: Gary gets it, so "this bit" makes sense
+function chView(){const P=$('p-gary');if(P.scrollHeight-P.scrollTop-P.clientHeight<200)return '';const r=P.getBoundingClientRect();let out='';
+ for(const b of $('thread').querySelectorAll('p.q,p.a')){const q=b.getBoundingClientRect();if(q.bottom<r.top+40||q.top>r.bottom-60)continue;out+=(b.classList.contains('q')?'You: ':'Gary: ')+b.textContent.trim()+'\n'}
+ return out.slice(0,3000)}
+// the chat you're in, and a new-chat button, under G.A.R.Y.
+function chHead(){const n=$('chname');if(n)n.textContent=CHAT?($('ctitle').textContent||'Chat'):'New chat'}
 const CHT={plans:'Plans',feelings:'Feelings',people:'People',work:'Work',health:'Health',projects:'Projects',ideas:'Ideas',questions:'Questions',fun:'Fun',voice:'Voice'};
 let CHS=[],CHF='all';
 async function listChats(){sheet('chl',true);$('chq').value='';if(!CS){$('chf').innerHTML='';$('chlist').innerHTML='<p class="empty">Sign in under You → Settings to keep chats with Gary.</p>';return}
@@ -864,7 +886,7 @@ async function chSearch(){const q=$('chq').value.trim();if(!q)return drawChats()
  R.sort((a,b)=>new Date(b.t)-new Date(a.t));
  $('chlist').innerHTML=R.length?'<div class="lab chg">'+R.length+(R.length>=80?'+':'')+' found · newest first</div>'+R.map(r=>'<button class="ci chi chr" data-id="'+esc(r.id)+'" data-at="'+(r.at||'')+'"><span class="chs" style="color:var(--fg)"><b style="display:inline;font:inherit;font-weight:600">'+r.who+':</b> '+snip(r.text)+'</span><small>'+esc((r.title||'Chat')+' · '+chWhen(r.t))+'</small></button>').join(''):'<p class="empty">Nothing found for "'+esc(q)+'".</p>';chOpenWire()}
 function chOpenWire(){$('chlist').querySelectorAll('.chr').forEach(b=>b.onclick=()=>{sheet('chl',false);const at=+b.dataset.at||0;if(tab!=='gary')go('gary');loadChatAt(b.dataset.id,at)})}
-$('chatsBtn').onclick=listChats;$('newChat').onclick=()=>{loadChat(null);sheet('chl',false);setTimeout(()=>$('ask').focus(),300)};
+$('chatsBtn').onclick=listChats;$('chnew').onclick=()=>{loadChat(null);setTimeout(()=>$('ask').focus(),300)};new MutationObserver(chHead).observe($('ctitle'),{childList:true,characterData:true,subtree:true});$('newChat').onclick=()=>{loadChat(null);sheet('chl',false);setTimeout(()=>$('ask').focus(),300)};
 // What Gary can see of Momentum right now (no passwords, nothing hidden)
 function garyCtx(){const t=today(),its=Object.values(S.items).filter(i=>!i.deleted&&occurs(i,t));
  return{app:'Momentum',page:tab==='gary'?(store('garyFrom')||'gary'):tab,viewing_day:cur,device:wide()?'computer':(/iPhone|iPad/.test(navigator.userAgent)?'iPhone/iPad':'phone'),
@@ -1875,9 +1897,9 @@ let VOICEIN=false;
 async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock();
  if(!CS){toast('Sign in under You → Settings to talk to Gary');return}
  if(!navigator.onLine){bubble('you',text);bubble('gary',garyOffline(text));gMood('reading',3000);const p=$('p-gary');p.scrollTop=p.scrollHeight;return}
- if(GB.pending)await gOpenSave();talking=true;GTALK=false;bubble('you',text);const a=bubble('gary','');a.classList.add('wait');const p=$('p-gary');p.scrollTop=p.scrollHeight;let got='';
+ const VIEW=chView();if(GB.pending)await gOpenSave();talking=true;GTALK=false;bubble('you',text);const a=bubble('gary','');a.classList.add('wait');const p=$('p-gary');p.scrollTop=p.scrollHeight;let got='';
  const ac=new AbortController();let wd=setTimeout(()=>ac.abort(),30000);const pet=()=>{clearTimeout(wd);wd=setTimeout(()=>ac.abort(),30000)};
- try{const r=await garyFetch({text,convo:CHAT,ctx:garyCtx(),items:garyItems()},ac.signal);
+ try{const r=await garyFetch({text,convo:CHAT,ctx:garyCtx(),items:garyItems(),view:VIEW},ac.signal);
   if(r.status===404)throw new Error('nofn');if(!r.ok)throw new Error('http '+r.status);
   const rd=r.body.getReader(),dec=new TextDecoder();
   for(;;){const{value,done}=await rd.read();if(done)break;pet();GTALK=true;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
@@ -1941,7 +1963,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124154931';let UPD=false;
+const BUILD='20261124155655';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
