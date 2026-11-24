@@ -840,7 +840,7 @@ $('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini'
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
-const G_BODY=['................................','................................','............SSSSSSSS............','..........SSSSSSSSSSHH..........','.........SSSSSSSSSSSSHH.........','.........SSSSSSSSSSSSSH.........','........SSSSSSSSSSSSSSHH........','........SSSSSSSSSSSSSSSH........','........MMSSSSSSSSSSSSMM........','.......SMMSSSSSSSSSSSSMMH.......','.......SMMSSSSSSSSSSSSMMH.......','........SSSSSSSSSSSSSSSH........','........SSSSSSSSSSSSSSSH........','.........SSSSSSSSSSSSHH.........','..........SSSSSSSSSSHH..........','...........SSSSSSSSHH...........','.............HHHHHH.............','.......GBBBBBBWWWWBBBBBBB.......','......GBBKBBBBWWWWBBBBKBBB......','......GBBKBBBBWWWWBBBBKBBB......','......GBBKBBBBBWWBBBBBKBBB......','......GBBKBBBBBWWBBBBBKBBB......','......GBBKBBBBBBBBBBBBKBBB......','......GBBKBBBBBBBBBBBBKBBB......','......WWW.BBBBBBBBBBBB.WWW......','......WWW.BBBBBBBBBBBB.WWW......','..........BBBBBBBBBBBB..........','..........BBBBBBBBBBBB..........','..........BBBBB..BBBBB..........','..........BBBBB..BBBBB..........','.........BBBBBB..BBBBBB.........','................................'];
+const G_BODY=['................................','................................','............SSSSSSSS............','..........SSSSSSSSSSHH..........','.........SSSSSSSSSSSSHH.........','.........SSSSSSSSSSSSSH.........','........SSSSSSSSSSSSSSHH........','........SSSSSSSSSSSSSSSH........','........MMSSSSSSSSSSSSMM........','.......SMMSSSSSSSSSSSSMMH.......','.......SMMSSSSSSSSSSSSMMH.......','........SSSSSSSSSSSSSSSH........','........SSSSSSSSSSSSSSSH........','.........SSSSSSSSSSSSHH.........','..........SSSSSSSSSSHH..........','...........SSSSSSSSHH...........','.............HHHHHH.............','..........GBBBWWWWBBBB..........','.........GKBBBWWWWBBBKB.........','........GBKBBBWWWWBBBKBB........','........GBKBBBBWWBBBBKBB........','........GBKBBBBWWBBBBKBB........','........GBKBBBBBBBBBBKBB........','........GBKBBBBBBBBBBKBB........','........WW.BBBBBBBBBB.WW........','........WW.BBBBBBBBBB.WW........','...........BBBBBBBBBB...........','...........BBBBBBBBBB...........','...........BBBB..BBBB...........','...........BBBB..BBBB...........','..........BBBBB..BBBBB..........','................................'];
 // name: eyes brows mouth arms fx motion tint posture
 const G_EX={};`idle open n smile rest - bob
 happy u n grin upR blush bob
@@ -980,10 +980,10 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
  P[21*32+18]='W';P[21*32+19]='W';P[25*32+16]='G';P[23*32+16]='G';P[30*32+10]='G';P[30*32+18]='G';
  const put=(i,y,c)=>{i=Math.round(i);y=Math.round(y);if(i>=0&&i<32&&y>=0&&y<32)P[y*32+i]=c},del=(i,y)=>{delete P[y*32+i]};
  const rect=(x0,y0,w,h,c)=>{for(let y=y0;y<y0+h;y++)for(let i=x0;i<x0+w;i++)put(i,y,c)};
- const clr=s=>{for(let y=18;y<26;y++)for(let i=s?6:22;i<(s?10:26);i++)del(i,y)};
+ const clr=s=>{for(let y=18;y<26;y++)for(let i=s?8:21;i<(s?11:24);i++)del(i,y)};
  const line=(a,b,c,d,col)=>{const n=Math.max(Math.abs(c-a),Math.abs(d-b))||1;for(let k=0;k<=n;k++){const px=a+(c-a)*k/n,py=b+(d-b)*k/n;put(px,py,col);put(px,py+1,col)}};
  // an arm from the shoulder (via optional elbow) to a glove; L = left side of the picture
- const arm=(L,gx,gy,via,col,gw,gh)=>{clr(L);const sx=L?7:24,sy=19;col=col||'B';let px=sx,py=sy;for(const [vx,vy] of via||[]){line(px,py,vx,vy,col);px=vx;py=vy}line(px,py,gx,gy,col);gw=gw||3;gh=gh||3;rect(Math.round(gx-(gw-1)/2),Math.round(gy-(gh-1)/2),gw,gh,'W')};
+ const arm=(L,gx,gy,via,col,gw,gh)=>{clr(L);const sx=L?9:22,sy=19;col=col||'B';let px=sx,py=sy;for(const [vx,vy] of via||[]){line(px,py,vx,vy,col);px=vx;py=vy}line(px,py,gx,gy,col);gw=gw||3;gh=gh||3;rect(Math.round(gx-(gw-1)/2),Math.round(gy-(gh-1)/2),gw,gh,'W')};
  const A=X.a,odd=t%4<2;
  switch(A){
   case 'wave':arm(0,27+(odd?0:1),13);break; case 'upR':arm(0,27,12);break; case 'upL':arm(1,4,12);break;
@@ -1025,7 +1025,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'sip':arm(0,19,17,[[23,21]],null,2,2);rect(15,13,4,3,'W');put(19,14,'W');put(19,13,'W');rect(14,16,6,1,'C');if(odd){put(16,11,'C');put(17,10,'C')}else{put(17,11,'C');put(16,10,'C')}break;
   case 'phoneEar':arm(0,24,12,[[27,18]],null,2,2);rect(23,8,2,5,'K');break;
   case 'cup':arm(1,6,10,[[4,16]],null,2,3);put(8,9,'W');break;
-  case 'walk':{const st=Math.floor((GW.step||0)/7)%2===0;const L0=st?6:23,L1=st?23:6;rect(L0,23,3,1,'W');rect(L0,25,3,1,'B');rect(L1,25,3,1,'W');rect(L1,26,3,1,'W');if(st){del(10,30);del(11,30);put(10,29,'K')}else{del(20,30);del(21,30);put(21,29,'K')}break}
+  case 'walk':{const st=Math.floor((GW.step||0)/7)%2===0;const L0=st?8:22,L1=st?22:8;rect(L0,23,2,1,'W');rect(L0,25,2,1,'B');rect(L1,25,2,1,'W');rect(L1,26,2,1,'W');if(st){del(10,30);del(11,30);put(10,29,'K')}else{del(20,30);del(21,30);put(21,29,'K')}break}
   case 'bike':{for(let y=28;y<31;y++)for(let i=8;i<24;i++)del(i,y);arm(0,24,21,null,'G',2,2);arm(1,21,22,[[11,22]],'G',2,2);
    const c=(cx)=>{for(let a=0;a<16;a++)put(cx+Math.round(Math.cos(a/16*6.283)*3.4),28+Math.round(Math.sin(a/16*6.283)*3.4),'C');put(cx,28,'K');const sa=(GW.step||t*3)/3.4;put(cx+Math.round(Math.cos(sa)*2),28+Math.round(Math.sin(sa)*2),'W');put(cx-Math.round(Math.cos(sa)*2),28-Math.round(Math.sin(sa)*2),'W')};
    line(7,27,16,26,'D');line(16,26,24,27,'D');line(16,26,15,24,'D');line(24,27,24,22,'K');rect(23,21,3,1,'K');c(7);c(24);
