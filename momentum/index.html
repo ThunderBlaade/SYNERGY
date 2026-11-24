@@ -370,6 +370,10 @@ body.kbup #gbar{height:72px}body.kbup #gdock{width:66px;height:66px;margin:0 0 -
 /* top bar: higher up, bigger and full brightness */
 header{padding-top:calc(4px + var(--safeT))!important}header>.lab{font-size:12.5px!important;font-weight:600!important;color:var(--fg)!important;opacity:1!important}#hdate{color:var(--fg)!important;letter-spacing:.2em}
 @media (min-width:1000px){header{padding-top:12px!important}}
+
+/* tap to interrupt: just grey words under Gary, no pill */
+#gcut,#lvcut{background:none!important;border:0!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;color:var(--faint)!important;font:400 12.5px var(--sans)!important;letter-spacing:.04em!important;text-transform:none!important;padding:6px 10px!important}
+#gcut::before,#lvcut::before{display:none!important}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -1039,6 +1043,9 @@ function lvNoteCut(){const full=(LV.outT||'').trim();if(!full||!LV.ctx)return;co
  LV.outT=heard?heard+'…':'';LV.unsaid=rest||'';LV.recv=0;if(!rest)return;LV.cutShown=true;
  const note='(Note: Sam cut in while you were speaking. He heard you up to: "'+heard.slice(-240)+'". He did not hear the rest: "'+rest.slice(0,300)+'". Answer what he says next first. Then, if it still matters, pick up where you left off in your own way.)';
  if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:note}]}],turnComplete:false}}))}
+// switching from the typed chat to voice: he picks up out loud from where he'd got to
+function lvCarry(heard,rest){if(!rest)return;const go=()=>{if(!LV.on)return;if(!LV.ws||LV.ws.readyState!==1||!LV.ready){if((LV.carryTries=(LV.carryTries||0)+1)<20)setTimeout(go,500);return}LV.carryTries=0;
+  LV.ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:'(Sam just switched from the typed chat to talking out loud while you were still answering him there. '+(heard?'He got as far as: "'+heard.slice(-240)+'". ':'')+'You had not yet said: "'+rest.slice(0,1200)+'". Carry on out loud from exactly where you left off - say the rest naturally in your own words, without starting over or announcing it.)'}]}],turnComplete:true}}))};go()}
 function lvHush(){for(const s of LV.srcs){try{s.stop()}catch(e){}}LV.srcs=[];LV.playAt=0;$('live').classList.remove('speaking')}
 async function lvSaveTurn(){const you=LV.inT.trim(),him=(LV.outT.trim()+(LV.unsaid?'\n\n(Didn\'t get to say: '+LV.unsaid+')':'')).trim();LV.inT='';LV.outT='';LV.unsaid='';if(!you&&!him)return;
  try{if(!CHAT){CHAT='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);store('garyChat',CHAT);await gdb('gary_convos',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id:CHAT,title:'Talk with Gary'})});$('ctitle').textContent='Talk with Gary'}
@@ -1056,19 +1063,19 @@ async function lvTool(fc){const a=fc.args||{};let res={result:'done'};
   else res={error:'not available'}}catch(e){res={error:'failed'}}
  if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({toolResponse:{functionResponses:[{id:fc.id,name:fc.name,response:res}]}}))}
 async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.text():new Response(d).text());let m;try{m=JSON.parse(d)}catch(e){return}
- if(m.setupComplete){LV.tries=0;if(LV.shown){LV.ready=true;lvStatus('Listening… just talk');brainDraw()}else{LV.shown=true;lvStatus('He\'s coming…');lvEnter(performance.now()-LV.t0)}return}
+ if(m.setupComplete){LV.tries=0;if(LV.carry){const C=LV.carry;LV.carry=null;setTimeout(()=>lvCarry(C.heard,C.rest),LV.shown?300:2600)}if(LV.shown){LV.ready=true;lvStatus('Listening… just talk');brainDraw()}else{LV.shown=true;lvStatus('He\'s coming…');lvEnter(performance.now()-LV.t0)}return}
  if(m.toolCall){(m.toolCall.functionCalls||[]).forEach(lvTool);return}
  if(m.goAway){lvStatus('One moment…');setTimeout(()=>{if(LV.on){lvStop(true);liveStart(true)}},300);return}
  const c=m.serverContent;if(!c)return;
- if(c.interrupted){lvNoteCut();lvHush();LV.drop=false;lvStatus('Listening…')}
+ if(c.interrupted){LV.turnOpen=false;lvNoteCut();lvHush();LV.drop=false;lvStatus('Listening…')}
  if(c.inputTranscription&&c.inputTranscription.text){LV.act=Date.now();LV.inT+=c.inputTranscription.text;lvStatus('Listening…')}
- if(c.outputTranscription&&c.outputTranscription.text)LV.outT+=c.outputTranscription.text;
+ if(c.outputTranscription&&c.outputTranscription.text){LV.outT+=c.outputTranscription.text;LV.turnOpen=true}
  if(c.modelTurn&&!LV.drop)for(const p of c.modelTurn.parts||[]){if(p.inlineData&&p.inlineData.data){const r=+((p.inlineData.mimeType||'').match(/rate=(\d+)/)||[0,24000])[1];lvPlay(p.inlineData.data,r);lvStatus('Gary')}}
- if(c.turnComplete){LV.spoke=true;LV.drop=false;LV.recv=0;if(LV.inT.trim()&&!LV.typed)lvLine('you',LV.inT.trim());LV.typed=false;if(LV.outT.trim())lvLine('gary',LV.outT.trim());if(LV.unsaid)lvLine('cut','…didn\'t get to say: '+LV.unsaid);lvSaveTurn()}}
+ if(c.turnComplete){LV.turnOpen=false;LV.spoke=true;LV.drop=false;LV.recv=0;if(LV.inT.trim()&&!LV.typed)lvLine('you',LV.inT.trim());LV.typed=false;if(LV.outT.trim())lvLine('gary',LV.outT.trim());if(LV.unsaid)lvLine('cut','…didn\'t get to say: '+LV.unsaid);lvSaveTurn()}}
 // toasts are hidden, so if he can't start a call, Gary says why himself (and sign-in opens straight away)
 function lvWhy(t){if(tab==='gary'){gBubble(t,6000);gMood('shrug',2500)}else toast(t)}
 async function liveStart(again){if(!gUse().live){lvWhy('Voice is switched off, sir - tap the symbols by Momentum to switch it on.');return}if(!gUse().google){lvWhy('I need Google Gemini switched on to talk - tap the symbols by Momentum.');return}let ctx0=null;if(!again){try{ctx0=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});ctx0.resume()}catch(e){}}if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){try{ctx0&&ctx0.close()}catch(e){}lvWhy('You\'ll need to sign in on this device first, sir.');sheet('signin',true);setTimeout(()=>$('siE').focus(),300);return}if(!navigator.onLine){lvWhy('No internet, sir - I can\'t talk out loud without it.');return}
- if(LV.on&&!again)return;speakStop();
+ if(LV.on&&!again)return;if(!again){const sl=GSPK?spLeft():null;LV.carry=sl?{heard:sl[0],rest:sl[1]}:null;LV.streamCut=talking?((($('thread').lastElementChild||{}).textContent||'').replace(/^…/,'').length):null}speakStop();
  LV.ctx=ctx0||new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // created inside the tap, so iPhone allows sound
  lvRStop();LVR.quiet=0;LVR.t=0;$('live').classList.remove('typing');$('lvtype').classList.remove('on');LV.typed=false;LV.nomic=false;LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;LV.spoke=false;LV.uttAt=0;LV.unsaid='';$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open','entering','rack','rackgone');$('live').classList.toggle('curt',Math.random()<0.25);$('lvorb').className=''}lvStatus('Connecting…');
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
@@ -1081,7 +1088,17 @@ async function liveStart(again){if(!gUse().live){lvWhy('Voice is switched off, s
  ws.onclose=e=>{if(LV.ws!==ws)return;if(e.code!==1000||!LV.ready)lvErr(LV.ready?'dropped':'connect',{code:e.code,reason:String(e.reason||'').slice(0,200),ready:LV.ready,tries:LV.tries});if(LV.on&&!LV.ready&&LV.tries<2){LV.tries++;lvStop(true);liveStart(true);return}
   if(LV.on){lvSaveTurn();if(e.code===1000)lvStatus('Ended');else lvNoShow()}}
  }
-function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;try{ws&&ws.close(1000)}catch(e){}lvHush();
+// leaving voice while he's mid-sentence: whatever he hadn't said yet carries on in the typed chat
+function lvHandoff(ws){const H={heard:LV.outT.trim(),rest:LV.unsaid||'',more:'',done:false};LV.unsaid='';
+ const fin=()=>{if(H.done)return;H.done=true;try{ws.close(1000)}catch(e){}const t=(H.rest+(H.more?(H.rest?' ':'')+H.more:'')).replace(/\s+/g,' ').trim();if(!t)return;
+  const b=bubble('gary','…'+t);if(tab==='gary')garyBottom();if(CS&&CHAT)gdb('gary_messages',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({convo:CHAT,role:'gary',content:'…'+t})}).catch(()=>{})};
+ if(!LV.turnOpen||!ws||ws.readyState!==1){setTimeout(fin,50);return}
+ ws.onmessage=async ev=>{let d=ev.data;if(typeof d!=='string')d=await (d.text?d.text():new Response(d).text());let m;try{m=JSON.parse(d)}catch(e){return}const c=m.serverContent;if(!c)return;
+  if(c.outputTranscription&&c.outputTranscription.text)H.more+=c.outputTranscription.text;if(c.turnComplete||c.interrupted)fin()};
+ setTimeout(fin,8000)}
+function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;let handed=false;
+ if(!keep&&(LV.srcs.length||LV.turnOpen)&&LV.outT.trim()){lvNoteCut();if(LV.unsaid||LV.turnOpen){handed=true;lvHandoff(ws)}}
+ if(!handed)try{ws&&ws.close(1000)}catch(e){}lvHush();
  try{LV.stream&&LV.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{LV.node&&LV.node.disconnect()}catch(e){}try{LV.ctx&&LV.ctx.close()}catch(e){}
  LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;GS.nocoat=false;$('live').classList.remove('on','speaking','mini');document.body.classList.remove('lvon');gFloatSync();brainDraw();lvSaveTurn()}}
 $('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini')){lvMini(false);return}if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>{if(performance.now()-LV.t0<900)return;lvStop()};$('lvmin').onclick=()=>{if(performance.now()-LV.t0<900)return;lvMini(true)};$('lvmute').onclick=async()=>{if(LV.nomic){try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});LV.nomic=false;await lvMicWire()}catch(e){buzz(20);lvStatus('Microphone still unavailable - type to him');return}}LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvStatus(LV.muted?'Muted':'Listening…')};
@@ -1866,7 +1883,7 @@ async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock()
   for(;;){const{value,done}=await rd.read();if(done)break;pet();GTALK=true;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
   const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);GPOSE=j.pose||null;brainFrom(j.brain);garyJobs(j.jobs,a)}catch(e){}}}
  catch(e){if(e.name==='AbortError'&&!got)a.textContent='That took far too long, sir - Google seems to have nodded off. Try me again.';else if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':garyOffline(text,1)||'I can\'t reach the cloud just now, sir. Try again in a moment.'}
- clearTimeout(wd);a.classList.remove('wait');talking=false;GTALK=false;if(GPOSE)gPose(GPOSE);else if(got)gMood('happy',1600);else gMood('confused',3500);GPOSE=null;const said=got.split('\x1e')[0].trim();if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
+ clearTimeout(wd);a.classList.remove('wait');talking=false;GTALK=false;if(GPOSE)gPose(GPOSE);else if(got)gMood('happy',1600);else gMood('confused',3500);GPOSE=null;const said=got.split('\x1e')[0].trim();if(said&&typeof LV!=='undefined'&&LV.on&&LV.streamCut!=null){const k=Math.min(said.length,LV.streamCut);LV.streamCut=null;if(said.slice(k).trim())lvCarry(said.slice(0,k),said.slice(k).trim())}else if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
 // Gary's voice: the device's own British male voice (free, swappable later)
 function garyVoice(){const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]GB/i.test(v.lang));
  return vs.find(v=>/daniel|arthur|george|oliver|male|ryan|thomas/i.test(v.name))||vs[0]||null}
@@ -1882,13 +1899,16 @@ async function ttsFetch(text,vo){const tok=await clTok();if(!tok)throw 0;
  if((r.headers.get('content-type')||'').includes('pcm')){const rate=+r.headers.get('X-Rate')||24000,i16=new Int16Array(buf.byteLength>>1);new Uint8Array(i16.buffer).set(new Uint8Array(buf,0,i16.length*2));
   const ab=AC.createBuffer(1,i16.length,rate),ch=ab.getChannelData(0);for(let k=0;k<i16.length;k++)ch[k]=i16[k]/32768;return ab}
  return await AC.decodeAudioData(buf)}
-function playBuf(ab){const s=AC.createBufferSource();s.buffer=ab;s.connect(AC.destination);const at=Math.max(AC.currentTime+0.05,acEnd);s.start(at);acEnd=at+ab.duration;return s}
+function playBuf(ab,txt){const s=AC.createBufferSource();s.buffer=ab;s.connect(AC.destination);const at=Math.max(AC.currentTime+0.05,acEnd);s.start(at);acEnd=at+ab.duration;if(txt!=null)SPQ.push({txt,at,dur:ab.duration});return s}
+let SPQ=[];
+// how far read-aloud got: [heard, not yet said]
+function spLeft(){if(!AC||!SPQ.length)return null;const now=AC.currentTime;let heard='',rest='';for(const p of SPQ){if(now>=p.at+p.dur)heard+=p.txt+' ';else if(now<=p.at)rest+=p.txt+' ';else{const f=(now-p.at)/p.dur,cut=p.txt.slice(0,Math.floor(p.txt.length*f)).replace(/\S*$/,'');heard+=cut;rest+=p.txt.slice(cut.length)+' '}}return rest.trim()?[heard.trim(),rest.trim()]:null}
 function speakDevice(t){if(!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';const v=garyVoice();if(v)u.voice=v;u.rate=1;u.pitch=.95;speechSynthesis.speak(u)}
 function speakStop(){talkGen++;try{if(AC){AC.close();AC=null;acEnd=0}}catch(e){}try{speechSynthesis.cancel()}catch(e){}}
-async function speak(t,vo){t=String(t||'').replace(/[*_#`]/g,'').trim();if(!t)return;speakStop();audioUnlock();if(!AC||!CS||!navigator.onLine){speakDevice(t);return}
+async function speak(t,vo){t=String(t||'').replace(/[*_#`]/g,'').trim();if(!t)return;if(!vo&&typeof LV!=='undefined'&&LV.on){lvCarry('',t);return}speakStop();audioUnlock();if(!AC||!CS||!navigator.onLine){speakDevice(t);return}
  const gen=++talkGen;const m=t.match(/^[\s\S]*?[.!?](\s|$)/);const first=m&&m[0].length<t.length&&m[0].length>12?m[0]:t,rest=t.slice(first.length).trim();
  const parts=[ttsFetch(first,vo)].concat(rest?[ttsFetch(rest,vo)]:[]);   // both start now; the first plays as soon as it's ready
- try{for(const p of parts){const ab=await p;if(gen!==talkGen)return;playBuf(ab)}}
+ const txts=[first].concat(rest?[rest]:[]);SPQ=[];SPQ.full=t;try{for(let k=0;k<parts.length;k++){const ab=await parts[k];if(gen!==talkGen)return;playBuf(ab,txts[k])}}
  catch(e){if(gen===talkGen){speakStop();speakDevice(t)}}}
 if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{};
 const grow=()=>{const t=$('ask');if(!t.value){t.style.height='';askPH();return}t.style.height='auto';t.style.height=Math.min(160,t.scrollHeight)+'px'};
@@ -1921,7 +1941,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124154531';let UPD=false;
+const BUILD='20261124154931';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
