@@ -584,7 +584,8 @@ header{background:linear-gradient(#000 62%,rgba(0,0,0,0));padding-bottom:14px!im
 /* keyboard up: Rodger only shrinks a little */
 body.kbup #gbar{height:104px!important}body.kbup #gdock{width:100px!important;height:100px!important;margin:0 0 -6px -8px!important}body.kbup #gsay{bottom:106px!important}
 .gtop{background:#000!important;box-shadow:0 10px 14px 4px #000!important}
-@media (max-width:999px){#p-gary{padding-bottom:calc(var(--askH,190px) + 84px + var(--safeB))!important}body.kbup #p-gary{padding-bottom:calc(var(--askH,190px) + var(--kb,0px) + 24px)!important}}
+@media (max-width:999px){#p-gary{padding-bottom:calc(var(--askH,190px) + 110px + var(--safeB))!important}}
+#thread .a{font-size:17.5px!important;line-height:1.45!important}#thread .q{font-size:15px!important;line-height:1.45!important}
 /* search bar and send button stay one size: a circle and a fixed box */
 #ask{height:46px!important;min-height:46px!important;max-height:46px!important;line-height:22px}
 #ask::placeholder{font-size:var(--phfs,14.5px)!important;line-height:var(--phlh,22px)!important}
@@ -1529,7 +1530,7 @@ function kbFit(){navKeep();const v=VV(),a=$('askbar'),t=$('ask');if(!v||!a)retur
  if(open){if(window.scrollY)scrollTo(0,0);if(!v.offsetTop&&FULLH-v.height>150)store('kbH',String(FULLH-v.height));kbSlide(v.offsetTop+v.height);if(!kbFit.was){kbFit.was=true;setTimeout(garyBottom,280)}}
  else if(kbFit.was||document.body.classList.contains('kbup')){if(kbFit.pre&&document.activeElement===t&&Date.now()-(kbFit.t0||0)<900)return;kbFit.pre=false;kbSlide(null);kbFit.was=false}}
 // slide the bar (with transform, so it glides with the keyboard) so its bottom sits at y; null = back home
-function kbPad(){const a=$('askbar'),p=$('p-gary');if(!document.body.classList.contains('kbup')){p.style.paddingBottom='';return}p.style.paddingBottom=Math.max(40,Math.round(p.getBoundingClientRect().bottom-a.getBoundingClientRect().top+14))+'px';garyBottom()}
+function kbPad(){const a=$('askbar'),p=$('p-gary');if(!document.body.classList.contains('kbup')){p.style.removeProperty('padding-bottom');return}p.style.setProperty('padding-bottom',Math.max(40,Math.round(p.getBoundingClientRect().bottom-a.getBoundingClientRect().top+56))+'px','important');garyBottom()}
 function kbSlide(y){const a=$('askbar');clearTimeout(kbSlide.t);kbSlide.t=setTimeout(kbPad,320);if(y==null){a.style.transform='';document.body.classList.remove('kbup');document.documentElement.style.setProperty('--kb','0px');setTimeout(garyBottom,300);return}
  document.body.classList.add('kbup');const home=a.offsetTop+a.offsetHeight,dy=Math.round(y-home);a.style.transform='translateY('+dy+'px)';document.documentElement.style.setProperty('--kb',Math.max(0,-dy)+'px')}
 {const vv=VV();if(vv){vv.addEventListener('resize',kbFit);vv.addEventListener('scroll',kbFit);vv.addEventListener('resize',()=>{lvKb();setTimeout(lvKb,300)})}}
@@ -2371,7 +2372,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124214219';let UPD=false;
+const BUILD='20261124214305';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
