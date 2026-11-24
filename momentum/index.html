@@ -564,7 +564,7 @@ function parseQuick(raw,base){let t=' '+raw+' ',o={date:base,time:null,dur:null,
 // ---------- tabs
 let tab='today';
 const wide=()=>innerWidth>=1000;
-function go(t){if(wide()&&t==='todo')t='today';if(t===tab)return;if(t==='gary'){store('garyFrom',tab);if(!CHAT&&!talking&&!GL.guest)showChat();gGate()}const order=['today','todo','focus','you','gary'],fwd=order.indexOf(t)>order.indexOf(tab);
+function go(t){if(wide()&&t==='todo')t='today';if(t===tab)return;if(t==='gary'){store('garyFrom',tab);if(!CHAT&&!talking&&!GL.guest)showChat();gGate();garyBottom()}const order=['today','todo','focus','you','gary'],fwd=order.indexOf(t)>order.indexOf(tab);
  const old=$('p-'+tab);old.classList.remove('on');old.classList.toggle('left',fwd);const nw=$('p-'+t);nw.classList.remove('left');if(!fwd){nw.style.transform='translateX(-14px)';requestAnimationFrame(()=>nw.style.transform='')}
  nw.classList.add('on');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));tab=t;gFloatSync();if(t==='gary')gMood('wave',1800);
  $('fab').classList.toggle('hide',!(t==='today'||t==='todo'));document.body.classList.toggle('plan',wide()&&t==='today');$('askbar').classList.toggle('on',t==='gary');buzz(6);render()}
@@ -776,7 +776,7 @@ async function gdb(path,opt={}){const tok=await clTok();if(!tok)throw new Error(
  if(!r.ok)throw new Error('db '+r.status);const t=await r.text();return t?JSON.parse(t):null}
 function showChat(title,msgs){$('thread').innerHTML='';$('ctitle').textContent=title||'New chat';
  if(!msgs||!msgs.length){bubble('gary',CS?GARY_HELLO:'Sign in under You → Settings and I\'m all yours, sir. Same login as Synergy.');return}
- msgs.forEach(m=>bubble(m.role==='user'?'you':'gary',m.content));const p=$('p-gary');requestAnimationFrame(()=>p.scrollTop=p.scrollHeight)}
+ msgs.forEach(m=>bubble(m.role==='user'?'you':'gary',m.content));garyBottom()}
 async function loadChat(id){CHAT=id;store('garyChat',id||'');if(!id||!CS){showChat();return}
  try{const [c]=await gdb('gary_convos?select=title&id=eq.'+encodeURIComponent(id));if(!c){CHAT=null;store('garyChat','');showChat();return}
   const m=((await gdb('gary_messages?select=role,content&convo=eq.'+encodeURIComponent(id)+'&order=id.desc&limit=10'))||[]).reverse();
@@ -1103,6 +1103,9 @@ $('vcuse').onclick=()=>{const on=store('garyVoice')!=='clone';store('garyVoice',
 function vcTone(){const m=String(GPOSE||GS.mood||'').toLowerCase();
  return /sad|cry|tear|gloom|sorry|sympath|hug|comfort/.test(m)?'sad':/angry|furious|sarcas|eyeroll|disdain|annoy|grump|unimpressed|facepalm|smug/.test(m)?'cross':/excit|surpris|celebrat|party|shock|amazed|cheer|confetti/.test(m)?'excited':/happy|laugh|grin|proud|joy|wave|delight|thumbs/.test(m)?'happy':'calm'}
 const VC_STYLE={calm:'warm, measured and composed',happy:'cheerful and pleased',sad:'gentle, soft and sympathetic',cross:'dry, sarcastic and a little exasperated',excited:'excited and animated'};
+
+// G.A.R.Y.'s chat always opens at the newest message (after a refresh, or coming back to his page)
+function garyBottom(){const p=$('p-gary');if(!p)return;const go=()=>{p.scrollTop=p.scrollHeight};go();requestAnimationFrame(()=>{go();requestAnimationFrame(go)});setTimeout(go,250);setTimeout(go,700)}
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
@@ -1755,7 +1758,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124123515';let UPD=false;
+const BUILD='20261124123737';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
