@@ -462,7 +462,7 @@ body.lvon #chpick{display:none!important}
 
 <section class="pane" id="p-gary">
  <div class="gtop"><button class="lab" id="memBtn" style="color:var(--fg)">Memory ›</button><div class="lab" id="ctitle" hidden>New chat</div><button class="lab" id="gfid">Use Face ID</button>
- <button class="lab" id="chatsBtn" style="color:var(--fg)">Chat history ›</button></div><h1>R.O.D.G.E.R.</h1><div class="lab gsub">Respected Operator Designed for Growth, Empathy and Reasoning</div>
+ <button class="lab" id="chatsBtn" style="color:var(--fg)">Chat history ›</button></div><h1>R.O.D.G.E.R.</h1><div class="lab gsub">Responsive Operator Designed for Growth, Empathy and Reasoning</div>
  <div id="chead"><span id="chname">New chat</span><button class="lab" id="chnew">New chat +</button></div>
  <div id="chpick"><div class="cphead"><span class="lab">Your chats</span><button class="lab" id="cpnew">New chat +</button><button id="cpx" aria-label="Close">✕</button></div><div id="cplist"></div></div>
  <div id="thread"></div>
@@ -498,7 +498,7 @@ body.lvon #chpick{display:none!important}
  <input class="big" id="siP" type="password" placeholder="Password" autocomplete="current-password" style="font-size:20px;margin-top:10px">
  <p class="hint">Your plan goes to a private table only your account can read. Rodger's chats and memories are private to your account too.</p>
  <div class="acts"><button class="btn ghost" id="siX">Cancel</button><button class="btn fill" id="siGo">Sign in</button></div></div>
-<div id="live"><div class="lvhead"><div class="lvname">R.O.D.G.E.R.</div><div class="lab">Respected Operator Designed for Growth, Empathy and Reasoning</div></div>
+<div id="live"><div class="lvhead"><div class="lvname">R.O.D.G.E.R.</div><div class="lab">Responsive Operator Designed for Growth, Empathy and Reasoning</div></div>
  <div class="lvwrap"><div id="lvstage"><canvas id="lvrack" width="32" height="32"></canvas><div id="lvorb"><svg class="chute" viewBox="0 0 120 110" aria-hidden="true"><path d="M4 34Q60-14 116 34z" fill="#c0392b"/><path d="M36 34Q46 2 60 2L60 34z" fill="#f4f4f6"/><path d="M84 34Q74 2 60 2L60 34z" fill="#f4f4f6"/><path d="M4 34h112" stroke="#7a2a2a" stroke-width="2"/><path d="M6 35 22 109M42 35 23 109M78 35 95 109M114 35 96 109" stroke="#c9ced8" stroke-width="1" fill="none"/></svg></div><div id="lvcurt"><i class="cl"></i><i class="cr"></i><b class="val"></b></div></div><button id="lvcut">Tap to interrupt</button></div>
  <div id="lvstat">Connecting…</div><div id="lvtx"></div>
  <form id="lvtyp" autocomplete="off"><input id="lvtin" placeholder="Type to R.O.D.G.E.R." enterkeyhint="send" autocapitalize="sentences" autocorrect="on" spellcheck="true"><button class="mic" id="lvtsend" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button></form>
@@ -2088,7 +2088,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124174238';let UPD=false;
+const BUILD='20261124174858';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
