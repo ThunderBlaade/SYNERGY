@@ -749,7 +749,7 @@ export function parseActions(reply) {
   return out;
 }
 
-const VOICES = ["Charon", "Orus", "Iapetus", "Algenib", "Rasalgethi", "Sadaltager", "Schedar", "Enceladus"];
+const VOICES = ["Charon", "Orus", "Iapetus", "Algenib", "Rasalgethi", "Sadaltager", "Schedar", "Enceladus", "Gacrux", "Alnilam"];
 const VOICE_STYLE = "Say as a mature, posh British butler - a distinguished elderly gentleman in his seventies with a rich, deep, smooth baritone, a touch of age and gentle gravel in it, in crisp Received Pronunciation, unhurried and articulate but full of expression: dry deadpan on sarcasm, a knowing pause before punchlines, softer and warmer when kind: ";
 const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts", "gemini-2.5-flash-preview-tts"];
 
