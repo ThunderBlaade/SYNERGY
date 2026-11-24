@@ -431,6 +431,13 @@ body.lvon #chpick{display:none!important}
 
 /* guest mode (Face ID not passed): a smaller name at the top */
 body.guest #p-gary h1{font-size:30px;letter-spacing:.02em}body.guest #p-gary .gsub{font-size:8.5px}
+
+/* guest page (Face ID not passed): compact - the name small at the top, a grey Face ID button where the chat name was */
+#gtname,#gfid2{display:none}
+body.guest #gfid{display:none!important}body.guest #gtname{display:inline;color:var(--fg)}
+body.guest #p-gary h1,body.guest #p-gary .gsub,body.guest #chname{display:none!important}
+body.guest #gfid2{display:inline-flex;align-items:center;gap:8px;color:var(--dim);background:none;border:0;padding:0}body.guest #gfid2 svg{width:20px;height:20px}
+body.guest #chead{margin:16px 0 10px;padding:12px 0}body.guest #thread{padding-top:6px}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -466,9 +473,9 @@ body.guest #p-gary h1{font-size:30px;letter-spacing:.02em}body.guest #p-gary .gs
 </section>
 
 <section class="pane" id="p-gary">
- <div class="gtop"><button class="lab" id="memBtn" style="color:var(--fg)">Memory ›</button><div class="lab" id="ctitle" hidden>New chat</div><button class="lab" id="gfid">Use Face ID</button>
+ <div class="gtop"><button class="lab" id="memBtn" style="color:var(--fg)">Memory ›</button><div class="lab" id="ctitle" hidden>New chat</div><button class="lab" id="gfid">Use Face ID</button><span class="lab" id="gtname">R.O.D.G.E.R.</span>
  <button class="lab" id="chatsBtn" style="color:var(--fg)">Chat history ›</button></div><h1>R.O.D.G.E.R.</h1><div class="lab gsub">Respected Operator Designed for Growth, Empathy and Reasoning</div>
- <div id="chead"><span id="chname">New chat</span><button class="lab" id="chnew">New chat +</button></div>
+ <div id="chead"><button class="lab" id="gfid2" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg><span>Use Face ID</span></button><span id="chname">New chat</span><button class="lab" id="chnew">New chat +</button></div>
  <div id="chpick"><div class="cphead"><span class="lab">Your chats</span><button class="lab" id="cpnew">New chat +</button><button id="cpx" aria-label="Close">✕</button></div><div id="cplist"></div></div>
  <div id="thread"></div>
 </section>
@@ -1797,7 +1804,7 @@ function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
   else if(F&&GF.drag)GF.fling=null;requestAnimationFrame(fly)})();
  f.addEventListener('pointerup',end);f.addEventListener('pointercancel',end);
  addEventListener('resize',()=>{if(f.classList.contains('on'))gFloatPlace()});
- gCanvas($('gdock'),1);gCanvas($('lvorb'),1,1);$('gfid').onclick=()=>gGate();$('brain').onclick=e=>{e.stopPropagation();brainMenu()};$('bdlist').onclick=e=>{const t=e.target.closest('[data-bk]');if(t)brainToggle(t.dataset.bk)};$('bdx').onclick=brainClose;$('veil').addEventListener('click',brainClose);(function(){const d=$('bdrop');let y0=null;d.addEventListener('pointerdown',e=>{if(!e.target.closest('button'))y0=e.clientY});d.addEventListener('pointermove',e=>{if(y0!==null&&e.clientY-y0<-50){y0=null;brainClose()}});d.addEventListener('pointerup',()=>y0=null)})();brainDraw();
+ gCanvas($('gdock'),1);gCanvas($('lvorb'),1,1);$('gfid').onclick=()=>gGate();$('gfid2').onclick=()=>gGate();$('brain').onclick=e=>{e.stopPropagation();brainMenu()};$('bdlist').onclick=e=>{const t=e.target.closest('[data-bk]');if(t)brainToggle(t.dataset.bk)};$('bdx').onclick=brainClose;$('veil').addEventListener('click',brainClose);(function(){const d=$('bdrop');let y0=null;d.addEventListener('pointerdown',e=>{if(!e.target.closest('button'))y0=e.clientY});d.addEventListener('pointermove',e=>{if(y0!==null&&e.clientY-y0<-50){y0=null;brainClose()}});d.addEventListener('pointerup',()=>y0=null)})();brainDraw();
  $('gsay').onclick=()=>$('ask').focus();$('gcut').onclick=()=>{speakStop();gMood('idle')};gFloatSync()}
 async function gNotesCopy(){if(!CS){toast('Sign in first');return}
  try{const since=new Date(Date.now()-14*864e5).toISOString();const rows=await gdb('gary_audit?select=action,detail,at&or=(ok.eq.false,action.eq.wish)&at=gte.'+since+'&order=at.desc&limit=40')||[];
@@ -2105,7 +2112,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124180447';let UPD=false;
+const BUILD='20261124180715';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
