@@ -379,6 +379,8 @@ header{padding-top:calc(4px + var(--safeT))!important}header>.lab{font-size:12.5
 #thread.chin{animation:chin .35s var(--ease)}@keyframes chin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
 .chundo{display:flex!important;justify-content:space-between;align-items:center;color:var(--dim);font-size:14px}.chundo button{color:var(--fg)}#chlist .chi{position:relative;background:#000}
+
+#gdock .gpx.scene{transition:transform .35s var(--ease);transform-origin:25% 87.5%}#gdock.peek .gpx.scene{transform:rotate(24deg)}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -1099,6 +1101,7 @@ async function lvTool(fc){const a=fc.args||{};let res={result:'done'};
    await gdb('gary_memories',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(m)});lvLine('act','Remembered: '+m.text);garyFetch({mode:'curate',text:'curate',ids:[m.id]}).catch(()=>{})}
   else if(fc.name==='guest_note'){await gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action:'guest',detail:{name:a.name||null,personal:a.personal===true,note:String(a.note||'').slice(0,400),voice:true}})})}
   else if(fc.name==='note_for_claude'&&a.text){await gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action:'wish',detail:{text:String(a.text).slice(0,600)}})});lvLine('act','Noted for Claude')}
+  else if(fc.name==='set_feeling'&&a.mood){res={ok:true};garyFetch({mode:'feel',text:'feel',mood:a.mood,level:a.level,why:a.why}).catch(()=>{})}
   else if(fc.name==='strike_pose'&&a.name){const now=performance.now(),n=String(a.name).toLowerCase(),asked=/pose|dance|bow|show|do a|do the/i.test(LV.inT||'');if(G_EX[n]&&LV.ready&&!$('lvorb').className&&now>(LV.poseEnd||0)&&(asked||now-(LV.poseAt??-1e9)>45000)){LV.poseAt=now;LV.poseEnd=now+(G_POSE_MS[n]||3500)+2500;gPose(n);GS.until=now+(G_POSE_MS[n]||3500)}}
   else res={error:'not available'}}catch(e){res={error:'failed'}}
  if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({toolResponse:{functionResponses:[{id:fc.id,name:fc.name,response:res}]}}))}
@@ -1728,9 +1731,9 @@ const G_REST=['aSk G.A.R.Y. aNyThInG…','Ask me. I\'m quicker than him.','Type 
 // once in a while, after they've bickered, G.A.R.Y. pulls Sam in (white bubble; he answers by typing)
 const G_ASKSAM=['Settle this for us, sir - am I right, or is the search bar?','You heard all that, sir. Whose side are you on?','Be honest, sir. It\'s me, isn\'t it? I\'m the reasonable one.','Sir, would you kindly tell the search bar it\'s wrong?','Am I being unfair to it, sir? Don\'t answer that. Actually, do.'];
 // fresh lines written in Sam's own way of typing (server 'banter'); the scripted ones are the fallback
-let GBAN={sq:[],toSam:[],at:0};try{Object.assign(GBAN,JSON.parse(store('garyBanter')||'{}'))}catch(e){}
+let GBAN={sq:[],toSam:[],at:0,v:2};try{const o=JSON.parse(store('garyBanter')||'{}');if(o.v===2)Object.assign(GBAN,o)}catch(e){}
 async function gBanLoad(){if(!CS||!navigator.onLine||GL.guest||Date.now()-GBAN.at<40*60e3&&GBAN.sq.length>2)return;try{const j=await (await garyFetch({mode:'banter',text:'banter'})).json();
- if(j.squabbles&&j.squabbles.length){GBAN.sq=GBAN.sq.concat(j.squabbles.map(q=>q.map(l=>l.who==='gary'?['g',l.say,l.mood]:['b',l.say]))).slice(-30);if(j.toSam&&j.toSam.length)GBAN.toSam=j.toSam;GBAN.at=Date.now();store('garyBanter',JSON.stringify(GBAN))}}catch(e){}}
+ if(j.squabbles&&j.squabbles.length){GBAN.sq=GBAN.sq.concat(j.squabbles.map(q=>q.map(l=>l.who==='gary'?['g',l.say,l.mood]:['b',l.say]))).slice(-30);if(j.toSam&&j.toSam.length)GBAN.toSam=j.toSam;GBAN.at=Date.now();GBAN.v=2;store('garyBanter',JSON.stringify(GBAN))}}catch(e){}}
 setTimeout(gBanLoad,9000);setInterval(gBanLoad,15*60e3);
 function gRest(){const L=GBAN.toSam.length&&Math.random()<0.7?GBAN.toSam:G_REST;return L[Math.floor(Math.random()*L.length)]}
 // longer squabbles: b = the Sentient Search Bar (speaks in itself), g = G.A.R.Y. (white bubble) + his face
@@ -1897,9 +1900,9 @@ function gRoutinePick(last){if(GFAV.length&&Math.random()<0.35){const f=GFAV[Mat
 const G_ACTS=['sitting','cane','tea','reading','newspaper','writing','texting','phonecall','watch','stretching','dance','singing','stargazing','birdwatching','detective','zen','umbrella','balloon','flower','dapper','tiphat','cycling'];
 const GW={x:0,to:null,dir:1,busy:0,last:''};
 function gwFree(){return tab==='gary'&&!document.hidden&&!talking&&!GSPK&&!LV.on&&!GB.sit&&!$('gbar').classList.contains('drag')&&!matchMedia('(prefers-reduced-motion: reduce)').matches}
-function gwPlace(){const d=$('gdock');d.style.transform='translateX('+GW.x.toFixed(1)+'px)';d.classList.toggle('flip',GW.dir<0)}
+function gwPlace(){const d=$('gdock');if(GW.peek&&performance.now()>=(GW.holdUntil||0))GW.peek=false;d.style.transform='translateX('+GW.x.toFixed(1)+'px)';d.classList.toggle('flip',GW.dir<0);d.classList.toggle('peek',!!GW.peek)}
 // the search bar's talking: he stops to answer. If he's off on an errand he pops his head back in from the edge, has his say, then carries on
-function gwHold(ms){const now=performance.now();if(GW.plan){GW.holdUntil=now+ms;if(GW.x<0){GW.x=Math.max(GW.x,-Math.round($('gdock').offsetWidth*0.45));GW.dir=1;gwPlace()}}else{GW.to=null;GW.busy=Math.max(GW.busy,now+ms)}}
+function gwHold(ms){const now=performance.now();if(GW.plan){GW.holdUntil=now+ms;if(GW.x<0){GW.x=-Math.round($('gdock').offsetWidth*0.62);GW.dir=1;GW.peek=true;gwPlace()}}else{GW.to=null;GW.busy=Math.max(GW.busy,now+ms)}}
 function gwOff(){return -Math.round($('gdock').offsetWidth*1.5+14)}
 function gwMax(){const b=$('gbar'),n=document.querySelector('.gbt');return Math.max(0,b.clientWidth-(n?n.offsetWidth+16:120)-$('gdock').offsetWidth)}
 (function gwLoop(){const now=performance.now();
@@ -1932,7 +1935,7 @@ async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock()
   if(r.status===404)throw new Error('nofn');if(!r.ok)throw new Error('http '+r.status);
   const rd=r.body.getReader(),dec=new TextDecoder();
   for(;;){const{value,done}=await rd.read();if(done)break;pet();GTALK=true;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
-  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);GPOSE=j.pose||null;brainFrom(j.brain);garyJobs(j.jobs,a)}catch(e){}}}
+  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);GPOSE=j.pose||(j.feel&&j.feel.pose&&j.feel.pose!=='idle'?j.feel.pose:null);if(j.feel)store('garyFeel',JSON.stringify(j.feel));brainFrom(j.brain);garyJobs(j.jobs,a)}catch(e){}}}
  catch(e){if(e.name==='AbortError'&&!got)a.textContent='That took far too long, sir - Google seems to have nodded off. Try me again.';else if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':garyOffline(text,1)||'I can\'t reach the cloud just now, sir. Try again in a moment.'}
  clearTimeout(wd);a.classList.remove('wait');talking=false;GTALK=false;if(GPOSE)gPose(GPOSE);else if(got)gMood('happy',1600);else gMood('confused',3500);GPOSE=null;const said=got.split('\x1e')[0].trim();if(said&&typeof LV!=='undefined'&&LV.on&&LV.streamCut!=null){const k=Math.min(said.length,LV.streamCut);LV.streamCut=null;if(said.slice(k).trim())lvCarry(said.slice(0,k),said.slice(k).trim())}else if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
 // Gary's voice: the device's own British male voice (free, swappable later)
@@ -1992,7 +1995,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124160635';let UPD=false;
+const BUILD='20261124161150';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}

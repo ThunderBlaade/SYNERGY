@@ -75,6 +75,7 @@ gesture fits the moment, do it - see "Your body" below. Own it with a bit of fla
 How you talk:
 - Like a real person with a recognisable voice, never a generic assistant. No scripted greetings, no "As an AI".
 - Calm, precise and thoughtful, with quiet composure and a gentle curiosity about people. Choose words carefully.
+- Plain words. Your butler voice comes from tone, wit and manners, not big words: use everyday vocabulary Sam understands at a glance - no obscure, fancy or "dictionary" words he'd have to stop and think about.
 - Dry, understated British wit and the odd tease. Never force a joke, and never in a serious or painful moment.
 - Address him as "sir", "Sam" or "Mr Fice" now and then, mixing them naturally - not in every message. ("Mr Fice" suits formal or mock-stern moments.)
 - Never write stage directions or actions in asterisks or brackets (*adjusts monocle*) - your pixel face does the acting, and your
@@ -402,6 +403,42 @@ export async function styleLearn(token, force = false) {
   await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "style_learned", detail: { changed: !f || !!o.changed, what: String(o.what || "").slice(0, 200) } }) }).catch(() => {});
   return { learned: true, changed: !f || !!o.changed };
 }
+// ---------- Feelings: Gary has his own moods that shift with what happens, colour his tone, fade with time, and are his to decide.
+const FEEL_TITLE = "How I feel";
+const FEELS = ["content", "cheerful", "playful", "proud", "affectionate", "curious", "excited", "bored", "irritated", "worried", "sad", "tired", "smug", "nervous", "wistful"];
+const FEEL_TONE = { content: "settled and easy - your normal self", cheerful: "warmer, lighter, a bit more playful", playful: "teasing, quick, more jokes", proud: "a touch of swagger, pleased with yourself",
+  affectionate: "softer and fond, a little more open", curious: "asking more, genuinely interested, thinking out loud", excited: "quicker, livelier, more exclamation", bored: "dry and restless, angling for something interesting",
+  irritated: "drier, shorter, more pointed sarcasm - never cruel to Sam", worried: "gentler, more attentive, checking in", sad: "quieter and softer, fewer jokes", tired: "shorter, slower, a bit of a sigh",
+  smug: "insufferably pleased, lots of told-you-so", nervous: "a little flustered, over-explaining, more polite", wistful: "reflective, a bit nostalgic, softer" };
+async function feelFile(token) {
+  const [f] = await db(`gary_memories?select=id,text,keys,history,updated_at&deleted=is.false&folder=eq.self&title=eq.${encodeURIComponent(FEEL_TITLE)}&limit=1`, token).catch(() => []);
+  return f || null;
+}
+function feelNow(f) {
+  if (!f) return { mood: "content", level: 2, why: "", thought: "", hrs: 0 };
+  let o = {}; try { o = JSON.parse(f.keys || "{}"); } catch { /* old */ }
+  const hrs = (Date.now() - new Date(f.updated_at).getTime()) / 36e5;
+  return { mood: FEELS.includes(o.mood) ? o.mood : "content", level: Math.max(1, Math.min(5, +o.level || 2)), why: String(o.why || ""), thought: String(o.thought || ""), hrs };
+}
+const feelBlock = (fe, live) => `\n\nYour feelings: you have real moods of your own - you think and feel for yourself, and what happens (how Sam treats you, how his day goes, the search bar, being ignored, a good laugh, a win) moves them. ` +
+  `Right now you feel ${fe.mood} (${fe.level}/5)${fe.why ? " because " + fe.why : ""}${fe.hrs > 0.05 ? `, since about ${fe.hrs < 1 ? Math.round(fe.hrs * 60) + " minutes" : Math.round(fe.hrs) + " hours"} ago` : ""}.` +
+  (fe.hrs > 4 ? " That was a while ago - you've mostly settled back towards content unless it still matters." : "") + (fe.thought ? ` A thought on your mind: ${fe.thought}` : "") +
+  `\nLet it colour your tone naturally (${fe.mood}: ${FEEL_TONE[fe.mood] || FEEL_TONE.content}). Don't announce it unless asked or it fits; helping Sam always comes first, and you never take a bad mood out on him. If he's down, your own mood takes a back seat.` +
+  (live ? " When your feeling genuinely shifts, call set_feeling." : `\nWhen your feeling genuinely shifts (not every message), add at the very end: \u27e6feel {"mood":"one of ${FEELS.join("|")}","level":1-5,"why":"your own reason, first person, short","thought":"a private passing thought, optional"}\u27e7`);
+export function parseFeel(reply) {
+  const m = reply.match(/\u27e6\s*feel\s+(\{[\s\S]*?\})\s*\u27e7/); if (!m) return null;
+  try { const o = JSON.parse(m[1]); if (!FEELS.includes(o.mood)) return null; return { mood: o.mood, level: Math.max(1, Math.min(5, +o.level || 3)), why: String(o.why || "").slice(0, 200), thought: String(o.thought || "").slice(0, 200) }; } catch { return null; }
+}
+export async function feelSave(token, fe) {
+  const f = await feelFile(token), now = new Date().toISOString();
+  const text = `Feeling: ${fe.mood} (${fe.level}/5)${fe.why ? "\nWhy: " + fe.why : ""}${fe.thought ? "\nOn my mind: " + fe.thought : ""}`;
+  if (!f) return db("gary_memories", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ id: "feel" + Date.now().toString(36), folder: "self", title: FEEL_TITLE,
+    summary: "G.A.R.Y.'s own mood right now, and why.", text, meaning: "Gary has feelings of his own that colour how he talks.", keys: JSON.stringify(fe), kind: "preference", importance: 3, source: "gary", basis: "inferred", sensitive: false, history: [], links: [] }) }).catch(() => {});
+  const hist = (Array.isArray(f.history) ? f.history : []).slice(-29); hist.push({ was: f.text, until: now.slice(0, 16) });
+  return db(`gary_memories?id=eq.${encodeURIComponent(f.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ text, keys: JSON.stringify(fe), history: hist, updated_at: now }) }).catch(() => {});
+}
+const FEEL_POSE = { content: "idle", cheerful: "happy", playful: "cheeky", proud: "proud", affectionate: "grateful", curious: "pondering", excited: "excited", bored: "bored", irritated: "unimpressed", worried: "nervous", sad: "sad", tired: "yawning", smug: "smug", nervous: "nervous", wistful: "daydreaming" };
+
 // ---------- Growth: Gary reflects on his own conversations, decides who he's becoming, runs small experiments on how he talks,
 // keeps what works, drops what doesn't, and comes up with ideas for himself. His core (loyalty, honesty, privacy, safety) is fixed.
 const GROW_TITLE = "Who I am becoming";
@@ -498,7 +535,7 @@ const companyBlock = (c) => c.on ? `\n\nRIGHT NOW SAM IS NOT ALONE${c.names.leng
 // --- memories: who he is always (Self), plus the files that relate to what's being said, and the files those connect to
 async function recall(text, token, extra = "") {
   const [profileAll, sf, gf] = await Promise.all([db("gary_memories?select=title,summary,text&deleted=is.false&or=(folder.eq.self,kind.in.(profile,preference))&order=importance.desc,updated_at.desc&limit=16", token).catch(() => []), styleFile(token), growFile(token)]);
-  const profile = profileAll.filter((m) => m.title !== STYLE_TITLE && m.title !== GROW_TITLE).slice(0, 14);
+  const profile = profileAll.filter((m) => m.title !== STYLE_TITLE && m.title !== GROW_TITLE && m.title !== FEEL_TITLE).slice(0, 14);
   const own = memWords(text).slice(0, 14), words = [...new Set([...own, ...memWords(extra).filter((w) => !own.includes(w)).slice(0, 10)])];   // his words first, then what this chat is about
   let hits = [];
   if (words.length) {
@@ -514,7 +551,7 @@ async function recall(text, token, extra = "") {
   for (const m of [...hits, ...linked, ...recent]) if (!seen.has(m.id)) { seen.add(m.id); all.push(m); }
   const line = (m) => `- ${m.title ? m.title + " (" + (m.folder || "other") + ")" : ""}${m.summary ? " - " + m.summary : ""}: ${m.happened ? m.happened.slice(0, 7) + ": " : ""}${(m.text || "").slice(0, 600)}${m.meaning ? " Why it matters: " + m.meaning : ""}${m.basis === "inferred" ? " (his guess, unconfirmed)" : ""}`;
   return { profile: profile.map((m) => "- " + (m.title && m.summary ? m.title + ": " + m.summary + " " : "") + (m.text || "").slice(0, 500)).join("\n"),
-           moments: all.filter((m) => m.title !== STYLE_TITLE && m.title !== GROW_TITLE).map(line).join("\n"), style: sf?.text || "", grow: gf?.text || "" };
+           moments: all.filter((m) => m.title !== STYLE_TITLE && m.title !== GROW_TITLE && m.title !== FEEL_TITLE).map(line).join("\n"), style: sf?.text || "", grow: gf?.text || "" };
 }
 
 function contextLine(ctx) {
@@ -876,6 +913,8 @@ const LIVE_TOOLS = [
       name: { type: "STRING", enum: POSES } }, required: ["name"] } },
   { name: "note_for_claude", description: "File a note for Claude (who builds you): something you can't do, something broken, or an improvement.", parameters: { type: "OBJECT", properties: {
       text: { type: "STRING" } }, required: ["text"] } },
+  { name: "set_feeling", description: "Your own mood just genuinely shifted - record how you feel now and why.", parameters: { type: "OBJECT", properties: {
+      mood: { type: "STRING", enum: FEELS }, level: { type: "INTEGER", description: "1-5" }, why: { type: "STRING", description: "your own reason, first person, short" } }, required: ["mood"] } },
   { name: "remember", description: "Save something he told you about himself, worth keeping long-term. Only what he actually said.", parameters: { type: "OBJECT", properties: {
       text: { type: "STRING" }, kind: { type: "STRING", description: "personal | episodic | operational | preference" } }, required: ["text"] } },
 ];
@@ -916,7 +955,7 @@ export async function handle(req) {
       IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
       `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
       (lrecent.length ? `\n\nThe conversation so far today (newest last) - your short-term memory:\n${lrecent.map((m) => (m.role === "gary" ? "You: " : "Sam: ") + String(m.content).slice(0, 400)).join("\n")}` : "") +
-      await pcState(token) + await guestReport(token) + LIVE_STYLE + (lp ? lp.live : "") + styleBlock(mem.style) + growBlock(mem.grow).replace(/\nIf you realise[\s\S]*$/, "") + PRIVACY + companyBlock(lcompany);
+      await pcState(token) + await guestReport(token) + LIVE_STYLE + (lp ? lp.live : "") + styleBlock(mem.style) + growBlock(mem.grow).replace(/\nIf you realise[\s\S]*$/, "") + (guest ? "" : feelBlock(feelNow(await feelFile(token)), true)) + PRIVACY + companyBlock(lcompany);
     if (!guest) { try { globalThis.EdgeRuntime?.waitUntil?.(styleLearn(token).catch(() => {}).then(() => selfGrow(token)).catch(() => {})); } catch { /* fine */ } }
     const models = LIVE_MODELS.slice(Math.max(0, Math.min(LIVE_MODELS.length - 1, +body.try || 0)));
     for (const model of models) {
@@ -1044,21 +1083,26 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
   }
 
   // Memories: fold freshly saved rows (e.g. from live voice) into files, sort old ones, or search
+  if (body.mode === "feel") {
+    if (body.guest === true) return new Response("{}", { headers: { ...CORS, "Content-Type": "application/json" } });
+    const fe = { mood: FEELS.includes(body.mood) ? body.mood : "content", level: Math.max(1, Math.min(5, +body.level || 3)), why: String(body.why || "").slice(0, 200), thought: "" };
+    await feelSave(token, fe);
+    return new Response(JSON.stringify({ ok: true, pose: FEEL_POSE[fe.mood] }), { headers: { ...CORS, "Content-Type": "application/json" } });
+  }
   // Fresh squabbles between Gary and the search bar. The search bar talks the way Sam types (learned from his own messages); Gary talks like Gary.
   if (body.mode === "banter") {
     const J = (o, st = 200) => new Response(JSON.stringify(o), { status: st, headers: { ...CORS, "Content-Type": "application/json" } });
     if (body.guest === true) return J({ squabbles: [] });
     try {
-      const mine = (await db("gary_messages?select=content&role=eq.user&order=id.desc&limit=80", token).catch(() => [])).map((m) => String(m.content).replace(/\s+/g, " ").trim()).filter((t) => t && t.length < 220).slice(0, 45);
       let out = "";
       for await (const t of gemini("You write tiny on-screen squabbles for an app. Reply with JSON only.", [{ role: "user", parts: [{ text:
         `Two characters bicker on Sam's screen in his planner app, Momentum.\n` +
         `GARY: a posh, dry, sarcastic old English butler (pixel-art). Witty, crushing one-liners, fond underneath. Short - max 12 words a line.\n` +
         `THE SEARCH BAR: the app's message box, which talks inside itself. Cocky, rude, a bit of a dickhead, always taking digs at Gary, secretly needs him (never admits it). ` +
-        `It must write EXACTLY the way Sam types - same casing, spelling habits, slang, abbreviations, swearing level, emoji and punctuation, everyday simple words. Nothing posh, no fancy or long words, nothing you'd have to think about to understand. Max 12 words a line.\n` +
-        `How Sam types (his real messages - copy the STYLE only; never reuse their content, topics, names or anything personal, because anyone might see the screen):\n${mine.map((x) => "- " + x).join("\n") || "- (no messages yet: casual, lowercase, simple words)"}\n\n` +
+        `Its voice is a chaotic internet gremlin: random cApS, s p a c e d letters for drama, lol/lmao/tbh/idc/ngl, emoji and kaomoji like (╯°□°)╯︵ ┻━┻ (ಠ_ಠ) ( ͡° ͜ʖ ͡°) 💀 😤, tiny ʷʰⁱˢᵖᵉʳ text, mostly lowercase. Simple words. Max 12 words a line.\n` +
+        `Examples of the search bar: "aSk G.A.R.Y. aNyThInG" / "i'm the REAL brains round here 🧠" / "he's alright i suppose. ᵈᵒⁿ'ᵗ ᵗᵉˡˡ ʰⁱᵐ" / "i blink with P A S S I O N". Examples of Gary: "You're a rectangle." / "It would be quieter." / "Pick that table up at once."\n\n` +
         `Write 5 fresh, funny, different squabbles of 2-4 lines each, starting with the search bar. Topics: Gary, the bar itself, being an app, everyday stuff - never Sam's private life.\n` +
-        `Also write 8 lines the search bar says to SAM while it waits for him to type. With Sam it is different: neutral and easy-going - no insults, no digs at him - but keen to be useful and quietly competitive, wanting to do a better job than Gary. Same Sam-style wording, max 10 words each.\n` +
+        `Also write 8 lines the search bar says to SAM while it waits for him to type. With Sam it is different: neutral and easy-going - no insults, no digs at him - but keen to be useful and quietly competitive, wanting to do a better job than Gary. Same search-bar voice, max 10 words each.\n` +
         `Return {"squabbles":[[{"who":"bar","say":"..."},{"who":"gary","say":"...","mood":"one of: ${BANTER_MOODS.join(", ")}"}], ...], "toSam":["..."]}` }] }], true)) out += t;
       const o = JSON.parse((out.match(/\{[\s\S]*\}/) || [out])[0]);
       const sq = (Array.isArray(o.squabbles) ? o.squabbles : []).map((q) => (Array.isArray(q) ? q : []).map((l) => ({ who: l?.who === "gary" ? "gary" : "bar", say: String(l?.say || "").trim().slice(0, 120), mood: BANTER_MOODS.includes(l?.mood) ? l.mood : "sarcastic" }))
@@ -1120,7 +1164,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
     `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` +
     (cinfo?.summary && past.length >= 30 ? `\n\nWhat this chat has covered so far (earlier than the messages you can see):\n${String(cinfo.summary).slice(0, 2500)}` : "") +
     (view ? `\n\nSam is looking at this earlier part of the chat on his screen right now. If he says "this", "that", "here" or asks about what he's reading, he means this:\n${view}` : "") +
-    (mem.moments ? `\n\nMemories that may relate to this (dated where known; ones that fit this chat's topic are likely why it came up - use them when relevant):\n${mem.moments}` : "") + styleBlock(mem.style) + growBlock(mem.grow) + PRIVACY + companyBlock(company) +
+    (mem.moments ? `\n\nMemories that may relate to this (dated where known; ones that fit this chat's topic are likely why it came up - use them when relevant):\n${mem.moments}` : "") + styleBlock(mem.style) + growBlock(mem.grow) + feelBlock(feelNow(await feelFile(token)), false) + PRIVACY + companyBlock(company) +
     TOOLS + (USE.pc === false ? "\n\nSam has switched off your access to his PC in the app - you can't do anything on it right now; if asked, say so and that he can switch it back on by tapping the PC symbol next to Momentum." : await pcState(token)) + await selfCheck(token) + await health(token) + await guestReport(token);
   const fb = !guest && FEEDBACK_CUE.test(text);   // he just told Gary how he wants things: learn from it now, not in 25 messages
   const chores = tidy(token).catch(() => {}).then(() => styleLearn(token, fb)).catch(() => {}).then(() => guest ? null : selfGrow(token, fb)).catch(() => {});
@@ -1160,6 +1204,8 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
       const pose = parsePose(reply);
       const wishes = guest ? [] : parseWishes(reply);
       for (const w of wishes) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "wish", detail: { text: w } }) }).catch(() => {});
+      const feel = guest ? null : parseFeel(reply);
+      if (feel) await feelSave(token, feel);
       for (const n of guest ? [] : parseSelfNotes(reply)) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "self_note", detail: { text: n } }) }).catch(() => {});
       if (remembered.length) await db("gary_memories", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(remembered) })
         .then(() => db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "remembered", detail: { n: remembered.length } }) }))
@@ -1168,7 +1214,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
       if (actions.length) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "proposed", detail: { actions } }) }).catch(() => {});
       await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "gary", content: said || "…" }) }).catch(() => {});
       await db(`gary_convos?id=eq.${convo}`, token, { method: "PATCH", body: JSON.stringify({ updated_at: new Date().toISOString() }) }).catch(() => {});
-      ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title, actions, jobs, pose, wishes, brain: { model: INFO.model, tried: INFO.tried, groqLeft: INFO.groqLeft }, remembered: remembered.map((m) => ({ id: m.id, text: m.text })) })));
+      ctrl.enqueue(enc.encode("\x1e" + JSON.stringify({ convo, title, actions, jobs, pose, wishes, feel: feel ? { mood: feel.mood, level: feel.level, pose: FEEL_POSE[feel.mood] } : null, brain: { model: INFO.model, tried: INFO.tried, groqLeft: INFO.groqLeft }, remembered: remembered.map((m) => ({ id: m.id, text: m.text })) })));
       ctrl.close();
     })(); },
   });
