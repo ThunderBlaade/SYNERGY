@@ -1043,6 +1043,10 @@ $('lvtyp').onsubmit=e=>{e.preventDefault();const t=$('lvtin').value.trim();if(!t
 
 function lvVV(){if($('live').classList.contains('on')&&$('live').classList.contains('typing')&&(scrollY||document.documentElement.scrollTop))scrollTo(0,0)}
 if(window.visualViewport){visualViewport.addEventListener('resize',lvVV);visualViewport.addEventListener('scroll',lvVV)}$('lvtin').addEventListener('focus',()=>setTimeout(lvVV,60));$('lvtin').addEventListener('blur',()=>setTimeout(lvVV,60));
+// the keyboard's tick/Done (or tapping away) closes typing: the bar goes and the buttons drop back. Send and the magnifier keep focus so they don't count as tapping away.
+['lvtsend','lvtype'].forEach(id=>['pointerdown','mousedown'].forEach(ev=>$(id).addEventListener(ev,e=>{if(document.activeElement===$('lvtin'))e.preventDefault()})));
+$('lvtin').addEventListener('blur',()=>setTimeout(()=>{const L=$('live');if(document.activeElement===$('lvtin')||!L.classList.contains('on')||!L.classList.contains('typing'))return;
+ L.classList.remove('typing');$('lvtype').classList.remove('on');if(!LV.nomic)LV.muted=!!LV.preMute;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvVV()},120));
 
 async function lvMicWire(){const src=LV.ctx.createMediaStreamSource(LV.stream);
  try{await LV.ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([LIVE_WORKLET],{type:'application/javascript'})));LV.node=new AudioWorkletNode(LV.ctx,'gmic');LV.node.port.onmessage=e=>lvMic(e.data);src.connect(LV.node)}
@@ -1811,7 +1815,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124141610';let UPD=false;
+const BUILD='20261124141852';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
