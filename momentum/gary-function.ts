@@ -371,13 +371,16 @@ async function styleFile(token) {
   const [f] = await db(`gary_memories?select=id,text,history,updated_at&deleted=is.false&folder=eq.self&title=eq.${encodeURIComponent(STYLE_TITLE)}&limit=1`, token).catch(() => []);
   return f || null;
 }
+// chats from guest mode (Face ID not passed) - kept out of everything Rodger learns about Sam
+async function guestConvos(token) { return new Set((await db("gary_convos?select=id&title=like.Guest:*&limit=500", token).catch(() => [])).map((c) => c.id)); }
 export async function styleLearn(token, force = false) {
   const f = await styleFile(token);
   const since = f ? `&created_at=gt.${encodeURIComponent(f.updated_at)}` : "";
   const fresh = await db(`gary_messages?select=id&role=eq.user${since}&limit=25`, token).catch(() => []);
   if (!force && fresh.length < (f ? 20 : 8)) return { learned: false, waiting: fresh.length };
   if (force && f && Date.now() - new Date(f.updated_at).getTime() < 8 * 60e3) return { learned: false, wait: true };
-  const msgs = (await db("gary_messages?select=role,content,created_at&order=id.desc&limit=140", token).catch(() => [])).reverse();
+  const gids = await guestConvos(token);
+  const msgs = (await db("gary_messages?select=role,content,created_at,convo&order=id.desc&limit=140", token).catch(() => [])).filter((m) => !gids.has(m.convo)).reverse();   // guests' chats never shape what he learns about Sam
   if (msgs.filter((m) => m.role === "user").length < 5) return { learned: false };
   const talk = msgs.map((m) => `[${String(m.created_at).slice(5, 16).replace("T", " ")}] ${m.role === "gary" ? "Rodger" : "Sam"} (${String(m.content).length} chars): ${String(m.content).slice(0, 600)}`).join("\n").slice(-30000);
   let out = "";
@@ -457,7 +460,8 @@ export async function selfGrow(token, force = false) {
   const since = f ? `&created_at=gt.${encodeURIComponent(f.updated_at)}` : "";
   const fresh = await db(`gary_messages?select=id&role=eq.user${since}&limit=30`, token).catch(() => []);
   if (!force && fresh.length < (f ? 25 : 10)) return { grew: false, waiting: fresh.length };
-  const msgs = (await db("gary_messages?select=role,content,created_at&order=id.desc&limit=160", token).catch(() => [])).reverse();
+  const gids = await guestConvos(token);
+  const msgs = (await db("gary_messages?select=role,content,created_at,convo&order=id.desc&limit=160", token).catch(() => [])).filter((m) => !gids.has(m.convo)).reverse();   // guests' chats never shape what he learns about Sam
   if (msgs.filter((m) => m.role === "user").length < 4) return { grew: false };
   const st = await styleFile(token);
   const notes = (await db(`gary_audit?select=detail,at&action=eq.self_note&order=at.desc&limit=12`, token).catch(() => [])).map((r) => "- " + String(r.detail?.text || "")).join("\n");
@@ -1175,7 +1179,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
     (mem.moments ? `\n\nMemories that may relate to this (dated where known; ones that fit this chat's topic are likely why it came up - use them when relevant):\n${mem.moments}` : "") + styleBlock(mem.style) + growBlock(mem.grow) + feelBlock(feelNow(await feelFile(token)), false) + PRIVACY + companyBlock(company) +
     TOOLS + (USE.pc === false ? "\n\nSam has switched off your access to his PC in the app - you can't do anything on it right now; if asked, say so and that he can switch it back on by tapping the PC symbol next to Momentum." : await pcState(token)) + await selfCheck(token) + await health(token) + await guestReport(token) + (guest ? "" : CONVO);
   const fb = !guest && FEEDBACK_CUE.test(text);   // he just told Rodger how he wants things: learn from it now, not in 25 messages
-  const chores = tidy(token).catch(() => {}).then(() => styleLearn(token, fb)).catch(() => {}).then(() => guest ? null : selfGrow(token, fb)).catch(() => {});
+  const chores = tidy(token).catch(() => {}).then(() => guest ? null : styleLearn(token, fb)).catch(() => {}).then(() => guest ? null : selfGrow(token, fb)).catch(() => {});
   try { globalThis.EdgeRuntime?.waitUntil?.(chores); } catch { /* runs alongside anyway */ }
 
   await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "user", content: text, ctx: body.ctx || null }) });
