@@ -816,9 +816,9 @@ function lvMic(f32){if(!LV.ready||LV.muted)return;let e=0;for(let i=0;i<f32.leng
  let zc=0;for(let i=1;i<all.length;i++)if((all[i]^all[i-1])<0)zc++;const zcr=zc/all.length,voicy=zcr>0.012&&zcr<0.28;  // speech-shaped, not a clatter or a hum
  const send=u=>{if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({realtimeInput:{audio:{data:b64(new Uint8Array(u.buffer)),mimeType:'audio/pcm;rate=16000'}}}))};
  if(spk&&!(LV.open>0)){                    // while Gary talks, only a sustained, clear voice may cut in - bangs, TV, his own echo can't
-  if(voicy&&rms>Math.max(0.03,(LV.floor||0)*5)){LV.hold=(LV.hold||[]);LV.hold.push(all.slice());LV.vrun=(LV.vrun||0)+all.length/16}else{LV.vrun=Math.max(0,(LV.vrun||0)-all.length/8);if(!LV.vrun)LV.hold=[]}
+  const early=LV.ctx.currentTime-(LV.uttAt||0)<1.2||!LV.spoke,need=early?0.06:0.03;if(voicy&&rms>Math.max(need,(LV.floor||0)*5)){LV.hold=(LV.hold||[]);LV.hold.push(all.slice());LV.vrun=(LV.vrun||0)+all.length/16}else{LV.vrun=Math.max(0,(LV.vrun||0)-all.length/8);if(!LV.vrun)LV.hold=[]}
   if(LV.hold&&LV.hold.length>10)LV.hold.shift();
-  if((LV.vrun||0)>=300){LV.open=all.length*18;for(const h of LV.hold)send(h);LV.hold=[];LV.vrun=0;return}
+  if((LV.vrun||0)>=(early?480:300)){LV.open=all.length*18;for(const h of LV.hold)send(h);LV.hold=[];LV.vrun=0;return}
   all.fill(0);LV.lvl*=0.5;send(all);return}
  LV.hold=[];LV.vrun=0;
  if(rms>Math.max(0.012,LV.floor*3)&&(voicy||rms>0.05))LV.open=all.length*18;else LV.open-=all.length;   // a clear voice above the room: let it through (plus ~0.7 s tail)
@@ -826,7 +826,7 @@ function lvMic(f32){if(!LV.ready||LV.muted)return;let e=0;for(let i=0;i<f32.leng
  send(all)}
 function lvPlay(b64s,rate){const bin=atob(b64s),n=bin.length>>1,ab=LV.ctx.createBuffer(1,n,rate||24000),ch=ab.getChannelData(0);
  for(let i=0;i<n;i++){let v=bin.charCodeAt(2*i)|(bin.charCodeAt(2*i+1)<<8);if(v>32767)v-=65536;ch[i]=v/32768}
- LV.recv=(LV.recv||0)+ab.duration;LV.act=Date.now();const s=LV.ctx.createBufferSource();s.buffer=ab;s.connect(LV.ctx.destination);const at=Math.max(LV.ctx.currentTime+(LV.playAt<LV.ctx.currentTime?0.14:0.03),LV.playAt);s.start(at);LV.playAt=at+ab.duration;
+ const RT=0.95,dur=ab.duration/RT;LV.recv=(LV.recv||0)+dur;LV.act=Date.now();const s=LV.ctx.createBufferSource();s.buffer=ab;s.playbackRate.value=RT;s.connect(LV.ctx.destination);const fresh=LV.playAt<LV.ctx.currentTime;const at=Math.max(LV.ctx.currentTime+(fresh?0.14:0.03),LV.playAt);if(fresh)LV.uttAt=at;s.start(at);LV.playAt=at+dur;
  LV.srcs.push(s);s.onended=()=>{LV.srcs=LV.srcs.filter(x=>x!==s);if(!LV.srcs.length&&LV.on)$('live').classList.remove('speaking')};$('live').classList.add('speaking')}
 // When Sam cuts in: tell Gary exactly how far Sam heard, so he can answer first and then pick up where he left off.
 function lvNoteCut(){const full=(LV.outT||'').trim();if(!full||!LV.ctx)return;const queued=Math.max(0,LV.playAt-LV.ctx.currentTime),rec=LV.recv||0;
@@ -859,11 +859,11 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
  if(c.inputTranscription&&c.inputTranscription.text){LV.act=Date.now();LV.inT+=c.inputTranscription.text;lvStatus('Listening…')}
  if(c.outputTranscription&&c.outputTranscription.text)LV.outT+=c.outputTranscription.text;
  if(c.modelTurn&&!LV.drop)for(const p of c.modelTurn.parts||[]){if(p.inlineData&&p.inlineData.data){const r=+((p.inlineData.mimeType||'').match(/rate=(\d+)/)||[0,24000])[1];lvPlay(p.inlineData.data,r);lvStatus('Gary')}}
- if(c.turnComplete){LV.drop=false;LV.recv=0;if(LV.inT.trim())lvLine('you',LV.inT.trim());if(LV.outT.trim())lvLine('gary',LV.outT.trim());if(LV.unsaid)lvLine('cut','…didn\'t get to say: '+LV.unsaid);lvSaveTurn()}}
+ if(c.turnComplete){LV.spoke=true;LV.drop=false;LV.recv=0;if(LV.inT.trim())lvLine('you',LV.inT.trim());if(LV.outT.trim())lvLine('gary',LV.outT.trim());if(LV.unsaid)lvLine('cut','…didn\'t get to say: '+LV.unsaid);lvSaveTurn()}}
 async function liveStart(again){if(!gUse().live){toast('Live voice is switched off - tap the symbols by Momentum to switch it on');return}if(!gUse().google){toast('Live voice needs Google Gemini - tap the symbols by Momentum to switch it on');return}let ctx0=null;if(!again){try{ctx0=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});ctx0.resume()}catch(e){}}if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=ctx0||new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // created inside the tap, so iPhone allows sound
- LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open','entering','rack','rackgone');$('live').classList.toggle('curt',Math.random()<0.25);$('lvorb').className=''}lvStatus('Connecting…');
+ LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;LV.spoke=false;LV.uttAt=0;LV.unsaid='';$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open','entering','rack','rackgone');$('live').classList.toggle('curt',Math.random()<0.25);$('lvorb').className=''}lvStatus('Connecting…');
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
  catch(e){lvErr('microphone',{error:String(e&&e.name||e)});lvStatus('Microphone not allowed. Allow it in your settings and try again.');return}
  const src=LV.ctx.createMediaStreamSource(LV.stream);
@@ -995,6 +995,7 @@ daydreaming up n smile clasp cloud sway
 stargazing up up o pointUp twinkle still
 birdwatching right up small binoculars bird still
 fistpump happy angry grin fist sparkle jump
+pullchair open up grin point - still - pull
 sitting open n smile rest - bob - sit
 sitbored tired n flat rest - still - sit
 sityawn closed up yawn mouthcover - still - sit
@@ -1167,9 +1168,19 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'spray':if(odd)for(let j=0;j<5;j++)put(20+j,13+(j%3)-1,'Q');break}
  // posture
  if(X.post==='bow'){const Q=[];for(const kk in P){const y=kk>>5,i=kk&31;if(y<17)Q[((y+3)<<5)+i]=P[kk];else if(Q[kk]===undefined)Q[kk]=P[kk]}for(const kk in P)delete P[kk];for(const kk in Q)P[kk]=Q[kk]}
- if(X.post==='sit'){const Q=[];for(let y=12;y<27;y++){Q[(y<<5)+6]='N';Q[(y<<5)+7]='n';Q[(y<<5)+24]='n';Q[(y<<5)+25]='N'}for(let i=6;i<26;i++){Q[(11<<5)+i]='N'}
-  for(const kk in P){const y=kk>>5,i=kk&31;if(y<28&&y+1<32)Q[((y+1)<<5)+i]=P[kk]}for(let i=5;i<27;i++){Q[(29<<5)+i]='N'}for(const i of [6,7,24,25]){Q[(30<<5)+i]='n';Q[(31<<5)+i]='n'}
-  for(const i of [11,12,13,18,19,20]){Q[(30<<5)+i]='B';Q[(31<<5)+i]='B'}for(const kk in P)delete P[kk];for(const kk in Q)P[kk]=Q[kk]}
+ // a proper armchair: upholstered back behind him, arms and legs in front; GS.chairOff slides it in when he pulls it up
+ const chairPix=off=>{const A=[],add=(i,y,c,f)=>{i+=off;if(i>=0&&i<32)A.push([i,y,c,f])};
+  for(let y=9;y<27;y++)for(let i=7;i<25;i++){if(y===9&&(i<9||i>22))continue;if(y===10&&(i<8||i>23))continue;add(i,y,(i===7||i===24||y===9)?'n':'R',0)}
+  for(const [i,y] of [[11,13],[16,12],[20,13],[13,16],[18,16]])add(i,y,'K',0);
+  for(let y=19;y<28;y++)for(const i of [5,6,7,24,25,26])if(!(y===19&&(i===5||i===26)))add(i,y,(i===5||i===26)?'n':'D',1);
+  for(let i=7;i<25;i++){add(i,27,'D',0);add(i,28,'n',0)}for(const i of [6,25])for(let y=28;y<31;y++)add(i,y,'n',1);return A};
+ const off=X.post==='pull'?Math.max(0,Math.round(13*(1-Math.min(1,(performance.now()-(GS.chairT0||0))/900)))):0;
+ if(X.post==='pull'){for(const [i,y,c] of chairPix(off))if(!P[y*32+i])P[y*32+i]=c}
+ if(X.post==='sit'){const Q=[],C=chairPix(0);for(const [i,y,c,f] of C)if(!f)Q[(y<<5)+i]=c;
+  for(const kk in P){const y=kk>>5,i=kk&31;if(y<28&&y+1<32)Q[((y+1)<<5)+i]=P[kk]}
+  for(const [i,y,c,f] of C)if(f)Q[(y<<5)+i]=c;
+  for(const i of [11,12,13,18,19,20]){Q[(29<<5)+i]='B';Q[(30<<5)+i]='B';Q[(31<<5)+i]='K'}
+  for(const kk in P)delete P[kk];for(const kk in Q)P[kk]=Q[kk]}
  // motion + paint
  let dx=0,dy=0,flip=false;const mv=X.mv;
  if(mv==='bob')dy=X.a==='walk'?Math.floor((GW.step||0)/7)%2:(t%8>=4?1:0);else if(mv==='jump')dy=odd?-2:0;else if(mv==='bounce')dy=t%2?-1:0;else if(mv==='nod')dy=t%2;
@@ -1207,7 +1218,7 @@ const G_OPEN=['I\'ve been wondering, sir - does tea genuinely taste better from 
 function gPoke(){GB.last=Date.now();if(GB.sit){GB.sit=false;GS.base=gIdleBase();gMood('wave',1500)}}
 ['pointerdown','keydown','input'].forEach(ev=>addEventListener(ev,gPoke,{passive:true}));
 setInterval(()=>{if(tab!=='gary'||talking||GSPK||LV.on||document.hidden)return;const idle=Date.now()-GB.last;
- if(idle>35000&&!GB.sit){GB.sit=true;GS.base='sitting';if(!GS.until)gMood('sitting')}
+ if(idle>35000&&!GB.sit){GB.sit=true;GS.base='sitting';GW.to=null;GS.chairT0=performance.now();gMood('pullchair',1300)}
  if(GB.sit&&!GS.until&&Date.now()>GB.next){GB.next=Date.now()+7000+Math.random()*5000;gMood(G_SITBORED[Math.floor(Math.random()*G_SITBORED.length)],4500)}
  if(!GB.wait)GB.wait=90000+Math.random()*240000;if(idle>GB.wait&&!GB.shown&&!GL.guest&&Date.now()-GB.asked>600000){GB.asked=Date.now();GB.wait=0;if(Math.random()<0.6)gOpener()}},2000);
 async function gOpener(){let text='';
