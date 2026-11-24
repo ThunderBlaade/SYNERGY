@@ -212,7 +212,7 @@ body.lvon #askbar{display:none!important}
 #lvcurt i{position:absolute;top:0;bottom:0;width:51%;background:repeating-linear-gradient(90deg,#9e1b1b 0 14px,#861616 14px 22px,#a82020 22px 30px);transition:transform .9s cubic-bezier(.6,0,.3,1)}
 #lvcurt .cl{left:0}#lvcurt .cr{right:0}#lvcurt .val{position:absolute;left:0;right:0;top:0;height:20px;background:#6e1010;border-bottom:3px solid #e8c25a}
 #live.open #lvcurt{opacity:0;transition:opacity .5s .85s}#live.open #lvcurt .cl{transform:translateX(-102%)}#live.open #lvcurt .cr{transform:translateX(102%)}
-#live:not(.open) #lvorb{visibility:hidden}#live.mini #lvcurt{display:none}#live.mini #lvorb{visibility:visible}
+#live:not(.entering) #lvorb{visibility:hidden}#live:not(.curt) #lvcurt{display:none}#live.mini #lvcurt{display:none}#live.mini #lvorb{visibility:visible}
 @keyframes lvBike{0%{transform:translateX(-120vw)}55%{transform:translateX(6vw)}70%{transform:translateX(-2vw)}82%{transform:translateX(1vw)}100%{transform:none}}
 @keyframes lvStroll{0%{transform:translateX(110vw)}25%{transform:translateX(80vw) translateY(-4px)}50%{transform:translateX(52vw)}75%{transform:translateX(24vw) translateY(-4px)}100%{transform:none}}
 @keyframes lvPara{0%{transform:translateY(-110vh) rotate(-8deg)}30%{transform:translateY(-60vh) rotate(8deg)}55%{transform:translateY(-25vh) rotate(-6deg)}80%{transform:translateY(-4vh) rotate(4deg)}100%{transform:none}}
@@ -244,6 +244,13 @@ body.lvon #askbar{display:none!important}
 #ask{min-height:50px;height:50px;padding:13px 12px;font-size:16px;text-align:center}#ask:focus{text-align:left}#ask::placeholder{font-size:14.5px;text-align:center}
 #askbar .mic{width:50px;height:50px}#asksend svg{width:22px;height:22px}#toast{display:none!important}
 .bdoffl{font-size:11.5px;color:#e8c25a;margin-top:6px;opacity:.85}
+#lvrack{position:absolute;left:50%;top:50%;width:min(170px,44vw);height:min(170px,44vw);transform:translate(calc(-50% + min(150px,38vw)),-40%);image-rendering:pixelated;opacity:0;transition:opacity .6s;pointer-events:none}
+#live.rack #lvrack{opacity:1}#live.rackgone #lvrack{opacity:0}#live.mini #lvrack{display:none}
+@keyframes lvToRackK{0%{transform:translateX(-110vw)}100%{transform:translateX(min(40px,10vw))}}
+@keyframes lvFromRackK{0%{transform:translateX(min(40px,10vw))}100%{transform:none}}
+@keyframes lvTurnK{0%{transform:scaleX(1)}25%{transform:scaleX(.4)}50%{transform:scaleX(-1)}75%{transform:scaleX(.4)}100%{transform:scaleX(1)}}
+#lvorb.lvToRack{animation:lvToRackK 1.9s linear both}#lvorb.lvFromRack{animation:lvFromRackK 1.3s linear both}#lvorb.lvTurn{animation:lvTurnK .8s ease-in-out both}
+#lvorb.lvStroll{animation-duration:2.2s}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -315,7 +322,7 @@ body.lvon #askbar{display:none!important}
  <p class="hint">Your plan goes to a private table only your account can read. Gary's chats and memories are private to your account too.</p>
  <div class="acts"><button class="btn ghost" id="siX">Cancel</button><button class="btn fill" id="siGo">Sign in</button></div></div>
 <div id="live"><div class="lab lvlab" style="text-align:center">Talking to G.A.R.Y.</div>
- <div class="lvwrap"><div id="lvstage"><div id="lvorb"></div><div id="lvcurt"><i class="cl"></i><i class="cr"></i><b class="val"></b></div></div></div>
+ <div class="lvwrap"><div id="lvstage"><canvas id="lvrack" width="32" height="32"></canvas><div id="lvorb"></div><div id="lvcurt"><i class="cl"></i><i class="cr"></i><b class="val"></b></div></div></div>
  <div id="lvstat">Connecting…</div><div id="lvtx"></div>
  <button id="lvcut">Tap to interrupt</button>
  <div class="lvacts"><button class="lvb" id="lvmute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path class="slash" d="M4 3l16 18" stroke="#e0605a" stroke-width="2.2"/></svg></button><button class="lvb" id="lvmin" aria-label="Make small"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg></button><button class="lvb" id="lvend" aria-label="End call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>
@@ -813,7 +820,7 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
 async function liveStart(again){if(!gUse().live){toast('Live voice is switched off - tap the symbols by Momentum to switch it on');return}if(!gUse().google){toast('Live voice needs Google Gemini - tap the symbols by Momentum to switch it on');return}if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // inside the tap, so iPhone allows sound
- LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open');$('lvorb').className=''}lvStatus('Connecting…');
+ LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open','entering','rack','rackgone');$('live').classList.toggle('curt',Math.random()<0.25);$('lvorb').className=''}lvStatus('Connecting…');
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
  catch(e){lvStatus('Microphone not allowed. Allow it in your settings and try again.');return}
  const src=LV.ctx.createMediaStreamSource(LV.stream);
@@ -1116,7 +1123,7 @@ function gPaint(){GS.cv=GS.cv.filter(c=>c.isConnected);for(const c of GS.cv)if(c
 function gCanvas(el){const c=document.createElement('canvas');c.width=c.height=32;c.className='gpx';el.appendChild(c);GS.cv.push(c);gDraw(c.getContext('2d'));return c}
 const G_POSE_MS={dance:6000,sleep:6000,laugh:4000,jump:3500,cheering:4500,celebrating:4500,singing:6000,clapping:4000,applauding:4000};
 function gPose(n){n=String(n||'').toLowerCase();if(!G_EX[n])return;gMood(n,G_POSE_MS[n]||3800);GB.last=Date.now();if(GB.sit&&G_EX[n].post!=='sit'){GB.sit=false;GS.base=gIdleBase()}if($('gfloat').classList.contains('on'))GF.hold=performance.now()+(G_POSE_MS[n]||3800)}
-setInterval(()=>{GS.tick++;try{GSPK=(typeof AC!=='undefined'&&AC&&acEnd>AC.currentTime+0.05)||(window.speechSynthesis&&speechSynthesis.speaking)}catch(e){GSPK=false}
+setInterval(()=>{GS.tick++;if(GW.anim)GW.step=(GW.step||0)+3.2;try{GSPK=(typeof AC!=='undefined'&&AC&&acEnd>AC.currentTime+0.05)||(window.speechSynthesis&&speechSynthesis.speaking)}catch(e){GSPK=false}
  $('gcut').classList.toggle('on',GSPK&&tab==='gary'&&!LV.on);gPaint()},210);
 // --- floating Gary: no box, just Gary, happily drifting about
 const GF={x:0,y:0,vx:-0.22,vy:-0.14,drag:false,moved:false,last:0,hold:0,next:0};
@@ -1290,15 +1297,25 @@ async function gLockSet(on){if(on){if(!window.PublicKeyCredential||!(await Publi
  else{if(!(await gFace())){toast('Face ID needed to turn this off');return}store('garyLock','0');GL.ok=Date.now();if(GL.guest)gUnlock();toast('Face ID lock is off')}
  renderYou()}
 // ---------- the show: curtains while connecting, a silly entrance once he can hear you, a sulky exit if he can't
-function lvEnter(ms){const L=$('live'),o=$('lvorb');L.classList.add('open');
- const pick=ms<1500?['lvBike','cycling',1300]:ms<4000?(Math.random()<.5?['lvStroll','whistling',1700]:['lvPara','parachute',1600]):['lvPant','exhausted',2300];
- o.className='';void o.offsetWidth;setTimeout(()=>{o.className=pick[0];gMood(pick[1],pick[2]+300)},450);
- setTimeout(()=>{if(!LV.on)return;o.className='';LV.ready=true;lvStatus('Listening… just talk');gMood('wave',1600);brainDraw()},450+pick[2])}
+// Entrances. Curtains only sometimes (about 1 in 4); usually he just walks on, or hangs his coat on a rack that vanishes when he turns round.
+function lvRack(coat){const c=$('lvrack').getContext('2d');c.clearRect(0,0,32,32);const px=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h)};
+ px(15,4,2,25,'#5e3b20');px(11,28,10,2,'#5e3b20');px(10,29,2,2,'#5e3b20');px(20,29,2,2,'#5e3b20');px(13,4,6,2,'#8a5a34');px(11,6,2,2,'#8a5a34');px(19,6,2,2,'#8a5a34');px(16,2,1,2,'#8a5a34');
+ if(coat){px(17,7,7,15,'#08090c');px(18,8,5,13,'#3b3d4c');px(19,8,3,2,'#f4f4f6');px(18,21,5,1,'#08090c');px(23,10,1,8,'#1d1e26')}}
+function lvRun(o,cls,ms){o.className=cls;$('live').classList.add('entering');return new Promise(r=>setTimeout(r,ms))}
+async function lvEnter(ms){const L=$('live'),o=$('lvorb'),curt=L.classList.contains('curt');
+ if(curt){L.classList.add('open');await new Promise(r=>setTimeout(r,500))}
+ const coatRack=!curt&&ms<4000&&Math.random()<0.5;
+ if(coatRack){lvRack(false);L.classList.add('rack');gMood('walking');GW.anim=true;await lvRun(o,'lvToRack',1900);
+  GW.anim=false;gMood('happy',1200);await new Promise(r=>setTimeout(r,500));lvRack(true);await new Promise(r=>setTimeout(r,700));
+  gMood('walking');GW.anim=true;await lvRun(o,'lvFromRack',1300);GW.anim=false;o.className='lvTurn';L.classList.add('rackgone');gMood('dapper',1500);await new Promise(r=>setTimeout(r,900))}
+ else{const pick=ms<1500?['lvBike','cycling',1300]:ms<4000?(Math.random()<.5?['lvStroll','walking',2200]:['lvPara','parachute',1600]):['lvPant','exhausted',2300];
+  if(pick[1]==='walking')GW.anim=true;gMood(pick[1],pick[2]+300);await lvRun(o,pick[0],pick[2]);GW.anim=false}
+ if(!LV.on)return;o.className='';LV.ready=true;lvStatus('Listening… just talk');gMood('wave',1600);brainDraw()}
 setInterval(()=>{if(!LV.on||!LV.ready||LV.muted||LV.srcs.length||!LV.ws||LV.ws.readyState!==1)return;const now=Date.now();if(!LV.act)LV.act=now;if(!LV.nudgeAt)LV.nudgeAt=LV.act+90000+Math.random()*210000;
  if(now<LV.nudgeAt||now-LV.act<60000)return;LV.nudgeAt=now+120000+Math.random()*300000;if(Math.random()<0.45)return;
  LV.ws.send(JSON.stringify({realtimeInput:{text:'(Quiet moment: Sam has not said anything for a while. Only if it suits the mood, say ONE short thing to start a conversation - a thought, a question, something you are curious about. If he seems busy, low or focused, stay silent.)'}}))},5000);
 function lvNoShow(){if(LV.noshow)return;LV.noshow=true;const L=$('live'),o=$('lvorb');
- if(L.classList.contains('open')){gMood('sulking',2000);o.className='lvExit'}lvStatus('G.A.R.Y. can\'t hear you');
+ if(L.classList.contains('entering')){gMood('sulking',2000);o.className='lvExit'}lvStatus('G.A.R.Y. can\'t hear you');
  const q=['Sentient search bar: He\'s not coming. Talk to me instead - I\'m better looking anyway.','Sentient search bar: Typical. He\'s sulking behind the curtain. I\'m right here, though.','Sentient search bar: Signal\'s gone, so it\'s just you and me now. Type away.'][Math.floor(Math.random()*3)];
  setTimeout(()=>{lvLine('box',q)},700);
  setTimeout(()=>{lvStop();LV.noshow=false;go('gary');$('ask').placeholder=q.replace('Sentient search bar: ','');setTimeout(()=>$('ask').focus(),250)},4200)}
