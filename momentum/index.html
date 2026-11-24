@@ -962,11 +962,10 @@ function youPart(ysub,b){if(!b)return;
   '<div class="set"><div>Morning plan<small>When Rodger asks you to shape the day</small></div><input type="time" id="smo" value="'+(st.morning||'08:30')+'"></div>'+
   '<div class="set"><div>Evening reflection<small>A look back at what counted</small></div><input type="time" id="sev" value="'+(st.evening||'21:00')+'"></div>'+
   '<div class="set"><div>Heads-up before tasks</div><div class="chips" id="srem"></div></div>'+
-  '</div><div class="lab glab">R.O.D.G.E.R.</div><div class="grp"><div class="set stack"><div>Rodger\'s voice<small>Play each one, then pick - it\'s used for voice chat and replies read aloud</small></div><div id="svoice"></div></div>'+
+  '</div><div class="lab glab">R.O.D.G.E.R.</div><div class="grp"><div class="set stack"><div>Rodger\'s voice<small>To change it, just tell him in the chat: "change your voice", or "deeper", "slower", "softer". Then say "next" for another or "save" to keep it</small></div><div id="svoice"></div></div>'+
   '<div class="set"><div>Face ID for R.O.D.G.E.R.<small>Anyone else who opens him gets guest mode: nothing private, and he tells you who it was</small></div><button class="tog'+(gLockOn()?' on':'')+'" id="sfid"></button></div>'+
   '<div class="set"><div>Rodger\'s notes for Claude<small>What he can\'t do yet and anything that went wrong. Copy and paste to Claude to fix or improve him</small></div><button class="btn ghost" id="sgn" style="min-width:86px">Copy</button></div>'+
   '<div class="set"><div>Rodger wanders the other pages<small>Like the old Office assistant. Drag him anywhere; tap him to chat</small></div><button class="tog'+(store('garyFloat')!=='0'?' on':'')+'" id="sgf"></button></div>'+
-  '<div class="set"><div>Your butler voice<small>'+(store('garyVoice')==='clone'?'On - Rodger reads replies in your butler impression':'Record your butler impression and Rodger will speak with it')+'</small></div><button class="btn ghost" id="svcl" style="min-width:86px">Record</button></div>'+
   '<div class="set"><div>Rodger speaks every reply<small>He always answers aloud when you talk to him</small></div><button class="tog'+(store('garySpeak')==='1'?' on':'')+'" id="ssp"></button></div>'+
   '</div><div class="lab glab">Sync</div><div class="grp"><div class="set"><div>Sync across devices<small>'+(CS?(S.cloud==='off'?'Can\'t reach the cloud right now - saved here':'On · '+esc(CS.email||'')):'Sign in with your Synergy login to keep phone, iPad and PC in step')+'</small></div><button class="btn ghost" id="scloud">'+(CS?'Sign out':'Sign in')+'</button></div>'+
   '<div class="set"><div>Your PC<small>'+(!STATIC?'You\'re on the PC. Open Momentum anywhere: thunderblaade.github.io/synergy/momentum':PC?(S.online?'Connected - notifications and PC tasks are on':'Not reachable right now (is it on, with Tailscale?)'):'Connect it for notifications. Rodger works without it.')+'</small></div>'+(STATIC?'<button class="btn ghost" id="spc">'+(PC?'Change':'Connect')+'</button>':'<button class="btn ghost" id="slink">Copy link</button>')+'</div>'+
@@ -974,7 +973,7 @@ function youPart(ysub,b){if(!b)return;
   const setS=(k,v)=>{S.settings[k]=v;S.settings.updated=Date.now();S.dirty.settings=true;save();scheduleSync()};
   $('sn').onclick=()=>{setS('nudges',!st.nudges);renderYou()};$('smo').onchange=e=>setS('morning',e.target.value);$('sev').onchange=e=>setS('evening',e.target.value);
   chips('srem',[[0,'Off'],[5,'5m'],[10,'10m'],[15,'15m']],st.remind==null?5:st.remind,v=>{setS('remind',+v);renderYou()});
-  $('sgn').onclick=gNotesCopy;$('svcl').onclick=vcOpen;$('sfid').onclick=()=>gLockSet(!gLockOn());
+  $('sgn').onclick=gNotesCopy;$('sfid').onclick=()=>gLockSet(!gLockOn());
   $('sgf').onclick=()=>{store('garyFloat',gFloatOn()?'0':'1');gFloatSync();renderYou()};
   $('ssp').onclick=()=>{audioUnlock();const on=store('garySpeak')!=='1';store('garySpeak',on?'1':'0');if(on)speak('Very good, sir. I shall speak up.');renderYou()};
   voicePicker();$('ssync').onclick=()=>{sync().then(()=>toast(S.online||S.cloud==='ok'?'Synced':'Saved on this device - nothing reachable to sync with'))};
@@ -1376,7 +1375,7 @@ async function liveStart(again){if(!gUse().live){lvWhy('Voice is switched off, s
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:false,channelCount:1}})}
  catch(e){lvErr('microphone',{error:String(e&&e.name||e)});LV.stream=null;LV.nomic=true;LV.muted=true;$('lvmute').classList.add('on');$('lvmute').setAttribute('aria-label','Microphone unavailable');setTimeout(()=>{if(LV.on&&LV.nomic){$('live').classList.add('typing');$('lvtype').classList.add('on')}},2600)}
  if(LV.stream)lvMicWire();
- let j;try{const r=await garyFetch({mode:'live',text:'Talk with Rodger',convo:CHAT||'',ctx:garyCtx(),items:garyItems(),voice:gvCur()==='clone'?'usual':gvCur(),try:LV.tries});j=await r.json();if(!j.url)throw 0}
+ let j;try{const r=await garyFetch({mode:'live',text:'Talk with Rodger',convo:CHAT||'',ctx:garyCtx(),items:garyItems(),voice:vxCur().v,vstyle:vxStyle(vxCur()),try:LV.tries});j=await r.json();if(!j.url)throw 0}
  catch(e){lvErr('pass',{error:String(e&&e.message||e)});lvNoShow();return}
  const ws=new WebSocket(j.url);LV.ws=ws;
  ws.onopen=()=>ws.send(JSON.stringify({setup:j.setup}));ws.onmessage=lvMsg;
@@ -1524,11 +1523,38 @@ $('ask').addEventListener('focus',()=>{kbPre();kbFit();setTimeout(kbFit,60);setT
 const GV5=[['usual','His usual voice (default)','The Rodger you know: smooth, deep, older English gentleman'],['highland','The Highlander','Broad Scottish brogue, gravelly as an old whisky cask'],['ancient','The Ancient','Ninety-odd, papery and quavering, terribly proper'],['dublin','The Dubliner','Soft Irish lilt, a born storyteller with a wink'],['major','The Sergeant-Major','Ex-army: clipped, gruff, barks the important bits'],['thespian','The Thespian','Booming old stage actor, savours every word'],['mainframe','Vision','Calm, smooth and precise, like a thoughtful AI being. The closest built-in voice to Vision (not the actor\'s real voice)']];
 const GV_IDS=GV5.map(x=>x[0]);function gvCur(){const v=store('garyVoice');return v==='clone'||GV_IDS.includes(v)?v:'usual'}
 const GV_LINE='Good evening, sir. Rodger, at your service. Your tea is on the side, the diary is clear, and I have taken the liberty of tidying your plans.';
-function voicePicker(){const el=$('svoice');if(!el)return;const cur=gvCur();
- el.innerHTML=GV5.map(([v,name,desc])=>'<div class="gvrow'+(cur===v?' on':'')+'"><div><b>'+name+'</b><small>'+desc+(cur===v?' · in use':'')+'</small></div><button class="btn ghost" data-play="'+v+'">▶ Play</button><button class="btn'+(cur===v?' fill':' ghost')+'" data-use="'+v+'">'+(cur===v?'Chosen':'Use')+'</button></div>').join('')+
-  (vcMap().calm?'<div class="gvrow'+(cur==='clone'?' on':'')+'"><div><b>Your butler voice</b><small>Your own recording'+(cur==='clone'?' · in use':'')+' (read-aloud only)</small></div><button class="btn ghost" data-play="clone">▶ Play</button><button class="btn'+(cur==='clone'?' fill':' ghost')+'" data-use="clone">'+(cur==='clone'?'Chosen':'Use')+'</button></div>':'');
- el.querySelectorAll('[data-play]').forEach(b=>{b.dataset.v=b.dataset.play;b.onclick=()=>gvToggle(b.dataset.play)});gvBtns();
- el.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{const v=b.dataset.use;store('garyVoice',v);voicePicker();if(GVP.v!==v||GVP.st!=='play')gvToggle(v,true)})}
+function voicePicker(){const el=$('svoice');if(!el)return;const c=vxSaved(),k='vx:'+c.v+':'+c.m.join(','),def=c.v==='Algieba'&&!c.m.length;
+ el.innerHTML='<div class="gvrow on"><div><b>'+(def?'Default':'Your tuned voice')+'</b><small>Calm and measured, like Vision'+(c.m.length?' · '+esc(c.m.join(', ')):'')+(def?'':' · voice '+(VX_LIST.indexOf(c.v)+1))+'</small></div><button class="btn ghost" data-play="'+k+'">▶ Play</button>'+(def?'':'<button class="btn ghost" id="vxreset">Reset</button>')+'</div>';
+ el.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>gvToggle(b.dataset.play));gvBtns();
+ if($('vxreset'))$('vxreset').onclick=()=>{store('garyVx','');VXT=null;voicePicker()}}
+
+// ---------- Rodger's voice: one voice (calm, like Vision), tuned by chatting: "change your voice" → "next" / "save"
+const VX_LIST=['Algieba','Charon','Iapetus','Sadaltager','Schedar','Umbriel','Orus','Achird','Enceladus','Rasalgethi'];
+const VX_BASE='a calm, softly spoken synthetic being - a gentle, measured, mid-low English voice, smooth and warm, quietly curious and thoughtful, precise modern Received Pronunciation, unhurried with small reflective pauses, serene and composed, never theatrical';
+const VX_MODS=[[/\b(deep(er)?|lower)\b/,'deeper','with a deeper, lower pitch','higher'],[/\b(high(er)?|lighter)\b/,'higher','with a slightly higher, lighter pitch','deeper'],[/\bslow(er)?\b/,'slower','speaking more slowly','faster'],[/\b(fast(er)?|quick(er)?)\b/,'faster','speaking a little faster','slower'],
+ [/\b(warm(er)?|friendl\w*)\b/,'warmer','warmer and friendlier'],[/\b(calm(er)?|relax\w*)\b/,'calmer','even calmer and more serene'],[/\b(soft(er)?|gentle(r)?|quiet(er)?)\b/,'softer','softer and more gentle'],[/\b(robot\w*|synthetic|machine|computer\w*|digital)\b/,'more synthetic','with a subtly synthetic, precise, almost digital clarity','more natural'],
+ [/\b(human|natural)\b/,'more natural','more natural and human','more synthetic'],[/\b(posh(er)?|proper|refined)\b/,'posher','posher and more refined'],[/\bold(er)?\b/,'older','sounding older','younger'],[/\byoung(er)?\b/,'younger','sounding younger','older'],
+ [/\b(serious)\b/,'more serious','more serious and grave'],[/\b(expressive|emotional|lively)\b/,'more expressive','more expressive and lively'],[/\bvision\b/,'more like Vision','even more like a calm, thoughtful synthetic being, curious and gentle']];
+function vxSaved(){try{const o=JSON.parse(store('garyVx')||'null');if(o&&VX_LIST.includes(o.v))return{v:o.v,m:Array.isArray(o.m)?o.m.filter(k=>VX_MODS.some(x=>x[1]===k)).slice(0,8):[]}}catch(e){}return{v:'Algieba',m:[]}}
+let VXT=null;   // a voice being tried in the chat, not saved yet
+function vxCur(){return VXT||vxSaved()}
+function vxStyle(c){const ph=(c.m||[]).map(k=>(VX_MODS.find(x=>x[1]===k)||[])[2]).filter(Boolean);return VX_BASE+(ph.length?', '+ph.join(', '):'')}
+const VX_SAY=['Rodger, at your service. How does this sound, sir?','Good evening, sir. Is this more to your liking?','At your service, Mr Fice. Shall I keep this voice?'];
+function vxTry(c,you,note){VXT=c;bubble('you',you);const n=VX_LIST.indexOf(c.v)+1;
+ bubble('gary',note+' (Voice '+n+' of '+VX_LIST.length+(c.m.length?' · '+c.m.join(', '):'')+'.) Say "next" for another, "save" to keep it, or tell me deeper, slower, softer, warmer… "Cancel" puts it back.');
+ const p=$('p-gary');p.scrollTop=p.scrollHeight;gMood('happy',2500);speak(VX_SAY[Math.floor(Math.random()*VX_SAY.length)])}
+function vxCmd(text){const t=text.toLowerCase().trim().replace(/[.!?…]+$/,'').replace(/^(ok(ay)?|right|rodger|please)[, ]+/,'');const on=!!VXT,cur=vxCur();
+ if(on&&/^(next|next one|next voice|another|another one|try another( one)?|different one|skip|nah|no|nope)( please)?$/.test(t)){const v=VX_LIST[(VX_LIST.indexOf(cur.v)+1)%VX_LIST.length];vxTry({v,m:cur.m},text,'Very well - another one.');return true}
+ if(on&&/^(save|save it|save that|save this( one)?|keep it|keep that|keep this( one)?|that one|yes|yes save( it)?|perfect|lock it in|use (this|that)( one)?)$/.test(t)){
+  store('garyVx',JSON.stringify(VXT));VXT=null;bubble('you',text);bubble('gary','Saved, sir. This is my voice now, here and in voice chat.');voicePicker();const p=$('p-gary');p.scrollTop=p.scrollHeight;gMood('happy',2500);speak('Saved, sir.');return true}
+ if(on&&/^(cancel|stop|go back|undo|never ?mind|keep the old one|back|forget it)$/.test(t)){VXT=null;bubble('you',text);bubble('gary','As you were - back to my usual voice.');const p=$('p-gary');p.scrollTop=p.scrollHeight;speak('As you were, sir.');return true}
+ const voiceTalk=/\b(your|ur|ya|rodger'?s|his) voice\b|\bvoice\b/.test(t)&&/\b(change|different|new|another|try|switch|tweak|adjust|make|sound|deeper|lower|higher|slower|faster|softer|warmer|calmer|posh\w*|robot\w*|vision|reset|default|original|like)\b/.test(t);
+ const soundTalk=/^(can you |could you |please )?(sound|speak|talk) (a bit |a little |even )?(more|less|slower|faster|deeper|lower|higher|softer|warmer|calmer|posher|like)\b/.test(t);
+ if(!voiceTalk&&!soundTalk&&!(on&&VX_MODS.some(x=>x[0].test(t))&&t.split(' ').length<=6)){if(on){VXT=null;setTimeout(()=>{bubble('gary','(That voice wasn\'t saved - I\'m back to my usual one.)')},50)}return false}
+ if(/\b(reset|default|original|normal)\b/.test(t)){vxTry({v:'Algieba',m:[]},text,'Back to my default.');return true}
+ let m=cur.m.slice();let hit=0;for(const x of VX_MODS)if(x[0].test(t)){hit++;m=m.filter(k=>k!==x[1]&&k!==x[3]);m.push(x[1])}
+ if(hit){vxTry({v:cur.v,m:m.slice(-6)},text,'How about this?');return true}
+ const v=on?VX_LIST[(VX_LIST.indexOf(cur.v)+1)%VX_LIST.length]:cur.v;vxTry({v,m:cur.m},text,on?'Another one, then.':'Certainly. Here\'s how I sound now.');return true}
 // voice samples: every voice says the same short line; tap to play, tap again to pause, again to carry on
 const GV_SAMPLE='The quick brown fox jumps over the lazy dog.';const GVP={v:null,st:'',el:null,url:{}};
 // plays through an <audio> element, so it still works with the iPhone's silent switch on
@@ -2255,6 +2281,7 @@ async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new 
 let VOICEIN=false;
 async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock();
  if(!CS){toast('Sign in under You → Settings to talk to Rodger');return}
+ if(!GL.guest&&vxCmd(text))return;
  if(!navigator.onLine){bubble('you',text);bubble('gary',garyOffline(text));gMood('reading',3000);const p=$('p-gary');p.scrollTop=p.scrollHeight;return}
  const VIEW=chView();if(GB.pending)await gOpenSave();talking=true;GTALK=false;bubble('you',text);const a=bubble('gary','');a.classList.add('wait');const p=$('p-gary');p.scrollTop=p.scrollHeight;let got='';
  const ac=new AbortController();let wd=setTimeout(()=>ac.abort(),30000);const pet=()=>{clearTimeout(wd);wd=setTimeout(()=>ac.abort(),30000)};
@@ -2273,7 +2300,7 @@ const GVOICES=['Charon','Gacrux','Algenib','Rasalgethi','Sadaltager','Orus','Iap
 let AC=null,acEnd=0,talkGen=0;
 function audioUnlock(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
  const b=AC.createBuffer(1,1,22050),s=AC.createBufferSource();s.buffer=b;s.connect(AC.destination);s.start(0)}catch(e){}}
-function ttsBody(text,vo){const gv=vo||gvCur();if(gv==='clone'){const m=vcMap(),t=vcTone(),id=m[t]||m.calm;if(id)return {mode:'speak',text,voice:id,style:VC_STYLE[m[t]?t:'calm']}}return {mode:'speak',text,voice:gv==='clone'?'usual':gv}}
+function ttsBody(text,vo){let c=vxCur();if(vo&&String(vo).startsWith('vx:')){const q=String(vo).split(':');c={v:q[1],m:q[2]?q[2].split(','):[]}}return {mode:'speak',text,voice:c.v,vstyle:vxStyle(c)}}
 async function ttsFetch(text,vo){const tok=await clTok();if(!tok)throw 0;
  const r=await fetch(CL.url+'/functions/v1/gary',{method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(ttsBody(text,vo))});
  if(!r.ok)throw 0;const buf=await r.arrayBuffer();
@@ -2322,7 +2349,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124211451';let UPD=false;
+const BUILD='20261124213442';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}

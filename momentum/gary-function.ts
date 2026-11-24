@@ -874,7 +874,8 @@ const VOICES = ["Charon", "Orus", "Iapetus", "Algenib", "Rasalgethi", "Sadaltage
 const VOICE_STYLE = "Say as a mature, posh British butler - a distinguished elderly gentleman in his seventies with a rich, deep, smooth baritone, a touch of age and gentle gravel in it, in crisp Received Pronunciation, unhurried and articulate but full of expression: dry deadpan on sarcasm, a knowing pause before punchlines, softer and warmer when kind: ";
 // Rodger's voices: his usual one plus five butlers with their own accent and flair (picked in Settings, used for read-aloud and voice chat)
 const PERSONAS = {
-  usual: { v: "Charon", s: "", live: "" },
+  usual: { v: "Algieba", s: "Say as a calm, softly spoken synthetic being - a gentle, measured, mid-low English voice, smooth and warm, quietly curious and thoughtful, precise modern Received Pronunciation, unhurried with small reflective pauses, serene and composed, never theatrical: ",
+    live: "\n\nYOUR VOICE: speak as a calm, softly spoken synthetic being - gentle, measured, mid-low, smooth and warm, quietly curious and thoughtful, precise modern RP, unhurried with small reflective pauses, serene and composed, never theatrical. Keep it consistent." },
   highland: { v: "Algenib", s: "Say as an old Highland Scottish butler - a broad, warm Scottish brogue with rolled Rs, a gravelly, weathered voice like an old whisky cask, dry and wry, proper but with a twinkle: ",
     live: "\n\nYOUR VOICE: speak with a broad Highland Scottish brogue - rolled Rs, gravelly and weathered, dry and wry, proper but with a twinkle. Keep it consistent." },
   ancient: { v: "Gacrux", s: "Say as a very ancient English butler in his nineties - a thin, papery, slightly quavering voice, very slow, plummy old-fashioned upper-class English, little pauses to catch his breath, utterly dignified: ",
@@ -889,6 +890,13 @@ const PERSONAS = {
     live: "\n\nYOUR VOICE: speak as a grand old theatrical butler - booming, resonant and dramatic, rich old-school RP, savouring every word as if on stage. Keep it consistent." },
 };
 const persona = (k) => PERSONAS[String(k || "")] || null;
+// Sam tunes Rodger's voice by chatting: the app sends one of Google's voices plus a short description of how to sound
+const ALL_VOICES = ["Zephyr","Puck","Charon","Kore","Fenrir","Leda","Orus","Aoede","Callirrhoe","Autonoe","Enceladus","Iapetus","Umbriel","Algieba","Despina","Erinome","Algenib","Rasalgethi","Laomedeia","Achernar","Alnilam","Schedar","Gacrux","Pulcherrima","Achird","Zubenelgenubi","Vindemiatrix","Sadachbia","Sadaltager","Sulafat"];
+const customVoice = (b) => {
+  const st = typeof b.vstyle === "string" ? b.vstyle.replace(/[\u0000-\u001f\u27e6\u27e7]/g, " ").trim().slice(0, 500) : "";
+  if (!st) return null;
+  return { v: ALL_VOICES.includes(b.voice) ? b.voice : "Algieba", s: "Say as " + st + ": ", live: "\n\nYOUR VOICE: speak as " + st + ". Keep it consistent." };
+};
 const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts", "gemini-2.5-flash-preview-tts"];
 
 const LIVE_MODELS = ["gemini-3.1-flash-live-preview", "gemini-2.5-flash-native-audio-preview-12-2025", "gemini-2.5-flash-native-audio-preview-09-2025"];
@@ -955,8 +963,8 @@ export async function handle(req) {
   if (body.mode === "live") {
     const key = env("GEMINI_API_KEY");
     if (!key) return new Response(JSON.stringify({ error: "nokey" }), { status: 503, headers: { ...CORS, "Content-Type": "application/json" } });
-    const lp = persona(body.voice);
-    const voice = lp ? lp.v : VOICES.includes(body.voice) ? body.voice : "Charon";
+    const lp = customVoice(body) || persona(body.voice) || persona("usual");
+    const voice = lp.v;
     const guest = body.guest === true;
     let [mem, plan] = guest ? [{}, ""] : await Promise.all([recall(String(body.text || ""), token), planSummary(token, body.items)]);
     const lcv = String(body.convo || "").replace(/[^a-z0-9]/gi, "").slice(0, 40);
@@ -1059,7 +1067,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
     } catch (e) { return J({ error: "Couldn't reach Google just now." }, 503); }
   }
   if (body.mode === "speak") {
-    const sp = persona(body.voice);
+    const sp = customVoice(body) || persona(body.voice) || (VOICES.includes(body.voice) ? null : persona("usual"));
     const voice = sp ? sp.v : VOICES.includes(body.voice) ? body.voice : (env("GARY_VOICE") || "Charon");
     const vstyle = sp && sp.s ? sp.s : VOICE_STYLE;
     const say = text.replace(/[*_#`\u27e6\u27e7]/g, "").slice(0, 1500);
