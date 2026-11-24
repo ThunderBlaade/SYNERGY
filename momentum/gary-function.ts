@@ -876,6 +876,47 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
   }
 
   // Gary's voice: text -> natural speech (raw 16-bit mono PCM). Google first, Groq next; the app falls back to the device voice.
+  if (body.mode === "speak" && /^voice_[A-Za-z0-9_-]{4,120}$/.test(String(body.voice || ""))) {
+    const key = env("GEMINI_API_KEY"), say = text.replace(/[*_#`\u27e6\u27e7]/g, "").slice(0, 1500);
+    for (const m of ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"]) {
+      if (!key || USE.google === false) break;
+      try {
+        const part0 = { text: say }; if (body.style) part0.speechMetadata = { style: String(body.style).slice(0, 80) };
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+          body: JSON.stringify({ contents: [{ role: "user", parts: [part0] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { voice: body.voice } } } }) });
+        if (!r.ok) continue;
+        const j = await r.json(); const part = (j.candidates?.[0]?.content?.parts || []).find((p) => p.inlineData?.data); if (!part) continue;
+        const mt = part.inlineData.mimeType || "", bin = Uint8Array.from(atob(part.inlineData.data), (c) => c.charCodeAt(0));
+        if (/wav/i.test(mt)) return new Response(bin, { headers: { ...CORS, "Content-Type": "audio/wav", "X-Voice": m, "Access-Control-Expose-Headers": "X-Voice" } });
+        const rate = +((mt.match(/rate=(\d+)/) || [0, 24000])[1]);
+        return new Response(bin, { headers: { ...CORS, "Content-Type": "audio/pcm", "X-Rate": String(rate), "X-Voice": m, "Access-Control-Expose-Headers": "X-Rate, X-Voice" } });
+      } catch { /* next */ }
+    }
+    body.voice = "Charon";   // couldn't use his voice just now: fall back to Gary's usual one below
+  }
+  // Make a copy of Sam's own voice (his butler impression) from a 10-30 s clip plus the consent line - one per tone of voice
+  if (body.mode === "voiceclone") {
+    const J = (o, st = 200) => new Response(JSON.stringify(o), { status: st, headers: { ...CORS, "Content-Type": "application/json" } });
+    const key = env("GEMINI_API_KEY"); if (!key) return J({ error: "Gary has no Google key set up." }, 503);
+    if (body.guest === true) return J({ error: "no" }, 403);
+    const tone = String(body.tone || "calm").replace(/[^a-z]/g, "").slice(0, 12) || "calm";
+    const b64 = (x) => typeof x === "string" && /^[A-Za-z0-9+/=]+$/.test(x) && x.length > 1000 && x.length < 4_000_000;
+    if (!b64(body.sample) || !b64(body.consent)) return J({ error: "The recordings didn't come through - try recording them again." }, 400);
+    try {
+      const r = await fetch("https://generativelanguage.googleapis.com/v1beta/voices", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+        body: JSON.stringify({ store: true, voice: { model: "gemini-3.8-flash-tts", type: "replicated", display_name: "Gary - Sam's butler (" + tone + ")",
+          replicated: { source_audio: { mime_type: "audio/wav", data: body.sample }, consent_audio: { mime_type: "audio/wav", data: body.consent } } } }) });
+      const t = await r.text(); let j = {}; try { j = JSON.parse(t); } catch { /* not json */ }
+      const id = j.id || j.voice?.id || j.name?.split("/").pop();
+      if (!r.ok || !id) {
+        const why = (j.error?.message || t || "").slice(0, 300);
+        await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "voice_clone_failed", ok: false, detail: { tone, status: r.status, why } }) }).catch(() => {});
+        return J({ error: why || ("Google said no (" + r.status + ")") }, 502);
+      }
+      await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "voice_clone", detail: { tone, id } }) }).catch(() => {});
+      return J({ id, tone });
+    } catch (e) { return J({ error: "Couldn't reach Google just now." }, 503); }
+  }
   if (body.mode === "speak") {
     const voice = VOICES.includes(body.voice) ? body.voice : (env("GARY_VOICE") || "Charon");
     const say = text.replace(/[*_#`\u27e6\u27e7]/g, "").slice(0, 1500);

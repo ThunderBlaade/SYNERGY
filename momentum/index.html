@@ -354,6 +354,9 @@ body.lvon #askbar{display:none!important}
 *{scrollbar-width:thin;scrollbar-color:#2e2f36 transparent}
 ::-webkit-scrollbar{width:6px;height:6px;background:transparent}::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#2e2f36;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#44454e}::-webkit-scrollbar-corner{background:transparent}
+
+.vcrow{border-top:1px solid var(--line);padding:14px 0}.vchd{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.vchd small{color:var(--dim);font-size:12px}
+.vcline{font:400 15px/1.45 var(--serif);color:var(--fg);margin:8px 0 10px;opacity:.9}.vcbtns{display:flex;gap:10px}#vcl{height:88dvh}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -436,6 +439,12 @@ body.lvon #askbar{display:none!important}
  <input class="big" id="mq" placeholder="Search memories" spellcheck="false" autocomplete="off" enterkeyhint="search">
  <div class="hint" id="mnote"></div>
  <div id="mlist"></div></div>
+<div class="sheet" id="vcl"><div class="grab"></div>
+ <div class="lab">Your butler voice</div>
+ <p class="hint" style="margin:10px 0 4px">Do your best butler. Record each tone for 10-30 seconds in a quiet room, same spot each time. Gary picks the tone that matches his mood when he reads replies aloud. (Live voice chat keeps his built-in voice - Google doesn't allow custom voices there yet.)</p>
+ <div id="vclist"></div>
+ <div class="acts" style="margin-top:16px"><button class="btn ghost" id="vcuse">Use my voice: off</button><button class="btn fill" id="vcmake">Create Gary's voice</button></div>
+ <div class="hint" id="vcnote" style="margin-top:10px"></div></div>
 <div class="sheet" id="chl"><div class="grab"></div>
  <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab">Chat history</div><button class="btn" id="newChat">New chat +</button></div>
  <div class="chips" id="chf" style="margin-top:14px"></div>
@@ -725,6 +734,7 @@ function renderYou(){const b=$('ybody');
   '<div class="set"><div>Face ID for G.A.R.Y.<small>Anyone else who opens him gets guest mode: nothing private, and he tells you who it was</small></div><button class="tog'+(gLockOn()?' on':'')+'" id="sfid"></button></div>'+
   '<div class="set"><div>Gary\'s notes for Claude<small>What he can\'t do yet and anything that went wrong. Copy and paste to Claude to fix or improve him</small></div><button class="btn ghost" id="sgn" style="min-width:86px">Copy</button></div>'+
   '<div class="set"><div>Gary wanders the other pages<small>Like the old Office assistant. Drag him anywhere; tap him to chat</small></div><button class="tog'+(store('garyFloat')!=='0'?' on':'')+'" id="sgf"></button></div>'+
+  '<div class="set"><div>Your butler voice<small>'+(store('garyVoice')==='clone'?'On - Gary reads replies in your butler impression':'Record your butler impression and Gary will speak with it')+'</small></div><button class="btn ghost" id="svcl" style="min-width:86px">Record</button></div>'+
   '<div class="set"><div>Gary speaks every reply<small>He always answers aloud when you talk to him</small></div><button class="tog'+(store('garySpeak')==='1'?' on':'')+'" id="ssp"></button></div>'+
   '<div class="set"><div>Sync across devices<small>'+(CS?(S.cloud==='off'?'Can\'t reach the cloud right now - saved here':'On · '+esc(CS.email||'')):'Sign in with your Synergy login to keep phone, iPad and PC in step')+'</small></div><button class="btn ghost" id="scloud">'+(CS?'Sign out':'Sign in')+'</button></div>'+
   '<div class="set"><div>Your PC<small>'+(!STATIC?'You\'re on the PC. Open Momentum anywhere: thunderblaade.github.io/synergy/momentum':PC?(S.online?'Connected - notifications and PC tasks are on':'Not reachable right now (is it on, with Tailscale?)'):'Connect it for notifications. Gary works without it.')+'</small></div>'+(STATIC?'<button class="btn ghost" id="spc">'+(PC?'Change':'Connect')+'</button>':'<button class="btn ghost" id="slink">Copy link</button>')+'</div>'+
@@ -732,7 +742,7 @@ function renderYou(){const b=$('ybody');
   const setS=(k,v)=>{S.settings[k]=v;S.settings.updated=Date.now();S.dirty.settings=true;save();scheduleSync()};
   $('sn').onclick=()=>{setS('nudges',!st.nudges);renderYou()};$('smo').onchange=e=>setS('morning',e.target.value);$('sev').onchange=e=>setS('evening',e.target.value);
   chips('srem',[[0,'Off'],[5,'5m'],[10,'10m'],[15,'15m']],st.remind==null?5:st.remind,v=>{setS('remind',+v);renderYou()});
-  $('sgn').onclick=gNotesCopy;$('sfid').onclick=()=>gLockSet(!gLockOn());
+  $('sgn').onclick=gNotesCopy;$('svcl').onclick=vcOpen;$('sfid').onclick=()=>gLockSet(!gLockOn());
   $('sgf').onclick=()=>{store('garyFloat',gFloatOn()?'0':'1');gFloatSync();renderYou()};
   $('ssp').onclick=()=>{audioUnlock();const on=store('garySpeak')!=='1';store('garySpeak',on?'1':'0');if(on)speak('Very good, sir. I shall speak up.');renderYou()};
   chips('svoice',GVOICES.map(v=>[v,v]),store('garyVoice')||'Charon',v=>{audioUnlock();store('garyVoice',v);speak('Good evening, sir. Gary, at your service. Shall we see what today has in store?');renderYou()});$('ssync').onclick=()=>{sync().then(()=>toast(S.online||S.cloud==='ok'?'Synced':'Saved on this device - nothing reachable to sync with'))};
@@ -1006,7 +1016,7 @@ async function liveStart(again){if(!gUse().live){toast('Live voice is switched o
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
  catch(e){lvErr('microphone',{error:String(e&&e.name||e)});LV.stream=null;LV.nomic=true;LV.muted=true;$('lvmute').classList.add('on');$('lvmute').setAttribute('aria-label','Microphone unavailable');setTimeout(()=>{if(LV.on&&LV.nomic){$('live').classList.add('typing');$('lvtype').classList.add('on')}},2600)}
  if(LV.stream)lvMicWire();
- let j;try{const r=await garyFetch({mode:'live',text:'Talk with Gary',convo:CHAT||'',ctx:garyCtx(),items:garyItems(),voice:store('garyVoice')||'Charon',try:LV.tries});j=await r.json();if(!j.url)throw 0}
+ let j;try{const r=await garyFetch({mode:'live',text:'Talk with Gary',convo:CHAT||'',ctx:garyCtx(),items:garyItems(),voice:(store('garyVoice')==='clone'?'Charon':store('garyVoice'))||'Charon',try:LV.tries});j=await r.json();if(!j.url)throw 0}
  catch(e){lvErr('pass',{error:String(e&&e.message||e)});lvNoShow();return}
  const ws=new WebSocket(j.url);LV.ws=ws;
  ws.onopen=()=>ws.send(JSON.stringify({setup:j.setup}));ws.onmessage=lvMsg;
@@ -1048,6 +1058,51 @@ setInterval(()=>{const L=$('live');if(!LV.on||!LV.ready||L.classList.contains('m
 
 // the message box only scrolls once what you've typed goes past what it can show
 (function(){const a=$('ask');const fit=()=>{a.classList.toggle('ovf',a.scrollHeight>a.clientHeight+3)};a.addEventListener('input',fit);addEventListener('resize',fit);setTimeout(fit,300)})();
+
+// ---------- Sam's butler voice: one short recording per tone, plus Google's consent line; Gary picks the tone to match his mood
+const VC_TONES=[['consent','Consent line (once, in any voice)','I am the owner of this voice and I consent to Google using this voice to create a synthetic voice model.'],
+ ['calm','Calm - his everyday voice','Good evening, sir. I trust the day has treated you kindly. Your tea is on the side, the diary is clear until ten tomorrow, and I have taken the liberty of tidying your plans. Do let me know if there is anything else you require.'],
+ ['happy','Happy','Oh, splendid news, sir! Truly marvellous. I must say, this has quite made my afternoon. Well done indeed - I knew you had it in you, and I am delighted to have been proven entirely right.'],
+ ['sad','Sad and gentle','I am terribly sorry to hear that, sir. That must have been awfully hard. Take all the time you need. I am right here, and we shall get through it together, one small step at a time.'],
+ ['cross','Annoyed and sarcastic','Oh, wonderful. Another brilliant idea from the sentient search bar. Truly, sir, I am overcome. If it had a single working brain cell it would be lonely, and frankly, so would I.'],
+ ['excited','Excited','Sir! You will not believe this! It worked, it actually worked! Quick, come and look - this is the best thing that has happened all week, possibly all year!']];
+const VC={rec:{},on:null};
+function vcMap(){try{return JSON.parse(store('garyClone')||'{}')}catch(e){return {}}}
+async function vcOpen(){sheet('vcl',true);vcDraw();
+ if(CS&&!Object.keys(vcMap()).length){try{const a=await gdb('gary_audit?select=detail,created_at&action=eq.voice_clone&order=created_at.asc&limit=50')||[];const m={};for(const x of a)if(x.detail&&x.detail.id)m[x.detail.tone||'calm']=x.detail.id;if(Object.keys(m).length){store('garyClone',JSON.stringify(m));vcDraw()}}catch(e){}}}
+function vcDraw(){const m=vcMap();$('vclist').innerHTML=VC_TONES.map(([k,name,line])=>{const r=VC.rec[k],sec=r?Math.round(r.len/24000):0;
+  return '<div class="vcrow" data-k="'+k+'"><div class="vchd"><b>'+name+'</b><small>'+(m[k]?'✓ in his voice':r?sec+'s recorded':k==='consent'||k==='calm'?'needed':'optional')+'</small></div><p class="vcline">'+esc(line)+'</p>'+
+  '<div class="vcbtns"><button class="btn'+(VC.on===k?' fill':' ghost')+'" data-a="rec">'+(VC.on===k?'Stop':r?'Record again':'Record')+'</button>'+(r?'<button class="btn ghost" data-a="play">Play</button>':'')+'</div></div>'}).join('');
+ $('vcuse').textContent='Use my voice: '+(store('garyVoice')==='clone'?'on':'off');$('vcuse').disabled=!m.calm;
+ $('vclist').querySelectorAll('.vcrow').forEach(row=>row.querySelectorAll('button').forEach(b=>b.onclick=()=>b.dataset.a==='rec'?vcRec(row.dataset.k):vcPlay(row.dataset.k)))}
+async function vcRec(k){if(VC.on===k){vcStop();return}if(VC.on)vcStop();
+ try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();const src=ctx.createMediaStreamSource(st),node=ctx.createScriptProcessor(4096,1,1),bufs=[];
+  node.onaudioprocess=e=>bufs.push(new Float32Array(e.inputBuffer.getChannelData(0)));src.connect(node);const z=ctx.createGain();z.gain.value=0;node.connect(z);z.connect(ctx.destination);
+  VC.on=k;VC.cur={st,ctx,node,bufs,t0:Date.now()};VC.tm=setTimeout(()=>{if(VC.on===k)vcStop()},30000);vcDraw();$('vcnote').textContent='Recording… (stops by itself at 30 seconds)'}
+ catch(e){$('vcnote').textContent='Microphone isn\'t available - check it isn\'t being used by screen recording, then try again.'}}
+async function vcStop(){const k=VC.on,c=VC.cur;VC.on=null;clearTimeout(VC.tm);if(!c)return;try{c.node.disconnect();c.st.getTracks().forEach(t=>t.stop())}catch(e){}
+ const n=c.bufs.reduce((a,b)=>a+b.length,0),all=new Float32Array(n);let o=0;for(const b of c.bufs){all.set(b,o);o+=b.length}const rate=c.ctx.sampleRate;try{c.ctx.close()}catch(e){}
+ const len=Math.round(n*24000/rate);let out;try{const off=new OfflineAudioContext(1,Math.max(1,len),24000),ab=off.createBuffer(1,n,rate);ab.getChannelData(0).set(all);const s=off.createBufferSource();s.buffer=ab;s.connect(off.destination);s.start();out=(await off.startRendering()).getChannelData(0)}
+ catch(e){out=new Float32Array(len);for(let i=0;i<len;i++)out[i]=all[Math.floor(i*rate/24000)]||0}
+ const secs=out.length/24000;if(k!=='consent'&&secs<10){$('vcnote').textContent='That was only '+Math.round(secs)+' seconds - Google needs at least 10. Give it another go.';vcDraw();return}
+ VC.rec[k]={pcm:out,len:out.length};$('vcnote').textContent='';vcDraw()}
+function vcWav(f){const n=f.length,b=new ArrayBuffer(44+n*2),v=new DataView(b);const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+ w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,24000,true);v.setUint32(28,48000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+ for(let i=0;i<n;i++){const x=Math.max(-1,Math.min(1,f[i]));v.setInt16(44+i*2,x<0?x*32768:x*32767,true)}return new Uint8Array(b)}
+function vcB64(u8){let s='';for(let i=0;i<u8.length;i+=32768)s+=String.fromCharCode.apply(null,u8.subarray(i,i+32768));return btoa(s)}
+function vcPlay(k){const r=VC.rec[k];if(!r)return;audioUnlock();if(!AC)return;const ab=AC.createBuffer(1,r.len,24000);ab.getChannelData(0).set(r.pcm);playBuf(ab)}
+$('vcmake').onclick=async()=>{if(!CS){$('vcnote').textContent='Sign in first (You → Settings).';return}if(!VC.rec.consent||!VC.rec.calm){$('vcnote').textContent='Record the consent line and the calm voice first.';return}
+ const consent=vcB64(vcWav(VC.rec.consent.pcm)),m=vcMap(),todo=VC_TONES.map(t=>t[0]).filter(k=>k!=='consent'&&VC.rec[k]);let ok=0,err='';
+ for(const k of todo){$('vcnote').textContent='Making his '+k+' voice… ('+(ok+1)+' of '+todo.length+')';
+  try{const r=await garyFetch({mode:'voiceclone',text:'clone',tone:k,sample:vcB64(vcWav(VC.rec[k].pcm)),consent});const j=await r.json();if(j.id){m[k]=j.id;ok++}else err=j.error||'Google said no'}catch(e){err='Couldn\'t reach Gary'}}
+ store('garyClone',JSON.stringify(m));if(ok&&m.calm){store('garyVoice','clone');$('vcnote').textContent='Done - '+ok+' tone'+(ok>1?'s':'')+' made. Listen:';speak('Good evening, sir. I must say, I sound rather distinguished.')}
+ else $('vcnote').textContent='Google didn\'t accept it: '+err+(/consent/i.test(err)?' - read the consent line word for word, clearly.':'');vcDraw()};
+$('vcuse').onclick=()=>{const on=store('garyVoice')!=='clone';store('garyVoice',on?'clone':'Charon');vcDraw();if(on){audioUnlock();speak('Right you are, sir. My voice is yours.')}};
+// which recorded tone fits how Gary feels right now
+function vcTone(){const m=String(GPOSE||GS.mood||'').toLowerCase();
+ return /sad|cry|tear|gloom|sorry|sympath|hug|comfort/.test(m)?'sad':/angry|furious|sarcas|eyeroll|disdain|annoy|grump|unimpressed|facepalm|smug/.test(m)?'cross':/excit|surpris|celebrat|party|shock|amazed|cheer|confetti/.test(m)?'excited':/happy|laugh|grin|proud|joy|wave|delight|thumbs/.test(m)?'happy':'calm'}
+const VC_STYLE={calm:'warm, measured and composed',happy:'cheerful and pleased',sad:'gentle, soft and sympathetic',cross:'dry, sarcastic and a little exasperated',excited:'excited and animated'};
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
@@ -1657,8 +1712,9 @@ const GVOICES=['Charon','Orus','Iapetus','Algenib','Rasalgethi','Sadaltager','Sc
 let AC=null,acEnd=0,talkGen=0;
 function audioUnlock(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
  const b=AC.createBuffer(1,1,22050),s=AC.createBufferSource();s.buffer=b;s.connect(AC.destination);s.start(0)}catch(e){}}
+function ttsBody(text){if(store('garyVoice')==='clone'){const m=vcMap(),t=vcTone(),id=m[t]||m.calm;if(id)return {mode:'speak',text,voice:id,style:VC_STYLE[m[t]?t:'calm']}}return {mode:'speak',text,voice:store('garyVoice')==='clone'?'Charon':(store('garyVoice')||'Charon')}}
 async function ttsFetch(text){const tok=await clTok();if(!tok)throw 0;
- const r=await fetch(CL.url+'/functions/v1/gary',{method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({mode:'speak',text,voice:store('garyVoice')||'Charon'})});
+ const r=await fetch(CL.url+'/functions/v1/gary',{method:'POST',headers:{apikey:CL.key,Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(ttsBody(text))});
  if(!r.ok)throw 0;const buf=await r.arrayBuffer();
  if((r.headers.get('content-type')||'').includes('pcm')){const rate=+r.headers.get('X-Rate')||24000,i16=new Int16Array(buf.byteLength>>1);new Uint8Array(i16.buffer).set(new Uint8Array(buf,0,i16.length*2));
   const ab=AC.createBuffer(1,i16.length,rate),ch=ab.getChannelData(0);for(let k=0;k<i16.length;k++)ch[k]=i16[k]/32768;return ab}
@@ -1699,7 +1755,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124120547';let UPD=false;
+const BUILD='20261124121048';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
