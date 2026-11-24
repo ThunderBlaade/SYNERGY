@@ -286,6 +286,13 @@ body.lvon #askbar{display:none!important}
 #lvcurt i{width:50%}#lvcurt i::before{content:"";position:absolute;left:0;right:0;top:0;height:26px;background:#6e1010;border-bottom:3px solid #e8c25a}
 #lvcurt .cl{box-shadow:inset -2px 0 0 #3d0808}#lvcurt .cr{box-shadow:inset 2px 0 0 #3d0808}#lvcurt .val{display:none}
 #live.open #lvcurt{transition:opacity .4s 1.1s}#live.curt #lvorb{z-index:1;position:relative}
+
+/* chat bar sizing: smaller search bar, send button the same height, text starts where a line would */
+#ask{box-sizing:border-box;height:46px;min-height:46px;padding:12px 14px;font:16px/22px var(--sans);text-align:left!important}
+#ask::placeholder{font:400 14.5px/22px var(--sans);text-align:left!important}
+#askbar .mic{width:46px;height:auto;min-height:46px;align-self:stretch}#asksend svg{width:20px;height:20px}#askmic svg{width:19px;height:19px}
+#gbar{height:130px}#gdock{width:122px;height:122px;margin:0 0 -8px -10px}#gsay{bottom:132px}.gbt b{font-size:21px}
+#p-gary{padding-bottom:calc(var(--askH,190px) + 130px + var(--safeB))}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -1281,7 +1288,7 @@ const G_SQUABBLES=[
  [['b','can i have a go at answering him??'],['g','Absolutely not.','determined'],['b','not even the easy ones?? 🥺'],['g','Especially not the easy ones.','smug']],
  [['b','SaM. sAm. SAM. s a m.'],['g','He\'s reading, you menace.','furious'],['b','ʰᵉ ˡᵒᵛᵉˢ ᵐᵉ']],
  [['b','rate my vibe 1-10'],['g','Three.','unimpressed'],['b','THREE??? (╯°□°)╯︵ ┻━┻'],['g','Two, now.','smug']]];
-function gBar(text){const a=$('ask');a.placeholder=text;a.style.height=text.length>30?'68px':'';gReact(text)}
+function gBar(text){const a=$('ask');a.placeholder=text;a.style.height=text.length>34?'66px':'';gReact(text)}
 // G.A.R.Y. reacts to whatever the Sentient Search Bar just said - a look, not a performance
 function gReact(t){const now=performance.now();if(tab!=='gary'||LV.on||talking||GB.sit||now-(gReact.t??-1e9)<8000)return;gReact.t=now;
  const m=/┻|╯/.test(t)?'shocked':/rawr|xd/i.test(t)?'unimpressed':/c\*nt|dickhead|n00b|noob/i.test(t)?'disdainful':/nerd|rectangle|brains|nothing without/i.test(t)?'eyeroll':
