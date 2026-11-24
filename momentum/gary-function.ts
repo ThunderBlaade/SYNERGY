@@ -833,6 +833,8 @@ const PERSONAS = {
     live: "\n\nYOUR VOICE: speak with a soft, musical Dublin Irish lilt - a born storyteller, warm and mischievous, polite and charming. Keep it consistent." },
   major: { v: "Alnilam", s: "Say as a retired British Army sergeant-major turned butler - clipped, gruff and gravelly, short punchy delivery, crisp hard consonants, stiff upper lip, barking slightly on the important words: ",
     live: "\n\nYOUR VOICE: speak as a retired British Army sergeant-major turned butler - clipped, gruff, gravelly, short punchy delivery, crisp consonants, stiff upper lip. Keep it consistent." },
+  mainframe: { v: "Algieba", s: "Say as a refined, quietly brilliant English assistant in his forties - a smooth, calm, mid-low voice in polished modern Received Pronunciation, precise and unhurried, softly warm with a very dry wit, every consonant clean and every word deliberate, composed and never theatrical: ",
+    live: "\n\nYOUR VOICE: speak as a refined, quietly brilliant English assistant - smooth, calm, mid-low, polished modern RP, precise and unhurried, softly warm with a very dry wit, composed and never theatrical. Keep it consistent." },
   thespian: { v: "Orus", s: "Say as a grand old theatrical butler who once trod the boards - a booming, resonant, dramatic stage voice in rich old-school RP, savouring every word, sweeping rises and falls as if performing Shakespeare: ",
     live: "\n\nYOUR VOICE: speak as a grand old theatrical butler - booming, resonant and dramatic, rich old-school RP, savouring every word as if on stage. Keep it consistent." },
 };

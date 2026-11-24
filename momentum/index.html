@@ -1194,7 +1194,7 @@ function kbPre(){kbFit.t0=Date.now();if(tab!=='gary'||!matchMedia('(pointer:coar
 $('ask').addEventListener('focus',()=>{kbPre();kbFit();setTimeout(kbFit,60);setTimeout(kbFit,320);setTimeout(kbFit,650)});$('ask').addEventListener('blur',()=>{setTimeout(kbFit,60);setTimeout(kbFit,320)});
 
 // five voices to audition for G.A.R.Y.: play each, pick one (used for live voice chat and replies read aloud)
-const GV5=[['usual','His usual voice (default)','The Gary you know: smooth, deep, older English gentleman'],['highland','The Highlander','Broad Scottish brogue, gravelly as an old whisky cask'],['ancient','The Ancient','Ninety-odd, papery and quavering, terribly proper'],['dublin','The Dubliner','Soft Irish lilt, a born storyteller with a wink'],['major','The Sergeant-Major','Ex-army: clipped, gruff, barks the important bits'],['thespian','The Thespian','Booming old stage actor, savours every word']];
+const GV5=[['usual','His usual voice (default)','The Gary you know: smooth, deep, older English gentleman'],['highland','The Highlander','Broad Scottish brogue, gravelly as an old whisky cask'],['ancient','The Ancient','Ninety-odd, papery and quavering, terribly proper'],['dublin','The Dubliner','Soft Irish lilt, a born storyteller with a wink'],['major','The Sergeant-Major','Ex-army: clipped, gruff, barks the important bits'],['thespian','The Thespian','Booming old stage actor, savours every word'],['mainframe','The Mainframe','Smooth, calm and precise - a refined English AI']];
 const GV_IDS=GV5.map(x=>x[0]);function gvCur(){const v=store('garyVoice');return v==='clone'||GV_IDS.includes(v)?v:'usual'}
 const GV_LINE='Good evening, sir. Gary, at your service. Your tea is on the side, the diary is clear, and I have taken the liberty of tidying your plans.';
 function voicePicker(){const el=$('svoice');if(!el)return;const cur=gvCur();
@@ -1924,7 +1924,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124151846';let UPD=false;
+const BUILD='20261124153451';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
