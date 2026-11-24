@@ -405,6 +405,7 @@ export async function styleLearn(token, force = false) {
 // ---------- Growth: Gary reflects on his own conversations, decides who he's becoming, runs small experiments on how he talks,
 // keeps what works, drops what doesn't, and comes up with ideas for himself. His core (loyalty, honesty, privacy, safety) is fixed.
 const GROW_TITLE = "Who I am becoming";
+const BANTER_MOODS = "smug sarcastic eyeroll unimpressed disdainful cheeky proud dapper skeptical suspicious facepalm sheepish sigh exasperated surprised shocked furious sad laugh shrug whistling".split(" ");
 const GROW_ACTS = "twiddle lookabout sitread tea watch stretching sitting cane reading newspaper writing texting phonecall dance singing stargazing birdwatching detective zen umbrella dapper tiphat".split(" ");
 async function growFile(token) {
   const [f] = await db(`gary_memories?select=id,text,keys,history,updated_at&deleted=is.false&folder=eq.self&title=eq.${encodeURIComponent(GROW_TITLE)}&limit=1`, token).catch(() => []);
@@ -1043,6 +1044,30 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
   }
 
   // Memories: fold freshly saved rows (e.g. from live voice) into files, sort old ones, or search
+  // Fresh squabbles between Gary and the search bar. The search bar talks the way Sam types (learned from his own messages); Gary talks like Gary.
+  if (body.mode === "banter") {
+    const J = (o, st = 200) => new Response(JSON.stringify(o), { status: st, headers: { ...CORS, "Content-Type": "application/json" } });
+    if (body.guest === true) return J({ squabbles: [] });
+    try {
+      const mine = (await db("gary_messages?select=content&role=eq.user&order=id.desc&limit=80", token).catch(() => [])).map((m) => String(m.content).replace(/\s+/g, " ").trim()).filter((t) => t && t.length < 220).slice(0, 45);
+      let out = "";
+      for await (const t of gemini("You write tiny on-screen squabbles for an app. Reply with JSON only.", [{ role: "user", parts: [{ text:
+        `Two characters bicker on Sam's screen in his planner app, Momentum.\n` +
+        `GARY: a posh, dry, sarcastic old English butler (pixel-art). Witty, crushing one-liners, fond underneath. Short - max 12 words a line.\n` +
+        `THE SEARCH BAR: the app's message box, which talks inside itself. Cocky, rude, a bit of a dickhead, always taking digs at Gary, secretly needs him (never admits it). ` +
+        `It must write EXACTLY the way Sam types - same casing, spelling habits, slang, abbreviations, swearing level, emoji and punctuation, everyday simple words. Nothing posh, no fancy or long words, nothing you'd have to think about to understand. Max 12 words a line.\n` +
+        `How Sam types (his real messages - copy the STYLE only; never reuse their content, topics, names or anything personal, because anyone might see the screen):\n${mine.map((x) => "- " + x).join("\n") || "- (no messages yet: casual, lowercase, simple words)"}\n\n` +
+        `Write 5 fresh, funny, different squabbles of 2-4 lines each, starting with the search bar. Topics: Gary, the bar itself, being an app, everyday stuff - never Sam's private life.\n` +
+        `Also write 8 lines the search bar says to SAM while it waits for him to type. With Sam it is different: neutral and easy-going - no insults, no digs at him - but keen to be useful and quietly competitive, wanting to do a better job than Gary. Same Sam-style wording, max 10 words each.\n` +
+        `Return {"squabbles":[[{"who":"bar","say":"..."},{"who":"gary","say":"...","mood":"one of: ${BANTER_MOODS.join(", ")}"}], ...], "toSam":["..."]}` }] }], true)) out += t;
+      const o = JSON.parse((out.match(/\{[\s\S]*\}/) || [out])[0]);
+      const sq = (Array.isArray(o.squabbles) ? o.squabbles : []).map((q) => (Array.isArray(q) ? q : []).map((l) => ({ who: l?.who === "gary" ? "gary" : "bar", say: String(l?.say || "").trim().slice(0, 120), mood: BANTER_MOODS.includes(l?.mood) ? l.mood : "sarcastic" }))
+        .filter((l) => l.say).slice(0, 4)).filter((q) => q.length >= 2 && q[0].who === "bar").slice(0, 6);
+      const toSam = (Array.isArray(o.toSam) ? o.toSam : []).map((x) => String(x || "").trim().slice(0, 90)).filter(Boolean).slice(0, 10);
+      return J({ squabbles: sq, toSam });
+    } catch (e) { return J({ squabbles: [], error: MISHAP[e.kind] || "no" }, 503); }
+  }
+
   if (body.mode === "curate" || body.mode === "memsort" || body.mode === "memfind" || body.mode === "chatsum") {
     const J = (o, st = 200) => new Response(JSON.stringify(o), { status: st, headers: { ...CORS, "Content-Type": "application/json" } });
     if (body.guest === true) return J({ error: "no" }, 403);
