@@ -448,7 +448,9 @@ body.guest #thread{padding-top:14px}
 #newChat{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--fg);background:none;color:var(--fg)}#newChat svg{width:20px;height:20px}
 
 /* one layout for everyone: no big heading or chat-name row; Chat history left, New chat right; Memory (or Face ID, without it) by the Wi-Fi symbol */
-#p-gary h1,#p-gary .gsub,#chead,#memBtn{display:none!important}#gnew{display:inline!important}
+#p-gary h1,#p-gary .gsub,#chead{display:none!important}
+/* access version (Face ID passed): Memory left, Chat history right. Guest version: Chat history left, New chat right */
+#gnew{display:none!important}body.guest #gnew{display:inline!important}body.guest #memBtn{display:none!important}#hmem{display:none!important}
 #hmem{display:inline-grid;place-items:center;width:28px;height:28px;margin-left:8px;vertical-align:middle;background:none;border:0;color:var(--dim);padding:0}#hmem svg{width:19px;height:19px}body.guest #hmem{display:none}
 #thread{padding-top:14px}
 #hmem,#hfid{-webkit-tap-highlight-color:transparent}
@@ -2161,7 +2163,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124185315';let UPD=false;
+const BUILD='20261124185605';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
