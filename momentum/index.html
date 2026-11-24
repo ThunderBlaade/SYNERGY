@@ -323,6 +323,10 @@ body.lvon #askbar{display:none!important}
 #lvtsend{width:46px;height:46px}#live.mini #lvtyp,#live.mini #lvtype{display:none!important}
 #live.typing #lvtx{height:18vh}
 #gfloat #gfbub[data-at^=down]::after,#gfloat #gfbub[data-at^=side]::after{display:none}#gfloat #gfbub[data-at=upL]::after{right:auto;left:24px}#gfloat #gfbub[data-at=upR]::after{left:auto;right:24px}
+
+#live.kb{padding-top:10px;padding-bottom:10px;justify-content:flex-end;gap:0}#live.kb .lvlab{display:none}
+#live.kb .lvwrap{flex:1;min-height:0}#live.kb #lvorb{width:min(120px,30vw);height:min(120px,30vw);transition:width .25s,height .25s}
+#live.kb #lvstat{margin:6px 0}#live.kb #lvtx{height:auto;max-height:72px}#live.kb #lvtyp{margin-top:6px}#live.kb .lvacts{margin-top:8px}#live.kb #lvcut{display:none!important}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -396,7 +400,7 @@ body.lvon #askbar{display:none!important}
 <div id="live"><div class="lab lvlab" style="text-align:center">Talking to G.A.R.Y.</div>
  <div class="lvwrap"><div id="lvstage"><canvas id="lvrack" width="32" height="32"></canvas><div id="lvorb"><svg class="chute" viewBox="0 0 120 110" aria-hidden="true"><path d="M4 34Q60-14 116 34z" fill="#c0392b"/><path d="M36 34Q46 2 60 2L60 34z" fill="#f4f4f6"/><path d="M84 34Q74 2 60 2L60 34z" fill="#f4f4f6"/><path d="M4 34h112" stroke="#7a2a2a" stroke-width="2"/><path d="M6 35 22 109M42 35 23 109M78 35 95 109M114 35 96 109" stroke="#c9ced8" stroke-width="1" fill="none"/></svg></div><div id="lvcurt"><i class="cl"></i><i class="cr"></i><b class="val"></b></div></div><button id="lvcut">Tap to interrupt</button></div>
  <div id="lvstat">Connecting…</div><div id="lvtx"></div>
- <form id="lvtyp" autocomplete="off"><input id="lvtin" placeholder="Type to G.A.R.Y.…" enterkeyhint="send" autocapitalize="sentences" autocorrect="on" spellcheck="true"><button class="mic" id="lvtsend" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button></form>
+ <form id="lvtyp" autocomplete="off"><input id="lvtin" placeholder="Type to G.A.R.Y." enterkeyhint="send" autocapitalize="sentences" autocorrect="on" spellcheck="true"><button class="mic" id="lvtsend" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button></form>
  <div class="lvacts"><button class="lvb" id="lvtype" aria-label="Type to Gary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg></button><button class="lvb" id="lvmute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path class="slash" d="M4 3l16 18" stroke="#e0605a" stroke-width="2.2"/></svg></button><button class="lvb" id="lvmin" aria-label="Make small"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg></button><button class="lvb" id="lvend" aria-label="End call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>
 <div id="bdrop"><div class="bdhead"><div class="lab">What G.A.R.Y. runs on</div><button id="bdx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="bdlist"></div><div class="hint" id="bdfoot"></div><i class="bdgrab"></i></div>
 <div id="bconf"><div class="bcbox"><div id="bctx"></div><p id="bcbody"></p><div class="goacts"><button class="btn fill" id="bcyes">Turn off</button><button class="btn ghost" id="bcno">Keep on</button></div></div></div>
@@ -915,7 +919,7 @@ function lvMic(f32){if(!LV.ready||LV.muted)return;let e=0;for(let i=0;i<f32.leng
  send(all)}
 function lvPlay(b64s,rate){const bin=atob(b64s),n=bin.length>>1,ab=LV.ctx.createBuffer(1,n,rate||24000),ch=ab.getChannelData(0);
  for(let i=0;i<n;i++){let v=bin.charCodeAt(2*i)|(bin.charCodeAt(2*i+1)<<8);if(v>32767)v-=65536;ch[i]=v/32768}
- const RT=0.95,dur=ab.duration/RT;LV.recv=(LV.recv||0)+dur;LV.act=Date.now();const s=LV.ctx.createBufferSource();s.buffer=ab;s.playbackRate.value=RT;s.connect(LV.ctx.destination);const fresh=LV.playAt<LV.ctx.currentTime;const at=Math.max(LV.ctx.currentTime+(fresh?0.14:0.03),LV.playAt);if(fresh)LV.uttAt=at;s.start(at);LV.playAt=at+dur;
+ const RT=1,dur=ab.duration/RT;LV.recv=(LV.recv||0)+dur;LV.act=Date.now();const s=LV.ctx.createBufferSource();s.buffer=ab;s.playbackRate.value=RT;s.connect(LV.ctx.destination);const fresh=LV.playAt<LV.ctx.currentTime;const at=Math.max(LV.ctx.currentTime+(fresh?0.14:0.03),LV.playAt);if(fresh)LV.uttAt=at;s.start(at);LV.playAt=at+dur;
  LV.srcs.push(s);s.onended=()=>{LV.srcs=LV.srcs.filter(x=>x!==s);if(!LV.srcs.length&&LV.on)$('live').classList.remove('speaking')};$('live').classList.add('speaking')}
 // When Sam cuts in: tell Gary exactly how far Sam heard, so he can answer first and then pick up where he left off.
 function lvNoteCut(){const full=(LV.outT||'').trim();if(!full||!LV.ctx)return;const queued=Math.max(0,LV.playAt-LV.ctx.currentTime),rec=LV.recv||0;
@@ -975,6 +979,10 @@ $('lvtype').onclick=()=>{if(performance.now()-LV.t0<900)return;const on=!$('live
 $('lvtyp').onsubmit=e=>{e.preventDefault();const t=$('lvtin').value.trim();if(!t)return;if(!LV.ws||LV.ws.readyState!==1||!LV.ready){lvStatus('One moment - he\'s not quite here yet');return}
  if(LV.srcs.length){lvNoteCut();lvHush();LV.drop=false}LV.inT+=(LV.inT?' ':'')+t;LV.typed=true;LV.act=Date.now();lvLine('you',t);$('lvtin').value='';
  LV.ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:t}]}],turnComplete:true}}));lvStatus('Gary');gMood('think',1500)};
+
+function lvVV(){const v=window.visualViewport,L=$('live');if(!v||!L)return;const kb=L.classList.contains('on')&&L.classList.contains('typing')&&innerHeight-v.height>120;
+ L.classList.toggle('kb',kb);if(kb){L.style.top=v.offsetTop+'px';L.style.height=v.height+'px';L.style.bottom='auto';scrollTo(0,0)}else{L.style.top='';L.style.height='';L.style.bottom=''}}
+if(window.visualViewport){visualViewport.addEventListener('resize',lvVV);visualViewport.addEventListener('scroll',lvVV)}$('lvtin').addEventListener('focus',()=>setTimeout(lvVV,60));$('lvtin').addEventListener('blur',()=>setTimeout(lvVV,60));
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
@@ -1615,7 +1623,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124013203';let UPD=false;
+const BUILD='20261124013647';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
