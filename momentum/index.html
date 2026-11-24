@@ -332,6 +332,21 @@ body.lvon #askbar{display:none!important}
 .gtop::before{top:calc(52px + var(--safeT))}
 .chg{margin:18px 0 2px}.chi .chs{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--dim);font:400 14px/1.4 var(--serif);margin-top:4px}#chl{height:88dvh}
 #p-gary h1{margin-top:22px}
+
+.row.swiping{position:relative;overflow:visible;z-index:2}.swdel{position:absolute;left:100%;top:0;bottom:0;width:100vw;background:#3a1514;color:#e0605a;display:flex;align-items:center;padding-left:18px;font:500 12px var(--sans);letter-spacing:.14em;text-transform:uppercase;transition:background .15s}
+.row.swgo .swdel{background:#c0392b;color:#fff}.pane{overflow-x:hidden}
+
+#gsay::after{left:var(--tx,22px)!important;right:auto!important}
+#gfloat #gfbub::after{display:block!important;border:7px solid transparent;right:auto!important}
+#gfloat #gfbub[data-at^=up]::after{top:auto;bottom:-7px;left:var(--tx,24px)!important;border-bottom:0;border-top-color:#fff}
+#gfloat #gfbub[data-at^=down]::after{bottom:auto;top:-7px;left:var(--tx,24px)!important;border-top:0;border-bottom-color:#fff}
+#gfloat #gfbub[data-at=sideL]::after{bottom:auto;top:var(--ty,18px);left:auto!important;right:-7px!important;border-right:0;border-left-color:#fff}
+#gfloat #gfbub[data-at=sideR]::after{bottom:auto;top:var(--ty,18px);left:-7px!important;border-left:0;border-right-color:#fff}
+
+#lvstat,#lvtx{display:none!important}
+#live.typing{justify-content:flex-start;padding-top:calc(14px + env(safe-area-inset-top))}
+#live.typing .lvwrap{flex:none;height:min(310px,37vh);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
+#live.typing #lvorb{width:min(150px,38vw);height:min(150px,38vw)}#live.typing #lvtyp{margin-top:26px}#live.typing .lvacts{margin-top:14px}#live.typing #lvcut{display:none!important}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -569,19 +584,26 @@ function bindRows(box,day){box.querySelectorAll('.row').forEach(r=>{const it=S.i
 // ---------- hold and drag to prioritise (Tiimo-style)
 let dragged=false;
 function dragify(box,kind){box.querySelectorAll('.row[data-id]').forEach(row=>{
- let timer=null,start=null,on=false,rows,h,from,to;
+ let timer=null,start=null,on=false,rows,h,from,to,sw=0;
  const begin=y=>{on=true;dragged=true;buzz(14);rows=[...box.querySelectorAll('.row')];from=rows.indexOf(row);to=from;h=row.getBoundingClientRect().height;row.classList.add('lift');
   rows.forEach(r=>r!==row&&r.classList.add('shift'))};
- row.addEventListener('pointerdown',e=>{if(e.target.closest('.ck'))return;start=[e.clientX,e.clientY];dragged=false;
+ row.addEventListener('pointerdown',e=>{if(e.target.closest('.ck'))return;start=[e.clientX,e.clientY];dragged=false;sw=0;
   timer=setTimeout(()=>{begin(e.clientY);try{row.setPointerCapture(e.pointerId)}catch(x){}},e.pointerType==='mouse'?180:300)});
  row.addEventListener('pointermove',e=>{if(!start)return;const dy=e.clientY-start[1];
+  const dx=e.clientX-start[0];
+  if(!on&&(sw||(dx<-10&&Math.abs(dx)>Math.abs(dy)*1.4))){clearTimeout(timer);if(!sw){sw=1;dragged=true;try{row.setPointerCapture(e.pointerId)}catch(x){}let d=row.querySelector('.swdel');if(!d){d=document.createElement('span');d.className='swdel';d.textContent='Delete';row.appendChild(d)}row.classList.add('swiping')}
+   e.preventDefault();const x=Math.min(0,dx);sw=x||-0.001;row.style.transform='translateX('+x+'px)';row.classList.toggle('swgo',x<-Math.min(140,row.offsetWidth*.38));return}
   if(!on){if(Math.abs(e.clientX-start[0])>8||Math.abs(dy)>8)clearTimeout(timer);return}
   e.preventDefault();row.style.transform='translateY('+dy+'px) scale(1.02)';
   const mid=row.getBoundingClientRect().top+h/2;to=from;
   rows.forEach((r,i)=>{if(r===row)return;const b=r.getBoundingClientRect(),c=b.top-(parseFloat(r.dataset.off)||0)+b.height/2;
    const shouldUp=i>from&&mid>c,shouldDown=i<from&&mid<c;const off=shouldUp?-h:shouldDown?h:0;r.dataset.off=off;r.style.transform=off?'translateY('+off+'px)':'';
    if(shouldUp)to=Math.max(to,i);if(shouldDown)to=Math.min(to,i)})});
- const end=()=>{clearTimeout(timer);start=null;if(!on)return;on=false;rows.forEach(r=>{r.style.transform='';r.classList.remove('shift');delete r.dataset.off});row.classList.remove('lift');
+ const end=()=>{clearTimeout(timer);start=null;
+  if(sw){const go=row.classList.contains('swgo')||sw<-Math.min(140,row.offsetWidth*.38),it=S.items[row.dataset.id];row.style.transition='transform .25s var(--ease)';
+   if(go&&it){row.style.transform='translateX(-110%)';buzz([10,30,10]);setTimeout(()=>{touch(Object.assign(it,{deleted:true}));toast('Deleted “'+it.title+'”');dragged=false;render()},230)}
+   else{row.style.transform='';setTimeout(()=>{row.style.transition='';row.classList.remove('swiping','swgo');const d=row.querySelector('.swdel');d&&d.remove();dragged=false},260)}sw=0;return}
+  if(!on)return;on=false;rows.forEach(r=>{r.style.transform='';r.classList.remove('shift');delete r.dataset.off});row.classList.remove('lift');
   if(to!==from){const order=rows.filter(r=>r!==row);order.splice(to,0,row);const nb=order[to-1]||order[to+1];const it=S.items[row.dataset.id];
    const sec=(to>0?order[to-1]:order[to+1]).dataset.sec;
    if(kind==='prio'&&sec&&sec!==(it.prio||'none')){it.prio=sec;toast('Now '+PRIO[sec].toLowerCase()+' priority')}
@@ -973,12 +995,10 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
 async function liveStart(again){if(!gUse().live){toast('Live voice is switched off - tap the symbols by Momentum to switch it on');return}if(!gUse().google){toast('Live voice needs Google Gemini - tap the symbols by Momentum to switch it on');return}let ctx0=null;if(!again){try{ctx0=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});ctx0.resume()}catch(e){}}if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=ctx0||new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // created inside the tap, so iPhone allows sound
- $('live').classList.remove('typing');$('lvtype').classList.remove('on');LV.typed=false;LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;LV.spoke=false;LV.uttAt=0;LV.unsaid='';$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open','entering','rack','rackgone');$('live').classList.toggle('curt',Math.random()<0.25);$('lvorb').className=''}lvStatus('Connecting…');
+ $('live').classList.remove('typing');$('lvtype').classList.remove('on');LV.typed=false;LV.nomic=false;LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;LV.spoke=false;LV.uttAt=0;LV.unsaid='';$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open','entering','rack','rackgone');$('live').classList.toggle('curt',Math.random()<0.25);$('lvorb').className=''}lvStatus('Connecting…');
  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
- catch(e){lvErr('microphone',{error:String(e&&e.name||e)});lvStatus('Microphone not allowed. Allow it in your settings and try again.');return}
- const src=LV.ctx.createMediaStreamSource(LV.stream);
- try{await LV.ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([LIVE_WORKLET],{type:'application/javascript'})));LV.node=new AudioWorkletNode(LV.ctx,'gmic');LV.node.port.onmessage=e=>lvMic(e.data);src.connect(LV.node)}
- catch(e){LV.node=LV.ctx.createScriptProcessor(2048,1,1);LV.node.onaudioprocess=e=>lvMic(e.inputBuffer.getChannelData(0));src.connect(LV.node);const z=LV.ctx.createGain();z.gain.value=0;LV.node.connect(z);z.connect(LV.ctx.destination)}
+ catch(e){lvErr('microphone',{error:String(e&&e.name||e)});LV.stream=null;LV.nomic=true;LV.muted=true;$('lvmute').classList.add('on');$('lvmute').setAttribute('aria-label','Microphone unavailable');setTimeout(()=>{if(LV.on&&LV.nomic){$('live').classList.add('typing');$('lvtype').classList.add('on')}},2600)}
+ if(LV.stream)lvMicWire();
  let j;try{const r=await garyFetch({mode:'live',text:'Talk with Gary',ctx:garyCtx(),items:garyItems(),voice:store('garyVoice')||'Charon',try:LV.tries});j=await r.json();if(!j.url)throw 0}
  catch(e){lvErr('pass',{error:String(e&&e.message||e)});lvNoShow();return}
  const ws=new WebSocket(j.url);LV.ws=ws;
@@ -989,7 +1009,7 @@ async function liveStart(again){if(!gUse().live){toast('Live voice is switched o
 function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;try{ws&&ws.close(1000)}catch(e){}lvHush();
  try{LV.stream&&LV.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{LV.node&&LV.node.disconnect()}catch(e){}try{LV.ctx&&LV.ctx.close()}catch(e){}
  LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;GS.nocoat=false;$('live').classList.remove('on','speaking','mini');document.body.classList.remove('lvon');gFloatSync();brainDraw();lvSaveTurn()}}
-$('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini')){lvMini(false);return}if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>{if(performance.now()-LV.t0<900)return;lvStop()};$('lvmin').onclick=()=>{if(performance.now()-LV.t0<900)return;lvMini(true)};$('lvmute').onclick=()=>{LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvStatus(LV.muted?'Muted':'Listening…')};
+$('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini')){lvMini(false);return}if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>{if(performance.now()-LV.t0<900)return;lvStop()};$('lvmin').onclick=()=>{if(performance.now()-LV.t0<900)return;lvMini(true)};$('lvmute').onclick=async()=>{if(LV.nomic){try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});LV.nomic=false;await lvMicWire()}catch(e){buzz(20);lvStatus('Microphone still unavailable - type to him');return}}LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvStatus(LV.muted?'Muted':'Listening…')};
 
 // type to G.A.R.Y. during a call: he reads it and answers out loud
 $('lvtype').onclick=()=>{if(performance.now()-LV.t0<900)return;const on=!$('live').classList.contains('typing');$('live').classList.toggle('typing',on);$('lvtype').classList.toggle('on',on);if(on)setTimeout(()=>$('lvtin').focus(),60);else $('lvtin').blur()};
@@ -997,9 +1017,12 @@ $('lvtyp').onsubmit=e=>{e.preventDefault();const t=$('lvtin').value.trim();if(!t
  if(LV.srcs.length){lvNoteCut();lvHush();LV.drop=false}LV.inT+=(LV.inT?' ':'')+t;LV.typed=true;LV.act=Date.now();lvLine('you',t);$('lvtin').value='';
  LV.ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:t}]}],turnComplete:true}}));lvStatus('Gary');gMood('think',1500)};
 
-function lvVV(){const v=window.visualViewport,L=$('live');if(!v||!L)return;const kb=L.classList.contains('on')&&L.classList.contains('typing')&&innerHeight-v.height>120;
- L.classList.toggle('kb',kb);if(kb){L.style.top=v.offsetTop+'px';L.style.height=v.height+'px';L.style.bottom='auto';scrollTo(0,0)}else{L.style.top='';L.style.height='';L.style.bottom=''}}
+function lvVV(){if($('live').classList.contains('on')&&$('live').classList.contains('typing')&&(scrollY||document.documentElement.scrollTop))scrollTo(0,0)}
 if(window.visualViewport){visualViewport.addEventListener('resize',lvVV);visualViewport.addEventListener('scroll',lvVV)}$('lvtin').addEventListener('focus',()=>setTimeout(lvVV,60));$('lvtin').addEventListener('blur',()=>setTimeout(lvVV,60));
+
+async function lvMicWire(){const src=LV.ctx.createMediaStreamSource(LV.stream);
+ try{await LV.ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([LIVE_WORKLET],{type:'application/javascript'})));LV.node=new AudioWorkletNode(LV.ctx,'gmic');LV.node.port.onmessage=e=>lvMic(e.data);src.connect(LV.node)}
+ catch(e){LV.node=LV.ctx.createScriptProcessor(2048,1,1);LV.node.onaudioprocess=e=>lvMic(e.inputBuffer.getChannelData(0));src.connect(LV.node);const z=LV.ctx.createGain();z.gain.value=0;LV.node.connect(z);z.connect(LV.ctx.destination)}}
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
@@ -1129,6 +1152,7 @@ sitwhistle right up whistle behind notes still - sit
 floating happy n smile spread - sway
 cycling happy up grin bike whoosh bob
 walking open n smile walk - bob
+strut u up grin walk sparkle bob
 parachute happy up open upBoth - still
 sulking down worried frown behind - still`.split('\n').forEach(l=>{const a=l.trim().split(/\s+/);G_EX[a[0]]={e:a[1],b:a[2],m:a[3],a:a[4],f:a[5],mv:a[6],tint:a[7]&&a[7]!=='-'?a[7]:null,post:a[8]||'stand'}});
 const G_NAMES=Object.keys(G_EX);
@@ -1304,7 +1328,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   for(const kk in P)delete P[kk];for(const kk in Q)P[kk]=Q[kk]}
  // motion + paint
  let dx=0,dy=0,flip=false;const mv=X.mv;
- if(mv==='bob')dy=X.a==='walk'?Math.floor((GW.step||0)/7)%2:(t%8>=4?1:0);else if(mv==='jump')dy=odd?-2:0;else if(mv==='bounce')dy=t%2?-1:0;else if(mv==='nod')dy=t%2;
+ if(mv==='bob')dy=X.a==='walk'?Math.floor((GW.step||0)/7)%2:(GS.nobob?0:(t%8>=4?1:0));else if(mv==='jump')dy=odd?-2:0;else if(mv==='bounce')dy=t%2?-1:0;else if(mv==='nod')dy=t%2;
  else if(mv==='shake')dx=t%2?1:-1;else if(mv==='tremble')dx=(t*7)%3-1;else if(mv==='sway')dx=[-1,0,1,0][t%4];else if(mv==='dance'){flip=t%8>=4;dy=t%2}
  GS.ldy=dy;const tint=G_TINT[X.tint]||{};x.clearRect(0,0,32,32);x.save();if(flip){x.translate(32,0);x.scale(-1,1)}x.fillStyle=GP.K;
  for(let y=0;y<32;y++)for(let i=0;i<32;i++)if(!P[y*32+i]&&(P[y*32+i-1]&&i>0||P[y*32+i+1]&&i<31||P[(y-1)*32+i]||P[(y+1)*32+i]))x.fillRect(i+dx,y+dy,1,1);
@@ -1326,7 +1350,7 @@ function gScene(x,amb){const name=gState(),X=G_EX[name]||G_EX.idle,mini=amb&&$('
  let pr=G_PROPS[name]||null,chair=X.post==='sit'?0:X.post==='pull'?Math.max(0,Math.round(28*(1-Math.min(1,(performance.now()-(GS.chairT0||0))/1100)))):null;
  if(amb&&(!LV.ready||$('lvorb').className)){if(pr!=='bike')pr=null;chair=null}else if(!pr&&chair===null&&amb&&!mini)pr='lamp';
  if(!GOFF){GOFF=document.createElement('canvas');GOFF.width=GOFF.height=32}
- GS.scene=true;try{gDraw(GOFF.getContext('2d'),name)}finally{GS.scene=false}
+ GS.scene=true;GS.nobob=!amb;try{gDraw(GOFF.getContext('2d'),name)}finally{GS.scene=false;GS.nobob=false}
  const sit=X.post==='sit',dy=(GS.ldy||0)+(sit?-2:0),lift=pr==='bike'?-4:sit?-5:0;x.clearRect(0,0,64,64);
  if(chair!==null)gProp(x,PROP_CHAIR,16+chair,33);if(pr==='bike')gProp(x,PROP_BIKE,10,34);if(pr==='lamp')gProp(x,PROP_LAMP,5,13);if(pr==='briefcase')gProp(x,PROP_BRIEFCASE,46,46);
  x.drawImage(GOFF,16,24+lift);
@@ -1365,7 +1389,7 @@ function gfBubPlace(px,py,T0){const X0=px??GF.x,Y0=py??GF.y,bub=$('gfbub'),T=T0|
  const C=[['up',80-w,-h-10],['up',0,-h-10],['down',80-w,90],['down',0,90],['side',-w-8,4],['side',88,4]];let best=null,bs=1e18;
  for(const [k,l,t] of C){const ax=X0+l,ay=Y0+t;let c=0;for(const q of T){const ww=Math.min(ax+w,q.right)-Math.max(ax,q.left),hh=Math.min(ay+h,q.bottom)-Math.max(ay,q.top);if(ww>0&&hh>0)c+=ww*hh}
   if(ax<4||ax+w>innerWidth-4||ay<4||ay+h>nb-4)c+=1e7;if(k==='up')c-=200;if(c<bs){bs=c;best=[k,l,t]}}
- if(T0)return bs;bub.style.left=best[1]+'px';bub.style.top=best[2]+'px';bub.style.right='auto';bub.style.bottom='auto';bub.dataset.at=best[0]+(best[1]<=0?'L':'R');return bs}
+ if(T0)return bs;bub.style.left=best[1]+'px';bub.style.top=best[2]+'px';bub.style.setProperty('--tx',Math.max(10,Math.min(w-24,40-best[1]-7))+'px');bub.style.setProperty('--ty',Math.max(8,Math.min(h-22,30-best[2]-7))+'px');bub.style.right='auto';bub.style.bottom='auto';bub.dataset.at=best[0]+(best[1]<=0?'L':'R');return bs}
 function gFloatPlace(){const b=gFloatBounds();GF.x=Math.max(b.x0,Math.min(b.x1,GF.x));GF.y=Math.max(b.y0,Math.min(b.y1,GF.y));const f=$('gfloat');f.style.left=GF.x+'px';f.style.top=GF.y+'px'}
 (function drift(){const f=$('gfloat'),now=performance.now();if(f&&f.classList.contains('on')&&!GF.drag&&!f.classList.contains('say')&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&now>GF.hold){
   if(!GF.to&&now>(GF.pause||0))GF.to=gfPick({x:GF.x,y:GF.y});if(GF.to){const dx=GF.to.x-GF.x,dy=GF.to.y-GF.y,d=Math.hypot(dx,dy);if(d<1.5){GF.to=null;GF.pause=now+4000+Math.random()*4000;if(GF.sayQ){const q=GF.sayQ;GF.sayQ=null;gSay(q[0],q[1],1)}}else{const sp=GF.sayQ?Math.min(2.4,0.4+d/50):Math.min(0.6,0.12+d/140);GF.x+=dx/d*sp;GF.y+=dy/d*sp+Math.sin(now/900)*0.08}}gFloatPlace()}
@@ -1375,17 +1399,17 @@ function gFloatPlace(){const b=gFloatBounds();GF.x=Math.max(b.x0,Math.min(b.x1,G
 const GB={last:Date.now(),sit:false,next:0,asked:0,shown:false};
 const G_SITBORED=['sitbored','sityawn','sitwatch','sittea','sitread','sitdoze','sittwiddle','sitwhistle'];
 const G_OPEN=['I\'ve been wondering, sir - does tea genuinely taste better from a proper cup? I\'m firmly of the view it does.','Penny for your thoughts, Sam?','Did you know a group of owls is called a parliament? I find that enormously satisfying.','How\'s the day really treating you, Mr Fice?','I was thinking about the stars just now. Have you ever seen the Milky Way properly, away from the lights?','Anything on your mind you\'d like a second pair of eyes on, sir?'];
-function gPoke(){GB.last=Date.now();if(GB.sit){GB.sit=false;GS.base=gIdleBase();gMood('wave',1500)}}
+function gPoke(){GB.last=Date.now();if(GB.bored){GB.bored=false;GW.to=null;if(GS.mood==='strut')GS.mood=GS.base||'idle'}if(GB.sit){GB.sit=false;GS.base=gIdleBase();gMood('wave',1500)}}
 ['pointerdown','keydown','input'].forEach(ev=>addEventListener(ev,gPoke,{passive:true}));
 setInterval(()=>{if(tab!=='gary'||talking||GSPK||LV.on||document.hidden)return;const idle=Date.now()-GB.last;
- if(idle>35000&&!GB.sit){GB.sit=true;GS.base='sitting';GW.to=null;GS.chairT0=performance.now();gMood('pullchair',1300)}
+ if(idle>35000&&!GB.bored&&!GB.sit){GB.bored=true;GW.busy=0;GW.rest=false}
  if(GB.sit&&!GS.until&&Date.now()>GB.next){GB.next=Date.now()+7000+Math.random()*5000;gMood(G_SITBORED[Math.floor(Math.random()*G_SITBORED.length)],4500)}
  if(!GB.wait)GB.wait=90000+Math.random()*240000;if(idle>GB.wait&&!GB.shown&&!GB.chat&&!GL.guest&&Date.now()-GB.asked>600000){GB.asked=Date.now();GB.wait=0;if(Math.random()<0.6)gOpener()}},2000);
 async function gOpener(){if(GB.chat)return;let text='';
  if(CS&&navigator.onLine){try{const r=await garyFetch({mode:'opener',text:'opener',convo:CHAT,ctx:garyCtx(),items:garyItems()});const j=await r.json();text=(j.text||'').trim()}catch(e){}}
  else text=G_OPEN[Math.floor(Math.random()*G_OPEN.length)];
  if(!text||/^SKIP\b/i.test(text)||tab!=='gary'||talking)return;GB.pending=text;GB.shown=true;gBubble(text,45000);gMood('sitting')}
-function gBubble(text,ms){const g=$('gsay');g.textContent=text;g.style.left=Math.max(0,Math.min($('gbar').clientWidth-g.offsetWidth-4,GW.x+14))+'px';
+function gBubble(text,ms){const g=$('gsay');g.textContent=text;const gl=Math.max(0,Math.min($('gbar').clientWidth-g.offsetWidth-4,GW.x+14));g.style.left=gl+'px';g.style.setProperty('--tx',Math.max(10,Math.min(g.offsetWidth-22,GW.x+($('gdock').offsetWidth/2)-gl-6))+'px');
  g.classList.add('on');clearTimeout(g._t);g._t=setTimeout(()=>{g.classList.remove('on');GB.shown=false},ms||4000)}
 async function gOpenSave(){const text=GB.pending;GB.pending=null;GB.shown=false;$('gsay').classList.remove('on');if(!text)return;bubble('gary',text);
  try{if(!CHAT){CHAT='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);store('garyChat',CHAT);await gdb('gary_convos',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id:CHAT,title:'A chat G.A.R.Y. started'})});$('ctitle').textContent='A chat G.A.R.Y. started'}
@@ -1562,18 +1586,18 @@ function lvNoShow(){if(LV.noshow)return;LV.noshow=true;const L=$('live'),o=$('lv
  setTimeout(()=>{lvLine('box',q)},700);
  setTimeout(()=>{lvStop();LV.noshow=false;go('gary');$('ask').placeholder=q.replace('Sentient search bar: ','');setTimeout(()=>$('ask').focus(),250)},4200)}
 // ---------- G.A.R.Y. lives in his bar: wanders up and down and gets on with things (20 activities)
-const G_ACTS=['cane','tea','reading','newspaper','writing','texting','phonecall','watch','stretching','dance','singing','stargazing','birdwatching','detective','zen','umbrella','balloon','flower','dapper','tiphat','cycling'];
+const G_ACTS=['sitting','cane','tea','reading','newspaper','writing','texting','phonecall','watch','stretching','dance','singing','stargazing','birdwatching','detective','zen','umbrella','balloon','flower','dapper','tiphat','cycling'];
 const GW={x:0,to:null,dir:1,busy:0,last:''};
 function gwFree(){return tab==='gary'&&!document.hidden&&!talking&&!GSPK&&!LV.on&&!GB.sit&&!$('gbar').classList.contains('drag')&&!matchMedia('(prefers-reduced-motion: reduce)').matches}
 function gwPlace(){const d=$('gdock');d.style.transform='translateX('+GW.x.toFixed(1)+'px)';d.classList.toggle('flip',GW.dir<0)}
 function gwMax(){const b=$('gbar'),n=document.querySelector('.gbt');return Math.max(0,b.clientWidth-(n?n.offsetWidth+16:120)-$('gdock').offsetWidth)}
 (function gwLoop(){const now=performance.now();
  if(gwFree()){const max=gwMax();
-  if(GW.to!==null){const sp=GS.mood==='cycling'?Math.max(0.5,gwMax()/360):0.32,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
-   if(Math.abs(dx)<=sp){GW.x=GW.to;GW.to=null;if(GS.mood==='walking'||GS.mood==='cycling')GS.mood=GS.base||'idle';
-    let a;do{a=G_ACTS[Math.floor(Math.random()*(G_ACTS.length-1))]}while(a===GW.last);GW.last=a;GW.busy=now+8000+Math.random()*4000;GW.rest=true;gMood(a,GW.busy-now)}
-   else{GW.x+=sp*GW.dir;if(!GS.until&&GS.mood!=='cycling')GS.mood='walking'}gwPlace()}
-  else if(now>GW.busy&&!GS.until){if(GW.rest!==false){GW.rest=false;GW.busy=now+25000+Math.random()*35000;GS.mood=GS.base||'idle'}else if(Math.random()<0.05){GW.to=GW.x<max/2?max:0;GS.mood='cycling'}else{GW.to=Math.round(Math.random()*max)}}
+  if(GW.to!==null){const sp=GS.mood==='cycling'?Math.max(0.5,gwMax()/360):GS.mood==='strut'?0.26:0.32,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
+   if(Math.abs(dx)<=sp){GW.x=GW.to;GW.to=null;if(GS.mood==='walking'||GS.mood==='cycling'||GS.mood==='strut')GS.mood=GS.base||'idle';
+    if(GB.bored){GW.busy=now+1500+Math.random()*2500;GS.mood='idle';gwPlace()}else{let a;do{a=G_ACTS[Math.floor(Math.random()*(G_ACTS.length-1))]}while(a===GW.last);GW.last=a;GW.busy=now+8000+Math.random()*4000;GW.rest=true;gMood(a,GW.busy-now)}}
+   else{GW.x+=sp*GW.dir;if(!GS.until&&GS.mood!=='cycling')GS.mood=GB.bored?'strut':'walking'}gwPlace()}
+  else if(now>GW.busy&&!GS.until){if(GB.bored){const mn=Math.round(max*0.15),mx=Math.round(max*0.85);GW.to=GW.x<max/2?mx+Math.round(Math.random()*(max-mx)):Math.round(Math.random()*mn)}else if(GW.rest!==false){GW.rest=false;GW.busy=now+25000+Math.random()*35000;GS.mood=GS.base||'idle'}else if(Math.random()<0.05){GW.to=GW.x<max/2?max:0;GS.mood='cycling'}else{GW.to=Math.round(Math.random()*max)}}
   if(GW.x>max){GW.x=max;gwPlace()}}
  requestAnimationFrame(gwLoop)})();
 function garyLog(action,detail){gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action,detail})}).catch(()=>{})}
@@ -1642,7 +1666,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124014917';let UPD=false;
+const BUILD='20261124103150';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
