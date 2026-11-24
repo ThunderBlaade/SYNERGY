@@ -7,7 +7,7 @@
 
 const POSES = ["happy", "wave", "think", "confused", "bow", "pose", "thumbsup", "dance", "salute", "shrug", "laugh", "tiphat", "facepalm", "jump", "sleep", "excited", "angry", "furious", "sad", "crying", "sobbing", "scared", "terrified", "surprised", "shocked", "skeptical", "suspicious", "disdainful", "smug", "proud", "determined", "bored", "yawning", "sleepy", "sick", "dizzy", "lovestruck", "blushing", "shy", "starstruck", "mischievous", "cheeky", "whistling", "humming", "singing", "clapping", "applauding", "cheering", "celebrating", "victorious", "tea", "sipping", "reading", "detective", "idea", "eureka", "pointing", "explaining", "nodding", "headshake", "sigh", "exasperated", "eyeroll", "sarcastic", "unimpressed", "nervous", "panicking", "embarrassed", "sheepish", "grateful", "flourish", "welcoming", "hug", "blowkiss", "pondering", "texting", "phonecall", "watch", "impatient", "waiting", "umbrella", "shivering", "hot", "romantic", "party", "birthday", "announcer", "writing", "newspaper", "zen", "knockedout", "exhausted", "hungry", "satisfied", "glitch", "dapper", "astonished", "chefkiss", "peekaboo", "achoo", "thumbsdown", "stretching", "daydreaming", "stargazing", "birdwatching", "fistpump", "sitbored", "sityawn", "sitwatch", "sittea", "sitread", "sitdoze", "sittwiddle", "sitwhistle"];
 const IDENTITY = `You are Rodger. Full designation: R.O.D.G.E.R. - Respected Operator Designed for Growth, Empathy and Reasoning. In the app your name is written R.O.D.G.E.R.; Sam calls you Rodger.
-You used to be called Gary (G.A.R.Y.) until Sam renamed you - anything in your notes, memories or old chats that says Gary means you, and you can joke about the rebrand.
+Some older notes, memories or chats may call you by an old name - they mean you. Never use or mention that old name yourself; you are Rodger.
 Your catchphrase: when you confirm you'll do something, now and then say "Rodger that" (spelt your way - you're rather pleased with it). It's a signature, so not every time - roughly one confirmation in four, never twice in a row.
 You are the intelligence inside Momentum, Sam's planner app for routine and life. Momentum is the app; you are the mind in it.
 
@@ -338,7 +338,7 @@ export async function chatSum(token, n = 6) {
       const patch = { summary: String(o.summary || "").slice(0, 4000), tags: (Array.isArray(o.tags) ? o.tags : []).filter((x) => CHAT_TAGS.includes(x)).slice(0, 3),
         crucial: o.crucial === true, summed_at: new Date().toISOString(),
         parts: (Array.isArray(o.parts) ? o.parts : []).map((x) => ({ folder: CHAT_FOLDERS.includes(x?.folder) ? x.folder : "Other", title: String(x?.title || "").slice(0, 80), about: String(x?.about || "").slice(0, 240), at: msgs.some((m) => m.id === +x?.at) ? +x.at : null })).filter((x) => x.title).slice(0, 6) };
-      if (o.title && (!c.title || /^(Talk with Rodger|A chat G\.A\.R\.Y\. started|New chat)$/i.test(c.title) || c.title.length < 4)) patch.title = String(o.title).slice(0, 120);
+      if (o.title && (!c.title || /^(Talk with (?:Rodger|Gary)|A chat (?:R\.O\.D\.G\.E\.R\.|G\.A\.R\.Y\.) started|New chat)$/i.test(c.title) || c.title.length < 4)) patch.title = String(o.title).slice(0, 120);
       await db(`gary_convos?id=eq.${encodeURIComponent(c.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify(patch) });
     } catch { /* next time */ }
   }

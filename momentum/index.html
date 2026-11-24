@@ -426,6 +426,8 @@ body.lvon #chpick{display:none!important}
 .chd{flex:none;font:400 11px var(--sans);font-style:normal;color:var(--dim);letter-spacing:.02em}.chrow .chi small:empty{display:none}
 
 #chcl.on{text-decoration:underline;text-underline-offset:4px}.chback{display:block;color:var(--fg);padding:4px 0}
+
+#gdock.peek.wisp .gpx.scene{transition:transform .38s cubic-bezier(.5,0,.9,.4),opacity .38s ease-in;transform:translateX(-70%) rotate(55deg) scale(.85);opacity:0}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -1993,14 +1995,19 @@ function gRoutinePick(last){if(GFAV.length&&Math.random()<0.35){const f=GFAV[Mat
 const G_ACTS=['sitting','cane','tea','reading','newspaper','writing','texting','phonecall','watch','stretching','dance','singing','stargazing','birdwatching','detective','zen','umbrella','balloon','flower','dapper','tiphat','cycling'];
 const GW={x:0,to:null,dir:1,busy:0,last:''};
 function gwFree(){return tab==='gary'&&!document.hidden&&!talking&&!GSPK&&!LV.on&&!GB.sit&&!$('gbar').classList.contains('drag')&&!matchMedia('(prefers-reduced-motion: reduce)').matches}
-function gwPlace(){const d=$('gdock');if(GW.peek&&performance.now()>=(GW.holdUntil||0))GW.peek=false;d.style.transform='translateX('+GW.x.toFixed(1)+'px)';d.classList.toggle('flip',GW.dir<0);d.classList.toggle('peek',!!GW.peek)}
+function gwPlace(){const d=$('gdock');d.style.transform='translateX('+GW.x.toFixed(1)+'px)';d.classList.toggle('flip',GW.dir<0);d.classList.toggle('peek',!!GW.peek)}
 // the search bar's talking: he stops to answer. If he's off on an errand he pops his head back in from the edge, has his say, then carries on
-function gwHold(ms){const now=performance.now();if(GW.plan){GW.holdUntil=now+ms;if(GW.x<0){GW.x=-Math.round($('gdock').offsetWidth*0.62);GW.dir=1;GW.peek=true;gwPlace()}}else{GW.to=null;GW.busy=Math.max(GW.busy,now+ms)}}
+function gwHold(ms){const now=performance.now();if(GW.plan){if(GW.x<0){GW.holdUntil=now+ms;GW.leaving=0;GW.x=-Math.round($('gdock').offsetWidth*0.62);GW.dir=1;GW.peek=true;gwPlace()}}   // walking about on screen with something: he just carries on
+ else{GW.to=null;GW.busy=Math.max(GW.busy,now+ms)}}
 function gwOff(){return -Math.round($('gdock').offsetWidth*1.5+14)}
 function gwMax(){const b=$('gbar'),n=document.querySelector('.gbt');return Math.max(0,b.clientWidth-(n?n.offsetWidth+16:120)-$('gdock').offsetWidth)}
 (function gwLoop(){const now=performance.now();
  if(gwFree()){const max=gwMax();
   if(now<(GW.holdUntil||0)){if(!GS.until)GS.mood='idle';gwPlace()}
+  else if(GW.peek){   // done answering: a cheeky peep, then he whisks himself away and carries on with his errand
+   if(!GW.leaving){GW.leaving=now;gMood('cheeky',750)}
+   else if(now-GW.leaving>750&&!$('gdock').classList.contains('wisp'))$('gdock').classList.add('wisp');
+   else if(now-GW.leaving>1150){$('gdock').classList.remove('wisp');GW.peek=false;GW.leaving=0;GW.x=-Math.round($('gdock').offsetWidth*1.5+14);GS.until=0;gwPlace()}}
   else if(GW.to!==null){const sp=GS.mood==='cycling'?Math.max(0.5,gwMax()/360):GS.mood==='strut'?0.26:GW.plan?0.85:0.32,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
    if(Math.abs(dx)<=sp){GW.x=GW.to;GW.to=null;if(GS.mood==='walking'||GS.mood==='cycling'||GS.mood==='strut')GS.mood=GS.base||'idle';
     const P=GW.plan,start=(a,ms)=>{GW.last=a;GW.busy=now+ms;GW.rest=true;gMood(a,ms)};
@@ -2088,7 +2095,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124174238';let UPD=false;
+const BUILD='20261124175446';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
