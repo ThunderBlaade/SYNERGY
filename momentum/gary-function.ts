@@ -546,7 +546,7 @@ export async function handle(req) {
         generationConfig: { responseModalities: ["AUDIO"], speechConfig: { languageCode: "en-GB", voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } },
         systemInstruction: { parts: [{ text: sys }] },
         inputAudioTranscription: {}, outputAudioTranscription: {},
-        realtimeInputConfig: { automaticActivityDetection: { startOfSpeechSensitivity: "START_SENSITIVITY_LOW", silenceDurationMs: 550, prefixPaddingMs: 300 } },
+        realtimeInputConfig: { automaticActivityDetection: { startOfSpeechSensitivity: "START_SENSITIVITY_LOW", silenceDurationMs: 550, prefixPaddingMs: 450 } },
         proactivity: { proactiveAudio: true },
         tools: [{ functionDeclarations: guest ? LIVE_TOOLS.filter((t) => t.name === "strike_pose").concat([{ name: "guest_note", description: "Log who you're talking to and what they wanted (for Sam).", parameters: { type: "OBJECT", properties: {
           name: { type: "STRING" }, personal: { type: "BOOLEAN", description: "true if they asked about Sam's private things" }, note: { type: "STRING" } }, required: ["note"] } }]) : LIVE_TOOLS }] };

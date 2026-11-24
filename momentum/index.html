@@ -232,18 +232,19 @@ body.lvon #askbar{display:none!important}
 #gsay{max-width:min(280px,70vw);pointer-events:auto;cursor:pointer}
 #bdrop{position:fixed;left:0;right:0;top:0;z-index:80;max-width:560px;margin:0 auto;background:#000;border-bottom:1px solid var(--fg);padding:calc(16px + var(--safeT)) 22px 18px;transform:translateY(-105%);transition:transform .4s var(--ease);touch-action:pan-x}
 #bdrop{visibility:hidden;transition:transform .4s var(--ease),visibility 0s .4s}#bdrop.on{transform:none;visibility:visible;transition:transform .4s var(--ease)}.bdhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}#bdx{width:40px;height:40px;display:grid;place-items:center;background:none;border:0;color:var(--fg)}#bdx svg{width:22px;height:22px}
-.bdrow{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}.bdrow .bmi{margin-top:2px}.bdtx{flex:1;min-width:0}.bdrow .tog{margin-top:2px}
-.bdname{font:400 17px var(--sans)}.bdname span{font:500 10px var(--sans);letter-spacing:.16em;text-transform:uppercase;margin-left:6px}.bdon{color:#5fbf5f}.bdoff{color:var(--faint)}
-.bdtx small{display:block;color:var(--dim);font-size:13px;margin:3px 0 8px;line-height:1.4}
-.bdbar{height:5px;background:var(--line);position:relative}.bdbar i{position:absolute;left:0;top:0;bottom:0;background:#5fbf5f}.bdbar i.low{background:#e8c25a}.bdbar i.out{background:#e0605a}.bdbar i.off{background:var(--faint)}
-.bdlab{font-size:11.5px;color:var(--dim);margin-top:5px}#bdfoot{margin-top:12px;font-size:12.5px}.bdgrab{display:block;width:36px;height:3px;background:var(--line);margin:12px auto 0}
+.bdrow{display:flex;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}.bdrow:last-child{border-bottom:0}.bdtx{flex:1;min-width:0}
+.bdname{font:500 16px var(--sans)}.bdtx small{display:block;color:var(--dim);font-size:12.5px;margin:2px 0 0}.bdtx small b{font-weight:500}.bdon{color:#5fbf5f}.bdoff{color:var(--faint)}
+.bdbar{height:2px;background:var(--line);position:relative;margin-top:9px;border-radius:2px;overflow:hidden}.bdbar i{position:absolute;left:0;top:0;bottom:0;background:#5fbf5f;border-radius:2px;transition:width .6s var(--ease)}.bdbar i.low{background:#e8c25a}.bdbar i.out{background:#e0605a}.bdbar i.off{background:var(--faint)}
+.bdlab{font-size:11px;color:var(--faint);margin-top:5px;font-variant-numeric:tabular-nums}#bdfoot{margin-top:10px;font-size:11.5px;color:var(--faint)}.bdgrab{display:block;width:36px;height:4px;border-radius:4px;background:var(--line);margin:12px auto 0}
+#bdrop .tog{width:44px;height:26px;border-radius:13px;border:0;background:#2a2b31;transition:background .3s var(--ease)}#bdrop .tog::after{top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}#bdrop .tog.on{background:#5fbf5f}#bdrop .tog.on::after{transform:translateX(18px);background:#fff}
+#bdrop{border-bottom:0;border-radius:0 0 22px 22px;background:rgba(12,12,14,.96);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:0 10px 40px rgba(0,0,0,.6)}#bdrop .bdhead .lab{letter-spacing:.18em}
 @media (min-width:1000px){#bdrop{left:auto;right:40px;top:60px;border:1px solid var(--fg);width:480px}}
 #bgo,#bgq,#bpc,#bsrc,#bsrc.show{display:none!important}
 #brain #bwifi{display:block;width:20px;height:20px;opacity:1}#brain #bwifi svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2}
 #bwifi.ok{color:#5fbf5f}#bwifi.low{color:#e8c25a}#bwifi.out{color:#e0605a}#bwifi.off{color:var(--faint)}#bwifi.live{animation:blink 1.4s ease-in-out infinite}
 #ask{min-height:50px;height:50px;padding:13px 12px;font-size:16px;text-align:center}#ask:focus{text-align:left}#ask::placeholder{font-size:14.5px;text-align:center}
 #askbar .mic{width:50px;height:50px}#asksend svg{width:22px;height:22px}#toast{display:none!important}
-.bdoffl{font-size:11.5px;color:#e8c25a;margin-top:6px;opacity:.85}
+
 #lvrack{position:absolute;left:50%;top:50%;width:min(170px,44vw);height:min(170px,44vw);transform:translate(calc(-50% + min(150px,38vw)),-40%);image-rendering:pixelated;opacity:0;transition:opacity .6s;pointer-events:none}
 #live.rack #lvrack{opacity:1}#live.rackgone #lvrack{opacity:0}#live.mini #lvrack{display:none}
 @keyframes lvToRackK{0%{transform:translateX(-110vw)}100%{transform:translateX(min(40px,10vw))}}
@@ -251,6 +252,35 @@ body.lvon #askbar{display:none!important}
 @keyframes lvTurnK{0%{transform:scaleX(1)}25%{transform:scaleX(.4)}50%{transform:scaleX(-1)}75%{transform:scaleX(.4)}100%{transform:scaleX(1)}}
 #lvorb.lvToRack{animation:lvToRackK 1.9s linear both}#lvorb.lvFromRack{animation:lvFromRackK 1.3s linear both}#lvorb.lvTurn{animation:lvTurnK .8s ease-in-out both}
 #lvorb.lvStroll{animation-duration:2.2s}
+
+/* v-polish: steady voice screen, smooth interrupt pill, raised nav, solid G.A.R.Y. bar */
+#lvstat{height:16px;line-height:16px;margin:14px 0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#lvtx{height:24vh;min-height:0;max-height:none;flex:none;-webkit-mask-image:linear-gradient(transparent,#000 30%);mask-image:linear-gradient(transparent,#000 30%)}
+.lvwrap{position:relative;min-height:0}
+#gcut,#lvcut{display:flex!important;align-items:center;gap:9px;font:500 13px var(--sans);letter-spacing:.02em;text-transform:none;color:#fff;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:10px 18px 10px 14px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .3s var(--ease)}
+#gcut::before,#lvcut::before{content:"";width:8px;height:8px;border-radius:2px;background:#fff;opacity:.85}
+#lvcut{position:absolute;left:50%;bottom:0;transform:translate(-50%,6px);margin:0!important;z-index:3}
+#live.speaking #lvcut{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+#live.mini #lvcut{display:none!important}
+#gcut{transform:translate(-50%,6px)}#gcut.on{opacity:1;pointer-events:auto;transform:translate(-50%,0);animation:none}
+@media (max-width:999px){
+ nav{padding-bottom:calc(24px + var(--safeB));background:#000}
+ #askbar{bottom:calc(66px + var(--safeB));background:#000;padding-top:4px}
+ #askbar::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:26px;background:linear-gradient(transparent,#000);pointer-events:none}
+ #live.mini{bottom:calc(66px + var(--safeB))}
+ #fab{bottom:calc(80px + var(--safeB))}
+ #gcut{bottom:calc(var(--askH,190px) + 80px + var(--safeB))}
+ .pane{padding-bottom:calc(104px + var(--safeB))}
+}
+#p-gary{padding-bottom:calc(var(--askH,190px) + 90px + var(--safeB))}
+#gbar{height:112px;cursor:pointer;touch-action:manipulation}#gdock{width:104px;height:104px}#gbar .gbh{display:none}
+#gsay{bottom:116px}
+
+.gtop{box-shadow:0 16px 14px -6px #000}.gtop::before{content:"";position:absolute;left:22px;right:22px;top:calc(50px + var(--safeT));height:1px;background:#2a2b31;pointer-events:none}
+.gtop::after{content:"";position:absolute;left:22px;right:22px;bottom:0;height:1.5px;border-radius:2px;pointer-events:none;background:linear-gradient(90deg,#7ec8ff,#b59cff,#ff9ecf,#ffd59e,#9effd6,#7ec8ff,#b59cff);background-size:300% 100%;animation:irid 9s linear infinite;opacity:.9}
+@keyframes irid{from{background-position:0 0}to{background-position:150% 0}}
+@media (prefers-reduced-motion:reduce){.gtop::after{animation:none}}
+@media (min-width:1000px){.gtop::before{top:52px;left:max(48px,calc((100% - 760px)/2));right:max(48px,calc((100% - 760px)/2))}.gtop::after{left:max(48px,calc((100% - 760px)/2));right:max(48px,calc((100% - 760px)/2))}}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -292,7 +322,7 @@ body.lvon #askbar{display:none!important}
 </section>
 
 <div id="askbar"><div id="gbar"><div id="gopen"><div id="gotx"></div><div class="goacts"><button class="btn fill" id="goyes">Reply</button><button class="btn ghost" id="gono">Not now</button></div></div>
- <i class="gbh"></i><div id="gsay"></div><button id="gdock" aria-label="G.A.R.Y."></button><div class="gbt"><b>G.A.R.Y.</b><span class="lab" id="gbs">Pull up or tap to talk</span></div></div>
+ <div id="gsay"></div><button id="gdock" aria-label="G.A.R.Y."></button><div class="gbt"><b>G.A.R.Y.</b><span class="lab" id="gbs">Tap to talk</span></div></div>
  <textarea id="ask" rows="1" placeholder="aSk G.A.R.Y. aNyThInG…" spellcheck="true" autocorrect="on" autocapitalize="sentences" enterkeyhint="send"></textarea>
  <button class="mic" id="asksend" aria-label="Send" style="border-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
  <button class="mic" id="askmic" aria-label="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 19 7.5 6l5 13M4.4 14.5h6.2M19.5 4.5v15M17.5 4.5h4M17.5 19.5h4"/></svg></button></div>
@@ -322,9 +352,8 @@ body.lvon #askbar{display:none!important}
  <p class="hint">Your plan goes to a private table only your account can read. Gary's chats and memories are private to your account too.</p>
  <div class="acts"><button class="btn ghost" id="siX">Cancel</button><button class="btn fill" id="siGo">Sign in</button></div></div>
 <div id="live"><div class="lab lvlab" style="text-align:center">Talking to G.A.R.Y.</div>
- <div class="lvwrap"><div id="lvstage"><canvas id="lvrack" width="32" height="32"></canvas><div id="lvorb"></div><div id="lvcurt"><i class="cl"></i><i class="cr"></i><b class="val"></b></div></div></div>
+ <div class="lvwrap"><div id="lvstage"><canvas id="lvrack" width="32" height="32"></canvas><div id="lvorb"></div><div id="lvcurt"><i class="cl"></i><i class="cr"></i><b class="val"></b></div></div><button id="lvcut">Tap to interrupt</button></div>
  <div id="lvstat">Connecting…</div><div id="lvtx"></div>
- <button id="lvcut">Tap to interrupt</button>
  <div class="lvacts"><button class="lvb" id="lvmute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path class="slash" d="M4 3l16 18" stroke="#e0605a" stroke-width="2.2"/></svg></button><button class="lvb" id="lvmin" aria-label="Make small"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg></button><button class="lvb" id="lvend" aria-label="End call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>
 <div id="bdrop"><div class="bdhead"><div class="lab">What G.A.R.Y. runs on</div><button id="bdx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="bdlist"></div><div class="hint" id="bdfoot"></div><i class="bdgrab"></i></div>
 <div id="bconf"><div class="bcbox"><div id="bctx"></div><p id="bcbody"></p><div class="goacts"><button class="btn fill" id="bcyes">Turn off</button><button class="btn ghost" id="bcno">Keep on</button></div></div></div>
@@ -777,10 +806,19 @@ function lvMic(f32){if(!LV.ready||LV.muted)return;let e=0;for(let i=0;i<f32.leng
  lvBuf.push(o);lvLen+=n;if(lvLen<640)return;           // ~40 ms of audio per message: low latency, not chatty
  const all=new Int16Array(lvLen);let p=0;for(const c of lvBuf){all.set(c,p);p+=c.length}lvBuf=[];lvLen=0;
  let e2=0;for(let i=0;i<all.length;i++)e2+=all[i]*all[i];const rms=Math.sqrt(e2/all.length)/32768;
- LV.floor=LV.floor==null?rms:(rms<LV.floor?LV.floor*0.7+rms*0.3:LV.floor*0.995+rms*0.005);   // the room's background level: falls fast, rises slowly
- if(rms>Math.max(0.012,LV.floor*3))LV.open=all.length*18;else LV.open-=all.length;          // a clear voice above the room: let it through (plus ~0.7 s tail)
+ const spk=LV.srcs.length>0||(LV.ctx&&LV.playAt>LV.ctx.currentTime);
+ if(!spk)LV.floor=LV.floor==null?rms:(rms<LV.floor?LV.floor*0.7+rms*0.3:LV.floor*0.995+rms*0.005);   // the room's background level (not learned while he talks)
+ let zc=0;for(let i=1;i<all.length;i++)if((all[i]^all[i-1])<0)zc++;const zcr=zc/all.length,voicy=zcr>0.012&&zcr<0.28;  // speech-shaped, not a clatter or a hum
+ const send=u=>{if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({realtimeInput:{audio:{data:b64(new Uint8Array(u.buffer)),mimeType:'audio/pcm;rate=16000'}}}))};
+ if(spk&&!(LV.open>0)){                    // while Gary talks, only a sustained, clear voice may cut in - bangs, TV, his own echo can't
+  if(voicy&&rms>Math.max(0.03,(LV.floor||0)*5)){LV.hold=(LV.hold||[]);LV.hold.push(all.slice());LV.vrun=(LV.vrun||0)+all.length/16}else{LV.vrun=Math.max(0,(LV.vrun||0)-all.length/8);if(!LV.vrun)LV.hold=[]}
+  if(LV.hold&&LV.hold.length>10)LV.hold.shift();
+  if((LV.vrun||0)>=300){LV.open=all.length*18;for(const h of LV.hold)send(h);LV.hold=[];LV.vrun=0;return}
+  all.fill(0);LV.lvl*=0.5;send(all);return}
+ LV.hold=[];LV.vrun=0;
+ if(rms>Math.max(0.012,LV.floor*3)&&(voicy||rms>0.05))LV.open=all.length*18;else LV.open-=all.length;   // a clear voice above the room: let it through (plus ~0.7 s tail)
  if(!(LV.open>0)){all.fill(0);LV.lvl*=0.5}                                                    // background only: Gary hears silence
- if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({realtimeInput:{audio:{data:b64(new Uint8Array(all.buffer)),mimeType:'audio/pcm;rate=16000'}}}))}
+ send(all)}
 function lvPlay(b64s,rate){const bin=atob(b64s),n=bin.length>>1,ab=LV.ctx.createBuffer(1,n,rate||24000),ch=ab.getChannelData(0);
  for(let i=0;i<n;i++){let v=bin.charCodeAt(2*i)|(bin.charCodeAt(2*i+1)<<8);if(v>32767)v-=65536;ch[i]=v/32768}
  LV.recv=(LV.recv||0)+ab.duration;LV.act=Date.now();const s=LV.ctx.createBufferSource();s.buffer=ab;s.connect(LV.ctx.destination);const at=Math.max(LV.ctx.currentTime+(LV.playAt<LV.ctx.currentTime?0.14:0.03),LV.playAt);s.start(at);LV.playAt=at+ab.duration;
@@ -788,11 +826,11 @@ function lvPlay(b64s,rate){const bin=atob(b64s),n=bin.length>>1,ab=LV.ctx.create
 // When Sam cuts in: tell Gary exactly how far Sam heard, so he can answer first and then pick up where he left off.
 function lvNoteCut(){const full=(LV.outT||'').trim();if(!full||!LV.ctx)return;const queued=Math.max(0,LV.playAt-LV.ctx.currentTime),rec=LV.recv||0;
  const frac=rec?Math.max(0,Math.min(1,(rec-queued)/rec)):1;let heard=full.slice(0,Math.floor(full.length*frac)).replace(/\S*$/,'').trim();const rest=full.slice(heard.length).trim();
- LV.outT=(heard?heard+' -':'')+(rest?' [didn\'t get to say: '+rest+']':'');LV.recv=0;if(!rest)return;lvLine('cut','…didn\'t get to say: '+rest);
+ LV.outT=heard?heard+'…':'';LV.unsaid=rest||'';LV.recv=0;if(!rest)return;LV.cutShown=true;
  const note='(Note: Sam cut in while you were speaking. He heard you up to: "'+heard.slice(-240)+'". He did not hear the rest: "'+rest.slice(0,300)+'". Answer what he says next first. Then, if it still matters, pick up where you left off in your own way.)';
  if(LV.ws&&LV.ws.readyState===1)LV.ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:note}]}],turnComplete:false}}))}
 function lvHush(){for(const s of LV.srcs){try{s.stop()}catch(e){}}LV.srcs=[];LV.playAt=0;$('live').classList.remove('speaking')}
-async function lvSaveTurn(){const you=LV.inT.trim(),him=LV.outT.trim();LV.inT='';LV.outT='';if(!you&&!him)return;
+async function lvSaveTurn(){const you=LV.inT.trim(),him=(LV.outT.trim()+(LV.unsaid?'\n\n(Didn\'t get to say: '+LV.unsaid+')':'')).trim();LV.inT='';LV.outT='';LV.unsaid='';if(!you&&!him)return;
  try{if(!CHAT){CHAT='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);store('garyChat',CHAT);await gdb('gary_convos',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id:CHAT,title:'Talk with Gary'})});$('ctitle').textContent='Talk with Gary'}
   const rows=[];if(you)rows.push({convo:CHAT,role:'user',content:you.slice(0,19000)});if(him)rows.push({convo:CHAT,role:'gary',content:him.slice(0,19000)});
   await gdb('gary_messages',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(rows)});if(you)bubble('you',you);if(him)bubble('gary',him)}catch(e){}}
@@ -816,7 +854,7 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
  if(c.inputTranscription&&c.inputTranscription.text){LV.act=Date.now();LV.inT+=c.inputTranscription.text;lvStatus('Listening…')}
  if(c.outputTranscription&&c.outputTranscription.text)LV.outT+=c.outputTranscription.text;
  if(c.modelTurn&&!LV.drop)for(const p of c.modelTurn.parts||[]){if(p.inlineData&&p.inlineData.data){const r=+((p.inlineData.mimeType||'').match(/rate=(\d+)/)||[0,24000])[1];lvPlay(p.inlineData.data,r);lvStatus('Gary')}}
- if(c.turnComplete){LV.drop=false;LV.recv=0;if(LV.inT.trim())lvLine('you',LV.inT.trim());if(LV.outT.trim())lvLine('gary',LV.outT.trim());lvSaveTurn()}}
+ if(c.turnComplete){LV.drop=false;LV.recv=0;if(LV.inT.trim())lvLine('you',LV.inT.trim());if(LV.outT.trim())lvLine('gary',LV.outT.trim());if(LV.unsaid)lvLine('cut','…didn\'t get to say: '+LV.unsaid);lvSaveTurn()}}
 async function liveStart(again){if(!gUse().live){toast('Live voice is switched off - tap the symbols by Momentum to switch it on');return}if(!gUse().google){toast('Live voice needs Google Gemini - tap the symbols by Momentum to switch it on');return}let ctx0=null;if(!again){try{ctx0=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});ctx0.resume()}catch(e){}}if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){toast('Sign in under You → Settings to talk to Gary');return}if(!navigator.onLine){toast('Talking to Gary needs the internet');return}
  if(LV.on&&!again)return;speakStop();
  LV.ctx=ctx0||new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();   // created inside the tap, so iPhone allows sound
@@ -840,7 +878,7 @@ $('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini'
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
-const G_BODY=['................................','................................','............SSSSSSSS............','..........SSSSSSSSSSHH..........','.........SSSSSSSSSSSSHH.........','.........SSSSSSSSSSSSSH.........','........SSSSSSSSSSSSSSHH........','........SSSSSSSSSSSSSSSH........','........MMSSSSSSSSSSSSMM........','.......SMMSSSSSSSSSSSSMMH.......','.......SMMSSSSSSSSSSSSMMH.......','........SSSSSSSSSSSSSSSH........','........SSSSSSSSSSSSSSSH........','.........SSSSSSSSSSSSHH.........','..........SSSSSSSSSSHH..........','...........SSSSSSSSHH...........','.............HHHHHH.............','..........GBBBWWWWBBBB..........','.........GKBBBWWWWBBBKB.........','........GBKBBBWWWWBBBKBB........','........GBKBBBBWWBBBBKBB........','........GBKBBBBWWBBBBKBB........','........GBKBBBBBBBBBBKBB........','........GBKBBBBBBBBBBKBB........','........WW.BBBBBBBBBB.WW........','........WW.BBBBBBBBBB.WW........','...........BBBBBBBBBB...........','...........BBBBBBBBBB...........','...........BBBB..BBBB...........','...........BBBB..BBBB...........','..........BBBBB..BBBBB..........','................................'];
+const G_BODY=['................................','................................','............SSSSSSSS............','..........SSSSSSSSSSHH..........','.........SSSSSSSSSSSSHH.........','.........SSSSSSSSSSSSSH.........','........SSSSSSSSSSSSSSHH........','........SSSSSSSSSSSSSSSH........','........MMSSSSSSSSSSSSMM........','.......SMMSSSSSSSSSSSSMMH.......','.......SMMSSSSSSSSSSSSMMH.......','........SSSSSSSSSSSSSSSH........','........SSSSSSSSSSSSSSSH........','.........SSSSSSSSSSSSHH.........','..........SSSSSSSSSSHH..........','...........SSSSSSSSHH...........','.............HHHHHH.............','...........BBBWWWWBBB...........','..........GBBBWWWWBBBB..........','.........GKBBBWWWWBBBKB.........','.........GKBBBBWWBBBBKB.........','.........GKBBBBWWBBBBKB.........','.........GKBBBBBBBBBBKB.........','.........GKBBBBBBBBBBKB.........','.........WWBBBBBBBBBBWW.........','.........WWBBBBBBBBBBWW.........','...........BBBBBBBBBB...........','...........BBBBBBBBBB...........','...........BBBB..BBBB...........','...........BBBB..BBBB...........','..........BBBBB..BBBBB..........','................................'];
 // name: eyes brows mouth arms fx motion tint posture
 const G_EX={};`idle open n smile rest - bob
 happy u n grin upR blush bob
@@ -981,9 +1019,9 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
  const put=(i,y,c)=>{i=Math.round(i);y=Math.round(y);if(i>=0&&i<32&&y>=0&&y<32)P[y*32+i]=c},del=(i,y)=>{delete P[y*32+i]};
  const rect=(x0,y0,w,h,c)=>{for(let y=y0;y<y0+h;y++)for(let i=x0;i<x0+w;i++)put(i,y,c)};
  const clr=s=>{for(let y=18;y<26;y++)for(let i=s?8:21;i<(s?11:24);i++)del(i,y)};
- const line=(a,b,c,d,col)=>{const n=Math.max(Math.abs(c-a),Math.abs(d-b))||1;for(let k=0;k<=n;k++){const px=a+(c-a)*k/n,py=b+(d-b)*k/n;put(px,py,col);put(px,py+1,col)}};
+ const line=(a,b,c,d,col,thick)=>{const n=Math.max(Math.abs(c-a),Math.abs(d-b))||1;for(let k=0;k<=n;k++){const px=a+(c-a)*k/n,py=b+(d-b)*k/n;put(px,py,col);if(thick)put(px,py+1,col)}};
  // an arm from the shoulder (via optional elbow) to a glove; L = left side of the picture
- const arm=(L,gx,gy,via,col,gw,gh)=>{clr(L);const sx=L?9:22,sy=19;col=col||'B';let px=sx,py=sy;for(const [vx,vy] of via||[]){line(px,py,vx,vy,col);px=vx;py=vy}line(px,py,gx,gy,col);gw=gw||3;gh=gh||3;rect(Math.round(gx-(gw-1)/2),Math.round(gy-(gh-1)/2),gw,gh,'W')};
+ const arm=(L,gx,gy,via,col,gw,gh)=>{clr(L);const sx=L?9:22,sy=19;col=col||'B';let px=sx,py=sy;for(const [vx,vy] of via||[]){line(px,py,vx,vy,col,1);px=vx;py=vy}line(px,py,gx,gy,col,1);gw=gw||2;gh=gh||2;rect(Math.round(gx-(gw-1)/2),Math.round(gy-(gh-1)/2),gw,gh,'W')};
  const A=X.a,odd=t%4<2;
  switch(A){
   case 'wave':arm(0,27+(odd?0:1),13);break; case 'upR':arm(0,27,12);break; case 'upL':arm(1,4,12);break;
@@ -991,17 +1029,17 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'fists':arm(0,22,20,[[26,22]],'G');arm(1,9,20,[[5,22]],'G');break;
   case 'chin':arm(0,19,16,[[23,22]]);break; case 'temple':arm(0,23,7,[[26,15]]);break;
   case 'pose':arm(0,27,12);arm(1,7,22,[[4,21]]);break; case 'hips':arm(1,7,22,[[4,21]]);arm(0,24,22,[[27,21]]);break; case 'hipL':arm(1,7,22,[[4,21]]);break;
-  case 'thumbs':arm(0,25,19,[[26,22]]);put(25,17,'W');put(25,16,'W');break; case 'thumbsdown':arm(0,26,21,[[27,20]]);put(26,23,'W');put(26,24,'W');break;
+  case 'thumbs':arm(0,25,19,[[26,22]],null,3,3);put(25,17,'W');put(25,16,'W');break; case 'thumbsdown':arm(0,26,21,[[27,20]]);put(26,23,'W');put(26,24,'W');break;
   case 'salute':arm(0,23,6,[[26,14]],null,4,2);break;
   case 'shrug':arm(0,29,19,[[27,22]]);arm(1,2,19,[[4,22]]);break;
   case 'facepalm':arm(1,12,9,[[7,15]],null,4,3);break; case 'peek':arm(1,12,9,[[7,15]],null,4,3);arm(0,20,9,[[24,15]],null,4,3);break;
-  case 'cross':clr(0);clr(1);rect(8,20,13,2,'G');rect(21,20,2,2,'W');rect(11,22,13,2,'G');rect(8,22,3,2,'W');put(10,21,'K');put(21,23,'K');break;
+  case 'cross':clr(0);clr(1);put(9,19,'G');rect(22,19,1,3,'B');rect(9,20,12,2,'G');rect(21,20,2,2,'W');rect(11,22,11,2,'B');rect(9,22,2,2,'W');for(let i=11;i<21;i++)put(i,21,i%2?'G':'K');break;
   case 'clap':if(t%2){arm(0,17,20,null,'G',2,3);arm(1,14,20,null,'G',2,3)}else{arm(0,20,20,null,'G',2,3);arm(1,11,20,null,'G',2,3)}break;
   case 'clasp':arm(0,17,21,null,'G',2,3);arm(1,14,21,null,'G',2,3);break;
   case 'mouthcover':arm(0,16,14,[[22,20]],null,4,2);break;
   case 'point':arm(0,29,19,null,null,2,2);put(31,19,'W');break; case 'pointUp':arm(0,26,10,null,null,2,3);put(26,7,'W');put(26,8,'W');break;
   case 'spread':arm(0,29,17,null,null,2,3);arm(1,2,17,null,null,2,3);break;
-  case 'hug':clr(0);clr(1);rect(9,21,14,2,'G');rect(21,19,3,2,'W');rect(8,19,3,2,'W');rect(13,21,6,1,'B');break;
+  case 'hug':clr(0);clr(1);rect(9,18,1,3,'G');rect(22,18,1,3,'B');rect(9,21,14,2,'G');rect(21,19,3,2,'W');rect(8,19,3,2,'W');rect(13,21,6,1,'B');break;
   case 'heart':arm(0,19,20,null,'G',2,2);arm(1,12,20,null,'G',2,2);[[14,19],[15,20],[16,20],[17,19],[15,21],[16,21],[14,20],[17,20]].forEach(([i,y])=>put(i,y,'P'));break;
   case 'scratch':arm(0,22,3,[[27,12]]);break; case 'behind':clr(0);clr(1);break; case 'belly':arm(0,19,23,null,'G');break;
   case 'bowtie':arm(0,18,18,null,'G',2,2);arm(1,13,18,null,'G',2,2);break; case 'bowR':arm(0,15,22,null,'G');break;
@@ -1025,7 +1063,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'sip':arm(0,19,17,[[23,21]],null,2,2);rect(15,13,4,3,'W');put(19,14,'W');put(19,13,'W');rect(14,16,6,1,'C');if(odd){put(16,11,'C');put(17,10,'C')}else{put(17,11,'C');put(16,10,'C')}break;
   case 'phoneEar':arm(0,24,12,[[27,18]],null,2,2);rect(23,8,2,5,'K');break;
   case 'cup':arm(1,6,10,[[4,16]],null,2,3);put(8,9,'W');break;
-  case 'walk':{const st=Math.floor((GW.step||0)/7)%2===0;const L0=st?8:22,L1=st?22:8;rect(L0,23,2,1,'W');rect(L0,25,2,1,'B');rect(L1,25,2,1,'W');rect(L1,26,2,1,'W');if(st){del(10,30);del(11,30);put(10,29,'K')}else{del(20,30);del(21,30);put(21,29,'K')}break}
+  case 'walk':{const st=Math.floor((GW.step||0)/7)%2===0;const L0=st?9:21,L1=st?21:9;rect(L0,23,2,2,'W');del(L0,25);del(L0+1,25);put(L0===9?9:22,22,L0===9?'G':'B');rect(L1,25,2,2,'W');put(L1===9?9:22,24,L1===9?'G':'B');put(L1===9?10:21,24,'K');if(st){del(10,30);del(11,30);put(10,29,'K')}else{del(20,30);del(21,30);put(21,29,'K')}break}
   case 'bike':{for(let y=28;y<31;y++)for(let i=8;i<24;i++)del(i,y);arm(0,24,21,null,'G',2,2);arm(1,21,22,[[11,22]],'G',2,2);
    const c=(cx)=>{for(let a=0;a<16;a++)put(cx+Math.round(Math.cos(a/16*6.283)*3.4),28+Math.round(Math.sin(a/16*6.283)*3.4),'C');put(cx,28,'K');const sa=(GW.step||t*3)/3.4;put(cx+Math.round(Math.cos(sa)*2),28+Math.round(Math.sin(sa)*2),'W');put(cx-Math.round(Math.cos(sa)*2),28-Math.round(Math.sin(sa)*2),'W')};
    line(7,27,16,26,'D');line(16,26,24,27,'D');line(16,26,15,24,'D');line(24,27,24,22,'K');rect(23,21,3,1,'K');c(7);c(24);
@@ -1191,13 +1229,12 @@ async function gNotesCopy(){if(!CS){toast('Sign in first');return}
   await navigator.clipboard.writeText(txt);toast(rows.length+' notes copied - paste them to Claude')}catch(e){toast('Couldn\'t fetch the notes just now')}}
 // ---------- G.A.R.Y.'s bar: pull it up, or give it a clean tap, to go into voice with him (never from a scroll or a brushing thumb)
 let GSCR=0;$('p-gary').addEventListener('scroll',()=>GSCR=Date.now(),{passive:true});
-(function(){const b=$('gbar');let y0=null,x0=0,dy=0,moved=0,t0=0;
- b.addEventListener('pointerdown',e=>{if(e.target.closest('#gsay,#gopen'))return;y0=e.clientY;x0=e.clientX;dy=0;moved=0;t0=Date.now();try{b.setPointerCapture(e.pointerId)}catch(x){}b.classList.add('drag')});
- b.addEventListener('pointermove',e=>{if(y0===null)return;dy=Math.min(0,e.clientY-y0);moved=Math.max(moved,Math.abs(e.clientY-y0)+Math.abs(e.clientX-x0));
-  b.style.transform='translateY('+Math.max(-110,dy)+'px)';$('gbs').textContent=dy<-70?'Let go to talk':'Pull up to talk';if(dy<-70)gMood('excited')});
- const end=()=>{if(y0===null)return;y0=null;b.classList.remove('drag');b.style.transform='';$('gbs').textContent='Pull up or tap to talk';
-  const tap=moved<8&&Date.now()-t0<450&&Date.now()-GSCR>600;if((dy<-70||tap)&&Date.now()-(b._go||0)>1500){b._go=Date.now();gPoke();liveStart()}};
- b.addEventListener('pointerup',end);b.addEventListener('pointercancel',()=>{y0=null;b.classList.remove('drag');b.style.transform=''})})();
+(function(){const b=$('gbar');let y0=null,x0=0,moved=0,t0=0;
+ b.addEventListener('pointerdown',e=>{if(e.target.closest('#gsay,#gopen'))return;y0=e.clientY;x0=e.clientX;moved=0;t0=Date.now()});
+ b.addEventListener('pointermove',e=>{if(y0!==null)moved=Math.max(moved,Math.abs(e.clientY-y0)+Math.abs(e.clientX-x0))});
+ b.addEventListener('pointerup',()=>{if(y0===null)return;y0=null;const tap=moved<8&&Date.now()-t0<500&&Date.now()-GSCR>600;if(tap&&Date.now()-(b._go||0)>1500){b._go=Date.now();gPoke();liveStart()}});
+ b.addEventListener('pointercancel',()=>{y0=null});
+ const ro=()=>document.documentElement.style.setProperty('--askH',$('askbar').offsetHeight+'px');if(window.ResizeObserver)new ResizeObserver(ro).observe($('askbar'));ro()})();
 // the Sentient Search Bar has opinions (it talks in itself); G.A.R.Y. answers back
 const G_BANTER=[['aSk G.A.R.Y. aNyThInG','Anything within reason, sir.','smug'],['he dOeSn\'T bItE ¯\\_(ツ)_/¯','I nibble. Occasionally.','cheeky'],
  ['G.A.R.Y. is PRETTY gay if u ask me 🌈','Fabulous, actually. Nobody asked you.','sarcastic'],['tYpE sOmEtHiNg. he\'s getting b o r e d','The sentient search bar is being mean to me again, sir.','sad'],
@@ -1256,7 +1293,7 @@ function brainDraw(){const e=$('brain');if(!e)return;const U=gUse(),off=!navigat
 async function brainPC(){if(!CS||!navigator.onLine)return;try{const a=await gdb('gary_agents?select=name,last_seen&order=last_seen.desc&limit=1');const on=a&&a[0]&&Date.now()-new Date(a[0].last_seen).getTime()<150000;
  BR.pc=on?'on':'off';BR.pcName=a&&a[0]?a[0].name:'';brainSave();brainDraw()}catch(e){}}
 setInterval(brainPC,60000);setTimeout(brainPC,1500);addEventListener('online',brainDraw);addEventListener('offline',brainDraw);
-const BR_OFF={live:'You won\'t be able to talk out loud with G.A.R.Y. - pulling his bar up will do nothing. Typing still works as normal.',google:'G.A.R.Y. will think with Groq only. Live voice talk needs Google, so pulling him up to talk will stop working, and his spoken replies will use Groq\'s voice instead.',
+const BR_OFF={live:'You won\'t be able to talk out loud with G.A.R.Y. - tapping his bar will do nothing. Typing still works as normal.',google:'G.A.R.Y. will think with Groq only. Live voice talk needs Google, so talking out loud will stop working, and his spoken replies will use Groq\'s voice instead.',
  groq:'No backup brain: if Google is busy or runs out, G.A.R.Y. won\'t switch over - he\'ll just tell you he\'s unavailable until Google is back.',
  pc:'G.A.R.Y. won\'t do anything on your PC - no opening apps, finding files or media controls. Your plan still syncs with the PC as normal.'};
 const BR_NAME={google:'Google Gemini',groq:'GroqCloud',live:'Live voice',pc:'Your PC'};
@@ -1267,18 +1304,18 @@ async function brainData(){if(!CS||!navigator.onLine)return;const day=new Date()
   BRD={pc:ag&&ag[0],g:(rp||[]).filter(r=>!/^groq/.test(r.detail&&r.detail.model||'')).length,q:(rp||[]).filter(r=>/^groq/.test(r.detail&&r.detail.model||'')).length,lv:(lv||[]).length};
   if(BRD.pc){BR.pc=Date.now()-new Date(BRD.pc.last_seen).getTime()<150000?'on':'off';BR.pcName=BRD.pc.name}brainSave();brainDraw();if($('bdrop').classList.contains('on'))brainMenu(true)}catch(e){}}
 function brainMenu(keep){const U=gUse(),off=!navigator.onLine||!CS,live=typeof LV!=='undefined'&&LV.on;
- const bar=(pct,cls,label)=>'<div class="bdbar"><i class="'+cls+'" style="width:'+Math.max(3,Math.min(100,pct))+'%"></i></div><div class="bdlab">'+label+'</div>';
- const OFFS={google:'Off: he only uses GroqCloud, and live voice stops.',groq:'Off: no backup - if Google is busy he can\'t reply.',live:'Off: pulling or tapping his bar does nothing. Typing still works.',pc:'Off: he can\'t touch your PC. Your plan still syncs.'};
- const row=(k,icon,meaning,conn,b)=>'<div class="bdrow"><i class="bmi '+(!U[k]?'dis':conn?'ok':'off')+'">'+BR_ICON[icon]+'</i><div class="bdtx"><div class="bdname">'+BR_NAME[k]+' <span class="'+(conn&&U[k]?'bdon':'bdoff')+'">'+(!U[k]?'Switched off':conn?'Connected':'Not connected')+'</span></div><small>'+meaning+'</small>'+(U[k]?b:'')+'<div class="bdoffl">'+OFFS[k]+'</div></div><button class="tog'+(U[k]?' on':'')+'" data-bk="'+k+'"></button></div>';
+ const bar=(pct,cls)=>'<div class="bdbar"><i class="'+cls+'" style="width:'+Math.max(3,Math.min(100,pct))+'%"></i></div>';
+ const row=(k,icon,role,conn,state,pct,cls,stat)=>'<div class="bdrow"><i class="bmi '+(!U[k]?'dis':conn?'ok':'off')+'">'+BR_ICON[icon]+'</i><div class="bdtx"><div class="bdname">'+BR_NAME[k]+'</div><small>'+role+' · <b class="'+(!U[k]?'bdoff':conn?'bdon':'bdoff')+'">'+(!U[k]?'Off':state)+'</b></small>'+(U[k]?bar(pct,cls)+'<div class="bdlab">'+stat+'</div>':'')+'</div><button class="tog'+(U[k]?' on':'')+'" data-bk="'+k+'" aria-label="'+BR_NAME[k]+'"></button></div>';
  const gConn=!off&&BR.g!=='out',gp=BR.g==='ok'?100:BR.g==='low'?45:8;
  const qConn=!off,qp=BR.groqLeft!=null?Math.round(BR.groqLeft*100):100;
- const pcOn=BR.pc==='on',dr=BRD.pc&&BRD.pc.info&&BRD.pc.info.drives||{},dk=Object.keys(dr)[0];
+ const pcOn=BR.pc==='on',dr=BRD.pc&&BRD.pc.info&&BRD.pc.info.drives||{},dk=dr.L?'L':Object.keys(dr)[0];
+ const n=(v,w)=>v==null?'':v+' '+(v===1?w:w==='reply'?'replies':w+'s')+' today';
  $('bdlist').innerHTML=
-  row('google','google','✦ His main brain - thinks and writes his replies.',gConn,bar(gp,BR.g==='ok'?'ok':BR.g,(BR.g==='ok'?'Running well':BR.g==='low'?'Busy - on a backup model':'Full or busy - Groq is covering')+(BRD.g!=null?' · '+BRD.g+' replies today':'')+' · Google doesn\'t say exactly how much is left'))+
-  row('groq','groq','⚡ His backup brain - takes over the moment Google is busy or full.',qConn,bar(qp,qp<20?'low':'ok',(BR.groqLeft!=null?qp+'% of today\'s allowance left':'Allowance not checked yet - shows after he uses it')+(BRD.q!=null?' · '+BRD.q+' replies today':'')))+
-  row('live','live','〰 Talking out loud with him - pull his bar up. Runs on Google Gemini Live.',!off&&U.google,bar(live?100:BRD.lv?Math.max(8,100-BRD.lv*4):100,'ok',(live?'Talking now':'Ready')+(BRD.lv!=null?' · '+BRD.lv+' conversation'+(BRD.lv===1?'':'s')+' today':'')))+
-  row('pc','pc','▭ Your computer - he can open apps, find files and control media when it\'s on.',pcOn,dk?bar(Math.round(100*(1-dr[dk].free_gb/dr[dk].total_gb)),dr[dk].free_gb<15?'low':'ok',dk+' drive: '+dr[dk].free_gb+' GB free of '+dr[dk].total_gb+(BR.pcName?' · '+BR.pcName:'')):bar(pcOn?100:5,pcOn?'ok':'off',pcOn?'On':'Off or asleep'));
- $('bdfoot').textContent=(off?'◆ Right now: no internet or not signed in, so Momentum is running from this phone\'s memory and G.A.R.Y. can\'t think. ':'◆ appears instead when you\'re offline: Momentum runs from this phone\'s memory. ')+'Plan sync: '+($('sync').className==='ok'?'up to date.':'waiting for a connection.');
+  row('google','google','Main brain',gConn,off?'Offline':BR.g==='ok'?'Running well':BR.g==='low'?'Busy':'Full - Groq covering',gp,BR.g==='ok'?'ok':BR.g,n(BRD.g,'reply')||'&nbsp;')+
+  row('groq','groq','Backup brain',qConn,off?'Offline':'Standing by',qp,qp<20?'low':'ok',(BR.groqLeft!=null?qp+'% left today':'Allowance shows after first use')+(BRD.q?' · '+n(BRD.q,'reply'):''))+
+  row('live','live','Talk out loud',!off&&U.google,off?'Offline':!U.google?'Needs Gemini':live?'Talking now':'Ready',100,live?'ok':'ok',n(BRD.lv,'talk')||'&nbsp;')+
+  row('pc','pc','Apps, files, media',pcOn,pcOn?'On'+(BR.pcName?' · '+BR.pcName:''):'Asleep',dk?Math.round(100*(1-dr[dk].free_gb/dr[dk].total_gb)):(pcOn?100:5),dk?(dr[dk].free_gb<15?'low':'ok'):(pcOn?'ok':'off'),dk?dk+': '+dr[dk].free_gb+' GB free of '+dr[dk].total_gb:'Drive space shows when it\'s on');
+ $('bdfoot').textContent=off?'No internet - your plan works from this phone; G.A.R.Y. is resting.':'Plan sync '+($('sync').className==='ok'?'up to date':'waiting')+' · Tap a switch to turn something off.';
  if(!keep){$('bdrop').classList.add('on');$('veil').classList.add('on');brainData()}}
 function brainClose(){$('bdrop').classList.remove('on');if(!document.querySelector('.sheet.on'))$('veil').classList.remove('on')}
 function brainToggle(k){const U=gUse();if(!U[k]){U[k]=true;store('garyUse',JSON.stringify(U));brainDraw();brainMenu(true);toast(BR_NAME[k]+' is back on');return}
