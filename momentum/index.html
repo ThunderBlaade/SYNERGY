@@ -389,6 +389,11 @@ body.lvon.lvmini #askbar{display:flex!important;animation:barback .35s var(--eas
 #gbcall button{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);background:none;color:var(--fg);border-radius:50%}#gbcall svg{width:16px;height:16px}#gbcall #gbmute.on{background:var(--fg);color:#000}
 #live:not(.mini){animation:liveup .3s var(--ease)}@keyframes liveup{from{opacity:.4;transform:translateY(16px)}to{opacity:1;transform:none}}
 #p-gary{transition:padding-bottom .3s var(--ease)}
+
+/* the bar: just an up-arrow where "G.A.R.Y. / Tap to talk" was */
+.gbt b,#gbs{display:none!important}#gbup{display:block;width:34px;height:34px;color:var(--fg)}#gbup svg{width:100%;height:100%}body.kbup #gbup{width:26px;height:26px}
+.gbt{align-items:flex-end!important}#gbcall{justify-content:flex-end}
+#thread p.cap{color:var(--fg)}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -431,9 +436,9 @@ body.lvon.lvmini #askbar{display:flex!important;animation:barback .35s var(--eas
 </section>
 
 <div id="askbar"><div id="gbar"><div id="gopen"><div id="gotx"></div><div class="goacts"><button class="btn fill" id="goyes">Reply</button><button class="btn ghost" id="gono">Not now</button></div></div>
- <div id="gsay"></div><button id="gdock" aria-label="G.A.R.Y."></button><div class="gbt"><b>G.A.R.Y.</b><span class="lab" id="gbs">Tap to talk</span><div id="gbcall"><button id="gbmute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><button id="gbend" aria-label="End call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div></div>
+ <div id="gsay"></div><button id="gdock" aria-label="G.A.R.Y."></button><div class="gbt"><b>G.A.R.Y.</b><span class="lab" id="gbs">Tap to talk</span><i id="gbup" aria-label="Talk to G.A.R.Y."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15l7-7 7 7"/></svg></i><div id="gbcall"><button id="gbmute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><button id="gbend" aria-label="End call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div></div>
  <textarea id="ask" rows="1" placeholder="aSk G.A.R.Y. aNyThInG…" spellcheck="true" autocorrect="on" autocapitalize="sentences" enterkeyhint="send"></textarea>
- <button class="mic" id="asksend" aria-label="Send" style="border-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+ <button class="mic" id="asksend" aria-label="Send" style="border-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg></button>
  <button class="mic" id="askmic" aria-label="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 19 7.5 6l5 13M4.4 14.5h6.2M19.5 4.5v15M17.5 4.5h4M17.5 19.5h4"/></svg></button></div>
 
 <button id="gcut">Tap to interrupt</button>
@@ -1118,11 +1123,11 @@ async function lvMsg(ev){let d=ev.data;if(typeof d!=='string')d=await (d.text?d.
  if(m.toolCall){(m.toolCall.functionCalls||[]).forEach(lvTool);return}
  if(m.goAway){lvStatus('One moment…');setTimeout(()=>{if(LV.on){lvStop(true);liveStart(true)}},300);return}
  const c=m.serverContent;if(!c)return;
- if(c.interrupted){LV.turnOpen=false;lvNoteCut();lvHush();LV.drop=false;lvStatus('Listening…')}
+ if(c.interrupted){LV.turnOpen=false;LV.cap=null;lvNoteCut();lvHush();LV.drop=false;lvStatus('Listening…')}
  if(c.inputTranscription&&c.inputTranscription.text){LV.act=Date.now();LV.inT+=c.inputTranscription.text;lvStatus('Listening…')}
- if(c.outputTranscription&&c.outputTranscription.text){LV.outT+=c.outputTranscription.text;LV.turnOpen=true}
+ if(c.outputTranscription&&c.outputTranscription.text){LV.outT+=c.outputTranscription.text;LV.turnOpen=true;if(document.body.classList.contains('lvmini')){if(!LV.cap){if(!LV.typed&&LV.inT.trim())bubble('you',LV.inT.trim());LV.cap=bubble('gary','');LV.cap.classList.add('cap')}LV.cap.textContent=LV.outT.trim();garyBottom()}}
  if(c.modelTurn&&!LV.drop)for(const p of c.modelTurn.parts||[]){if(p.inlineData&&p.inlineData.data){const r=+((p.inlineData.mimeType||'').match(/rate=(\d+)/)||[0,24000])[1];lvPlay(p.inlineData.data,r);lvStatus('Gary')}}
- if(c.turnComplete){LV.turnOpen=false;LV.spoke=true;LV.drop=false;LV.recv=0;if(LV.inT.trim()&&!LV.typed)lvLine('you',LV.inT.trim());LV.typed=false;if(LV.outT.trim())lvLine('gary',LV.outT.trim());if(LV.unsaid)lvLine('cut','…didn\'t get to say: '+LV.unsaid);lvSaveTurn()}}
+ if(c.turnComplete){LV.turnOpen=false;LV.cap=null;LV.spoke=true;LV.drop=false;LV.recv=0;if(LV.inT.trim()&&!LV.typed)lvLine('you',LV.inT.trim());LV.typed=false;if(LV.outT.trim())lvLine('gary',LV.outT.trim());if(LV.unsaid)lvLine('cut','…didn\'t get to say: '+LV.unsaid);lvSaveTurn()}}
 // toasts are hidden, so if he can't start a call, Gary says why himself (and sign-in opens straight away)
 function lvWhy(t){if(tab==='gary'){gBubble(t,6000);gMood('shrug',2500)}else toast(t)}
 async function liveStart(again){if(!gUse().live){lvWhy('Voice is switched off, sir - tap the symbols by Momentum to switch it on.');return}if(!gUse().google){lvWhy('I need Google Gemini switched on to talk - tap the symbols by Momentum.');return}let ctx0=null;if(!again){try{ctx0=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});ctx0.resume()}catch(e){}}if(!again&&gLockOn()&&!GL.ok&&!GL.guest){await gGate()}if(!CS){try{ctx0&&ctx0.close()}catch(e){}lvWhy('You\'ll need to sign in on this device first, sir.');sheet('signin',true);setTimeout(()=>$('siE').focus(),300);return}if(!navigator.onLine){lvWhy('No internet, sir - I can\'t talk out loud without it.');return}
@@ -1156,6 +1161,13 @@ $('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini'
 
 // type to G.A.R.Y. during a call: he reads it and answers out loud
 $('lvtype').onclick=()=>{if(performance.now()-LV.t0<900)return;const on=!$('live').classList.contains('typing');$('live').classList.toggle('typing',on);$('lvtype').classList.toggle('on',on);if(on){const t=$('lvtin');t.focus({preventScroll:true});t.click();LV.preMute=LV.muted;LV.muted=true;LV.open=0}else{$('lvtin').blur();if(!LV.nomic)LV.muted=!!LV.preMute}$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute')};
+// minimised call: what you type goes to Gary in the call; he answers out loud and his words appear in the chat as he says them
+function askAny(v){if(typeof LV!=='undefined'&&LV.on&&document.body.classList.contains('lvmini'))return lvTypeSend(v);return ask(v)}
+function lvTypeSend(t){t=String(t||'').trim();if(!t)return;if(!LV.ws||LV.ws.readyState!==1||!LV.ready){gBubble('One moment, sir - I\'m not quite connected yet.',3000);return}
+ if(LV.srcs.length){lvNoteCut();lvHush();LV.drop=false}LV.inT+=(LV.inT?' ':'')+t;LV.typed=true;LV.act=Date.now();bubble('you',t);LV.cap=null;garyBottom();
+ LV.ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:t}]}],turnComplete:true}}));gMood('think',1500)}
+$('ask').addEventListener('focus',()=>{if(LV.on&&document.body.classList.contains('lvmini')){if(LV.typeMute===undefined||LV.typeMute===null)LV.preMute=LV.muted;LV.typeMute=true;LV.muted=true;LV.open=0;$('lvmute').classList.add('on');lvCallDraw()}});
+$('ask').addEventListener('blur',()=>{if(LV.typeMute){LV.typeMute=null;if(!LV.nomic)LV.muted=!!LV.preMute;$('lvmute').classList.toggle('on',LV.muted);lvCallDraw()}});
 $('lvtyp').onsubmit=e=>{e.preventDefault();const t=$('lvtin').value.trim();if(!t)return;if(!LV.ws||LV.ws.readyState!==1||!LV.ready){lvStatus('One moment - he\'s not quite here yet');return}
  if(LV.srcs.length){lvNoteCut();lvHush();LV.drop=false}LV.inT+=(LV.inT?' ':'')+t;LV.typed=true;LV.act=Date.now();lvLine('you',t);$('lvtin').value='';
  LV.ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:t}]}],turnComplete:true}}));lvStatus('Gary');gMood('think',1500)};
@@ -1983,8 +1995,8 @@ async function speak(t,vo){t=String(t||'').replace(/[*_#`]/g,'').trim();if(!t)re
 if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{};
 const grow=()=>{const t=$('ask');if(!t.value){t.style.height='';askPH();return}t.style.height='auto';t.style.height=Math.min(160,t.scrollHeight)+'px'};
 $('ask').addEventListener('input',grow);
-$('ask').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const v=$('ask').value;$('ask').value='';grow();ask(v)}});
-$('asksend').onclick=()=>{const v=$('ask').value,keep=Date.now()-(window.__askFocusAt||0)<1500||document.activeElement===$('ask');$('ask').value='';grow();if(keep)$('ask').focus({preventScroll:true});ask(v)};
+$('ask').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const v=$('ask').value;$('ask').value='';grow();askAny(v)}});
+$('asksend').onclick=()=>{const v=$('ask').value,keep=Date.now()-(window.__askFocusAt||0)<1500||document.activeElement===$('ask');$('ask').value='';grow();if(keep)$('ask').focus({preventScroll:true});askAny(v)};
 // sending keeps the keyboard up (the tap on send doesn't steal focus from the box); tapping anywhere else puts it away
 $('asksend').addEventListener('pointerdown',e=>{if(document.activeElement===$('ask')){window.__askFocusAt=Date.now();e.preventDefault()}});$('asksend').addEventListener('mousedown',e=>{if(document.activeElement===$('ask'))e.preventDefault()});
 document.addEventListener('pointerdown',e=>{const t=$('ask');if(document.activeElement===t&&!e.target.closest('#askbar'))t.blur()},true);
@@ -2011,7 +2023,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124161533';let UPD=false;
+const BUILD='20261124162224';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
