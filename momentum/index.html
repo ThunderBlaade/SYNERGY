@@ -1111,8 +1111,13 @@ function garyBottom(){const p=$('p-gary');if(!p)return;const go=()=>{p.scrollTop
 
 // keyboard on G.A.R.Y.'s page (phones): the page stays put; his bar + the message box ride up to sit right above the keyboard, and drop back when it closes
 const VV=()=>window.__vv||window.visualViewport;
-function kbFit(){const v=VV(),a=$('askbar'),t=$('ask');if(!v||!a)return;const open=document.activeElement===t&&tab==='gary'&&innerHeight-v.height>120;
- if(open){if(window.scrollY)scrollTo(0,0);const kb=Math.max(0,innerHeight-v.height-v.offsetTop);a.style.top=Math.round(v.offsetTop+v.height-a.offsetHeight)+'px';a.style.bottom='auto';
+let FULLH=window.__fullh||innerHeight;const kbTyping=()=>{const e=document.activeElement;return !!e&&/INPUT|TEXTAREA/.test(e.tagName)};
+addEventListener('resize',()=>{if(!kbTyping())FULLH=window.__fullh||innerHeight;navKeep()});addEventListener('orientationchange',()=>setTimeout(()=>{FULLH=innerHeight},400));
+// the page tabs always stay at the very bottom, under the keyboard - even if the phone shrinks the app when the keyboard opens
+function navKeep(){const n=document.querySelector('nav');if(!n)return;const shrunk=(window.__ih||innerHeight)<FULLH-100&&kbTyping();n.style.transform=shrunk?'translateY('+(FULLH-(window.__ih||innerHeight))+'px)':''}
+document.addEventListener('focusin',()=>{navKeep();setTimeout(navKeep,350)});document.addEventListener('focusout',()=>setTimeout(navKeep,120));
+function kbFit(){navKeep();const v=VV(),a=$('askbar'),t=$('ask');if(!v||!a)return;const open=document.activeElement===t&&tab==='gary'&&FULLH-v.height>120;
+ if(open){if(window.scrollY)scrollTo(0,0);const kb=Math.max(0,FULLH-v.height-v.offsetTop);a.style.top=Math.round(v.offsetTop+v.height-a.offsetHeight)+'px';a.style.bottom='auto';
   document.documentElement.style.setProperty('--kb',kb+'px');document.body.classList.add('kbup');if(!kbFit.was)garyBottom();kbFit.was=true}
  else if(kbFit.was||a.style.top){a.style.top='';a.style.bottom='';document.documentElement.style.setProperty('--kb','0px');document.body.classList.remove('kbup');kbFit.was=false}}
 if(window.visualViewport){visualViewport.addEventListener('resize',kbFit);visualViewport.addEventListener('scroll',kbFit)}
@@ -1769,7 +1774,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124125102';let UPD=false;
+const BUILD='20261124125559';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
