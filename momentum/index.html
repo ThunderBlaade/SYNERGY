@@ -1209,7 +1209,7 @@ function voicePicker(){const el=$('svoice');if(!el)return;const cur=gvCur();
  el.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>{audioUnlock();speak(GV_LINE,b.dataset.play);b.textContent='♪ Playing';setTimeout(()=>{if(b.isConnected)b.textContent='▶ Play'},6000)});
  el.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{store('garyVoice',b.dataset.use);voicePicker()})}
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
-const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
+const GP={X:'#9ea6b3',S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
 const G_BODY=['................................','................................','............SSSSSSSS............','..........SSSSSSSSSSHH..........','.........SSSSSSSSSSSSHH.........','.........SSSSSSSSSSSSSH.........','........SSSSSSSSSSSSSSHH........','........SSSSSSSSSSSSSSSH........','........MMSSSSSSSSSSSSMM........','.......SMMSSSSSSSSSSSSMMH.......','.......SMMSSSSSSSSSSSSMMH.......','........SSSSSSSSSSSSSSSH........','........SSSSSSSSSSSSSSSH........','.........SSSSSSSSSSSSHH.........','..........SSSSSSSSSSHH..........','...........SSSSSSSSHH...........','.............HHHHHH.............','...........BBBWWWWBBB...........','..........GBBBWWWWBBBB..........','.........GKBBBWWWWBBBKB.........','.........GKBBBBWWBBBBKB.........','.........GKBBBBWWBBBBKB.........','.........GKBBBBBBBBBBKB.........','.........GKBBBBBBBBBBKB.........','.........WWBBBBBBBBBBWW.........','.........WWBBBBBBBBBBWW.........','...........BBBBBBBBBB...........','...........BBBBBBBBBB...........','...........BBBB..BBBB...........','...........BBBB..BBBB...........','..........BBBBB..BBBBB..........','................................'];
 // name: eyes brows mouth arms fx motion tint posture
@@ -1414,9 +1414,9 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'phoneEar':arm(0,24,12,[[27,18]],null,2,2);rect(23,8,2,5,'K');break;
   case 'cup':arm(1,6,10,[[4,16]],null,2,3);put(8,9,'W');break;
   case 'walk':{const st=Math.floor((GW.step||0)/7)%2===0;const L0=st?9:21,L1=st?21:9;rect(L0,23,2,2,'W');del(L0,25);del(L0+1,25);put(L0===9?9:22,22,L0===9?'G':'B');rect(L1,25,2,2,'W');put(L1===9?9:22,24,L1===9?'G':'B');put(L1===9?10:21,24,'K');if(st){del(10,30);del(11,30);put(10,29,'K')}else{del(20,30);del(21,30);put(21,29,'K')}break}
-  case 'bike':{if(GS.scene){arm(0,24,21,null,'G',2,2);arm(1,21,22,[[11,22]],'G',2,2);break}for(let y=28;y<31;y++)for(let i=8;i<24;i++)del(i,y);arm(0,24,21,null,'G',2,2);arm(1,21,22,[[11,22]],'G',2,2);
+  case 'bike':{for(let y=28;y<31;y++)for(let i=8;i<24;i++)del(i,y);arm(0,24,21,null,'G',2,2);arm(1,21,22,[[11,22]],'G',2,2);
    const c=(cx)=>{for(let a=0;a<16;a++)put(cx+Math.round(Math.cos(a/16*6.283)*3.4),28+Math.round(Math.sin(a/16*6.283)*3.4),'C');put(cx,28,'K');const sa=(GW.step||t*3)/3.4;put(cx+Math.round(Math.cos(sa)*2),28+Math.round(Math.sin(sa)*2),'W');put(cx-Math.round(Math.cos(sa)*2),28-Math.round(Math.sin(sa)*2),'W')};
-   line(7,27,16,26,'D');line(16,26,24,27,'D');line(16,26,15,24,'D');line(24,27,24,22,'K');rect(23,21,3,1,'K');c(7);c(24);
+   line(7,27,16,26,'X');line(16,26,24,27,'X');line(16,26,15,24,'X');line(24,27,24,22,'K');rect(23,21,3,1,'K');c(7);c(24);
    if(odd){put(14,27,'B');put(14,28,'B');put(13,29,'K')}else{put(17,27,'B');put(17,28,'B');put(18,29,'K')}break}
   case 'tiphat':arm(0,27,13);rect(24,11,7,1,'K');rect(25,6,5,5,'K');rect(25,10,5,1,'G');break}
  // brows
@@ -1541,7 +1541,7 @@ const PROP_TEACUP=["....KKKK....","...KWWWWK...","..KWWAWWKK..","..KWWWWWWK..","
 const PROP_BRIEFCASE=["....KKKKKK....","...KLLLLLLK...",".KKKKKKKKKKKK.","KDDDDDDDDDDDDK","KDLLLLLLLLLLDK","KDDDDDYYDDDDDK","KDDDDDDDDDDDDK","KDDDDDDDDDDDDK","KKKKKKKKKKKKKK"];
 const PROP_LAMP=["....KKKKKKKK....","..KKYYYYYYYYKK..",".KYYLLLLLLLLYYK.",".KYYDDDDDDDDYYK.","KKKKKKKKKKKKKKKK",...Array(35).fill(".......KL......."),".....KKKKKK.....","....KLLLLLLK....","....KKKKKKKK...."];
 const PROP_TOPHAT=["....KKKKKKKKKK....","...KBBBBBBBBBBK...","...KBGGGGGGGGGBK..","...KBBBBBBBBBBK...","...KBBBBBBBBBBK...","...KBBBBBBBBBBK...","...KRRRRRRRRRRK...","...KBBBBBBBBBBK...",".KKKKKKKKKKKKKKKK.","KBBBBBBBBBBBBBBBBK","KGGGGGGGGGGGGGGGGK",".KKKKKKKKKKKKKKKK."];
-const G_PROPS={cycling:'bike',umbrella:'umbrella',tea:'teacup',reading:'lamp',newspaper:'lamp',writing:'lamp',dapper:'tophat',flourish:'tophat',welcoming:'tophat',waiting:'briefcase',watch:'briefcase',impatient:'briefcase',cane:'cane',sitread:'lamp',sittea:'teacup'};
+const G_PROPS={cycling:'bike',umbrella:'umbrella',tea:'teacup',dapper:'tophat',flourish:'tophat',welcoming:'tophat',waiting:'briefcase',watch:'briefcase',impatient:'briefcase',cane:'cane',sittea:'teacup'};
 function gProp(x,pat,sx,sy){for(let y=0;y<pat.length;y++)for(let i=0;i<pat[y].length;i++){const c=pat[y][i];if(c==='.'||!GPP[c])continue;x.fillStyle=GPP[c];x.fillRect(sx+i,sy+y,1,1)}}
 // small things he carries in his hand while walking in or out with them
 const G_CARRY={tea:[PROP_TEACUP,30,44],book:[["KKKKKKK","KDDDDDK","KDLLLDK","KDDDDDK","KKKKKKK"],35,45],phone:[["KKKK","KAAK","KAAK","KAAK","KKKK"],36,45],glass:[[".KKKK.","KAAAAK","KAWAAK","KAAAAK",".KKKK.","....KD","....KD"],35,41],
@@ -1552,12 +1552,12 @@ function gCarry(x,items){for(const i of items){const c=G_CARRY[i];if(c)gProp(x,c
 let GOFF=null;
 function gScene(x,amb){const name=gState(),X=G_EX[name]||G_EX.idle,mini=amb&&$('live').classList.contains('mini');
  let pr=G_PROPS[name]||null;if(pr&&!(pr==='lamp'&&amb)&&!GS.has.has(G_PROPITEM[pr]||pr))pr=null;let chair=!GS.has.has('chair')?null:X.post==='sit'?0:X.post==='pull'?Math.max(0,Math.round(28*(1-Math.min(1,(performance.now()-(GS.chairT0||0))/1100)))):null;
- if(amb&&(!LV.ready||$('lvorb').className)){if(pr!=='bike')pr=null;chair=null}else if(!pr&&chair===null&&amb&&!mini)pr='lamp';
+ if(amb&&(!LV.ready||$('lvorb').className)){if(pr!=='bike')pr=null;chair=null}
  if(!GOFF){GOFF=document.createElement('canvas');GOFF.width=GOFF.height=32}
  GS.scene=true;GS.nobob=!amb;GS.noshort=['umbrella','teacup','bike','cane'].includes(pr);try{gDraw(GOFF.getContext('2d'),name)}finally{GS.scene=false;GS.nobob=false;GS.noshort=false}
- const sit=X.post==='sit',dy=(GS.ldy||0)+(sit?-2:0),lift=pr==='bike'?-4:sit?-5:0;x.clearRect(0,0,64,64);
- if(GS.carry&&(name==='walking'||name==='strut')){if(GS.carry.includes('chair'))gProp(x,PROP_CHAIR,1,33);if(GS.carry.includes('lamp'))gProp(x,PROP_LAMP,3,13)}
- if(chair!==null)gProp(x,PROP_CHAIR,16+chair,33);if(pr==='bike')gProp(x,PROP_BIKE,10,34);if(pr==='lamp')gProp(x,PROP_LAMP,5,13);if(pr==='briefcase')gProp(x,PROP_BRIEFCASE,46,46);
+ const sit=X.post==='sit',dy=(GS.ldy||0)+(sit?-2:0),lift=sit?-5:0;x.clearRect(0,0,64,64);
+ if(GS.carry&&(name==='walking'||name==='strut')){if(GS.carry.includes('chair'))gProp(x,PROP_CHAIR,1,33);0}
+ if(chair!==null)gProp(x,PROP_CHAIR,16+chair,33);if(pr==='briefcase')gProp(x,PROP_BRIEFCASE,46,46);
  x.drawImage(GOFF,16,24+lift);
  if(sit){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h)};P(GPP.K,25,46,14,4);P(GPP.B,26,46,12,3);P(GPP.G,31,47,2,1);P(GPP.K,26,49,5,7);P(GPP.K,33,49,5,7);P(GPP.B,27,49,3,5);P(GPP.B,34,49,3,5);P(GPP.K,25,54,6,2);P(GPP.K,33,54,6,2)}
  if(pr==='cane')gProp(x,PROP_CANE,36,43+dy);if(pr==='umbrella')gProp(x,PROP_UMBRELLA,26,5+dy);if(pr==='teacup')gProp(x,PROP_TEACUP,32,38+dy);if(pr==='tophat')gProp(x,PROP_TOPHAT,23,15+dy)
@@ -1921,7 +1921,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124154141';let UPD=false;
+const BUILD='20261124154531';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
