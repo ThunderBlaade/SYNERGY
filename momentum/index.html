@@ -377,6 +377,8 @@ header{padding-top:calc(4px + var(--safeT))!important}header>.lab{font-size:12.5
 
 #chead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0 4px;padding:10px 0;border-bottom:1px solid var(--line)}#chname{font:400 16px/1.3 var(--serif);color:var(--fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#chnew{color:var(--fg);flex:none}
 #thread.chin{animation:chin .35s var(--ease)}@keyframes chin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.chundo{display:flex!important;justify-content:space-between;align-items:center;color:var(--dim);font-size:14px}.chundo button{color:var(--fg)}#chlist .chi{position:relative;background:#000}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -848,16 +850,32 @@ async function listChats(){sheet('chl',true);$('chq').value='';if(!CS){$('chf').
  catch(e){if(!CHS.length)$('chlist').innerHTML='<p class="empty">Can\'t reach your chats right now.</p>'}}
 const CHFOLD=['People','Places','Experiences','Self','Knowledge','Other'];let CHW=null;
 function chWhen(d){const t=new Date(d);return t.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:t.getFullYear()===new Date().getFullYear()?undefined:'numeric'})+' · '+t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
+// swipe a chat left to delete it (Undo for 5 seconds), right to pin it to the top (or unpin)
+function chPins(){try{return JSON.parse(store('garyPins')||'[]')}catch(e){return []}}
+function chSwipe(b){let x0=null,y0=0,dx=0,on=false;b.style.touchAction='pan-y';
+ b.addEventListener('pointerdown',e=>{x0=e.clientX;y0=e.clientY;dx=0;on=false;b._sw=false});
+ b.addEventListener('pointermove',e=>{if(x0===null)return;dx=e.clientX-x0;if(!on){if(Math.abs(dx)>12&&Math.abs(dx)>Math.abs(e.clientY-y0)*1.3){on=true;b._sw=true;b.style.transition='none'}else return}
+  b.style.transform='translateX('+dx+'px)';b.style.opacity=String(Math.max(.35,1-Math.abs(dx)/400));b.dataset.sw=dx<0?'del':'pin'});
+ const end=()=>{if(x0===null)return;x0=null;if(!on){return}b.style.transition='transform .3s var(--ease),opacity .3s';const W=b.offsetWidth;
+  if(dx<-W*0.35){b.style.transform='translateX(-110%)';b.style.opacity='0';setTimeout(()=>chDelete(b),280)}
+  else if(dx>W*0.3){const P=chPins(),id=b.dataset.id,i=P.indexOf(id);if(i<0)P.unshift(id);else P.splice(i,1);store('garyPins',JSON.stringify(P.slice(0,30)));buzz(12);b.style.transform='';b.style.opacity='';setTimeout(drawChats,250)}
+  else{b.style.transform='';b.style.opacity=''}setTimeout(()=>{b._sw=false},350)};
+ b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end)}
+function chDelete(b){const id=b.dataset.id,c=CHS.find(x=>x.id===id);if(!c)return;const u=document.createElement('div');u.className='ci chundo';u.innerHTML='<span>Chat deleted</span><button class="lab">Undo</button>';b.replaceWith(u);
+ let gone=false;const t=setTimeout(async()=>{gone=true;u.remove();CHS=CHS.filter(x=>x.id!==id);const e=encodeURIComponent(id);const P=chPins().filter(x=>x!==id);store('garyPins',JSON.stringify(P));
+  try{await gdb('gary_messages?convo=eq.'+e,{method:'DELETE'});await gdb('gary_convos?id=eq.'+e,{method:'DELETE'});if(id===CHAT)loadChat(null)}catch(err){listChats()}},5000);
+ u.querySelector('button').onclick=()=>{if(gone)return;clearTimeout(t);drawChats()}}
 function drawChats(){if($('chq').value.trim())return chSearch();const tags={};for(const c of CHS)for(const t of c.tags||[])tags[t]=(tags[t]||0)+1;const imp=CHS.filter(c=>c.crucial).length,np=CHS.reduce((a,c)=>a+((c.parts||[]).length),0);
  const F=[['all','All '+CHS.length]].concat(imp?[['crucial','Important '+imp]]:[]).concat(np?[['folders','Folders '+np]]:[]).concat([['claude','Claude suggestions']]).concat(Object.keys(CHT).filter(t=>tags[t]).map(t=>[t,CHT[t]+' '+tags[t]]));if(!F.some(f=>f[0]===CHF))CHF='all';
  $('chf').innerHTML=F.map(f=>'<button class="chip'+(f[0]===CHF?' on':'')+'" data-f="'+f[0]+'">'+esc(f[1])+'</button>').join('');$('chf').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{CHF=b.dataset.f;drawChats()});
  if(CHF==='folders')return chFolders();if(CHF==='claude')return chClaude();
  const L=CHS.filter(c=>CHF==='all'||(CHF==='crucial'?c.crucial:(c.tags||[]).includes(CHF)));const now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
- const grp=c=>{const t=new Date(c.updated_at).getTime();return t>=d0?'Today':t>=d0-6*864e5?'This week':t>=d0-30*864e5?'This month':'Earlier'};let last='',h='';
+ const PIN=chPins();L.sort((a,b)=>(PIN.includes(b.id)?1:0)-(PIN.includes(a.id)?1:0));
+ const grp=c=>{if(PIN.includes(c.id))return 'Pinned';const t=new Date(c.updated_at).getTime();return t>=d0?'Today':t>=d0-6*864e5?'This week':t>=d0-30*864e5?'This month':'Earlier'};let last='',h='';
  for(const c of L){const g=grp(c);if(g!==last){h+='<div class="lab chg">'+g+'</div>';last=g}
   h+='<button class="ci chi'+(c.id===CHAT?' on':'')+'" data-id="'+esc(c.id)+'"><b>'+esc(c.title||'Chat')+'</b>'+(c.summary?'<span class="chs">'+esc(c.summary)+'</span>':'')+'<small>'+[new Date(c.updated_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}),...(c.tags||[]).map(t=>CHT[t]||t),c.crucial?'kept word for word':c.archived?'summary only':''].filter(Boolean).map(esc).join(' · ')+'</small></button>'}
  $('chlist').innerHTML=h||'<p class="empty">No chats here.</p>';
- $('chlist').querySelectorAll('.ci').forEach(b=>{b.onclick=()=>{loadChat(b.dataset.id);sheet('chl',false)};
+ $('chlist').querySelectorAll('.ci').forEach(b=>{chSwipe(b);b.onclick=()=>{if(b._sw)return;loadChat(b.dataset.id);sheet('chl',false)};
    let t=null;b.addEventListener('pointerdown',()=>{t=setTimeout(async()=>{t=-1;buzz(14);const c=CHS.find(x=>x.id===b.dataset.id),id=encodeURIComponent(c.id);
     const v=prompt('Rename this chat (or type DELETE to remove it):',c.title);if(v===null)return;
     try{if(v.trim().toUpperCase()==='DELETE'){await gdb('gary_messages?convo=eq.'+id,{method:'DELETE'});await gdb('gary_convos?id=eq.'+id,{method:'DELETE'});if(c.id===CHAT)loadChat(null)}
@@ -1971,7 +1989,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124160102';let UPD=false;
+const BUILD='20261124160322';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
