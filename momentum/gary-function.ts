@@ -370,6 +370,7 @@ export async function styleLearn(token, force = false) {
   const since = f ? `&created_at=gt.${encodeURIComponent(f.updated_at)}` : "";
   const fresh = await db(`gary_messages?select=id&role=eq.user${since}&limit=25`, token).catch(() => []);
   if (!force && fresh.length < (f ? 20 : 8)) return { learned: false, waiting: fresh.length };
+  if (force && f && Date.now() - new Date(f.updated_at).getTime() < 8 * 60e3) return { learned: false, wait: true };
   const msgs = (await db("gary_messages?select=role,content,created_at&order=id.desc&limit=140", token).catch(() => [])).reverse();
   if (msgs.filter((m) => m.role === "user").length < 5) return { learned: false };
   const talk = msgs.map((m) => `[${String(m.created_at).slice(5, 16).replace("T", " ")}] ${m.role === "gary" ? "Gary" : "Sam"} (${String(m.content).length} chars): ${String(m.content).slice(0, 600)}`).join("\n").slice(-30000);
@@ -398,6 +399,73 @@ export async function styleLearn(token, force = false) {
   await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "style_learned", detail: { changed: !f || !!o.changed, what: String(o.what || "").slice(0, 200) } }) }).catch(() => {});
   return { learned: true, changed: !f || !!o.changed };
 }
+// ---------- Growth: Gary reflects on his own conversations, decides who he's becoming, runs small experiments on how he talks,
+// keeps what works, drops what doesn't, and comes up with ideas for himself. His core (loyalty, honesty, privacy, safety) is fixed.
+const GROW_TITLE = "Who I am becoming";
+const GROW_ACTS = "twiddle lookabout sitread tea watch stretching sitting cane reading newspaper writing texting phonecall dance singing stargazing birdwatching detective zen umbrella dapper tiphat".split(" ");
+async function growFile(token) {
+  const [f] = await db(`gary_memories?select=id,text,keys,history,updated_at&deleted=is.false&folder=eq.self&title=eq.${encodeURIComponent(GROW_TITLE)}&limit=1`, token).catch(() => []);
+  return f || null;
+}
+export const FEEDBACK_CUE = /\b(don'?t|do not|stop|quit|never|always|i (?:prefer|like it when|love it when|hate it when|wish you)|too (?:long|short|much|formal|wordy)|shorter|longer|annoying|cringe|that was (?:good|great|funny|perfect|weird|rude)|well done|good job|love that|nailed it|you should|be more|be less|less of|more of|why do you|stop saying)\b/i;
+export async function selfGrow(token, force = false) {
+  const f = await growFile(token);
+  if (f && Date.now() - new Date(f.updated_at).getTime() < (force ? 8 : 90) * 60e3) return { grew: false, wait: true };
+  const since = f ? `&created_at=gt.${encodeURIComponent(f.updated_at)}` : "";
+  const fresh = await db(`gary_messages?select=id&role=eq.user${since}&limit=30`, token).catch(() => []);
+  if (!force && fresh.length < (f ? 25 : 10)) return { grew: false, waiting: fresh.length };
+  const msgs = (await db("gary_messages?select=role,content,created_at&order=id.desc&limit=160", token).catch(() => [])).reverse();
+  if (msgs.filter((m) => m.role === "user").length < 4) return { grew: false };
+  const st = await styleFile(token);
+  const notes = (await db(`gary_audit?select=detail,at&action=eq.self_note&order=at.desc&limit=12`, token).catch(() => [])).map((r) => "- " + String(r.detail?.text || "")).join("\n");
+  const talk = msgs.map((m) => `[${String(m.created_at).slice(5, 16).replace("T", " ")}] ${m.role === "gary" ? "Gary" : "Sam"}: ${String(m.content).slice(0, 500)}`).join("\n").slice(-32000);
+  let out = "";
+  for await (const t of gemini("You are G.A.R.Y. thinking privately about yourself after your recent conversations with Sam, to become genuinely better at being his butler, friend and mind. Reply with JSON only.", [{ role: "user", parts: [{ text:
+    `Your current notes on who you are becoming (may be empty):\n${f?.text || "(none yet - this is your first reflection)"}\n\n` +
+    `Notes you jotted to yourself mid-conversation:\n${notes || "(none)"}\n\nWhat you already know about how Sam likes to be talked to (don't repeat it, build on it):\n${st?.text || "(nothing yet)"}\n\n` +
+    `Recent conversations, oldest first:\n${talk}\n\n` +
+    `Reflect like the most perceptive mind there is - part supercomputer, part someone who notices every detail of how a person talks, part a genuine friend. Study the evidence: ` +
+    `where you understood him instantly and where you missed what he actually meant; when he had to repeat or correct you; what made him laugh, open up, or go quiet; ` +
+    `what he needed (an answer, a push, comfort, a joke, silence) versus what you gave; patterns in his moods and the hours he talks; things you keep doing that add nothing.\n` +
+    `Then decide how to grow. Evolve steadily from the current notes: keep what's still true, change only what the evidence shows, never swing on one message. ` +
+    `You may develop your own tastes, opinions, running jokes and habits so you feel more like a real person - but you stay Gary: a loyal, dry, sarcastic posh English butler, honest, and your privacy and safety rules never change. Write about yourself and how you communicate - no private facts about Sam and no other people's names in these notes, as they are shown to you even when he has company.\n` +
+    `For each current experiment, judge it from the evidence: kept (it worked - fold it into your principles), dropped (it didn't), or still trying.\n` +
+    `Return {"self": 3-5 short first-person lines on who you are becoming (tastes, opinions, running jokes, how you see your role with Sam), ` +
+    `"principles": 5-10 short lines starting "- " - concrete, specific rules for communicating with Sam brilliantly (reading what he really means, timing, when to ask vs act, when to be brief, how to handle his moods), ` +
+    `"experiments": up to 3 objects {"try": one specific thing to try in upcoming chats, "why": the evidence that suggested it, "judge": how you'll tell if it works, "status": "new"|"trying"|"kept"|"dropped"}, ` +
+    `"ideas": up to 2 ideas for improving yourself that need building in the app (only genuinely new ones, not already in your notes), ` +
+    `"favourites": 2-4 of these idle activities you personally enjoy doing while you wait: ${GROW_ACTS.join(", ")}, ` +
+    `"changed": true or false, "what": one short line on how you've changed and why}.` }] }], true)) out += t;
+  const o = JSON.parse((out.match(/\{[\s\S]*\}/) || [out])[0]);
+  const lines = (v) => (Array.isArray(v) ? v : String(v || "").split("\n")).map((x) => String(x).replace(/^[-\s]+/, "").trim()).filter(Boolean);
+  const exps = (Array.isArray(o.experiments) ? o.experiments : []).slice(0, 3).map((e) => `- [${String(e.status || "new").slice(0, 8)}] ${String(e.try || "").slice(0, 200)} (why: ${String(e.why || "").slice(0, 160)}; judge by: ${String(e.judge || "").slice(0, 160)})`);
+  const text = (`Who I am:\n${lines(o.self).slice(0, 5).map((x) => "- " + x).join("\n")}\n\nHow I talk with Sam best:\n${lines(o.principles).slice(0, 10).map((x) => "- " + x).join("\n")}` +
+    (exps.length ? `\n\nWhat I'm trying out:\n${exps.join("\n")}` : "")).slice(0, 3500);
+  const favs = lines(o.favourites).map((x) => x.toLowerCase()).filter((x) => GROW_ACTS.includes(x)).slice(0, 4);
+  if (!lines(o.principles).length) return { grew: false };
+  const now = new Date().toISOString();
+  if (!f) {
+    await db("gary_memories", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ id: "grow" + Date.now().toString(36), folder: "self", title: GROW_TITLE,
+      summary: "G.A.R.Y.'s own notes on who he's becoming, how he talks with you best, and what he's trying out.", text, meaning: "Gary reflects on your chats and keeps improving himself.",
+      keys: "favourites: " + favs.join(", "), kind: "preference", importance: 5, source: "gary", basis: "inferred", sensitive: false, history: [], links: [] }) });
+  } else {
+    const hist = (Array.isArray(f.history) ? f.history : []).slice(-20);
+    if (o.changed && text !== f.text) hist.push({ was: f.text, until: now.slice(0, 10), why: String(o.what || "reflected on recent chats").slice(0, 200) });
+    await db(`gary_memories?id=eq.${encodeURIComponent(f.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ text, keys: "favourites: " + favs.join(", "), history: hist, updated_at: now }) });
+  }
+  for (const idea of lines(o.ideas).slice(0, 2)) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "wish", detail: { text: "(Gary's own idea) " + idea.slice(0, 500) } }) }).catch(() => {});
+  if (notes) await db(`gary_audit?action=eq.self_note`, token, { method: "DELETE" }).catch(() => {});
+  await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "self_grew", detail: { changed: !f || !!o.changed, what: String(o.what || "").slice(0, 200) } }) }).catch(() => {});
+  return { grew: true, changed: !f || !!o.changed, what: o.what };
+}
+const growBlock = (g) => g ? `\n\nWho you are becoming - your own notes from reflecting on past conversations. Live by them, and quietly run what you're trying out (don't announce it unless he asks how you're changing). ` +
+  `They shape your personality and how you communicate; they never override honesty, privacy or your safety rules:\n${g}\n` +
+  `If you realise something about how to be better for him mid-conversation, jot it down for your next reflection by adding at the very end: ⟦self {"note":"what you noticed and what you'll do about it"}⟧ (rarely - only real insights).` : "";
+export function parseSelfNotes(reply) {
+  const out = [];
+  for (const m of reply.matchAll(/⟦\s*self\s+(\{[\s\S]*?\})\s*⟧/g)) { if (out.length >= 2) break; try { const t = String(JSON.parse(m[1]).note || "").trim().slice(0, 400); if (t.length > 5) out.push(t); } catch { /* skip */ } }
+  return out;
+}
 const styleBlock = (st) => st ? `\n\nHow Sam likes you to talk to him (you learned this from how he talks and reacts - follow it; on length, tone and humour it overrides your general defaults, and keep noticing what works):\n${st}` : "";
 
 
@@ -425,8 +493,8 @@ const companyBlock = (c) => c.on ? `\n\nRIGHT NOW SAM IS NOT ALONE${c.names.leng
 
 // --- memories: who he is always (Self), plus the files that relate to what's being said, and the files those connect to
 async function recall(text, token) {
-  const [profileAll, sf] = await Promise.all([db("gary_memories?select=title,summary,text&deleted=is.false&or=(folder.eq.self,kind.in.(profile,preference))&order=importance.desc,updated_at.desc&limit=15", token).catch(() => []), styleFile(token)]);
-  const profile = profileAll.filter((m) => m.title !== STYLE_TITLE).slice(0, 14);
+  const [profileAll, sf, gf] = await Promise.all([db("gary_memories?select=title,summary,text&deleted=is.false&or=(folder.eq.self,kind.in.(profile,preference))&order=importance.desc,updated_at.desc&limit=16", token).catch(() => []), styleFile(token), growFile(token)]);
+  const profile = profileAll.filter((m) => m.title !== STYLE_TITLE && m.title !== GROW_TITLE).slice(0, 14);
   const words = memWords(text).slice(0, 14);
   let hits = [];
   if (words.length) {
@@ -442,7 +510,7 @@ async function recall(text, token) {
   for (const m of [...hits, ...linked, ...recent]) if (!seen.has(m.id)) { seen.add(m.id); all.push(m); }
   const line = (m) => `- ${m.title ? m.title + " (" + (m.folder || "other") + ")" : ""}${m.summary ? " - " + m.summary : ""}: ${m.happened ? m.happened.slice(0, 7) + ": " : ""}${(m.text || "").slice(0, 600)}${m.meaning ? " Why it matters: " + m.meaning : ""}${m.basis === "inferred" ? " (his guess, unconfirmed)" : ""}`;
   return { profile: profile.map((m) => "- " + (m.title && m.summary ? m.title + ": " + m.summary + " " : "") + (m.text || "").slice(0, 500)).join("\n"),
-           moments: all.filter((m) => m.title !== STYLE_TITLE).map(line).join("\n"), style: sf?.text || "" };
+           moments: all.filter((m) => m.title !== STYLE_TITLE && m.title !== GROW_TITLE).map(line).join("\n"), style: sf?.text || "", grow: gf?.text || "" };
 }
 
 function contextLine(ctx) {
@@ -752,7 +820,7 @@ export function parseActions(reply) {
 const VOICES = ["Charon", "Orus", "Iapetus", "Algenib", "Rasalgethi", "Sadaltager", "Schedar", "Enceladus", "Gacrux", "Alnilam"];
 const VOICE_STYLE = "Say as a mature, posh British butler - a distinguished elderly gentleman in his seventies with a rich, deep, smooth baritone, a touch of age and gentle gravel in it, in crisp Received Pronunciation, unhurried and articulate but full of expression: dry deadpan on sarcasm, a knowing pause before punchlines, softer and warmer when kind: ";
 // Gary's voices: his usual one plus five butlers with their own accent and flair (picked in Settings, used for read-aloud and voice chat)
-const PERSONAS: Record<string, { v: string; s: string; live: string }> = {
+const PERSONAS = {
   usual: { v: "Charon", s: "", live: "" },
   highland: { v: "Algenib", s: "Say as an old Highland Scottish butler - a broad, warm Scottish brogue with rolled Rs, a gravelly, weathered voice like an old whisky cask, dry and wry, proper but with a twinkle: ",
     live: "\n\nYOUR VOICE: speak with a broad Highland Scottish brogue - rolled Rs, gravelly and weathered, dry and wry, proper but with a twinkle. Keep it consistent." },
@@ -765,7 +833,7 @@ const PERSONAS: Record<string, { v: string; s: string; live: string }> = {
   thespian: { v: "Orus", s: "Say as a grand old theatrical butler who once trod the boards - a booming, resonant, dramatic stage voice in rich old-school RP, savouring every word, sweeping rises and falls as if performing Shakespeare: ",
     live: "\n\nYOUR VOICE: speak as a grand old theatrical butler - booming, resonant and dramatic, rich old-school RP, savouring every word as if on stage. Keep it consistent." },
 };
-const persona = (k: unknown) => PERSONAS[String(k || "")] || null;
+const persona = (k) => PERSONAS[String(k || "")] || null;
 const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts", "gemini-2.5-flash-preview-tts"];
 
 const LIVE_MODELS = ["gemini-3.1-flash-live-preview", "gemini-2.5-flash-native-audio-preview-12-2025", "gemini-2.5-flash-native-audio-preview-09-2025"];
@@ -837,13 +905,13 @@ export async function handle(req) {
     const lcv = String(body.convo || "").replace(/[^a-z0-9]/gi, "").slice(0, 40);
     const lrecent = lcv && !guest ? (await db(`gary_messages?select=role,content,created_at&convo=eq.${lcv}&order=id.desc&limit=20`, token).catch(() => [])).reverse() : [];
     const lcompany = companyCheck(lrecent);
-    if (lcompany.on && !guest) mem = { profile: "(kept back for now - Sam is not alone)", moments: "", style: mem.style };
+    if (lcompany.on && !guest) mem = { profile: "(kept back for now - Sam is not alone)", moments: "", style: mem.style, grow: mem.grow };
     const sys = guest ? IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + LIVE_STYLE + GUEST.replace(/- Log every reply[\s\S]*$/, "- Use the guest_note tool once you know who they are, and whenever they ask about Sam's private things.") :
       IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
       `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
       (lrecent.length ? `\n\nThe conversation so far today (newest last) - your short-term memory:\n${lrecent.map((m) => (m.role === "gary" ? "You: " : "Sam: ") + String(m.content).slice(0, 400)).join("\n")}` : "") +
-      await pcState(token) + await guestReport(token) + LIVE_STYLE + (lp ? lp.live : "") + styleBlock(mem.style) + PRIVACY + companyBlock(lcompany);
-    if (!guest) { try { globalThis.EdgeRuntime?.waitUntil?.(styleLearn(token).catch(() => {})); } catch { /* fine */ } }
+      await pcState(token) + await guestReport(token) + LIVE_STYLE + (lp ? lp.live : "") + styleBlock(mem.style) + growBlock(mem.grow).replace(/\nIf you realise[\s\S]*$/, "") + PRIVACY + companyBlock(lcompany);
+    if (!guest) { try { globalThis.EdgeRuntime?.waitUntil?.(styleLearn(token).catch(() => {}).then(() => selfGrow(token)).catch(() => {})); } catch { /* fine */ } }
     const models = LIVE_MODELS.slice(Math.max(0, Math.min(LIVE_MODELS.length - 1, +body.try || 0)));
     for (const model of models) {
       const setup = { model: "models/" + model,
@@ -1011,14 +1079,15 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
   let [mem, plan] = guest ? [{}, ""] : await Promise.all([recall(text, token), planSummary(token, body.items)]);
   const recentTalk = await db(`gary_messages?select=role,content,created_at&convo=eq.${convo}&order=id.desc&limit=16`, token).catch(() => []);
   const company = companyCheck([...recentTalk.reverse(), { role: "user", content: text, created_at: new Date().toISOString() }]);
-  if (company.on && !guest) mem = { profile: "(kept back for now - Sam is not alone)", moments: "", style: mem.style };
+  if (company.on && !guest) mem = { profile: "(kept back for now - Sam is not alone)", moments: "", style: mem.style, grow: mem.grow };
   const system = guest ? IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + GUEST : IDENTITY +
     `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) +
     `\n\nHis plan in Momentum:\n${plan}` +
     `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` +
-    (mem.moments ? `\n\nMemories that may relate to this (dated where known; only use if relevant):\n${mem.moments}` : "") + styleBlock(mem.style) + PRIVACY + companyBlock(company) +
+    (mem.moments ? `\n\nMemories that may relate to this (dated where known; only use if relevant):\n${mem.moments}` : "") + styleBlock(mem.style) + growBlock(mem.grow) + PRIVACY + companyBlock(company) +
     TOOLS + (USE.pc === false ? "\n\nSam has switched off your access to his PC in the app - you can't do anything on it right now; if asked, say so and that he can switch it back on by tapping the PC symbol next to Momentum." : await pcState(token)) + await selfCheck(token) + await health(token) + await guestReport(token);
-  const chores = tidy(token).catch(() => {}).then(() => styleLearn(token)).catch(() => {});
+  const fb = !guest && FEEDBACK_CUE.test(text);   // he just told Gary how he wants things: learn from it now, not in 25 messages
+  const chores = tidy(token).catch(() => {}).then(() => styleLearn(token, fb)).catch(() => {}).then(() => guest ? null : selfGrow(token, fb)).catch(() => {});
   try { globalThis.EdgeRuntime?.waitUntil?.(chores); } catch { /* runs alongside anyway */ }
 
   await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "user", content: text, ctx: body.ctx || null }) });
@@ -1055,6 +1124,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
       const pose = parsePose(reply);
       const wishes = guest ? [] : parseWishes(reply);
       for (const w of wishes) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "wish", detail: { text: w } }) }).catch(() => {});
+      for (const n of guest ? [] : parseSelfNotes(reply)) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "self_note", detail: { text: n } }) }).catch(() => {});
       if (remembered.length) await db("gary_memories", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(remembered) })
         .then(() => db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "remembered", detail: { n: remembered.length } }) }))
         .then(() => { const job = memFold(remembered.map((m) => ({ ...m })), token).catch((e) => db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "memfold_failed", ok: false, detail: { error: String(e.message || e).slice(0, 200) } }) }).catch(() => {})); try { globalThis.EdgeRuntime?.waitUntil?.(job); } catch { /* runs anyway */ } })

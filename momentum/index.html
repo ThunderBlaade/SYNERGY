@@ -1759,7 +1759,11 @@ function lvNoShow(){if(LV.noshow)return;LV.noshow=true;const L=$('live'),o=$('lv
 // ---------- G.A.R.Y. lives in his bar: wanders up and down and gets on with things (20 activities)
 // what a person does while waiting: [mood, min s, max s, weight]
 const G_ROUTINE=[['twiddle',5,8,4],['lookabout',3,5,3],['sitread',10,15,3],['tea',8,11,2],['watch',3,5,2],['stretching',5,7,1],['sitting',8,12,1]];
-function gRoutinePick(last){const tot=G_ROUTINE.reduce((a,r)=>a+r[3],0);for(let k=0;k<6;k++){let x=Math.random()*tot;for(const r of G_ROUTINE){x-=r[3];if(x<=0){if(r[0]!==last)return r;break}}}return G_ROUTINE[0]}
+// his own favourite pastimes, which he picks for himself when he reflects on your chats (server: "Who I am becoming")
+let GFAV=[];async function gFavLoad(){try{const r=await gdb('gary_memories?select=keys&deleted=is.false&folder=eq.self&title=eq.'+encodeURIComponent('Who I am becoming')+'&limit=1');const j=r.json?await r.json():r;
+ const k=(j&&j[0]&&j[0].keys||'').replace(/^favourites:\s*/,'');GFAV=k.split(',').map(x=>x.trim()).filter(x=>G_EX[x])}catch(e){}}
+setTimeout(gFavLoad,4000);setInterval(gFavLoad,3600e3);
+function gRoutinePick(last){if(GFAV.length&&Math.random()<0.35){const f=GFAV[Math.floor(Math.random()*GFAV.length)];if(f!==last)return [f,8,12,1]}const tot=G_ROUTINE.reduce((a,r)=>a+r[3],0);for(let k=0;k<6;k++){let x=Math.random()*tot;for(const r of G_ROUTINE){x-=r[3];if(x<=0){if(r[0]!==last)return r;break}}}return G_ROUTINE[0]}
 const G_ACTS=['sitting','cane','tea','reading','newspaper','writing','texting','phonecall','watch','stretching','dance','singing','stargazing','birdwatching','detective','zen','umbrella','balloon','flower','dapper','tiphat','cycling'];
 const GW={x:0,to:null,dir:1,busy:0,last:''};
 function gwFree(){return tab==='gary'&&!document.hidden&&!talking&&!GSPK&&!LV.on&&!GB.sit&&!$('gbar').classList.contains('drag')&&!matchMedia('(prefers-reduced-motion: reduce)').matches}
@@ -1852,7 +1856,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124143430';let UPD=false;
+const BUILD='20261124143944';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
