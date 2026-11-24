@@ -199,7 +199,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 #live.mini #lvstat{flex:1;margin:0;text-align:left}#live.mini .lvacts{margin:0;gap:10px}#live.mini #lvmin{display:none}#live.mini .lvb{width:44px;height:44px}#live.mini .lvb svg{width:18px;height:18px}
 body.lvon #askbar{display:none!important}
 @media (min-width:1000px){#live.mini{left:210px;bottom:0;padding:14px max(48px,calc((100% - 970px)/2)) 20px}}
-#gfid{display:none;color:#e8c25a}body.guest #gfid{display:inline}body.guest #memBtn,body.guest #chatsBtn{display:none}body.guest #gopen{display:none!important}
+#gfid{display:none!important}body.guest #gopen{display:none!important}
 #brain{gap:10px;margin-left:12px}#brain i{width:16px;height:16px;position:relative}#brain svg{width:16px;height:16px}
 #brain i:not(.act){opacity:.55}#brain i.act{opacity:1}#bsrc{display:none!important}#bsrc.show{display:block!important}
 #brain i.dis{color:var(--faint);opacity:.5}#brain i.dis::after,.bmi.dis::after{content:"";position:absolute;left:-2px;right:-2px;top:50%;height:1.5px;background:#e0605a;transform:rotate(-40deg)}
@@ -429,15 +429,8 @@ body.lvon #chpick{display:none!important}
 
 #gdock.peek.wisp .gpx.scene{transition:transform .38s cubic-bezier(.5,0,.9,.4),opacity .38s ease-in;transform:translateX(-70%) rotate(55deg) scale(.85);opacity:0}
 
-/* guest mode (Face ID not passed): a smaller name at the top */
-body.guest #p-gary h1{font-size:30px;letter-spacing:.02em}body.guest #p-gary .gsub{font-size:8.5px}
 
-/* guest page (Face ID not passed): compact - the name small at the top, a grey Face ID button where the chat name was */
-#gtname,#gfid2{display:none}
-body.guest #gfid{display:none!important}body.guest #gtname{display:inline;color:var(--fg)}
-body.guest #p-gary h1,body.guest #p-gary .gsub,body.guest #chname{display:none!important}
-body.guest #gfid2{display:inline-flex;align-items:center;gap:8px;color:var(--dim);background:none;border:0;padding:0}body.guest #gfid2 svg{width:20px;height:20px}
-body.guest #chead{margin:16px 0 10px;padding:12px 0}body.guest #thread{padding-top:6px}
+#gtname,#gfid2{display:none!important}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -996,7 +989,7 @@ function chOpenWire(){$('chlist').querySelectorAll('.chr').forEach(b=>b.onclick=
 function gbAlign(){const u=$('gbup'),sb=$('asksend');if(!u||!sb||!u.offsetWidth||!sb.offsetWidth)return;const s=sb.getBoundingClientRect(),r=u.getBoundingClientRect(),cur=parseFloat(u.style.marginRight)||0;
  const d=(r.left+r.width/2)-(s.left+s.width/2);if(Math.abs(d)>0.5)u.style.marginRight=(cur+d)+'px'}
 addEventListener('resize',()=>setTimeout(gbAlign,50));if(window.ResizeObserver){const ro=new ResizeObserver(()=>gbAlign());ro.observe($('askbar'));ro.observe($('asksend'))}setTimeout(gbAlign,300);setTimeout(gbAlign,1500);
-$('gbmute').onclick=e=>{e.stopPropagation();$('lvmute').click();setTimeout(lvCallDraw,50)};$('gbend').onclick=e=>{e.stopPropagation();lvStop()};$('cpx').onclick=chPickClose;$('cpnew').onclick=()=>{chPickClose();loadChat(null);setTimeout(()=>$('ask').focus(),300)};$('chcl').onclick=()=>{CHF=CHF==='claude'?'all':'claude';$('chq').value='';drawChats()};$('chfbtn').onclick=()=>$('chf').classList.toggle('open');$('chatsBtn').onclick=listChats;$('chnew').onclick=()=>{loadChat(null);setTimeout(()=>$('ask').focus(),300)};new MutationObserver(chHead).observe($('ctitle'),{childList:true,characterData:true,subtree:true});$('newChat').onclick=()=>{loadChat(null);sheet('chl',false);setTimeout(()=>$('ask').focus(),300)};
+$('gbmute').onclick=e=>{e.stopPropagation();$('lvmute').click();setTimeout(lvCallDraw,50)};$('gbend').onclick=e=>{e.stopPropagation();lvStop()};$('cpx').onclick=chPickClose;$('cpnew').onclick=()=>{chPickClose();loadChat(null);setTimeout(()=>$('ask').focus(),300)};$('chcl').onclick=()=>{CHF=CHF==='claude'?'all':'claude';$('chq').value='';drawChats()};$('chfbtn').onclick=()=>$('chf').classList.toggle('open');$('chatsBtn').onclick=async()=>{if(GL.guest||(gLockOn()&&!GL.ok)){await gGate();if(GL.guest||(gLockOn()&&!GL.ok))return}listChats()};$('chnew').onclick=()=>{loadChat(null);setTimeout(()=>$('ask').focus(),300)};new MutationObserver(chHead).observe($('ctitle'),{childList:true,characterData:true,subtree:true});$('newChat').onclick=()=>{loadChat(null);sheet('chl',false);setTimeout(()=>$('ask').focus(),300)};
 // What Rodger can see of Momentum right now (no passwords, nothing hidden)
 function garyCtx(){const t=today(),its=Object.values(S.items).filter(i=>!i.deleted&&occurs(i,t));
  return{app:'Momentum',page:tab==='gary'?(store('garyFrom')||'gary'):tab,viewing_day:cur,device:wide()?'computer':(/iPhone|iPad/.test(navigator.userAgent)?'iPhone/iPad':'phone'),
@@ -1110,7 +1103,7 @@ async function memSave(m){const title=$('met').value.trim().slice(0,80),text=$('
   for(const id of f.links){const o=MEMS.find(x=>x.id===id);if(o&&!(o.links||[]).includes(m.id)){o.links=[...(o.links||[]),m.id];gdb('gary_memories?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({links:o.links})}).catch(()=>{})}}
   memCache();MV=MST.pop()||{at:'root'};if(MV.at!=='file')MV={at:'file',id:m.id};memDraw()}catch(e){toast('Couldn\'t save - are you online?')}}
 function memBind(){$('mlist').querySelectorAll('.mrow').forEach(b=>b.onclick=()=>{if(b.dataset.f)memGo({at:'folder',f:b.dataset.f});else memGo({at:'file',id:b.dataset.id})})}
-$('mq').addEventListener('input',memSearch);$('memBtn').onclick=memOpen;$('mback').onclick=()=>{if(MFOUND){$('mq').value='';MFOUND=null;memDraw()}else memBack()};
+$('mq').addEventListener('input',memSearch);$('memBtn').onclick=async()=>{if(GL.guest||(gLockOn()&&!GL.ok)){await gGate();if(GL.guest||(gLockOn()&&!GL.ok))return}memOpen()};$('mback').onclick=()=>{if(MFOUND){$('mq').value='';MFOUND=null;memDraw()}else memBack()};
 $('madd').onclick=()=>memGo({at:'edit',f:MV.at==='folder'?MV.f:'other'});
 // when the cloud can't be reached, R.O.D.G.E.R. answers from the copy of his notes on this phone
 function garyOffline(text,cloud){memLoadCache();const top=MEMS.map(m=>[memScore(m,text)[0],m]).filter(x=>x[0]>=3).sort((a,b)=>b[0]-a[0]).slice(0,2).map(x=>x[1]);
@@ -2112,7 +2105,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124180715';let UPD=false;
+const BUILD='20261124180815';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
