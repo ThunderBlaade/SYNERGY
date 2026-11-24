@@ -1114,13 +1114,14 @@ const VV=()=>window.__vv||window.visualViewport;
 let FULLH=window.__fullh||innerHeight;const kbTyping=()=>{const e=document.activeElement;return !!e&&/INPUT|TEXTAREA/.test(e.tagName)};
 addEventListener('resize',()=>{if(!kbTyping())FULLH=window.__fullh||innerHeight;navKeep()});addEventListener('orientationchange',()=>setTimeout(()=>{FULLH=innerHeight},400));
 // the page tabs always stay at the very bottom, under the keyboard - even if the phone shrinks the app when the keyboard opens
-function navKeep(){const n=document.querySelector('nav');if(!n)return;const shrunk=(window.__ih||innerHeight)<FULLH-100&&kbTyping();n.style.transform=shrunk?'translateY('+(FULLH-(window.__ih||innerHeight))+'px)':''}
+function navKeep(){const n=document.querySelector('nav');if(!n)return;const v=VV(),t=kbTyping();const down=t?Math.max(0,FULLH-(window.__ih||innerHeight))+Math.max(0,(v&&v.offsetTop)||0,window.scrollY||0):0;n.style.transform=down>2?'translateY('+down+'px)':''}
 document.addEventListener('focusin',()=>{navKeep();setTimeout(navKeep,350)});document.addEventListener('focusout',()=>setTimeout(navKeep,120));
 function kbFit(){navKeep();const v=VV(),a=$('askbar'),t=$('ask');if(!v||!a)return;const open=document.activeElement===t&&tab==='gary'&&FULLH-v.height>120;
- if(open){if(window.scrollY)scrollTo(0,0);const kb=Math.max(0,FULLH-v.height-v.offsetTop);a.style.top=Math.round(v.offsetTop+v.height-a.offsetHeight)+'px';a.style.bottom='auto';
+ if(open){if(window.scrollY)scrollTo(0,0);const kb=Math.max(0,FULLH-v.height-v.offsetTop);if(!v.offsetTop&&kb>150)store('kbH',String(FULLH-v.height));a.style.top=Math.round(v.offsetTop+v.height-a.offsetHeight)+'px';a.style.bottom='auto';
   document.documentElement.style.setProperty('--kb',kb+'px');document.body.classList.add('kbup');if(!kbFit.was)garyBottom();kbFit.was=true}
- else if(kbFit.was||a.style.top){a.style.top='';a.style.bottom='';document.documentElement.style.setProperty('--kb','0px');document.body.classList.remove('kbup');kbFit.was=false}}
+ else if(kbFit.was||a.style.top){if(kbFit.pre&&document.activeElement===t&&Date.now()-(kbFit.t0||0)<900)return;kbFit.pre=false;a.style.top='';a.style.bottom='';document.documentElement.style.setProperty('--kb','0px');document.body.classList.remove('kbup');kbFit.was=false}}
 if(window.visualViewport){visualViewport.addEventListener('resize',kbFit);visualViewport.addEventListener('scroll',kbFit)}
+$('ask').addEventListener('touchstart',()=>{kbFit.t0=Date.now();if(tab!=='gary'||document.activeElement===$('ask'))return;const a=$('askbar'),kb=+store('kbH')||Math.round(FULLH*0.42);a.style.top=Math.max(80,FULLH-kb-a.offsetHeight)+'px';a.style.bottom='auto';kbFit.pre=true},{passive:true});
 $('ask').addEventListener('focus',()=>{kbFit();setTimeout(kbFit,60);setTimeout(kbFit,320);setTimeout(kbFit,650)});$('ask').addEventListener('blur',()=>{setTimeout(kbFit,60);setTimeout(kbFit,320)});
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
@@ -1774,7 +1775,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124125559';let UPD=false;
+const BUILD='20261124125722';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
