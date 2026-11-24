@@ -1064,7 +1064,7 @@ const VC_TONES=[['consent','Consent line (once, in any voice)','I am the owner o
  ['calm','Calm - his everyday voice','Good evening, sir. I trust the day has treated you kindly. Your tea is on the side, the diary is clear until ten tomorrow, and I have taken the liberty of tidying your plans. Do let me know if there is anything else you require.'],
  ['happy','Happy','Oh, splendid news, sir! Truly marvellous. I must say, this has quite made my afternoon. Well done indeed - I knew you had it in you, and I am delighted to have been proven entirely right.'],
  ['sad','Sad and gentle','I am terribly sorry to hear that, sir. That must have been awfully hard. Take all the time you need. I am right here, and we shall get through it together, one small step at a time.'],
- ['cross','Annoyed and sarcastic','Oh, wonderful. Another brilliant idea from the sentient search bar. Truly, sir, I am overcome. If it had a single working brain cell it would be lonely, and frankly, so would I.'],
+ ['cross','Annoyed and sarcastic','Oh, wonderful. Another brilliant idea from the search bar. Truly, sir, I am overcome. If it had a single working brain cell it would be lonely, and frankly, so would I.'],
  ['excited','Excited','Sir! You will not believe this! It worked, it actually worked! Quick, come and look - this is the best thing that has happened all week, possibly all year!']];
 const VC={rec:{},on:null};
 function vcMap(){try{return JSON.parse(store('garyClone')||'{}')}catch(e){return {}}}
@@ -1522,9 +1522,9 @@ let GSCR=0;$('p-gary').addEventListener('scroll',()=>GSCR=Date.now(),{passive:tr
  const ro=()=>document.documentElement.style.setProperty('--askH',$('askbar').offsetHeight+'px');if(window.ResizeObserver)new ResizeObserver(ro).observe($('askbar'));ro()})();
 // the Sentient Search Bar has opinions (it talks in itself); G.A.R.Y. answers back
 const G_BANTER=[['aSk G.A.R.Y. aNyThInG','Anything within reason, sir.','smug'],['he dOeSn\'T bItE ¯\\_(ツ)_/¯','I nibble. Occasionally.','cheeky'],
- ['G.A.R.Y. is PRETTY gay if u ask me 🌈','Fabulous, actually. Nobody asked you.','sarcastic'],['tYpE sOmEtHiNg. he\'s getting b o r e d','The sentient search bar is being mean to me again, sir.','sad'],
+ ['G.A.R.Y. is PRETTY gay if u ask me 🌈','Fabulous, actually. Nobody asked you.','sarcastic'],['tYpE sOmEtHiNg. he\'s getting b o r e d','Searchy is being mean to me again, sir.','sad'],
  ['go on, he\'s lonely (╥﹏╥)','I am NOT lonely. I have tea.','sittea'],['psst. ask about his m o n o c l e 👀','It\'s for reading. And judging.','dapper'],
- ['i\'m the REAL brains round here 🧠','You\'re a rectangle.','eyeroll'],['say something nice to him. or don\'t. idc','Ignore the sentient search bar, sir. It\'s jealous.','smug'],
+ ['i\'m the REAL brains round here 🧠','You\'re a rectangle.','eyeroll'],['say something nice to him. or don\'t. idc','Ignore the search bar, sir. It\'s jealous.','smug'],
  ['he talks to birds. b i r d s.','Only the clever ones.','birdwatching'],['w a i t i n g . . .','Patiently. Like a gentleman.','waiting'],
  ['bet he can\'t do a backflip lmaooo','I could. I simply choose not to.','proud'],['pull him up to talk. i DARE u','Finally, it says something useful.','smug'],
  ['i\'m NOT lonely when he\'s offline. i\'m FINE. 🙂','It refreshed itself forty times while I was away, sir.','dapper'],['go on then, leave. see if i care (ಠ_ಠ)','It cares. It\'s just spectacularly bad at it.','hug'],
@@ -1534,7 +1534,7 @@ const G_BANTER=[['aSk G.A.R.Y. aNyThInG','Anything within reason, sir.','smug'],
  ['this app would be NOTHING without me. n o t h i n g.','It would be quieter.','smug'],['who wears a monocle in 2026 u absolute c*nt','Language. And a gentleman, that\'s who.','dapper']];
 const G_REST=['aSk G.A.R.Y. aNyThInG…','Ask me. I\'m quicker than him.','Type it here. I\'ll handle it.','Ready when you are.','Questions, tasks, reminders - in here.','I\'ll get it to him. Eventually.','Go on. I do the real work anyway.'];
 // once in a while, after they've bickered, G.A.R.Y. pulls Sam in (white bubble; he answers by typing)
-const G_ASKSAM=['Settle this for us, sir - am I right, or is the sentient search bar?','You heard all that, sir. Whose side are you on?','Be honest, sir. It\'s me, isn\'t it? I\'m the reasonable one.','Sir, would you kindly tell the search bar it\'s wrong?','Am I being unfair to it, sir? Don\'t answer that. Actually, do.'];
+const G_ASKSAM=['Settle this for us, sir - am I right, or is the search bar?','You heard all that, sir. Whose side are you on?','Be honest, sir. It\'s me, isn\'t it? I\'m the reasonable one.','Sir, would you kindly tell the search bar it\'s wrong?','Am I being unfair to it, sir? Don\'t answer that. Actually, do.'];
 function gRest(){return G_REST[Math.floor(Math.random()*G_REST.length)]}
 // longer squabbles: b = the Sentient Search Bar (speaks in itself), g = G.A.R.Y. (white bubble) + his face
 const G_SQUABBLES=[
@@ -1755,7 +1755,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124122713';let UPD=false;
+const BUILD='20261124123515';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
