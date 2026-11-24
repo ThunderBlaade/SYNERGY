@@ -1200,7 +1200,7 @@ function lvMic(f32){if(!LV.ready||LV.muted)return;let e=0;for(let i=0;i<f32.leng
  send(all)}
 function lvPlay(b64s,rate){const bin=atob(b64s),n=bin.length>>1,ab=LV.ctx.createBuffer(1,n,rate||24000),ch=ab.getChannelData(0);
  for(let i=0;i<n;i++){let v=bin.charCodeAt(2*i)|(bin.charCodeAt(2*i+1)<<8);if(v>32767)v-=65536;ch[i]=v/32768}
- const RT=1,dur=ab.duration/RT;LV.recv=(LV.recv||0)+dur;LV.act=Date.now();const s=LV.ctx.createBufferSource();s.buffer=ab;s.playbackRate.value=RT;s.connect(LV.ctx.destination);const fresh=LV.playAt<LV.ctx.currentTime;const at=Math.max(LV.ctx.currentTime+(fresh?0.14:0.03),LV.playAt);if(fresh)LV.uttAt=at;s.start(at);LV.playAt=at+dur;
+ const RT=1,dur=ab.duration/RT;LV.recv=(LV.recv||0)+dur;LV.act=Date.now();const s=LV.ctx.createBufferSource();s.buffer=ab;s.playbackRate.value=RT;s.connect(lvOut());const fresh=LV.playAt<LV.ctx.currentTime;const at=Math.max(LV.ctx.currentTime+(fresh?0.14:0.03),LV.playAt);if(fresh)LV.uttAt=at;s.start(at);LV.playAt=at+dur;
  LV.srcs.push(s);s.onended=()=>{LV.srcs=LV.srcs.filter(x=>x!==s);if(!LV.srcs.length&&LV.on)$('live').classList.remove('speaking')};$('live').classList.add('speaking')}
 // When Sam cuts in: tell Rodger exactly how far Sam heard, so he can answer first and then pick up where he left off.
 function lvNoteCut(){const full=(LV.outT||'').trim();if(!full||!LV.ctx)return;const queued=Math.max(0,LV.playAt-LV.ctx.currentTime),rec=LV.recv||0;
@@ -1211,6 +1211,9 @@ function lvNoteCut(){const full=(LV.outT||'').trim();if(!full||!LV.ctx)return;co
 // switching from the typed chat to voice: he picks up out loud from where he'd got to
 function lvCarry(heard,rest){if(!rest)return;const go=()=>{if(!LV.on)return;if(!LV.ws||LV.ws.readyState!==1||!LV.ready){if((LV.carryTries=(LV.carryTries||0)+1)<20)setTimeout(go,500);return}LV.carryTries=0;
   LV.ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:'(Sam just switched from the typed chat to talking out loud while you were still answering him there. '+(heard?'He got as far as: "'+heard.slice(-240)+'". ':'')+'You had not yet said: "'+rest.slice(0,1200)+'". Carry on out loud from exactly where you left off - say the rest naturally in your own words, without starting over or announcing it.)'}]}],turnComplete:true}}))};go()}
+// his voice goes through a gentle leveller and a steady boost, so it stays an even volume through a speaker instead of swelling and dipping
+function lvOut(){const c=LV.ctx;if(LV.outCtx===c&&LV.outNode)return LV.outNode;const k=c.createDynamicsCompressor();k.threshold.value=-26;k.knee.value=18;k.ratio.value=5;k.attack.value=0.004;k.release.value=0.3;
+ const g=c.createGain();g.gain.value=1.6;k.connect(g);g.connect(c.destination);LV.outCtx=c;LV.outNode=k;return k}
 function lvHush(){for(const s of LV.srcs){try{s.stop()}catch(e){}}LV.srcs=[];LV.playAt=0;$('live').classList.remove('speaking')}
 async function lvSaveTurn(){const you=LV.inT.trim(),him=(LV.outT.trim()+(LV.unsaid?'\n\n(Didn\'t get to say: '+LV.unsaid+')':'')).trim();LV.inT='';LV.outT='';LV.unsaid='';if(!you&&!him)return;
  try{if(!CHAT){CHAT='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);store('garyChat',CHAT);await gdb('gary_convos',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id:CHAT,title:'Talk with Rodger'})});$('ctitle').textContent='Talk with Rodger'}
@@ -1244,7 +1247,7 @@ async function liveStart(again){if(!gUse().live){lvWhy('Voice is switched off, s
  if(LV.on&&!again)return;if(!again){const sl=GSPK?spLeft():null;LV.carry=sl?{heard:sl[0],rest:sl[1]}:null;LV.streamCut=talking?((($('thread').lastElementChild||{}).textContent||'').replace(/^…/,'').length):null}speakStop();
  LV.ctx=ctx0||new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});LV.ctx.resume();LV.ctx.onstatechange=()=>{const c=LV.ctx;if(LV.on&&LV.ready&&c&&(c.state==='interrupted'||(c.state==='suspended'&&document.hidden)))lvYield('call')};   // created inside the tap, so iPhone allows sound
  lvRStop();LVR.quiet=0;LVR.t=0;$('live').classList.remove('typing');$('lvtype').classList.remove('on');LV.typed=false;LV.nomic=false;LV.on=true;LV.ready=false;LV.muted=false;LV.floor=0.004;LV.open=0;LV.spoke=false;LV.uttAt=0;LV.unsaid='';$('live').classList.add('on');document.body.classList.add('lvon');gFloatSync();brainDraw();$('lvmute').classList.remove('on');lvMini(false);if(!again){$('lvtx').innerHTML='';LV.t0=performance.now();LV.shown=false;LV.noshow=false;$('live').classList.remove('open','entering','rack','rackgone');$('live').classList.toggle('curt',Math.random()<0.25);$('lvorb').className=''}lvStatus('Connecting…');
- try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
+ try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:false,channelCount:1}})}
  catch(e){lvErr('microphone',{error:String(e&&e.name||e)});LV.stream=null;LV.nomic=true;LV.muted=true;$('lvmute').classList.add('on');$('lvmute').setAttribute('aria-label','Microphone unavailable');setTimeout(()=>{if(LV.on&&LV.nomic){$('live').classList.add('typing');$('lvtype').classList.add('on')}},2600)}
  if(LV.stream)lvMicWire();
  let j;try{const r=await garyFetch({mode:'live',text:'Talk with Rodger',convo:CHAT||'',ctx:garyCtx(),items:garyItems(),voice:gvCur()==='clone'?'usual':gvCur(),try:LV.tries});j=await r.json();if(!j.url)throw 0}
@@ -1267,7 +1270,7 @@ function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;let handed=false;
  if(!handed)try{ws&&ws.close(1000)}catch(e){}lvHush();
  try{LV.stream&&LV.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{LV.node&&LV.node.disconnect()}catch(e){}try{LV.ctx&&LV.ctx.close()}catch(e){}
  LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;GS.nocoat=false;$('live').classList.remove('on','speaking','mini');document.body.classList.remove('lvon','lvmini');lvCallDraw();gFloatSync();brainDraw();lvSaveTurn()}}
-$('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini')){lvMini(false);return}if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>{if(performance.now()-LV.t0<900)return;lvStop()};$('lvmin').onclick=()=>{if(performance.now()-LV.t0<900)return;lvMini(true)};$('lvmute').onclick=async()=>{if(LV.nomic){try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});LV.nomic=false;await lvMicWire()}catch(e){buzz(20);lvStatus('Microphone still unavailable - type to him');return}}LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvStatus(LV.muted?'Muted':'Listening…')};
+$('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini')){lvMini(false);return}if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>{if(performance.now()-LV.t0<900)return;lvStop()};$('lvmin').onclick=()=>{if(performance.now()-LV.t0<900)return;lvMini(true)};$('lvmute').onclick=async()=>{if(LV.nomic){try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:false,channelCount:1}});LV.nomic=false;await lvMicWire()}catch(e){buzz(20);lvStatus('Microphone still unavailable - type to him');return}}LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvStatus(LV.muted?'Muted':'Listening…')};
 
 // type to R.O.D.G.E.R. during a call: he reads it and answers out loud
 $('lvtype').onclick=()=>{if(performance.now()-LV.t0<900)return;const on=!$('live').classList.contains('typing');$('live').classList.toggle('typing',on);$('lvtype').classList.toggle('on',on);if(on){const t=$('lvtin');t.focus({preventScroll:true});t.click();LV.preMute=LV.muted;LV.muted=true;LV.open=0}else{$('lvtin').blur();if(!LV.nomic)LV.muted=!!LV.preMute}$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute')};
@@ -1340,7 +1343,7 @@ function vcDraw(){const m=vcMap();$('vclist').innerHTML=VC_TONES.map(([k,name,li
  $('vcuse').textContent='Use my voice: '+(store('garyVoice')==='clone'?'on':'off');$('vcuse').disabled=!m.calm;
  $('vclist').querySelectorAll('.vcrow').forEach(row=>row.querySelectorAll('button').forEach(b=>b.onclick=()=>b.dataset.a==='rec'?vcRec(row.dataset.k):vcPlay(row.dataset.k)))}
 async function vcRec(k){if(VC.on===k){vcStop();return}if(VC.on)vcStop();
- try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});
+ try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:false,channelCount:1}});
   const ctx=new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();const src=ctx.createMediaStreamSource(st),node=ctx.createScriptProcessor(4096,1,1),bufs=[];
   node.onaudioprocess=e=>bufs.push(new Float32Array(e.inputBuffer.getChannelData(0)));src.connect(node);const z=ctx.createGain();z.gain.value=0;node.connect(z);z.connect(ctx.destination);
   VC.on=k;VC.cur={st,ctx,node,bufs,t0:Date.now()};VC.tm=setTimeout(()=>{if(VC.on===k)vcStop()},30000);vcDraw();$('vcnote').textContent='Recording… (stops by itself at 30 seconds)'}
@@ -2158,7 +2161,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124185224';let UPD=false;
+const BUILD='20261124185315';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
