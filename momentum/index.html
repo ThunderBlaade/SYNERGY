@@ -491,7 +491,7 @@ body.guest #thread{padding-top:14px}
 </section>
 
 <section class="pane" id="p-gary">
- <div class="gtop"><button class="lab" id="memBtn" style="color:var(--fg)">Memory ›</button><div class="lab" id="ctitle" hidden>New chat</div><button class="lab" id="gfid">Use Face ID</button><span class="lab" id="gtname">R.O.D.G.E.R.</span>
+ <div class="gtop"><button class="lab" id="memBtn" style="color:var(--fg)">Memories ›</button><div class="lab" id="ctitle" hidden>New chat</div><button class="lab" id="gfid">Use Face ID</button><span class="lab" id="gtname">R.O.D.G.E.R.</span>
  <button class="lab" id="chatsBtn" style="color:var(--fg)">Chat history ›</button><button class="lab" id="gnew" style="color:var(--fg)">New chat +</button></div><h1>R.O.D.G.E.R.</h1><div class="lab gsub">Respected Operator Designed for Growth, Empathy and Reasoning</div>
  <div id="chead"><button class="lab" id="gfid2" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg><span>Use Face ID</span></button><span id="chname">New chat</span><button class="lab" id="chnew">New chat +</button></div>
  <div id="chpick"><div class="cphead"><span class="lab">Your chats</span><button class="lab" id="cpnew">New chat +</button><button id="cpx" aria-label="Close">✕</button></div><div id="cplist"></div></div>
@@ -536,7 +536,7 @@ body.guest #thread{padding-top:14px}
 <div id="bdrop"><div class="bdhead"><div class="lab">What R.O.D.G.E.R. runs on</div><button id="bdx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="bdlist"></div><div class="hint" id="bdfoot"></div><i class="bdgrab"></i></div>
 <div id="bconf"><div class="bcbox"><div id="bctx"></div><p id="bcbody"></p><div class="goacts"><button class="btn fill" id="bcyes">Turn off</button><button class="btn ghost" id="bcno">Keep on</button></div></div></div>
 <div class="sheet" id="mem"><div class="grab"></div>
- <div class="mhead"><button id="mback" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="lab" id="mpath">Memories</div><button class="btn" id="madd">New +</button></div>
+ <div class="mhead"><button class="lab" id="mback" aria-label="Back" style="color:var(--fg)">‹ Back</button><div class="lab" id="mpath"></div><button class="btn" id="madd">New +</button></div>
  <input class="big" id="mq" placeholder="Search memories" spellcheck="false" autocomplete="off" enterkeyhint="search">
  <div class="hint" id="mnote"></div>
  <div id="mlist"></div></div>
@@ -1089,7 +1089,7 @@ async function memSortLoop(){if(memSortLoop.on)return;memSortLoop.on=true;
   const r=await garyFetch({mode:'memsort',text:'sort'});const j=await r.json();if(j.error)break;await memFetch();if(!j.left)break}}catch(e){}
  memSortLoop.on=false;if(!MEMS.some(m=>m.meaning==null))$('mnote').textContent=''}
 function memGo(v){MST.push(MV);MV=v;$('mq').value='';MFOUND=null;memDraw();$('mem').scrollTop=0}
-function memBack(){MV=MST.pop()||{at:'root'};memDraw()}
+function memBack(){if(MV.at==='root'&&!MST.length){sheet('mem',false);return}MV=MST.pop()||{at:'root'};memDraw()}
 const MSW=new Set('the a an and or of to in on at for with that this was is it my me i about when what who where night day time thing stuff'.split(' '));
 function memScore(m,q){const ws=q.toLowerCase().match(/[a-z0-9']{2,}/g)||[];const W=ws.filter(w=>!MSW.has(w));if(!W.length)return [0,[]];
  const hay=[[mTitle(m),5],[m.keys||'',4],[(m.people||[]).join(' '),4],[m.summary||'',3],[(m.links||[]).map(id=>{const o=MEMS.find(x=>x.id===id);return o?mTitle(o):''}).join(' '),1],[m.text||'',1],[m.meaning||'',1]];
@@ -1101,12 +1101,12 @@ function memSearch(){const q=$('mq').value.trim();if(!q){MFOUND=null;memDraw();r
  MFOUND={q,loc,ai:MFOUND&&MFOUND.q===q?MFOUND.ai:[]};memDraw();clearTimeout(mFindT);
  if(CS&&navigator.onLine&&q.split(/\s+/).length>=2)mFindT=setTimeout(async()=>{try{const r=await garyFetch({mode:'memfind',text:q});const j=await r.json();if($('mq').value.trim()===q&&MFOUND){MFOUND.ai=j.hits||[];memDraw()}}catch(e){}},650)}
 function memRow(m,why){const ic=m.folder==='people'?MI.person:MI.file;return '<button class="mrow" data-id="'+esc(m.id)+'"><i>'+ic+'</i><span><b>'+esc(mTitle(m))+'</b><small>'+esc(why||mDesc(m))+'</small></span></button>'}
-function memDraw(){const L=$('mlist'),at=MV.at;$('mback').style.visibility=at==='root'&&!MFOUND?'hidden':'visible';$('madd').style.display=at==='file'||at==='edit'?'none':'';$('mq').style.display=(at==='edit'||at==='file')&&!MFOUND?'none':'';
+function memDraw(){const L=$('mlist'),at=MV.at;$('mback').style.visibility='visible';$('madd').style.display=at==='file'||at==='edit'?'none':'';$('mq').style.display=(at==='edit'||at==='file')&&!MFOUND?'none':'';
  if(MFOUND){$('mpath').textContent='Search';const seen=new Set(),rows=[];
   for(const h of MFOUND.ai){const m=MEMS.find(x=>x.id===h.id);if(m&&!seen.has(m.id)){seen.add(m.id);rows.push(memRow(m,h.why))}}
   for(const x of MFOUND.loc)if(!seen.has(x.m.id)){seen.add(x.m.id);rows.push(memRow(x.m,x.why))}
   L.innerHTML=rows.length?rows.join(''):'<p class="empty">Nothing yet'+(CS&&navigator.onLine?' - R.O.D.G.E.R. is having a think…':'.')+'</p>';memBind();return}
- if(at==='root'){$('mpath').textContent='Memories';
+ if(at==='root'){$('mpath').textContent='';
   L.innerHTML=Object.keys(MF).map(k=>{const n=MEMS.filter(m=>(m.folder||'other')===k).length;return '<button class="mrow" data-f="'+k+'"><i>'+MI.folder+'</i><span><b>'+MF[k][0]+'</b><small>'+(n?n+(n===1?' file':' files')+' · ':'')+MF[k][1]+'</small></span><em>›</em></button>'}).join('');memBind();return}
  if(at==='folder'){$('mpath').textContent='Memories › '+MF[MV.f][0];let F=MEMS.filter(m=>(m.folder||'other')===MV.f);
   F=MV.f==='people'||MV.f==='places'?F.sort((a,b)=>mTitle(a).localeCompare(mTitle(b))):F;
@@ -2175,7 +2175,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124191655';let UPD=false;
+const BUILD='20261124191827';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
