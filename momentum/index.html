@@ -418,6 +418,14 @@ body.lvon #chpick{display:none!important}
 .chren{flex:none;width:26px;height:26px;display:grid;place-items:center;color:var(--dim)}.chren svg{width:15px;height:15px}
 .chrin{position:absolute;z-index:2;left:12px;right:12px;top:8px;background:#000;border:0;border-bottom:1px solid var(--fg);color:var(--fg);font:400 16px var(--serif);padding:4px 0}
 .chrow .chs{-webkit-line-clamp:2!important;font-size:13.5px;margin-top:0}.chrow .chf1{-webkit-line-clamp:2;font-size:12px;margin-top:5px}.chrow .chi small{font-size:11px;margin-top:5px}
+
+/* chat history search: a thin grey box with a magnifier */
+#chqbox{display:flex;align-items:center;gap:8px;margin-top:14px;border:1px solid var(--line);padding:0 12px;height:40px;color:var(--dim)}#chqbox svg{width:16px;height:16px;flex:none}
+#chq{flex:1;min-width:0;height:100%;background:none;border:0;outline:none;color:var(--fg);font:400 15px var(--sans);-webkit-appearance:none;appearance:none}#chq::placeholder{color:var(--faint)}#chq::-webkit-search-cancel-button{filter:grayscale(1);opacity:.5}
+#chqbox:focus-within{border-color:var(--dim)}
+.chd{flex:none;font:400 11px var(--sans);font-style:normal;color:var(--dim);letter-spacing:.02em}.chrow .chi small:empty{display:none}
+
+#chcl.on{text-decoration:underline;text-underline-offset:4px}.chback{display:block;color:var(--fg);padding:4px 0}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -509,8 +517,8 @@ body.lvon #chpick{display:none!important}
  <div class="acts" style="margin-top:16px"><button class="btn ghost" id="vcuse">Use my voice: off</button><button class="btn fill" id="vcmake">Create Gary's voice</button></div>
  <div class="hint" id="vcnote" style="margin-top:10px"></div></div>
 <div class="sheet" id="chl"><div class="grab"></div>
- <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div class="lab" style="flex:1">Chat history</div><button id="chfbtn" aria-label="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button><button class="btn" id="newChat">New chat +</button></div>
- <input class="big" id="chq" type="search" placeholder="Search everything you've said" autocomplete="off" spellcheck="false" enterkeyhint="search" style="margin-top:14px;font-size:17px">
+ <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><button class="lab" id="chcl" style="flex:1;text-align:left;color:var(--fg);white-space:nowrap">Claude ideas ›</button><button id="chfbtn" aria-label="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button><button class="btn" id="newChat">New chat +</button></div>
+ <label id="chqbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><input id="chq" type="search" placeholder="Search" autocomplete="off" spellcheck="false" enterkeyhint="search"></label>
  <div class="chips" id="chf" style="margin-top:14px"></div>
  <div id="chlist" style="margin-top:14px"></div></div>
 <div class="sheet" id="dump"><div class="grab"></div>
@@ -916,18 +924,20 @@ function chBin(){if(!CHB.length){$('chlist').innerHTML='<p class="empty">The Bin
   if(btn.dataset.a==='back'){c.deleted_at=null;CHB=CHB.filter(x=>x!==c);CHS.unshift(c);CHS.sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at));chPatch(c.id,{deleted_at:null});drawChats()}
   else chAsk('Delete for good?','"'+(c.title||'Chat')+'" will be gone forever. This can\'t be undone.','Delete',async()=>{CHB=CHB.filter(x=>x!==c);drawChats();const e=encodeURIComponent(c.id);try{await gdb('gary_messages?convo=eq.'+e,{method:'DELETE'});await gdb('gary_convos?id=eq.'+e,{method:'DELETE'})}catch(err){}})}))}
 function drawChats(){if($('chq').value.trim())return chSearch();const tags={};for(const c of CHS)for(const t of c.tags||[])tags[t]=(tags[t]||0)+1;const imp=CHS.filter(c=>c.crucial).length,np=CHS.reduce((a,c)=>a+((c.parts||[]).length),0);
- const F=[['all','All '+CHS.length]].concat(imp?[['crucial','Important '+imp]]:[]).concat(np?[['folders','Folders '+np]]:[]).concat([['claude','Claude suggestions']]).concat(Object.keys(CHT).filter(t=>tags[t]).map(t=>[t,CHT[t]+' '+tags[t]])).concat([['bin','Bin'+(CHB.length?' '+CHB.length:'')]]);if(!F.some(f=>f[0]===CHF))CHF='all';$('chfbtn').classList.toggle('on',CHF!=='all');
+ const F=[['all','All '+CHS.length]].concat(imp?[['crucial','Important '+imp]]:[]).concat(np?[['folders','Folders '+np]]:[]).concat(Object.keys(CHT).filter(t=>tags[t]).map(t=>[t,CHT[t]+' '+tags[t]])).concat([['bin','Bin'+(CHB.length?' '+CHB.length:'')]]);if(CHF!=='claude'&&!F.some(f=>f[0]===CHF))CHF='all';$('chfbtn').classList.toggle('on',CHF!=='all'&&CHF!=='claude');$('chcl').classList.toggle('on',CHF==='claude');
  $('chf').innerHTML=F.map(f=>'<button class="chip'+(f[0]===CHF?' on':'')+'" data-f="'+f[0]+'">'+esc(f[1])+'</button>').join('');$('chf').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{CHF=b.dataset.f;drawChats()});
  if(CHF==='folders')return chFolders();if(CHF==='claude')return chClaude();if(CHF==='bin')return chBin();
  const L=CHS.filter(c=>CHF==='all'||(CHF==='crucial'?c.crucial:(c.tags||[]).includes(CHF)));
  $('chlist').innerHTML=chRowsHTML(L)||'<p class="empty">No chats here.</p>';chWire($('chlist'),id=>{loadChat(id);sheet('chl',false)})}
 // a chat as a box: title (underlined), the summary, and the first couple of lines of the chat itself
+function chWhenShort(d){const t=new Date(d),n=new Date(),hm=t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),y=new Date(n);y.setDate(n.getDate()-1);
+ return t.toDateString()===n.toDateString()?hm:t.toDateString()===y.toDateString()?'Yesterday '+hm:t.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+hm}
 let CHFIRST={};try{CHFIRST=JSON.parse(store('garyFirst')||'{}')}catch(e){}
 function chRowsHTML(L){const now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();L=L.slice().sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0));
  const grp=c=>{if(c.pinned)return 'Pinned';const t=new Date(c.updated_at).getTime();return t>=d0?'Today':t>=d0-6*864e5?'This week':t>=d0-30*864e5?'This month':'Earlier'};let last='',h='';
  for(const c of L){const g=grp(c);if(g!==last){h+='<div class="lab chg">'+g+'</div>';last=g}const f=CHFIRST[c.id];
-  h+='<div class="chrow" data-id="'+esc(c.id)+'"><button class="chact chpin">'+(c.pinned?'Unpin':'Pin')+'</button><button class="chact chdel">Delete</button><button class="ci chi'+(c.id===CHAT?' on':'')+'" data-id="'+esc(c.id)+'"><b><span class="cht">'+esc(c.title||'Chat')+'</span><i class="chren" role="button" aria-label="Rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></i></b>'+(c.summary?'<span class="chs">'+esc(c.summary)+'</span>':'')+
-   '<span class="chf1" data-f="'+esc(c.id)+'">'+(f?esc(f):'')+'</span><small>'+[new Date(c.updated_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}),...(c.tags||[]).map(t=>CHT[t]||t),c.crucial?'kept word for word':c.archived?'summary only':''].filter(Boolean).map(esc).join(' · ')+'</small></button></div>'}
+  h+='<div class="chrow" data-id="'+esc(c.id)+'"><button class="chact chpin">'+(c.pinned?'Unpin':'Pin')+'</button><button class="chact chdel">Delete</button><button class="ci chi'+(c.id===CHAT?' on':'')+'" data-id="'+esc(c.id)+'"><b><span class="cht">'+esc(c.title||'Chat')+'</span><em class="chd">'+chWhenShort(c.updated_at)+'</em><i class="chren" role="button" aria-label="Rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></i></b>'+(c.summary?'<span class="chs">'+esc(c.summary)+'</span>':'')+
+   '<span class="chf1" data-f="'+esc(c.id)+'">'+(f?esc(f):'')+'</span><small>'+[...(c.tags||[]).map(t=>CHT[t]||t),c.crucial?'kept word for word':c.archived?'summary only':''].filter(Boolean).map(esc).join(' · ')+'</small></button></div>'}
  setTimeout(()=>chFirstLoad(L.map(c=>c.id)),50);return h}
 async function chFirstLoad(ids){const need=ids.filter(id=>CHFIRST[id]===undefined).slice(0,30);if(!need.length||chFirstLoad.busy)return;chFirstLoad.busy=true;
  try{for(let i=0;i<need.length;i+=6)await Promise.all(need.slice(i,i+6).map(async id=>{try{const m=await gdb('gary_messages?select=role,content&convo=eq.'+encodeURIComponent(id)+'&order=id.asc&limit=2')||[];
@@ -954,9 +964,9 @@ function chFolders(){let h='';for(const f of CHFOLD){const P=[];for(const c of C
  $('chlist').innerHTML=h||'<p class="empty">Gary is still sorting your chats into folders - check back in a minute.</p>';chOpenWire()}
 // Gary's suggestions for Claude: things he wishes he could do or that are broken, newest first, ready to copy and send
 async function chClaude(){$('chlist').innerHTML='<p class="empty">Loading…</p>';try{CHW=await gdb('gary_audit?select=detail,at&action=eq.wish&order=at.desc&limit=60')||[]}catch(e){CHW=CHW||[]}
- if(CHF!=='claude')return;if(!CHW.length){$('chlist').innerHTML='<p class="empty">No suggestions yet. When Gary notices something he can\'t do, or has an idea for himself, it lands here for you to pass to Claude.</p>';return}
- $('chlist').innerHTML='<button class="btn ghost" id="chcopy" style="margin-bottom:6px">Copy all for Claude</button>'+CHW.map(w=>'<div class="ci chw"><span class="chs" style="-webkit-line-clamp:unset;color:var(--fg)">'+esc(w.detail&&w.detail.text||'')+'</span><small>'+esc(chWhen(w.at))+'</small></div>').join('');
- $('chcopy').onclick=async()=>{const t='Suggestions from G.A.R.Y.:\n'+CHW.map(w=>'- ('+String(w.at).slice(0,10)+') '+(w.detail&&w.detail.text||'')).join('\n');try{await navigator.clipboard.writeText(t);$('chcopy').textContent='Copied ✓'}catch(e){prompt('Copy this:',t)}}}
+ if(CHF!=='claude')return;if(!CHW.length){$('chlist').innerHTML='<button class="lab chback" onclick="CHF=\'all\';drawChats()">‹ Back to chats</button><p class="empty">No suggestions yet. When Gary notices something he can\'t do, or has an idea for himself, it lands here for you to pass to Claude.</p>';return}
+ $('chlist').innerHTML='<button class="lab chback">‹ Back to chats</button><button class="btn ghost" id="chcopy" style="margin:10px 0 6px">Copy all for Claude</button>'+CHW.map(w=>'<div class="ci chw"><span class="chs" style="-webkit-line-clamp:unset;color:var(--fg)">'+esc(w.detail&&w.detail.text||'')+'</span><small>'+esc(chWhen(w.at))+'</small></div>').join('');
+ $('chlist').querySelector('.chback').onclick=()=>{CHF='all';drawChats()};$('chcopy').onclick=async()=>{const t='Suggestions from G.A.R.Y.:\n'+CHW.map(w=>'- ('+String(w.at).slice(0,10)+') '+(w.detail&&w.detail.text||'')).join('\n');try{await navigator.clipboard.writeText(t);$('chcopy').textContent='Copied ✓'}catch(e){prompt('Copy this:',t)}}}
 // search: every message, chat title and summary; newest first; tap to open the chat right where it was said
 let CHQT=null;$('chq').addEventListener('input',()=>{clearTimeout(CHQT);CHQT=setTimeout(()=>$('chq').value.trim()?chSearch():drawChats(),250)});
 $('chq').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('chq').blur()}});
@@ -974,7 +984,7 @@ function chOpenWire(){$('chlist').querySelectorAll('.chr').forEach(b=>b.onclick=
 function gbAlign(){const u=$('gbup'),sb=$('asksend');if(!u||!sb||!u.offsetWidth||!sb.offsetWidth)return;const s=sb.getBoundingClientRect(),r=u.getBoundingClientRect(),cur=parseFloat(u.style.marginRight)||0;
  const d=(r.left+r.width/2)-(s.left+s.width/2);if(Math.abs(d)>0.5)u.style.marginRight=(cur+d)+'px'}
 addEventListener('resize',()=>setTimeout(gbAlign,50));if(window.ResizeObserver){const ro=new ResizeObserver(()=>gbAlign());ro.observe($('askbar'));ro.observe($('asksend'))}setTimeout(gbAlign,300);setTimeout(gbAlign,1500);
-$('gbmute').onclick=e=>{e.stopPropagation();$('lvmute').click();setTimeout(lvCallDraw,50)};$('gbend').onclick=e=>{e.stopPropagation();lvStop()};$('cpx').onclick=chPickClose;$('cpnew').onclick=()=>{chPickClose();loadChat(null);setTimeout(()=>$('ask').focus(),300)};$('chfbtn').onclick=()=>$('chf').classList.toggle('open');$('chatsBtn').onclick=listChats;$('chnew').onclick=()=>{loadChat(null);setTimeout(()=>$('ask').focus(),300)};new MutationObserver(chHead).observe($('ctitle'),{childList:true,characterData:true,subtree:true});$('newChat').onclick=()=>{loadChat(null);sheet('chl',false);setTimeout(()=>$('ask').focus(),300)};
+$('gbmute').onclick=e=>{e.stopPropagation();$('lvmute').click();setTimeout(lvCallDraw,50)};$('gbend').onclick=e=>{e.stopPropagation();lvStop()};$('cpx').onclick=chPickClose;$('cpnew').onclick=()=>{chPickClose();loadChat(null);setTimeout(()=>$('ask').focus(),300)};$('chcl').onclick=()=>{CHF=CHF==='claude'?'all':'claude';$('chq').value='';drawChats()};$('chfbtn').onclick=()=>$('chf').classList.toggle('open');$('chatsBtn').onclick=listChats;$('chnew').onclick=()=>{loadChat(null);setTimeout(()=>$('ask').focus(),300)};new MutationObserver(chHead).observe($('ctitle'),{childList:true,characterData:true,subtree:true});$('newChat').onclick=()=>{loadChat(null);sheet('chl',false);setTimeout(()=>$('ask').focus(),300)};
 // What Gary can see of Momentum right now (no passwords, nothing hidden)
 function garyCtx(){const t=today(),its=Object.values(S.items).filter(i=>!i.deleted&&occurs(i,t));
  return{app:'Momentum',page:tab==='gary'?(store('garyFrom')||'gary'):tab,viewing_day:cur,device:wide()?'computer':(/iPhone|iPad/.test(navigator.userAgent)?'iPhone/iPad':'phone'),
@@ -2078,7 +2088,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124173011';let UPD=false;
+const BUILD='20261124173446';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
