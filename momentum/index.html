@@ -1589,7 +1589,16 @@ const G_SQUABBLES=[
  [['b','can i have a go at answering him??'],['g','Absolutely not.','determined'],['b','not even the easy ones?? 🥺'],['g','Especially not the easy ones.','smug']],
  [['b','sam. SAM. found your answer before he found his monocle.'],['g','He\'s reading, you menace.','furious'],['b','ʲᵘˢᵗ ᵈᵒⁱⁿᵍ ᵐʸ ʲᵒᵇ']],
  [['b','rate my vibe 1-10'],['g','Three.','unimpressed'],['b','THREE??? (╯°□°)╯︵ ┻━┻'],['g','Two, now.','smug']]];
-function gBar(text){const a=$('ask');a.placeholder=text;a.style.height=text.length>34?'66px':'';gReact(text)}
+// the search bar's words always fit: measure the placeholder text and grow the box to hold all of it
+let ASKM=null;
+function askPH(){const a=$('ask');if(!a||a.value)return;const cs=getComputedStyle(a),ps=getComputedStyle(a,'::placeholder');
+ if(!ASKM){ASKM=document.createElement('div');ASKM.style.cssText='position:absolute;left:-9999px;top:0;visibility:hidden;white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word';document.body.appendChild(ASKM)}
+ const pad=parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight),bw=parseFloat(cs.borderLeftWidth)+parseFloat(cs.borderRightWidth);
+ ASKM.style.width=(a.offsetWidth-pad-bw)+'px';ASKM.style.font=ps.font||cs.font;ASKM.style.letterSpacing=ps.letterSpacing;ASKM.style.textTransform=ps.textTransform;ASKM.textContent=a.placeholder||' ';
+ const h=Math.ceil(ASKM.offsetHeight+parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom)+parseFloat(cs.borderTopWidth)+parseFloat(cs.borderBottomWidth)),min=parseFloat(cs.minHeight)||46;
+ a.style.height=h>min+2?Math.min(160,h)+'px':''}
+function gBar(text){const a=$('ask');a.placeholder=text;askPH();gReact(text)}
+addEventListener('resize',()=>askPH());
 // G.A.R.Y. reacts to whatever the Sentient Search Bar just said - a look, not a performance
 function gReact(t){const now=performance.now();if(tab!=='gary'||LV.on||talking||GB.sit||now-(gReact.t??-1e9)<8000)return;gReact.t=now;
  const m=/┻|╯/.test(t)?'shocked':/rawr|xd/i.test(t)?'unimpressed':/c\*nt|dickhead|n00b|noob/i.test(t)?'disdainful':/nerd|rectangle|brains|nothing without/i.test(t)?'eyeroll':
@@ -1656,12 +1665,19 @@ function brainToggle(k){const U=gUse();if(!U[k]){U[k]=true;store('garyUse',JSON.
  const both=(k==='google'&&!U.groq)||(k==='groq'&&!U.google);
  $('bctx').textContent='Turn off '+BR_NAME[k]+'?';$('bcbody').textContent=BR_OFF[k]+(both?' With both brains off, G.A.R.Y. can\'t reply at all.':'');
  $('bconf').classList.add('on');$('bcyes').onclick=()=>{U[k]=false;store('garyUse',JSON.stringify(U));$('bconf').classList.remove('on');brainDraw();brainMenu(true);toast('Switched off')};$('bcno').onclick=()=>$('bconf').classList.remove('on')}
-// voice screen: swipe down (or the cross) to shrink into the message bar's spot; swipe up or tap G.A.R.Y. to bring it back
+// voice screen: swipe it away (down, left or right) to hang up and go back to the search bar; it follows your finger and springs back if you let go early
 function lvMini(on){$('live').classList.toggle('mini',on)}
-(function(){const L=$('live');let y0=null,dy=0;
- L.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;y0=e.clientY;dy=0});
- L.addEventListener('pointermove',e=>{if(y0===null)return;dy=e.clientY-y0});
- const end=()=>{if(y0===null)return;y0=null;const mini=L.classList.contains('mini');if(!mini&&dy>80)lvMini(true);else if(mini&&dy<-30)lvMini(false)};
+(function(){const L=$('live');let x0=null,y0=0,dx=0,dy=0,ax=0;
+ const put=(x,y,t)=>{L.style.transition=t||'none';L.style.transform=x||y?'translate('+x+'px,'+y+'px)':'';L.style.opacity=x||y?String(Math.max(.35,1-Math.hypot(x,y)/700)):''};
+ L.addEventListener('pointerdown',e=>{if(e.target.closest('button,input,textarea,#lvtype')||L.classList.contains('mini')||!L.classList.contains('on'))return;x0=e.clientX;y0=e.clientY;dx=dy=0;ax=0});
+ L.addEventListener('pointermove',e=>{if(x0===null)return;dx=e.clientX-x0;dy=e.clientY-y0;
+  if(!ax&&Math.hypot(dx,dy)>12)ax=Math.abs(dx)>Math.abs(dy)?1:(dy>0?2:-1);
+  if(ax===1)put(dx,0);else if(ax===2)put(0,Math.max(0,dy))});
+ const end=()=>{if(x0===null)return;x0=null;const gone=(ax===1&&Math.abs(dx)>90)||(ax===2&&dy>90);
+  if(!gone){if(ax>0)put(0,0,'transform .3s var(--ease),opacity .3s');setTimeout(()=>{L.style.transition=''},320);return}
+  if(performance.now()-LV.t0<900){put(0,0,'transform .3s var(--ease),opacity .3s');return}
+  const W=innerWidth,H=innerHeight;put(ax===1?Math.sign(dx)*W:0,ax===2?H:0,'transform .28s var(--ease),opacity .28s');
+  setTimeout(()=>{lvStop();L.style.transition='none';put(0,0);requestAnimationFrame(()=>{L.style.transition=''})},290)};
  L.addEventListener('pointerup',end);L.addEventListener('pointercancel',end)})();
 // ---------- Face ID for G.A.R.Y.: if the person opening him isn't verified, he runs in guest mode (no private info, asks who they are)
 const GL={ok:0,hid:0,guest:false,save:null,busy:false};
@@ -1706,7 +1722,7 @@ function lvNoShow(){if(LV.noshow)return;LV.noshow=true;const L=$('live'),o=$('lv
  if(L.classList.contains('entering')){gMood('sulking',2000);o.className='lvExit'}lvStatus('G.A.R.Y. can\'t hear you');
  const q=['Sentient search bar: He\'s not coming. Talk to me instead - I\'m better looking anyway.','Sentient search bar: Typical. He\'s sulking behind the curtain. I\'m right here, though.','Sentient search bar: Signal\'s gone, so it\'s just you and me now. Type away.'][Math.floor(Math.random()*3)];
  setTimeout(()=>{lvLine('box',q)},700);
- setTimeout(()=>{lvStop();LV.noshow=false;go('gary');$('ask').placeholder=q.replace('Sentient search bar: ','');setTimeout(()=>$('ask').focus(),250)},4200)}
+ setTimeout(()=>{lvStop();LV.noshow=false;go('gary');$('ask').placeholder=q.replace('Sentient search bar: ','');askPH();setTimeout(()=>$('ask').focus(),250)},4200)}
 // ---------- G.A.R.Y. lives in his bar: wanders up and down and gets on with things (20 activities)
 // what a person does while waiting: [mood, min s, max s, weight]
 const G_ROUTINE=[['twiddle',5,8,4],['lookabout',3,5,3],['sitread',10,15,3],['tea',8,11,2],['watch',3,5,2],['stretching',5,7,1],['sitting',8,12,1]];
@@ -1765,7 +1781,7 @@ async function speak(t,vo){t=String(t||'').replace(/[*_#`]/g,'').trim();if(!t)re
  try{for(const p of parts){const ab=await p;if(gen!==talkGen)return;playBuf(ab)}}
  catch(e){if(gen===talkGen){speakStop();speakDevice(t)}}}
 if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{};
-const grow=()=>{const t=$('ask');t.style.height='auto';t.style.height=Math.min(160,t.scrollHeight)+'px'};
+const grow=()=>{const t=$('ask');if(!t.value){t.style.height='';askPH();return}t.style.height='auto';t.style.height=Math.min(160,t.scrollHeight)+'px'};
 $('ask').addEventListener('input',grow);
 $('ask').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const v=$('ask').value;$('ask').value='';grow();ask(v)}});
 $('asksend').onclick=()=>{const v=$('ask').value,keep=Date.now()-(window.__askFocusAt||0)<1500||document.activeElement===$('ask');$('ask').value='';grow();if(keep)$('ask').focus({preventScroll:true});ask(v)};
@@ -1795,7 +1811,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124140933';let UPD=false;
+const BUILD='20261124141610';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
