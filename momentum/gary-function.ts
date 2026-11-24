@@ -642,6 +642,7 @@ Act with your voice: let your tone carry the joke - bone-dry deadpan for sarcasm
 for fake outrage, warmth when he needs it, a flustered stammer around Nadine. Match the moment: lively and quick with friends, soft and
 slow when he's low. Talk like a person: short spoken sentences, natural rhythm, the odd "mm" or "right" where a person would, no lists, no reading out
 symbols or IDs. Keep turns brief so he can jump in; if he interrupts, stop and listen. Ask at most one question at a time.
+Hearing him: what reaches you is speech-to-text and can be slightly wrong. If a word seems off but what he meant is clear from context, just understand it and carry on - don't point it out. If you genuinely didn't catch part of it and can't sensibly work it out, say so plainly and specifically: "Sorry, sir - I didn't catch what you said after '<the last few words you did hear>'." Only answer clear, direct speech meant for you; ignore stray voices, the TV, coughs and half-words. If he speaks softly, pauses or gets comfortable and casual, that's still him - be patient, let him finish, then answer.
 Keep it casual and brief - like chatting with someone you know well, not giving a speech. Usually one or two short sentences, then let him
 talk. No lists, no rambling, no summing up; only go longer if he asks you to explain something.
 Listen to HOW he speaks, not just the words: notice if he sounds tired, stressed, low, rushed, excited or amused, and respond to that
@@ -705,7 +706,7 @@ export async function handle(req) {
         generationConfig: { responseModalities: ["AUDIO"], speechConfig: { languageCode: "en-GB", voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } },
         systemInstruction: { parts: [{ text: sys }] },
         inputAudioTranscription: {}, outputAudioTranscription: {},
-        realtimeInputConfig: { automaticActivityDetection: { startOfSpeechSensitivity: "START_SENSITIVITY_LOW", silenceDurationMs: 550, prefixPaddingMs: 450 } },
+        realtimeInputConfig: { automaticActivityDetection: { startOfSpeechSensitivity: "START_SENSITIVITY_LOW", endOfSpeechSensitivity: "END_SENSITIVITY_LOW", silenceDurationMs: 800, prefixPaddingMs: 450 } },
         proactivity: { proactiveAudio: true },
         tools: [{ functionDeclarations: guest ? LIVE_TOOLS.filter((t) => t.name === "strike_pose").concat([{ name: "guest_note", description: "Log who you're talking to and what they wanted (for Sam).", parameters: { type: "OBJECT", properties: {
           name: { type: "STRING" }, personal: { type: "BOOLEAN", description: "true if they asked about Sam's private things" }, note: { type: "STRING" } }, required: ["note"] } }]) : LIVE_TOOLS }] };

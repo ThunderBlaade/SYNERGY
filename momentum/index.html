@@ -1593,6 +1593,12 @@ $('emic').onclick=()=>hearInto($('emic'),t=>{$('et').value=t});$('askmic').oncli
 async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=await (await fetch(API+'/events'+Q)).json();(j.events||[]).forEach(e=>e.text&&toast(e.text));(j.reminders||[]).forEach(r=>toast('Reminder: '+r))}catch(e){}setTimeout(poll,20000)}
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
+// stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
+const BUILD='20261124012724';let UPD=false;
+async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
+function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
+ if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)updCheck()});setInterval(updCheck,300000);setTimeout(updCheck,4000);
 
 addEventListener('resize',()=>{document.body.classList.toggle('plan',wide()&&tab==='today');if(wide()&&tab==='todo')go('today');render()});
 document.body.classList.toggle('plan',wide()&&tab==='today');
