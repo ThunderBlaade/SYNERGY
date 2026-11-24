@@ -428,6 +428,9 @@ body.lvon #chpick{display:none!important}
 #chcl.on{text-decoration:underline;text-underline-offset:4px}.chback{display:block;color:var(--fg);padding:4px 0}
 
 #gdock.peek.wisp .gpx.scene{transition:transform .38s cubic-bezier(.5,0,.9,.4),opacity .38s ease-in;transform:translateX(-70%) rotate(55deg) scale(.85);opacity:0}
+
+/* guest mode (Face ID not passed): a smaller name at the top */
+body.guest #p-gary h1{font-size:30px;letter-spacing:.02em}body.guest #p-gary .gsub{font-size:8.5px}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -925,11 +928,11 @@ function chBin(){if(!CHB.length){$('chlist').innerHTML='<p class="empty">The Bin
  $('chlist').querySelectorAll('.chbin').forEach(r=>r.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{const c=CHB.find(x=>x.id===r.dataset.id);if(!c)return;
   if(btn.dataset.a==='back'){c.deleted_at=null;CHB=CHB.filter(x=>x!==c);CHS.unshift(c);CHS.sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at));chPatch(c.id,{deleted_at:null});drawChats()}
   else chAsk('Delete for good?','"'+(c.title||'Chat')+'" will be gone forever. This can\'t be undone.','Delete',async()=>{CHB=CHB.filter(x=>x!==c);drawChats();const e=encodeURIComponent(c.id);try{await gdb('gary_messages?convo=eq.'+e,{method:'DELETE'});await gdb('gary_convos?id=eq.'+e,{method:'DELETE'})}catch(err){}})}))}
-function drawChats(){if($('chq').value.trim())return chSearch();const tags={};for(const c of CHS)for(const t of c.tags||[])tags[t]=(tags[t]||0)+1;const imp=CHS.filter(c=>c.crucial).length,np=CHS.reduce((a,c)=>a+((c.parts||[]).length),0);
- const F=[['all','All '+CHS.length]].concat(imp?[['crucial','Important '+imp]]:[]).concat(np?[['folders','Folders '+np]]:[]).concat(Object.keys(CHT).filter(t=>tags[t]).map(t=>[t,CHT[t]+' '+tags[t]])).concat([['bin','Bin'+(CHB.length?' '+CHB.length:'')]]);if(CHF!=='claude'&&!F.some(f=>f[0]===CHF))CHF='all';$('chfbtn').classList.toggle('on',CHF!=='all'&&CHF!=='claude');$('chcl').classList.toggle('on',CHF==='claude');
+function drawChats(){if($('chq').value.trim())return chSearch();const tags={};for(const c of CHS)for(const t of c.tags||[])tags[t]=(tags[t]||0)+1;const isG=c=>/^Guest:/i.test(c.title||''),ng=CHS.filter(isG).length,imp=CHS.filter(c=>c.crucial).length,np=CHS.reduce((a,c)=>a+((c.parts||[]).length),0);
+ const F=[['all','All '+CHS.length]].concat(imp?[['crucial','Important '+imp]]:[]).concat(np?[['folders','Folders '+np]]:[]).concat(ng?[['guest','Guest '+ng]]:[]).concat(Object.keys(CHT).filter(t=>tags[t]).map(t=>[t,CHT[t]+' '+tags[t]])).concat([['bin','Bin'+(CHB.length?' '+CHB.length:'')]]);if(CHF!=='claude'&&!F.some(f=>f[0]===CHF))CHF='all';$('chfbtn').classList.toggle('on',CHF!=='all'&&CHF!=='claude');$('chcl').classList.toggle('on',CHF==='claude');
  $('chf').innerHTML=F.map(f=>'<button class="chip'+(f[0]===CHF?' on':'')+'" data-f="'+f[0]+'">'+esc(f[1])+'</button>').join('');$('chf').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{CHF=b.dataset.f;drawChats()});
  if(CHF==='folders')return chFolders();if(CHF==='claude')return chClaude();if(CHF==='bin')return chBin();
- const L=CHS.filter(c=>CHF==='all'||(CHF==='crucial'?c.crucial:(c.tags||[]).includes(CHF)));
+ const L=CHS.filter(c=>CHF==='all'||(CHF==='guest'?isG(c):CHF==='crucial'?c.crucial:(c.tags||[]).includes(CHF)));
  $('chlist').innerHTML=chRowsHTML(L)||'<p class="empty">No chats here.</p>';chWire($('chlist'),id=>{loadChat(id);sheet('chl',false)})}
 // a chat as a box: title (underlined), the summary, and the first couple of lines of the chat itself
 function chWhenShort(d){const t=new Date(d),n=new Date(),hm=t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),y=new Date(n);y.setDate(n.getDate()-1);
@@ -2095,7 +2098,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124175446';let UPD=false;
+const BUILD='20261124175631';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
