@@ -496,7 +496,7 @@ export async function selfGrow(token, force = false) {
     if (o.changed && text !== f.text) hist.push({ was: f.text, until: now.slice(0, 10), why: String(o.what || "reflected on recent chats").slice(0, 200) });
     await db(`gary_memories?id=eq.${encodeURIComponent(f.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ text, keys: "favourites: " + favs.join(", "), history: hist, updated_at: now }) });
   }
-  for (const idea of lines(o.ideas).slice(0, 2)) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "wish", detail: { text: "(Rodger's own idea) " + idea.slice(0, 500) } }) }).catch(() => {});
+  for (const idea of (Array.isArray(o.ideas) ? o.ideas : [o.ideas]).map((x) => typeof x === "string" ? x : x && (x.idea || x.text || x.what || x.title) ? String(x.idea || x.text || x.what || x.title) : "").map((x) => x.trim()).filter(Boolean).slice(0, 2)) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "wish", detail: { text: "(Rodger's own idea) " + idea.slice(0, 500) } }) }).catch(() => {});
   if (notes) await db(`gary_audit?action=eq.self_note`, token, { method: "DELETE" }).catch(() => {});
   await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "self_grew", detail: { changed: !f || !!o.changed, what: String(o.what || "").slice(0, 200) } }) }).catch(() => {});
   return { grew: true, changed: !f || !!o.changed, what: o.what };

@@ -438,6 +438,9 @@ body.guest #hfid{display:inline-grid;place-items:center;width:28px;height:28px;m
 body.guest #p-gary h1,body.guest #p-gary .gsub,body.guest #chead,body.guest #memBtn{display:none!important}
 body.guest #gnew{display:inline}
 body.guest #thread{padding-top:14px}
+
+.chihead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}#chcopy{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);background:none;color:var(--fg)}#chcopy svg{width:18px;height:18px}#chcopy.done{border-color:#5fbf5f;color:#5fbf5f}
+.chidea .chw{display:flex;gap:12px;align-items:flex-start;padding:12px}.chidea .chw small{flex:none;margin:2px 0 0}.chpinned{font-weight:600;color:var(--dim)}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><button id="hfid" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -975,10 +978,28 @@ function chFolders(){let h='';for(const f of CHFOLD){const P=[];for(const c of C
   for(const [p,c] of P)h+='<button class="ci chi chr" data-id="'+esc(c.id)+'" data-at="'+(p.at||'')+'"><b>'+esc(p.title)+'</b>'+(p.about?'<span class="chs">'+esc(p.about)+'</span>':'')+'<small>'+esc((c.title||'Chat')+' · '+chWhen(c.updated_at))+'</small></button>'}
  $('chlist').innerHTML=h||'<p class="empty">Rodger is still sorting your chats into folders - check back in a minute.</p>';chOpenWire()}
 // Rodger's suggestions for Claude: things he wishes he could do or that are broken, newest first, ready to copy and send
-async function chClaude(){$('chlist').innerHTML='<p class="empty">Loading…</p>';try{CHW=await gdb('gary_audit?select=detail,at&action=eq.wish&order=at.desc&limit=60')||[]}catch(e){CHW=CHW||[]}
- if(CHF!=='claude')return;if(!CHW.length){$('chlist').innerHTML='<button class="lab chback" onclick="CHF=\'all\';drawChats()">‹ Back to chats</button><p class="empty">No suggestions yet. When Rodger notices something he can\'t do, or has an idea for himself, it lands here for you to pass to Claude.</p>';return}
- $('chlist').innerHTML='<button class="lab chback">‹ Back to chats</button><button class="btn ghost" id="chcopy" style="margin:10px 0 6px">Copy all for Claude</button>'+CHW.map(w=>'<div class="ci chw"><span class="chs" style="-webkit-line-clamp:unset;color:var(--fg)">'+esc(w.detail&&w.detail.text||'')+'</span><small>'+esc(chWhen(w.at))+'</small></div>').join('');
- $('chlist').querySelector('.chback').onclick=()=>{CHF='all';drawChats()};$('chcopy').onclick=async()=>{const t='Suggestions from R.O.D.G.E.R.:\n'+CHW.map(w=>'- ('+String(w.at).slice(0,10)+') '+(w.detail&&w.detail.text||'')).join('\n');try{await navigator.clipboard.writeText(t);$('chcopy').textContent='Copied ✓'}catch(e){prompt('Copy this:',t)}}}
+// Claude ideas: swipe right to pin one to the top, left to delete it (asks first); the copy button copies them all for Claude
+function chIdeaText(w){const t=String(w.detail&&w.detail.text||'');return t.replace(/\bGary(?=['’]s\b|\b)/g,'Rodger').replace(/\bG\.A\.R\.Y\./g,'R.O.D.G.E.R.')}
+async function chClaude(){$('chlist').innerHTML='<p class="empty">Loading…</p>';try{CHW=await gdb('gary_audit?select=id,detail,at&action=eq.wish&order=at.desc&limit=80')||[]}catch(e){CHW=CHW||[]}
+ CHW=CHW.filter(w=>{const t=chIdeaText(w);return t&&!/\[object Object\]/.test(t)});chIdeas()}
+function chIdeas(){if(CHF!=='claude')return;const top='<div class="chihead"><button class="lab chback">‹ Back to chats</button><button id="chcopy" aria-label="Copy all for Claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="1.5"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/></svg></button></div>';
+ if(!CHW.length){$('chlist').innerHTML=top+'<p class="empty">No ideas yet. When Rodger notices something he can\'t do, or has an idea for himself, it lands here for you to pass to Claude.</p>';chIdeaWire();return}
+ const L=CHW.slice().sort((a,b)=>(b.detail&&b.detail.pinned?1:0)-(a.detail&&a.detail.pinned?1:0));
+ $('chlist').innerHTML=top+L.map(w=>'<div class="chrow chidea" data-id="'+w.id+'"><button class="chact chpin">'+(w.detail&&w.detail.pinned?'Unpin':'Pin')+'</button><button class="chact chdel">Delete</button><div class="ci chi chw"><span class="chs" style="-webkit-line-clamp:unset;color:var(--fg)">'+(w.detail&&w.detail.pinned?'<span class="chpinned">Pinned · </span>':'')+esc(chIdeaText(w))+'</span><small>'+esc(chWhen(w.at))+'</small></div></div>').join('');
+ chIdeaWire()}
+function chIdeaWire(){const L=$('chlist');L.querySelector('.chback').onclick=()=>{CHF='all';drawChats()};
+ $('chcopy').onclick=async()=>{const t='Ideas from R.O.D.G.E.R.:\n'+CHW.map(w=>'- ('+String(w.at).slice(0,10)+') '+chIdeaText(w)).join('\n');try{await navigator.clipboard.writeText(t);$('chcopy').classList.add('done');setTimeout(()=>$('chcopy')&&$('chcopy').classList.remove('done'),1500)}catch(e){prompt('Copy this:',t)}};
+ L.querySelectorAll('.chidea').forEach(row=>{chSwipeRow(row,
+  async()=>{const w=CHW.find(x=>String(x.id)===row.dataset.id);if(!w)return;w.detail=Object.assign({},w.detail,{pinned:!(w.detail&&w.detail.pinned)});buzz(12);chIdeas();try{await gdb('gary_audit?id=eq.'+w.id,{method:'PATCH',body:JSON.stringify({detail:w.detail})})}catch(e){}},
+  ()=>{const w=CHW.find(x=>String(x.id)===row.dataset.id);if(!w)return;chAsk('Delete this idea?','It will be removed for good.','Delete',async()=>{CHW=CHW.filter(x=>x!==w);chIdeas();try{await gdb('gary_audit?id=eq.'+w.id,{method:'DELETE'})}catch(e){}})})})}
+// shared swipe for list rows: right shows Pin, left shows Delete
+function chSwipeRow(row,onPin,onDel){const b=row.querySelector('.chi');let x0=null,y0=0,dx=0,base=0,on=false;
+ const set=(x,an)=>{b.style.transition=an?'transform .25s var(--ease)':'none';b.style.transform=x?'translateX('+x+'px)':'';row.dataset.open=x>0?'pin':x<0?'del':''};
+ b.addEventListener('pointerdown',e=>{x0=e.clientX;y0=e.clientY;dx=0;on=false;base=row.dataset.open==='pin'?84:row.dataset.open==='del'?-84:0});
+ b.addEventListener('pointermove',e=>{if(x0===null)return;dx=e.clientX-x0;if(!on){if(Math.abs(dx)>10&&Math.abs(dx)>Math.abs(e.clientY-y0)*1.3)on=true;else return}set(Math.max(-120,Math.min(120,base+dx)))});
+ const end=()=>{if(x0===null)return;x0=null;if(!on){if(base)set(0,1);return}const x=base+dx;set(x>50?84:x<-50?-84:0,1)};
+ b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
+ row.querySelector('.chpin').onclick=()=>{set(0,1);onPin()};row.querySelector('.chdel').onclick=()=>{set(0,1);onDel()}}
 // search: every message, chat title and summary; newest first; tap to open the chat right where it was said
 let CHQT=null;$('chq').addEventListener('input',()=>{clearTimeout(CHQT);CHQT=setTimeout(()=>$('chq').value.trim()?chSearch():drawChats(),250)});
 $('chq').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('chq').blur()}});
@@ -2125,7 +2146,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124183621';let UPD=false;
+const BUILD='20261124184048';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
