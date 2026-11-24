@@ -196,7 +196,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:0
 #live.mini{inset:auto 0 calc(58px + var(--safeB)) 0;height:auto;flex-direction:row;justify-content:flex-start;gap:12px;padding:8px 22px;background:linear-gradient(transparent,#000 25%);animation:gin .3s var(--ease)}
 #live.mini .lvlab,#live.mini #lvtx,#live.mini #lvcut{display:none!important}
 #live.mini .lvwrap{flex:none;width:auto;display:block}#live.mini #lvstat{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#live.mini .lvacts{flex:none}#live.mini #lvorb .gpx{width:60px;height:60px}
-#live.mini #lvstat{flex:1;margin:0;text-align:left}#live.mini .lvacts{margin:0;gap:10px}#live.mini .lvb{width:44px;height:44px}#live.mini .lvb svg{width:18px;height:18px}
+#live.mini #lvstat{flex:1;margin:0;text-align:left}#live.mini .lvacts{margin:0;gap:10px}#live.mini #lvmin{display:none}#live.mini .lvb{width:44px;height:44px}#live.mini .lvb svg{width:18px;height:18px}
 body.lvon #askbar{display:none!important}
 @media (min-width:1000px){#live.mini{left:210px;bottom:0;padding:14px max(48px,calc((100% - 970px)/2)) 20px}}
 #gfid{display:none;color:#e8c25a}body.guest #gfid{display:inline}body.guest #memBtn,body.guest #chatsBtn{display:none}body.guest #gopen{display:none!important}
@@ -211,7 +211,7 @@ body.lvon #askbar{display:none!important}
 #lvcurt{position:absolute;left:-34px;right:-34px;top:-30px;bottom:-14px;overflow:hidden;pointer-events:none;z-index:2}
 #lvcurt i{position:absolute;top:0;bottom:0;width:51%;background:repeating-linear-gradient(90deg,#9e1b1b 0 14px,#861616 14px 22px,#a82020 22px 30px);transition:transform .9s cubic-bezier(.6,0,.3,1)}
 #lvcurt .cl{left:0}#lvcurt .cr{right:0}#lvcurt .val{position:absolute;left:0;right:0;top:0;height:20px;background:#6e1010;border-bottom:3px solid #e8c25a}
-#live.open #lvcurt .cl{transform:translateX(-102%)}#live.open #lvcurt .cr{transform:translateX(102%)}
+#live.open #lvcurt{opacity:0;transition:opacity .5s .85s}#live.open #lvcurt .cl{transform:translateX(-102%)}#live.open #lvcurt .cr{transform:translateX(102%)}
 #live:not(.open) #lvorb{visibility:hidden}#live.mini #lvcurt{display:none}#live.mini #lvorb{visibility:visible}
 @keyframes lvBike{0%{transform:translateX(-120vw)}55%{transform:translateX(6vw)}70%{transform:translateX(-2vw)}82%{transform:translateX(1vw)}100%{transform:none}}
 @keyframes lvStroll{0%{transform:translateX(110vw)}25%{transform:translateX(80vw) translateY(-4px)}50%{transform:translateX(52vw)}75%{transform:translateX(24vw) translateY(-4px)}100%{transform:none}}
@@ -243,6 +243,7 @@ body.lvon #askbar{display:none!important}
 #bwifi.ok{color:#5fbf5f}#bwifi.low{color:#e8c25a}#bwifi.out{color:#e0605a}#bwifi.off{color:var(--faint)}#bwifi.live{animation:blink 1.4s ease-in-out infinite}
 #ask{min-height:50px;height:50px;padding:13px 12px;font-size:16px;text-align:center}#ask:focus{text-align:left}#ask::placeholder{font-size:14.5px;text-align:center}
 #askbar .mic{width:50px;height:50px}#asksend svg{width:22px;height:22px}#toast{display:none!important}
+.bdoffl{font-size:11.5px;color:#e8c25a;margin-top:6px;opacity:.85}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -317,7 +318,7 @@ body.lvon #askbar{display:none!important}
  <div class="lvwrap"><div id="lvstage"><div id="lvorb"></div><div id="lvcurt"><i class="cl"></i><i class="cr"></i><b class="val"></b></div></div></div>
  <div id="lvstat">Connecting…</div><div id="lvtx"></div>
  <button id="lvcut">Tap to interrupt</button>
- <div class="lvacts"><button class="lvb" id="lvmute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path class="slash" d="M4 3l16 18" stroke="#e0605a" stroke-width="2.2"/></svg></button><button class="lvb" id="lvend" aria-label="Make small"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>
+ <div class="lvacts"><button class="lvb" id="lvmute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path class="slash" d="M4 3l16 18" stroke="#e0605a" stroke-width="2.2"/></svg></button><button class="lvb" id="lvmin" aria-label="Make small"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg></button><button class="lvb" id="lvend" aria-label="End call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>
 <div id="bdrop"><div class="bdhead"><div class="lab">What G.A.R.Y. runs on</div><button id="bdx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="bdlist"></div><div class="hint" id="bdfoot"></div><i class="bdgrab"></i></div>
 <div id="bconf"><div class="bcbox"><div id="bctx"></div><p id="bcbody"></p><div class="goacts"><button class="btn fill" id="bcyes">Turn off</button><button class="btn ghost" id="bcno">Keep on</button></div></div></div>
 <div class="sheet" id="mem"><div class="grab"></div>
@@ -828,7 +829,7 @@ async function liveStart(again){if(!gUse().live){toast('Live voice is switched o
 function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;try{ws&&ws.close(1000)}catch(e){}lvHush();
  try{LV.stream&&LV.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{LV.node&&LV.node.disconnect()}catch(e){}try{LV.ctx&&LV.ctx.close()}catch(e){}
  LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;$('live').classList.remove('on','speaking','mini');document.body.classList.remove('lvon');gFloatSync();brainDraw();lvSaveTurn()}}
-$('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini')){lvMini(false);return}if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>{if($('live').classList.contains('mini'))lvStop();else lvMini(true)};$('lvmute').onclick=()=>{LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvStatus(LV.muted?'Muted':'Listening…')};
+$('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini')){lvMini(false);return}if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>lvStop();$('lvmin').onclick=()=>lvMini(true);$('lvmute').onclick=()=>{LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvStatus(LV.muted?'Muted':'Listening…')};
 // ---------- Gary in pixels: 100 expressions. Stands on his page (sits down when bored), floats free on the others.
 const GP={S:'#f2b48a',H:'#d48a63',M:'#7a4a26',B:'#1d1e26',G:'#3b3d4c',W:'#f4f4f6',L:'#bfe3ff',C:'#c9ced8',R:'#7a2a2a',Y:'#e8c25a',Q:'#7ec8ff',K:'#08090c',P:'#ff8fb1',V:'#5fbf5f',D:'#c0392b',N:'#8a5a34',n:'#5e3b20',F:'#ff9b2f'};
 const G_TINT={red:{S:'#e5735f',H:'#c24f3f'},green:{S:'#a9cf86',H:'#7fa862'},pale:{S:'#f6dccb',H:'#e2bba3'},blue:{S:'#b8cfe8',H:'#8fadd0'},flush:{S:'#f2a08a',H:'#d47a63'}};
@@ -1011,9 +1012,9 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'cake':arm(0,21,22,null,'G',2,2);arm(1,10,22,null,'G',2,2);rect(11,18,10,1,'P');rect(11,19,10,4,'W');rect(11,21,10,1,'P');put(15,16,'Y');put(15,17,'Y');put(15,15,odd?'F':'Y');break;
   case 'phone':arm(0,20,22,null,'G',2,2);rect(18,18,3,4,'K');rect(19,19,1,2,'L');break;
   case 'phoneEar':arm(0,24,12,[[27,18]],null,2,2);rect(23,8,2,5,'K');break;
-  case 'walk':{const st=t%4<2;clr(0);clr(1);rect(st?26:24,23,3,2,'W');rect(st?4:6,23,3,2,'W');if(st){del(10,30);del(11,30);put(10,29,'K')}else{del(20,30);del(21,30);put(21,29,'K')}break}
+  case 'walk':{const st=Math.floor((GW.step||0)/7)%2===0;clr(0);clr(1);rect(st?26:24,23,3,2,'W');rect(st?4:6,23,3,2,'W');if(st){del(10,30);del(11,30);put(10,29,'K')}else{del(20,30);del(21,30);put(21,29,'K')}break}
   case 'bike':{for(let y=28;y<31;y++)for(let i=8;i<24;i++)del(i,y);arm(0,24,21,null,'G',2,2);arm(1,21,22,[[11,22]],'G',2,2);
-   const c=(cx)=>{for(let a=0;a<16;a++)put(cx+Math.round(Math.cos(a/16*6.283)*3.4),28+Math.round(Math.sin(a/16*6.283)*3.4),'C');put(cx,28,'K');const sa=t*0.9;put(cx+Math.round(Math.cos(sa)*2),28+Math.round(Math.sin(sa)*2),'W');put(cx-Math.round(Math.cos(sa)*2),28-Math.round(Math.sin(sa)*2),'W')};
+   const c=(cx)=>{for(let a=0;a<16;a++)put(cx+Math.round(Math.cos(a/16*6.283)*3.4),28+Math.round(Math.sin(a/16*6.283)*3.4),'C');put(cx,28,'K');const sa=(GW.step||t*3)/3.4;put(cx+Math.round(Math.cos(sa)*2),28+Math.round(Math.sin(sa)*2),'W');put(cx-Math.round(Math.cos(sa)*2),28-Math.round(Math.sin(sa)*2),'W')};
    line(7,27,16,26,'D');line(16,26,24,27,'D');line(16,26,15,24,'D');line(24,27,24,22,'K');rect(23,21,3,1,'K');c(7);c(24);
    if(odd){put(14,27,'B');put(14,28,'B');put(13,29,'K')}else{put(17,27,'B');put(17,28,'B');put(18,29,'K')}break}
   case 'tiphat':arm(0,27,13);rect(24,11,7,1,'K');rect(25,6,5,5,'K');rect(25,10,5,1,'G');break}
@@ -1106,7 +1107,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   for(const i of [11,12,13,18,19,20]){Q[(30<<5)+i]='B';Q[(31<<5)+i]='B'}for(const kk in P)delete P[kk];for(const kk in Q)P[kk]=Q[kk]}
  // motion + paint
  let dx=0,dy=0,flip=false;const mv=X.mv;
- if(mv==='bob')dy=t%8>=4?1:0;else if(mv==='jump')dy=odd?-2:0;else if(mv==='bounce')dy=t%2?-1:0;else if(mv==='nod')dy=t%2;
+ if(mv==='bob')dy=X.a==='walk'?Math.floor((GW.step||0)/7)%2:(t%8>=4?1:0);else if(mv==='jump')dy=odd?-2:0;else if(mv==='bounce')dy=t%2?-1:0;else if(mv==='nod')dy=t%2;
  else if(mv==='shake')dx=t%2?1:-1;else if(mv==='tremble')dx=(t*7)%3-1;else if(mv==='sway')dx=[-1,0,1,0][t%4];else if(mv==='dance'){flip=t%8>=4;dy=t%2}
  const tint=G_TINT[X.tint]||{};x.clearRect(0,0,32,32);x.save();if(flip){x.translate(32,0);x.scale(-1,1)}x.fillStyle=GP.K;
  for(let y=0;y<32;y++)for(let i=0;i<32;i++)if(!P[y*32+i]&&(P[y*32+i-1]&&i>0||P[y*32+i+1]&&i<31||P[(y-1)*32+i]||P[(y+1)*32+i]))x.fillRect(i+dx,y+dy,1,1);
@@ -1116,7 +1117,7 @@ function gCanvas(el){const c=document.createElement('canvas');c.width=c.height=3
 const G_POSE_MS={dance:6000,sleep:6000,laugh:4000,jump:3500,cheering:4500,celebrating:4500,singing:6000,clapping:4000,applauding:4000};
 function gPose(n){n=String(n||'').toLowerCase();if(!G_EX[n])return;gMood(n,G_POSE_MS[n]||3800);GB.last=Date.now();if(GB.sit&&G_EX[n].post!=='sit'){GB.sit=false;GS.base=gIdleBase()}if($('gfloat').classList.contains('on'))GF.hold=performance.now()+(G_POSE_MS[n]||3800)}
 setInterval(()=>{GS.tick++;try{GSPK=(typeof AC!=='undefined'&&AC&&acEnd>AC.currentTime+0.05)||(window.speechSynthesis&&speechSynthesis.speaking)}catch(e){GSPK=false}
- $('gcut').classList.toggle('on',GSPK&&tab==='gary'&&!LV.on);gPaint()},140);
+ $('gcut').classList.toggle('on',GSPK&&tab==='gary'&&!LV.on);gPaint()},210);
 // --- floating Gary: no box, just Gary, happily drifting about
 const GF={x:0,y:0,vx:-0.22,vy:-0.14,drag:false,moved:false,last:0,hold:0,next:0};
 const G_LINES={today:['Shall I tidy today\'s plan for you, sir?','A fine day for getting things done, Sam.','Your day awaits, Mr Fice.'],todo:['That list won\'t tick itself, sir.','Shall we pick just one, Sam?'],focus:['I\'ll keep quiet while you focus, sir.','Head down, Mr Fice. I\'m right here.'],you:['Admiring your progress, Sam?','Looking rather well, sir.']};
@@ -1245,7 +1246,8 @@ async function brainData(){if(!CS||!navigator.onLine)return;const day=new Date()
   if(BRD.pc){BR.pc=Date.now()-new Date(BRD.pc.last_seen).getTime()<150000?'on':'off';BR.pcName=BRD.pc.name}brainSave();brainDraw();if($('bdrop').classList.contains('on'))brainMenu(true)}catch(e){}}
 function brainMenu(keep){const U=gUse(),off=!navigator.onLine||!CS,live=typeof LV!=='undefined'&&LV.on;
  const bar=(pct,cls,label)=>'<div class="bdbar"><i class="'+cls+'" style="width:'+Math.max(3,Math.min(100,pct))+'%"></i></div><div class="bdlab">'+label+'</div>';
- const row=(k,icon,meaning,conn,b)=>'<div class="bdrow"><i class="bmi '+(!U[k]?'dis':conn?'ok':'off')+'">'+BR_ICON[icon]+'</i><div class="bdtx"><div class="bdname">'+BR_NAME[k]+' <span class="'+(conn&&U[k]?'bdon':'bdoff')+'">'+(!U[k]?'Switched off':conn?'Connected':'Not connected')+'</span></div><small>'+meaning+'</small>'+(U[k]?b:'')+'</div><button class="tog'+(U[k]?' on':'')+'" data-bk="'+k+'"></button></div>';
+ const OFFS={google:'Off: he only uses GroqCloud, and live voice stops.',groq:'Off: no backup - if Google is busy he can\'t reply.',live:'Off: pulling or tapping his bar does nothing. Typing still works.',pc:'Off: he can\'t touch your PC. Your plan still syncs.'};
+ const row=(k,icon,meaning,conn,b)=>'<div class="bdrow"><i class="bmi '+(!U[k]?'dis':conn?'ok':'off')+'">'+BR_ICON[icon]+'</i><div class="bdtx"><div class="bdname">'+BR_NAME[k]+' <span class="'+(conn&&U[k]?'bdon':'bdoff')+'">'+(!U[k]?'Switched off':conn?'Connected':'Not connected')+'</span></div><small>'+meaning+'</small>'+(U[k]?b:'')+'<div class="bdoffl">'+OFFS[k]+'</div></div><button class="tog'+(U[k]?' on':'')+'" data-bk="'+k+'"></button></div>';
  const gConn=!off&&BR.g!=='out',gp=BR.g==='ok'?100:BR.g==='low'?45:8;
  const qConn=!off,qp=BR.groqLeft!=null?Math.round(BR.groqLeft*100):100;
  const pcOn=BR.pc==='on',dr=BRD.pc&&BRD.pc.info&&BRD.pc.info.drives||{},dk=Object.keys(dr)[0];
@@ -1262,7 +1264,7 @@ function brainToggle(k){const U=gUse();if(!U[k]){U[k]=true;store('garyUse',JSON.
  $('bctx').textContent='Turn off '+BR_NAME[k]+'?';$('bcbody').textContent=BR_OFF[k]+(both?' With both brains off, G.A.R.Y. can\'t reply at all.':'');
  $('bconf').classList.add('on');$('bcyes').onclick=()=>{U[k]=false;store('garyUse',JSON.stringify(U));$('bconf').classList.remove('on');brainDraw();brainMenu(true);toast('Switched off')};$('bcno').onclick=()=>$('bconf').classList.remove('on')}
 // voice screen: swipe down (or the cross) to shrink into the message bar's spot; swipe up or tap G.A.R.Y. to bring it back
-function lvMini(on){$('live').classList.toggle('mini',on);$('lvend').setAttribute('aria-label',on?'End call':'Make small')}
+function lvMini(on){$('live').classList.toggle('mini',on)}
 (function(){const L=$('live');let y0=null,dy=0;
  L.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;y0=e.clientY;dy=0});
  L.addEventListener('pointermove',e=>{if(y0===null)return;dy=e.clientY-y0});
@@ -1279,7 +1281,7 @@ async function gFace(){if(!window.PublicKeyCredential)return false;try{const c=a
 async function gGate(){if(!gLockOn()||GL.ok||GL.busy)return;GL.busy=true;const ok=await gFace();GL.busy=false;if(ok)gUnlock();else gGuestOn()}
 function gUnlock(){GL.ok=Date.now();if(GL.guest){GL.guest=false;document.body.classList.remove('guest');store('garyChat',GL.save||'');loadChat(GL.save||null);gMood('happy',1800)}}
 function gGuestOn(){if(GL.guest)return;GL.guest=true;GL.save=store('garyChat')||'';CHAT=null;document.body.classList.add('guest');$('gopen').classList.remove('on');
- $('thread').innerHTML='';$('ctitle').textContent='Guest';bubble('gary','Ah. Hello. I don\'t believe we\'ve been introduced - who do I have the pleasure of speaking with?');gMood('suspicious',3000)}
+ $('thread').innerHTML='';$('ctitle').textContent='New chat';bubble('gary',['Evening. What can I do for you?','Hello there. What are we after today?','Good evening. How can I help?'][Math.floor(Math.random()*3)]);gMood('wave',2000)}
 async function gLockSet(on){if(on){if(!window.PublicKeyCredential||!(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(()=>false))){toast('Face ID isn\'t available on this device');return}
   try{const c=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Momentum - G.A.R.Y.',id:location.hostname},
    user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'sam-gary',displayName:'G.A.R.Y. lock'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
@@ -1308,7 +1310,7 @@ function gwPlace(){const d=$('gdock');d.style.transform='translateX('+GW.x.toFix
 function gwMax(){const b=$('gbar'),n=document.querySelector('.gbt');return Math.max(0,b.clientWidth-(n?n.offsetWidth+16:120)-$('gdock').offsetWidth)}
 (function gwLoop(){const now=performance.now();
  if(gwFree()){const max=gwMax();
-  if(GW.to!==null){const sp=GS.mood==='cycling'?3.2:0.75,dx=GW.to-GW.x;GW.dir=dx<0?-1:1;
+  if(GW.to!==null){const sp=GS.mood==='cycling'?2.2:0.45,dx=GW.to-GW.x;GW.step=(GW.step||0)+sp;GW.dir=dx<0?-1:1;
    if(Math.abs(dx)<=sp){GW.x=GW.to;GW.to=null;if(GS.mood==='walking'||GS.mood==='cycling')GS.mood=GS.base||'idle';
     let a;do{a=G_ACTS[Math.floor(Math.random()*(G_ACTS.length-1))]}while(a===GW.last);GW.last=a;GW.busy=now+5000+Math.random()*3000;gMood(a,GW.busy-now)}
    else{GW.x+=sp*GW.dir;if(!GS.until&&GS.mood!=='cycling')GS.mood='walking'}gwPlace()}
