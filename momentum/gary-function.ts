@@ -580,7 +580,7 @@ async function* gemini(system, turns, json = false) {
   const list = (v, d) => (v || d).split(",").map((x) => x.trim()).filter(Boolean);
   if (USE.google === false && USE.groq === false) throw Object.assign(new Error("both brains off"), { kind: "off" });
   const gm = key && USE.google !== false ? list(env("GEMINI_MODEL"), "gemini-flash-lite-latest,gemini-flash-latest") : [];
-  const qm = gk && USE.groq !== false ? list(env("GROQ_MODEL"), "openai/gpt-oss-120b,llama-3.3-70b-versatile,openai/gpt-oss-20b,llama-3.1-8b-instant") : [];
+  const qm = gk && USE.groq !== false ? list(env("GROQ_MODEL"), "openai/gpt-oss-120b,llama-3.3-70b-versatile,openai/gpt-oss-20b") : [];
   const plan = [];
   for (let i = 0; i < Math.max(gm.length, qm.length); i++) { if (gm[i]) plan.push(["g", gm[i]]); if (qm[i]) plan.push(["q", qm[i]]); }
   let last, sofar = "";

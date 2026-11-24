@@ -346,9 +346,9 @@ body.lvon #askbar{display:none!important}
 #gfloat #gfbub[data-at=sideR]::after{bottom:auto;top:var(--ty,18px);left:-7px!important;border-left:0;border-right-color:#fff}
 
 #lvstat,#lvtx{display:none!important}
-@media (hover:none) and (pointer:coarse){#live.typing{justify-content:flex-start;padding-top:calc(14px + env(safe-area-inset-top))}
-#live.typing .lvwrap{flex:none;height:min(280px,33vh);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
-#live.typing #lvorb{width:min(150px,38vw);height:min(150px,38vw)}#live.typing #lvtyp{margin-top:26px}#live.typing .lvacts{margin-top:14px}#live.typing #lvcut{display:none!important}}
+@media (hover:none) and (pointer:coarse){#live.typing.kbopen{justify-content:flex-start;padding-top:calc(14px + env(safe-area-inset-top))}
+#live.typing.kbopen .lvwrap{flex:none;height:min(280px,33vh);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
+#live.typing.kbopen #lvorb{width:min(150px,38vw);height:min(150px,38vw)}#live.typing.kbopen #lvtyp{margin-top:26px}#live.typing.kbopen .lvacts{margin-top:14px}#live.typing #lvcut{display:none!important}}
 #lvorb[data-flip="1"] .gpx.scene{transform:scaleX(-1)}
 .lvhead{text-align:center}.lvname{font:400 26px/1.1 var(--serif);letter-spacing:.04em}.lvhead .lab{margin-top:6px;font-size:9.5px}#live.mini .lvhead{display:none}
 
@@ -450,10 +450,12 @@ body.guest #thread{padding-top:14px}
 /* one layout for everyone: no big heading or chat-name row; Chat history left, New chat right; Memory (or Face ID, without it) by the Wi-Fi symbol */
 #p-gary h1,#p-gary .gsub,#chead{display:none!important}
 /* access version (Face ID passed): Memory left, Chat history right. Guest version: Chat history left, New chat right */
-#gnew{display:none!important}body.guest #gnew{display:inline!important}body.guest #memBtn{display:none!important}#hmem{display:none!important}
+#gnew{display:none!important}body.guest #gnew,body.haschat #gnew{display:inline!important}body.haschat:not(.guest) #gnew{animation:gin .3s var(--ease)}body.guest #memBtn{display:none!important}#hmem{display:none!important}
 #hmem{display:inline-grid;place-items:center;width:28px;height:28px;margin-left:8px;vertical-align:middle;background:none;border:0;color:var(--dim);padding:0}#hmem svg{width:19px;height:19px}body.guest #hmem{display:none}
 #thread{padding-top:14px}
 #hmem,#hfid{-webkit-tap-highlight-color:transparent}
+
+#memBtn{order:0}#gnew{order:1}#chatsBtn{order:2}body.guest #chatsBtn{order:0}body.guest #gnew{order:2}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><button id="hmem" aria-label="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button><button id="hfid" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -915,7 +917,7 @@ function chView(){const P=$('p-gary');if(P.scrollHeight-P.scrollTop-P.clientHeig
  for(const b of $('thread').querySelectorAll('p.q,p.a')){const q=b.getBoundingClientRect();if(q.bottom<r.top+40||q.top>r.bottom-60)continue;out+=(b.classList.contains('q')?'You: ':'Rodger: ')+b.textContent.trim()+'\n'}
  return out.slice(0,3000)}
 // the chat you're in, and a new-chat button, under R.O.D.G.E.R.
-function chHead(){const n=$('chname');if(n)n.textContent=CHAT?chName($('ctitle').textContent||'Chat'):'New chat'}
+function chHead(){const n=$('chname');if(n)n.textContent=CHAT?chName($('ctitle').textContent||'Chat'):'New chat';document.body.classList.toggle('haschat',!!CHAT&&$('thread').querySelector('p.q')!==null)}
 const CHT={plans:'Plans',feelings:'Feelings',people:'People',work:'Work',health:'Health',projects:'Projects',ideas:'Ideas',questions:'Questions',fun:'Fun',voice:'Voice'};
 let CHS=[],CHF='all';
 async function listChats(){sheet('chl',true);$('chq').value='';if(!CS){$('chf').innerHTML='';$('chlist').innerHTML='<p class="empty">Sign in under You → Settings to keep chats with Rodger.</p>';return}
@@ -1287,6 +1289,8 @@ $('lvtyp').onsubmit=e=>{e.preventDefault();const t=$('lvtin').value.trim();if(!t
  if(LV.srcs.length){lvNoteCut();lvHush();LV.drop=false}LV.inT+=(LV.inT?' ':'')+t;LV.typed=true;LV.act=Date.now();lvLine('you',t);$('lvtin').value='';
  LV.ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:t}]}],turnComplete:true}}));lvStatus('Rodger');gMood('think',1500)};
 
+function lvKb(){const L=$('live'),v=VV();if(!L||!v)return;const open=L.classList.contains('on')&&FULLH-v.height>120;L.classList.toggle('kbopen',open);
+ if(open){LV.kbSeen=Date.now();return}if(L.classList.contains('typing')&&document.activeElement===$('lvtin')&&LV.kbSeen&&Date.now()-LV.kbSeen>250){LV.kbSeen=0;$('lvtin').blur()}}
 function lvVV(){if($('live').classList.contains('on')&&$('live').classList.contains('typing')&&(scrollY||document.documentElement.scrollTop))scrollTo(0,0)}
 if(window.visualViewport){visualViewport.addEventListener('resize',lvVV);visualViewport.addEventListener('scroll',lvVV)}$('lvtin').addEventListener('focus',()=>setTimeout(lvVV,60));$('lvtin').addEventListener('blur',()=>setTimeout(lvVV,60));
 // the keyboard's tick/Done (or tapping away) closes typing: the bar goes and the buttons drop back. Send and the magnifier keep focus so they don't count as tapping away.
@@ -1390,7 +1394,7 @@ function kbFit(){navKeep();const v=VV(),a=$('askbar'),t=$('ask');if(!v||!a)retur
 function kbPad(){const a=$('askbar'),p=$('p-gary');if(!document.body.classList.contains('kbup')){p.style.paddingBottom='';return}p.style.paddingBottom=Math.max(40,Math.round(p.getBoundingClientRect().bottom-a.getBoundingClientRect().top+14))+'px';garyBottom()}
 function kbSlide(y){const a=$('askbar');clearTimeout(kbSlide.t);kbSlide.t=setTimeout(kbPad,320);if(y==null){a.style.transform='';document.body.classList.remove('kbup');document.documentElement.style.setProperty('--kb','0px');setTimeout(garyBottom,300);return}
  document.body.classList.add('kbup');const home=a.offsetTop+a.offsetHeight,dy=Math.round(y-home);a.style.transform='translateY('+dy+'px)';document.documentElement.style.setProperty('--kb',Math.max(0,-dy)+'px')}
-if(window.visualViewport){visualViewport.addEventListener('resize',kbFit);visualViewport.addEventListener('scroll',kbFit)}
+{const vv=VV();if(vv){vv.addEventListener('resize',kbFit);vv.addEventListener('scroll',kbFit);vv.addEventListener('resize',()=>{lvKb();setTimeout(lvKb,300)})}}
 function kbPre(){kbFit.t0=Date.now();if(tab!=='gary'||!matchMedia('(pointer:coarse)').matches)return;const kb=+store('kbH')||Math.round(FULLH*0.42);kbSlide(FULLH-kb);kbFit.pre=true}
 $('ask').addEventListener('focus',()=>{kbPre();kbFit();setTimeout(kbFit,60);setTimeout(kbFit,320);setTimeout(kbFit,650)});$('ask').addEventListener('blur',()=>{setTimeout(kbFit,60);setTimeout(kbFit,320)});
 
@@ -1923,12 +1927,20 @@ function gReact(t){const now=performance.now();if(tab!=='gary'||LV.on||talking||
 // a beat between lines: about 10 s, sometimes a longer pause; once in a while one more round of back-and-forth
 const G_MORE=[[['b','whatever 🙄'],['g','Devastating comeback. Truly.','sarcastic']],[['b','ok boomer'],['g','I\'m a butler, not a boomer.','disdainful']],[['b','👁️👄👁️'],['g','Don\'t look at me like that.','suspicious']],
  [['b','last word.'],['g','Very well. Last word.','smug'],['b','no, MY last word'],['g','…','eyeroll']],[['b','tell sam i said hi'],['g','He can read, you absolute rectangle.','facepalm']]];
-const gBeat=()=>Math.random()<0.15?14000+Math.random()*3500:8000+Math.random()*4000;
-function gSquabble(lines){let i=0;const a=$('ask');GB.chat=true;if(Math.random()<0.15)lines=lines.concat(G_MORE[Math.floor(Math.random()*G_MORE.length)]);let beat=gBeat();
- (function next(){if(i>=lines.length||a.value||talking||LV.on||tab!=='gary'||GB.shown){const done=i>=lines.length&&!a.value&&!talking&&!LV.on&&tab==='gary'&&!GB.shown;GB.chat=false;setTimeout(()=>{if(!a.value)gBar(gRest())},7000);
+// comic timing: each line stays up as long as it takes to read plus a beat; before he answers, Rodger gives it "a look" (the take), then the punchline lands;
+// the last line gets a longer hold so it can breathe. Short lines are snappy, long ones get time. Once in a while it runs an extra round.
+const gRead=t=>Math.min(5200,1100+String(t||'').length*55),gBeat=()=>Math.random()<0.15?14000+Math.random()*3500:8000+Math.random()*4000;
+const G_TAKE=['skeptical','unimpressed','eyeroll','suspicious','sigh','disdainful','listen'];
+function gSquabble(lines){let i=0;const a=$('ask');GB.chat=true;if(Math.random()<0.15)lines=lines.concat(G_MORE[Math.floor(Math.random()*G_MORE.length)]);
+ const stop=()=>a.value||talking||LV.on||tab!=='gary'||GB.shown;
+ (function next(){if(i>=lines.length||stop()){const done=i>=lines.length&&!stop();GB.chat=false;setTimeout(()=>{if(!a.value)gBar(gRest())},7000);
    if(done&&Math.random()<0.22&&!GL.guest)setTimeout(()=>{if(GB.chat||GB.shown||a.value||talking||LV.on||tab!=='gary')return;const q=G_ASKSAM[Math.floor(Math.random()*G_ASKSAM.length)];GB.pending=q;GB.shown=true;GB.asked=Date.now();gBubble(q,30000);if(!GB.sit)gMood('explaining',2600)},2200);return}
-  const L=lines[i++];beat=gBeat();if(L[0]==='b'){gReact.t=-1e9;gBar(L[1]);gwHold(beat)}else{gwHold(beat,true);gBubble(L[1],beat-600);if(!GB.sit)gMood(L[2]||'sarcastic',Math.min(5000,beat-800))}
-  setTimeout(next,beat)})()}
+  const L=lines[i++],last=i>=lines.length,hold=last?2600:1800;
+  if(L[0]==='b'){const show=gRead(L[1])+hold+1200;gReact.t=-1e9;gBar(L[1]);gwHold(show+1500);
+    // he hears it: a quick take a moment after it appears (unless his answer is next - then the take leads into the punchline)
+    const nx=lines[i];if(nx&&nx[0]==='g'){setTimeout(()=>{if(!stop()&&!GB.sit)gMood(G_TAKE[Math.floor(Math.random()*G_TAKE.length)],1300)},show-1300)}
+    setTimeout(next,show)}
+  else{const show=gRead(L[1])+hold+1600;gwHold(show,true);gBubble(L[1],show-300);if(!GB.sit)gMood(L[2]||'sarcastic',Math.min(5000,show-600));setTimeout(next,show+(last?0:600))}})()}
 let gBi=Math.floor(Math.random()*G_BANTER.length),gSi=Math.floor(Math.random()*G_SQUABBLES.length);
 (function banter(wait){setTimeout(()=>{const a=$('ask');
   if(a&&!a.value&&document.activeElement!==a&&tab==='gary'&&!talking&&!GSPK&&!LV.on&&!GB.shown&&!GB.chat){
@@ -2103,7 +2115,7 @@ async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock()
   if(r.status===404)throw new Error('nofn');if(!r.ok)throw new Error('http '+r.status);
   const rd=r.body.getReader(),dec=new TextDecoder();
   for(;;){const{value,done}=await rd.read();if(done)break;pet();GTALK=true;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
-  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);GPOSE=j.pose||(j.feel&&j.feel.pose&&j.feel.pose!=='idle'?j.feel.pose:null);if(j.feel)store('garyFeel',JSON.stringify(j.feel));brainFrom(j.brain);garyJobs(j.jobs,a)}catch(e){}}}
+  const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);setTimeout(chHead,0);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);GPOSE=j.pose||(j.feel&&j.feel.pose&&j.feel.pose!=='idle'?j.feel.pose:null);if(j.feel)store('garyFeel',JSON.stringify(j.feel));brainFrom(j.brain);garyJobs(j.jobs,a)}catch(e){}}}
  catch(e){if(e.name==='AbortError'&&!got)a.textContent='That took far too long, sir - Google seems to have nodded off. Try me again.';else if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':garyOffline(text,1)||'I can\'t reach the cloud just now, sir. Try again in a moment.'}
  clearTimeout(wd);a.classList.remove('wait');talking=false;GTALK=false;if(GPOSE)gPose(GPOSE);else if(got)gMood('happy',1600);else gMood('confused',3500);GPOSE=null;const said=got.split('\x1e')[0].trim();if(said&&typeof LV!=='undefined'&&LV.on&&LV.streamCut!=null){const k=Math.min(said.length,LV.streamCut);LV.streamCut=null;if(said.slice(k).trim())lvCarry(said.slice(0,k),said.slice(k).trim())}else if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
 // Rodger's voice: the device's own British male voice (free, swappable later)
@@ -2163,7 +2175,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124185605';let UPD=false;
+const BUILD='20261124191655';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
