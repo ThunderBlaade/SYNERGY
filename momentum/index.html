@@ -322,6 +322,7 @@ body.lvon #askbar{display:none!important}
 #lvtin{flex:1;min-width:0;height:46px;box-sizing:border-box;border:1px solid var(--line);background:#0d0e12;padding:12px 14px;font:16px/22px var(--sans);color:var(--fg)}#lvtin::placeholder{color:var(--faint);font-size:14.5px}
 #lvtsend{width:46px;height:46px}#live.mini #lvtyp,#live.mini #lvtype{display:none!important}
 #live.typing #lvtx{height:18vh}
+#gfloat #gfbub[data-at^=down]::after,#gfloat #gfbub[data-at^=side]::after{display:none}#gfloat #gfbub[data-at=upL]::after{right:auto;left:24px}#gfloat #gfbub[data-at=upR]::after{left:auto;right:24px}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -1330,10 +1331,17 @@ function gFloatSync(){const f=$('gfloat');if(!f)return;const show=gFloatOn()&&ta
  if(show&&!f.classList.contains('on')){if(!GF.placed){GF.placed=true;const p=gfPick(null);GF.x=p.x;GF.y=p.y}GF.to=null;GF.pause=performance.now()+1200;gFloatPlace();f.classList.add('on');
   if(Date.now()-GF.last>150000){GF.last=Date.now();setTimeout(()=>gSay((G_LINES[tab]||G_LINES.today)[Math.floor(Math.random()*2)],'wave'),700)}}
  if(!show)f.classList.remove('on')}
-function gSay(text,mood){const f=$('gfloat');if(!f.classList.contains('on'))return;$('gfbub').textContent=text;f.classList.toggle('left',GF.x<innerWidth/2);f.classList.add('say');gMood(mood||'wave',2400);clearTimeout(GF.sayT);GF.sayT=setTimeout(()=>f.classList.remove('say'),5200)}
+function gSay(text,mood,moved){const f=$('gfloat');if(!f.classList.contains('on'))return;$('gfbub').textContent=text;f.classList.toggle('left',GF.x<innerWidth/2);
+ if(gfBubPlace()>1500&&!moved&&!GF.drag){f.classList.remove('say');GF.sayQ=[text,mood];{const b=gFloatBounds(),T=gfText();let bt=null,bc=1e18;for(let k=0;k<50;k++){const x=b.x0+Math.random()*Math.max(1,b.x1-b.x0),y=b.y0+Math.random()*Math.max(1,b.y1-b.y0),c=gfBubPlace(x,y,T)+gfCost(T,x,y)+Math.hypot(x-GF.x,y-GF.y)*2;if(c<bc){bc=c;bt={x,y}}}GF.to=bt}GF.pause=0;return}GF.sayQ=null;f.classList.add('say');gMood(mood||'wave',2400);clearTimeout(GF.sayT);GF.sayT=setTimeout(()=>f.classList.remove('say'),5200)}
+// put his speech bubble wherever it covers the least of your text (above, below or beside him), always on screen
+function gfBubPlace(px,py,T0){const X0=px??GF.x,Y0=py??GF.y,bub=$('gfbub'),T=T0||gfText(),w=bub.offsetWidth||190,h=bub.offsetHeight||60,nav=document.querySelector('nav'),nb=nav?nav.getBoundingClientRect().top:innerHeight;
+ const C=[['up',80-w,-h-10],['up',0,-h-10],['down',80-w,90],['down',0,90],['side',-w-8,4],['side',88,4]];let best=null,bs=1e18;
+ for(const [k,l,t] of C){const ax=X0+l,ay=Y0+t;let c=0;for(const q of T){const ww=Math.min(ax+w,q.right)-Math.max(ax,q.left),hh=Math.min(ay+h,q.bottom)-Math.max(ay,q.top);if(ww>0&&hh>0)c+=ww*hh}
+  if(ax<4||ax+w>innerWidth-4||ay<4||ay+h>nb-4)c+=1e7;if(k==='up')c-=200;if(c<bs){bs=c;best=[k,l,t]}}
+ if(T0)return bs;bub.style.left=best[1]+'px';bub.style.top=best[2]+'px';bub.style.right='auto';bub.style.bottom='auto';bub.dataset.at=best[0]+(best[1]<=0?'L':'R');return bs}
 function gFloatPlace(){const b=gFloatBounds();GF.x=Math.max(b.x0,Math.min(b.x1,GF.x));GF.y=Math.max(b.y0,Math.min(b.y1,GF.y));const f=$('gfloat');f.style.left=GF.x+'px';f.style.top=GF.y+'px'}
 (function drift(){const f=$('gfloat'),now=performance.now();if(f&&f.classList.contains('on')&&!GF.drag&&!f.classList.contains('say')&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&now>GF.hold){
-  if(!GF.to&&now>(GF.pause||0))GF.to=gfPick({x:GF.x,y:GF.y});if(GF.to){const dx=GF.to.x-GF.x,dy=GF.to.y-GF.y,d=Math.hypot(dx,dy);if(d<1.5){GF.to=null;GF.pause=now+4000+Math.random()*4000}else{const sp=Math.min(0.6,0.12+d/140);GF.x+=dx/d*sp;GF.y+=dy/d*sp+Math.sin(now/900)*0.08}}gFloatPlace()}
+  if(!GF.to&&now>(GF.pause||0))GF.to=gfPick({x:GF.x,y:GF.y});if(GF.to){const dx=GF.to.x-GF.x,dy=GF.to.y-GF.y,d=Math.hypot(dx,dy);if(d<1.5){GF.to=null;GF.pause=now+4000+Math.random()*4000;if(GF.sayQ){const q=GF.sayQ;GF.sayQ=null;gSay(q[0],q[1],1)}}else{const sp=GF.sayQ?Math.min(2.4,0.4+d/50):Math.min(0.6,0.12+d/140);GF.x+=dx/d*sp;GF.y+=dy/d*sp+Math.sin(now/900)*0.08}}gFloatPlace()}
  if(f&&f.classList.contains('on')&&!GS.until&&now>GF.next){if(GF.next)gMood(G_FLOATFUN[Math.floor(Math.random()*G_FLOATFUN.length)],3500);GF.next=now+9000+Math.random()*8000}
  requestAnimationFrame(drift)})();
 // --- on his page: stands; gets bored and sits; then starts a conversation you can answer
@@ -1607,7 +1615,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124012956';let UPD=false;
+const BUILD='20261124013203';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
