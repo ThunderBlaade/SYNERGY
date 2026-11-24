@@ -990,7 +990,7 @@ function youPart(ysub,b){if(!b)return;
   '<div class="set"><div>Morning plan<small>When Rodger asks you to shape the day</small></div><input type="time" id="smo" value="'+(st.morning||'08:30')+'"></div>'+
   '<div class="set"><div>Evening reflection<small>A look back at what counted</small></div><input type="time" id="sev" value="'+(st.evening||'21:00')+'"></div>'+
   '<div class="set"><div>Heads-up before tasks</div><div class="chips" id="srem"></div></div>'+
-  '</div><div class="lab glab">R.O.D.G.E.R.</div><div class="grp"><div class="set stack"><div>Rodger\'s voice<small>To change it, just tell him in the chat: "change your voice", or "deeper", "slower", "softer". Then say "next" for another or "save" to keep it</small></div><div id="svoice"></div></div>'+
+  '</div><div class="lab glab">R.O.D.G.E.R.</div><div class="grp"><div class="set stack"><div>Rodger\'s voice<small>Locked as Rodger voice one. To change it, tell him in the chat: "unlock your voice", then "change your voice", "next" and "save"</small></div><div id="svoice"></div></div>'+
   '<div class="set"><div>Face ID for R.O.D.G.E.R.<small>Anyone else who opens him gets guest mode: nothing private, and he tells you who it was</small></div><button class="tog'+(gLockOn()?' on':'')+'" id="sfid"></button></div>'+
   '<div class="set"><div>Rodger\'s notes for Claude<small>What he can\'t do yet and anything that went wrong. Copy and paste to Claude to fix or improve him</small></div><button class="btn ghost" id="sgn" style="min-width:86px">Copy</button></div>'+
   '<div class="set"><div>Rodger wanders the other pages<small>Like the old Office assistant. Drag him anywhere; tap him to chat</small></div><button class="tog'+(store('garyFloat')!=='0'?' on':'')+'" id="sgf"></button></div>'+
@@ -1558,7 +1558,7 @@ const GV5=[['usual','His usual voice (default)','The Rodger you know: smooth, de
 const GV_IDS=GV5.map(x=>x[0]);function gvCur(){const v=store('garyVoice');return v==='clone'||GV_IDS.includes(v)?v:'usual'}
 const GV_LINE='Good evening, sir. Rodger, at your service. Your tea is on the side, the diary is clear, and I have taken the liberty of tidying your plans.';
 function voicePicker(){const el=$('svoice');if(!el)return;const c=vxSaved(),k='vx:'+c.v+':'+c.m.join(','),def=c.v==='Algieba'&&!c.m.length;
- el.innerHTML='<div class="gvrow on"><div><b>'+(def?'Default':'Your tuned voice')+'</b><small>Calm and measured, like Vision'+(c.m.length?' · '+esc(c.m.join(', ')):'')+(def?'':' · voice '+(VX_LIST.indexOf(c.v)+1))+'</small></div><button class="btn ghost" data-play="'+k+'">▶ Play</button>'+(def?'':'<button class="btn ghost" id="vxreset">Reset</button>')+'</div>';
+ el.innerHTML='<div class="gvrow on"><div><b>Rodger voice one'+(vxLocked()?' · locked':'')+'</b><small>Calm and measured, like Vision'+(c.m.length?' · '+esc(c.m.join(', ')):'')+(def?'':' · voice '+(VX_LIST.indexOf(c.v)+1))+'</small></div><button class="btn ghost" data-play="'+k+'">▶ Play</button>'+(def||vxLocked()?'':'<button class="btn ghost" id="vxreset">Reset</button>')+'</div>';
  el.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>gvToggle(b.dataset.play));gvBtns();
  if($('vxreset'))$('vxreset').onclick=()=>{store('garyVx','');VXT=null;voicePicker()}}
 
@@ -1571,6 +1571,9 @@ const VX_MODS=[[/\b(deep(er)?|lower)\b/,'deeper','with a deeper, lower pitch','h
  [/\b(serious)\b/,'more serious','more serious and grave'],[/\b(expressive|emotional|lively)\b/,'more expressive','more expressive and lively'],[/\bvision\b/,'more like Vision','even more like a calm, thoughtful synthetic being, curious and gentle']];
 function vxSaved(){try{const o=JSON.parse(store('garyVx')||'null');if(o&&VX_LIST.includes(o.v))return{v:o.v,m:Array.isArray(o.m)?o.m.filter(k=>VX_MODS.some(x=>x[1]===k)).slice(0,8):[]}}catch(e){}return{v:'Algieba',m:[]}}
 let VXT=null;   // a voice being tried in the chat, not saved yet
+// Sam's pick, 24 Nov 2026: the voice as it is now is "Rodger voice one", locked until he says otherwise
+if(!store('garyVxLock')){store('garyVx',JSON.stringify(vxSaved()));store('garyVxLock','1')}
+const vxLocked=()=>store('garyVxLock')==='1';
 function vxCur(){return VXT||vxSaved()}
 function vxStyle(c){const ph=(c.m||[]).map(k=>(VX_MODS.find(x=>x[1]===k)||[])[2]).filter(Boolean);return VX_BASE+(ph.length?', '+ph.join(', '):'')}
 const VX_SAY=['Rodger, at your service. How does this sound, sir?','Good evening, sir. Is this more to your liking?','At your service, Mr Fice. Shall I keep this voice?'];
@@ -1578,6 +1581,11 @@ function vxTry(c,you,note){VXT=c;bubble('you',you);const n=VX_LIST.indexOf(c.v)+
  bubble('gary',note+' (Voice '+n+' of '+VX_LIST.length+(c.m.length?' · '+c.m.join(', '):'')+'.) Say "next" for another, "save" to keep it, or tell me deeper, slower, softer, warmer… "Cancel" puts it back.');
  const p=$('p-gary');p.scrollTop=p.scrollHeight;gMood('happy',2500);speak(VX_SAY[Math.floor(Math.random()*VX_SAY.length)])}
 function vxCmd(text){const t=text.toLowerCase().trim().replace(/[.!?…]+$/,'').replace(/^(ok(ay)?|right|rodger|please)[, ]+/,'');const on=!!VXT,cur=vxCur();
+ const say=(m,sp)=>{bubble('you',text);bubble('gary',m);const p=$('p-gary');p.scrollTop=p.scrollHeight;if(sp)speak(sp)};
+ if(/\b(unlock|unfreeze) (your|ur|the) voice\b/.test(t)){store('garyVxLock','0');voicePicker();say('Unlocked. Say "change your voice" whenever you want to try something new.');return true}
+ if(/\block (your|ur|the|this) voice\b/.test(t)&&!on){store('garyVxLock','1');voicePicker();say('Locked - this stays Rodger voice one.');return true}
+ if(vxLocked()&&!on){const vt=/\b(your|ur|ya|rodger'?s|his) voice\b|\bvoice\b/.test(t)&&/\b(change|different|new|another|try|switch|tweak|adjust|make|deeper|lower|higher|slower|faster|softer|warmer|calmer|reset)\b/.test(t);
+  if(vt){say('My voice is locked as Rodger voice one, sir. Say "unlock your voice" if you want to change it.');return true}return false}
  if(on&&/^(next|next one|next voice|another|another one|try another( one)?|different one|skip|nah|no|nope)( please)?$/.test(t)){const v=VX_LIST[(VX_LIST.indexOf(cur.v)+1)%VX_LIST.length];vxTry({v,m:cur.m},text,'Very well - another one.');return true}
  if(on&&/^(save|save it|save that|save this( one)?|keep it|keep that|keep this( one)?|that one|yes|yes save( it)?|perfect|lock it in|use (this|that)( one)?)$/.test(t)){
   store('garyVx',JSON.stringify(VXT));VXT=null;bubble('you',text);bubble('gary','Saved, sir. This is my voice now, here and in voice chat.');voicePicker();const p=$('p-gary');p.scrollTop=p.scrollHeight;gMood('happy',2500);speak('Saved, sir.');return true}
@@ -2399,7 +2407,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124224756';let UPD=false;
+const BUILD='20261124225359';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
