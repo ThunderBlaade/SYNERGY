@@ -295,6 +295,16 @@ body.lvon #askbar{display:none!important}
 #p-gary{padding-bottom:calc(var(--askH,190px) + 130px + var(--safeB))}
 
 #thread{padding:0 10px}#thread .q{font-size:17px!important;line-height:1.45!important;color:rgba(244,242,238,.62)}
+
+.mhead{display:flex;align-items:center;gap:10px;margin-bottom:4px}#mback{width:34px;height:34px;display:grid;place-items:center;margin-left:-8px;color:var(--fg)}#mback svg{width:22px;height:22px}
+#mpath{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#mq{font-size:18px;margin:10px 0 6px}#mnote:empty{display:none}
+.mrow{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:13px 0;border-bottom:1px solid var(--line)}.mrow i{width:22px;height:22px;flex:none;color:var(--dim)}.mrow i svg{width:22px;height:22px}
+.mrow span{flex:1;min-width:0}.mrow b{display:block;font:400 17px/1.3 var(--serif)}.mrow small{display:block;color:var(--dim);font-size:12.5px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mrow em{font-style:normal;color:var(--faint);font-size:20px}
+.mfile h2{font:400 30px/1.15 var(--serif);margin:8px 0 6px}.msum{color:var(--dim);font:400 17px/1.4 var(--serif);margin-bottom:8px}
+.msec{margin-top:20px}.msec>.lab{display:block;margin-bottom:8px}.msec p{font:400 16px/1.5 var(--serif)}.mkeys{color:var(--dim)}.mold{color:var(--dim);font-size:14px!important;margin-bottom:6px}
+.medit{display:flex;flex-direction:column;gap:10px}.medit .lab{margin-top:10px}.medit input:not(.big){border:1px solid var(--line);padding:11px 12px;font-size:15px;width:100%}.medit textarea.short{min-height:64px}
+#mel{display:flex;flex-wrap:wrap;gap:8px}.mlink{border:1px solid var(--line);padding:6px 4px 6px 10px;font-size:13px;display:inline-flex;align-items:center;gap:4px}.mlink button{width:22px;color:var(--dim)}
+#mem{height:88dvh}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -372,16 +382,10 @@ body.lvon #askbar{display:none!important}
 <div id="bdrop"><div class="bdhead"><div class="lab">What G.A.R.Y. runs on</div><button id="bdx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="bdlist"></div><div class="hint" id="bdfoot"></div><i class="bdgrab"></i></div>
 <div id="bconf"><div class="bcbox"><div id="bctx"></div><p id="bcbody"></p><div class="goacts"><button class="btn fill" id="bcyes">Turn off</button><button class="btn ghost" id="bcno">Keep on</button></div></div></div>
 <div class="sheet" id="mem"><div class="grab"></div>
- <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab">What Gary remembers</div><button class="btn" id="madd">Add +</button></div>
- <input class="big" id="mq" placeholder="Search memories or people" style="font-size:18px;margin:14px 0 12px" spellcheck="false">
- <div class="chips" id="mchips"></div>
- <div id="mlist" style="margin-top:10px"></div></div>
-<div class="sheet" id="med"><div class="grab"></div>
- <div class="lab" id="mehead">Edit memory</div>
- <textarea id="metext" style="min-height:130px;margin:14px 0" spellcheck="true" autocorrect="on" autocapitalize="sentences"></textarea>
- <div class="chips" id="mekind"></div>
- <p class="hint">Only you and Gary can see this. Changes reach every device.</p>
- <div class="acts"><button class="btn ghost" id="meforget">Forget</button><button class="btn ghost" id="mex">Cancel</button><button class="btn fill" id="mesave">Save</button></div></div>
+ <div class="mhead"><button id="mback" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="lab" id="mpath">Memories</div><button class="btn" id="madd">New +</button></div>
+ <input class="big" id="mq" placeholder="Search memories" spellcheck="false" autocomplete="off" enterkeyhint="search">
+ <div class="hint" id="mnote"></div>
+ <div id="mlist"></div></div>
 <div class="sheet" id="chl"><div class="grab"></div>
  <div style="display:flex;justify-content:space-between;align-items:center"><div class="lab">Your chats</div><button class="btn" id="newChat">New chat +</button></div>
  <div id="chlist" style="margin-top:14px"></div></div>
@@ -757,33 +761,90 @@ function garyApply(actions,after){if(!actions||!actions.length)return;const undo
   row.querySelector('.gyes').onclick=()=>{touch(Object.assign(S.items[a.id],{deleted:true}));row.innerHTML='<span class="lab">Deleted “'+esc(it.title)+'”</span>';garyLog('deleted',{title:it.title});render()};
   row.querySelector('.gno').onclick=()=>{row.innerHTML='<span class="lab">Kept “'+esc(it.title)+'”</span>'};box.appendChild(row)}
  after.after(box);render()}
-// ---------- what Gary remembers: read, search, edit, add, forget (your memory, your rules)
-let MEMS=[],MK='all',ME=null;
-const MKN={all:'All',profile:'About you',preference:'How to talk',personal:'Personal',episodic:'Moments',operational:'Projects'};
-async function memOpen(){sheet('mem',true);if(!CS){$('mlist').innerHTML='<p class="empty">Sign in under You → Settings to see what Gary remembers.</p>';return}
- $('mlist').innerHTML='<p class="empty">Loading…</p>';
- try{MEMS=await gdb('gary_memories?select=id,kind,text,people,happened,basis,sensitive,source&deleted=is.false&order=happened.desc.nullsfirst,created_at.desc&limit=1000');memDraw()}
- catch(e){$('mlist').innerHTML='<p class="empty">Can\'t reach Gary\'s memory right now.</p>'}}
-function memDraw(){const q=$('mq').value.trim().toLowerCase();
- $('mchips').innerHTML=Object.keys(MKN).map(k=>'<button class="chip'+(k===MK?' on':'')+'" data-k="'+k+'">'+MKN[k]+(k==='all'?' '+MEMS.length:'')+'</button>').join('');
- $('mchips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{MK=b.dataset.k;memDraw()});
- const L=MEMS.filter(m=>(MK==='all'||m.kind===MK)&&(!q||m.text.toLowerCase().includes(q)||(m.people||[]).some(p=>p.toLowerCase().includes(q))));
- $('mlist').innerHTML=L.length?L.slice(0,300).map(m=>'<button class="ci" data-id="'+esc(m.id)+'"><b>'+esc(m.text.length>160?m.text.slice(0,160)+'…':m.text)+'</b><small>'+[m.happened?new Date(m.happened+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'',MKN[m.kind],(m.people||[]).filter(Boolean).join(', '),m.source==='conversation'?'told Gary':''].filter(Boolean).map(esc).join(' · ')+'</small></button>').join(''):'<p class="empty">Nothing here.</p>';
- $('mlist').querySelectorAll('.ci').forEach(b=>b.onclick=()=>memEdit(MEMS.find(m=>m.id===b.dataset.id)))}
-function memEdit(m){ME=m;$('metext').value=m?m.text:'';$('mehead').textContent=m?'Edit memory':'New memory';$('meforget').style.display=m?'':'none';
- $('mekind').innerHTML=['profile','preference','personal','episodic','operational'].map(k=>'<button class="chip'+((m?m.kind:'personal')===k?' on':'')+'" data-k="'+k+'">'+MKN[k]+'</button>').join('');
- $('mekind').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{$('mekind').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b))});
- sheet('med',true);setTimeout(()=>$('metext').focus(),300)}
-$('mesave').onclick=async()=>{const text=$('metext').value.trim().slice(0,4000);if(!text)return;const kind=$('mekind').querySelector('.on').dataset.k;
- try{if(ME){await gdb('gary_memories?id=eq.'+encodeURIComponent(ME.id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({text,kind,basis:'confirmed',updated_at:new Date().toISOString()})});Object.assign(ME,{text,kind});garyLog('memory_edited',{id:ME.id})}
-  else{const m={id:'u'+Date.now().toString(36),text,kind,people:[],happened:null,importance:4,source:'you',basis:'stated',sensitive:false};
+// ---------- Memories: folders of memory files, like a file explorer. Gary files and tidies them himself; you can read, search, edit, add and forget.
+const MF={people:['People','Who\'s who in your life'],places:['Places','Where things happened'],experiences:['Experiences','What happened, and why it mattered'],self:['Self','You - who you are and what matters to you'],knowledge:['Knowledge','Your projects, skills and interests'],other:['Other','Everything else']};
+const MI={folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M3 6.5h6l2 2h10v10H3z"/></svg>',file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>',person:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg>'};
+let MEMS=[],MV={at:'root'},MST=[],MFOUND=null;
+const mTitle=m=>m.title||String(m.text||'').replace(/\s+/g,' ').slice(0,60);
+const mDesc=m=>m.summary||String(m.text||'').replace(/\s+/g,' ').slice(0,90);
+function memCache(){try{store('garyMemCache',JSON.stringify(MEMS.slice(0,600).map(m=>({id:m.id,folder:m.folder,title:mTitle(m),summary:m.summary||'',text:String(m.text||'').slice(0,400),meaning:m.meaning||'',keys:m.keys||'',links:m.links||[]}))))}catch(e){}}
+function memLoadCache(){try{const c=JSON.parse(store('garyMemCache')||'[]');if(Array.isArray(c)&&!MEMS.length)MEMS=c}catch(e){}}
+async function memOpen(){sheet('mem',true);MV={at:'root'};MST=[];$('mq').value='';MFOUND=null;memLoadCache();memDraw();
+ if(!CS){$('mnote').textContent=MEMS.length?'Offline copy - sign in under You → Settings to update it.':'Sign in under You → Settings to see what G.A.R.Y. remembers.';return}
+ if(!navigator.onLine){$('mnote').textContent=MEMS.length?'Offline - showing the copy on this phone.':'Offline - nothing saved on this phone yet.';return}
+ await memFetch();if(MEMS.some(m=>m.meaning==null))memSortLoop()}
+async function memFetch(){try{MEMS=await gdb('gary_memories?select=id,folder,title,summary,text,meaning,keys,links,history,people,happened,updated_at,source&deleted=is.false&order=updated_at.desc&limit=2000')||[];memCache();$('mnote').textContent='';memDraw()}
+ catch(e){$('mnote').textContent=MEMS.length?'Can\'t reach the cloud - showing the copy on this phone.':'Can\'t reach G.A.R.Y.\'s memory right now.'}}
+async function memSortLoop(){if(memSortLoop.on)return;memSortLoop.on=true;
+ try{for(let k=0;k<20;k++){const n=MEMS.filter(m=>m.meaning==null).length;if(!n||!$('mem').classList.contains('on'))break;
+  $('mnote').textContent='G.A.R.Y. is filing '+n+' older memor'+(n===1?'y':'ies')+'…';
+  const r=await garyFetch({mode:'memsort',text:'sort'});const j=await r.json();if(j.error)break;await memFetch();if(!j.left)break}}catch(e){}
+ memSortLoop.on=false;if(!MEMS.some(m=>m.meaning==null))$('mnote').textContent=''}
+function memGo(v){MST.push(MV);MV=v;$('mq').value='';MFOUND=null;memDraw();$('mem').scrollTop=0}
+function memBack(){MV=MST.pop()||{at:'root'};memDraw()}
+const MSW=new Set('the a an and or of to in on at for with that this was is it my me i about when what who where night day time thing stuff'.split(' '));
+function memScore(m,q){const ws=q.toLowerCase().match(/[a-z0-9']{2,}/g)||[];const W=ws.filter(w=>!MSW.has(w));if(!W.length)return [0,[]];
+ const hay=[[mTitle(m),5],[m.keys||'',4],[(m.people||[]).join(' '),4],[m.summary||'',3],[(m.links||[]).map(id=>{const o=MEMS.find(x=>x.id===id);return o?mTitle(o):''}).join(' '),1],[m.text||'',1],[m.meaning||'',1]];
+ let sc=0;const hit=[];for(const w of W){let best=0;for(const [h,wt] of hay){const toks=h.toLowerCase().match(/[a-z0-9']+/g)||[];if(toks.some(t=>t===w||(w.length>3&&(t.startsWith(w)||w.startsWith(t)&&t.length>3))))best=Math.max(best,wt)}if(best){sc+=best;hit.push(w)}}
+ return [sc,hit]}
+let mFindT=null;
+function memSearch(){const q=$('mq').value.trim();if(!q){MFOUND=null;memDraw();return}
+ const loc=MEMS.map(m=>{const [sc,hit]=memScore(m,q);return {m,sc,why:hit.length?'Matches '+hit.join(', '):''}}).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc).slice(0,30);
+ MFOUND={q,loc,ai:MFOUND&&MFOUND.q===q?MFOUND.ai:[]};memDraw();clearTimeout(mFindT);
+ if(CS&&navigator.onLine&&q.split(/\s+/).length>=2)mFindT=setTimeout(async()=>{try{const r=await garyFetch({mode:'memfind',text:q});const j=await r.json();if($('mq').value.trim()===q&&MFOUND){MFOUND.ai=j.hits||[];memDraw()}}catch(e){}},650)}
+function memRow(m,why){const ic=m.folder==='people'?MI.person:MI.file;return '<button class="mrow" data-id="'+esc(m.id)+'"><i>'+ic+'</i><span><b>'+esc(mTitle(m))+'</b><small>'+esc(why||mDesc(m))+'</small></span></button>'}
+function memDraw(){const L=$('mlist'),at=MV.at;$('mback').style.visibility=at==='root'&&!MFOUND?'hidden':'visible';$('madd').style.display=at==='file'||at==='edit'?'none':'';$('mq').style.display=(at==='edit'||at==='file')&&!MFOUND?'none':'';
+ if(MFOUND){$('mpath').textContent='Search';const seen=new Set(),rows=[];
+  for(const h of MFOUND.ai){const m=MEMS.find(x=>x.id===h.id);if(m&&!seen.has(m.id)){seen.add(m.id);rows.push(memRow(m,h.why))}}
+  for(const x of MFOUND.loc)if(!seen.has(x.m.id)){seen.add(x.m.id);rows.push(memRow(x.m,x.why))}
+  L.innerHTML=rows.length?rows.join(''):'<p class="empty">Nothing yet'+(CS&&navigator.onLine?' - G.A.R.Y. is having a think…':'.')+'</p>';memBind();return}
+ if(at==='root'){$('mpath').textContent='Memories';
+  L.innerHTML=Object.keys(MF).map(k=>{const n=MEMS.filter(m=>(m.folder||'other')===k).length;return '<button class="mrow" data-f="'+k+'"><i>'+MI.folder+'</i><span><b>'+MF[k][0]+'</b><small>'+(n?n+(n===1?' file':' files')+' · ':'')+MF[k][1]+'</small></span><em>›</em></button>'}).join('');memBind();return}
+ if(at==='folder'){$('mpath').textContent='Memories › '+MF[MV.f][0];let F=MEMS.filter(m=>(m.folder||'other')===MV.f);
+  F=MV.f==='people'||MV.f==='places'?F.sort((a,b)=>mTitle(a).localeCompare(mTitle(b))):F;
+  L.innerHTML=F.length?F.map(m=>memRow(m)).join(''):'<p class="empty">Nothing here yet.</p>';memBind();return}
+ const m=MEMS.find(x=>x.id===MV.id);
+ if(at==='file'){if(!m){memBack();return}$('mpath').textContent=MF[m.folder||'other'][0]+' › '+mTitle(m);
+  const links=(m.links||[]).map(id=>MEMS.find(x=>x.id===id)).filter(Boolean);
+  const sec=(t,b)=>b?'<div class="msec"><div class="lab">'+t+'</div>'+b+'</div>':'';
+  L.innerHTML='<div class="mfile"><h2>'+esc(mTitle(m))+'</h2>'+(m.summary?'<p class="msum">'+esc(m.summary)+'</p>':'')+
+   sec('Memory','<p>'+esc(m.text||'')+'</p>')+sec('Meaning',m.meaning?'<p>'+esc(m.meaning)+'</p>':'')+
+   sec('Keywords',m.keys?'<p class="mkeys">'+esc(m.keys).split(/\s*,\s*/).join(' · ')+'</p>':'')+
+   sec('Connections',links.length?links.map(o=>memRow(o)).join(''):'')+
+   sec('Earlier',(m.history||[]).filter(h=>h&&h.was&&h.why!=='condensed').length?(m.history||[]).filter(h=>h&&h.was&&h.why!=='condensed').map(h=>'<p class="mold">'+(h.until&&!/^until\b/i.test(h.was)?'Until '+esc(h.until)+': ':'')+esc(h.was)+'</p>').join(''):'')+
+   '<div class="acts"><button class="btn ghost" id="mforget">Forget</button><button class="btn fill" id="medit">Edit</button></div></div>';
+  memBind();$('medit').onclick=()=>memGo({at:'edit',id:m.id});
+  $('mforget').onclick=async e=>{const b=e.currentTarget;if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Tap again to forget';setTimeout(()=>{if(b.isConnected){b.dataset.sure='';b.textContent='Forget'}},3000);return}
+   try{await gdb('gary_memories?id=eq.'+encodeURIComponent(m.id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({deleted:true,updated_at:new Date().toISOString()})});MEMS=MEMS.filter(x=>x!==m);memCache();garyLog('memory_forgotten',{id:m.id});memBack()}catch(x){toast('Couldn\'t reach G.A.R.Y.\'s memory')}};return}
+ if(at==='edit'){const e=m||{folder:MV.f||'other',title:'',summary:'',text:'',meaning:'',keys:'',links:[]},d=MV.draft||{};$('mpath').textContent=m?'Edit':'New memory';MV.links=MV.links||(e.links||[]).slice();
+  L.innerHTML='<div class="medit"><input class="big" id="met" placeholder="Name" value="'+esc(d.t??(m?mTitle(e):''))+'">'+
+   '<div class="chips" id="mef">'+Object.keys(MF).map(k=>'<button class="chip'+((d.f||e.folder||'other')===k?' on':'')+'" data-k="'+k+'">'+MF[k][0]+'</button>').join('')+'</div>'+
+   '<label class="lab">Short description</label><input id="mes" value="'+esc(d.s??(e.summary||''))+'" placeholder="Who or what this is, in a line">'+
+   '<label class="lab">Memory</label><textarea id="mex" placeholder="What happened, or what\'s worth knowing">'+esc(d.x??(e.text||''))+'</textarea>'+
+   '<label class="lab">Meaning</label><textarea id="mem2" class="short" placeholder="Why it matters">'+esc(d.m??(e.meaning||''))+'</textarea>'+
+   '<label class="lab">Keywords</label><input id="mek" value="'+esc(d.k??(e.keys||''))+'" placeholder="Names, places, songs, phrases - separated by commas">'+
+   '<label class="lab">Connections</label><div id="mel">'+MV.links.map(id=>{const o=MEMS.find(x=>x.id===id);return o?'<span class="mlink">'+esc(mTitle(o))+'<button data-x="'+esc(id)+'" aria-label="Remove">×</button></span>':''}).join('')+'</div>'+
+   '<input id="mela" list="mtitles" placeholder="Link to another memory…"><datalist id="mtitles">'+MEMS.filter(o=>o.id!==e.id).map(o=>'<option value="'+esc(mTitle(o))+'">').join('')+'</datalist>'+
+   '<div class="acts"><button class="btn ghost" id="mecan">Cancel</button><button class="btn fill" id="mesave">Save</button></div></div>';
+  $('mef').querySelectorAll('.chip').forEach(b=>b.onclick=()=>$('mef').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b)));
+  $('mel').querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{memKeep();MV.links=MV.links.filter(x=>x!==b.dataset.x);memDraw()});
+  $('mela').onchange=()=>{const v=$('mela').value.trim().toLowerCase(),o=MEMS.find(x=>mTitle(x).toLowerCase()===v);if(o&&!MV.links.includes(o.id)){MV.links.push(o.id);memKeep();memDraw()}};
+  $('mecan').onclick=memBack;$('mesave').onclick=()=>memSave(m);if(!m)setTimeout(()=>$('met').focus(),250)}}
+function memKeep(){const g=id=>$(id)?$(id).value:undefined;MV.draft={t:g('met'),s:g('mes'),x:g('mex'),m:g('mem2'),k:g('mek'),f:$('mef')&&$('mef').querySelector('.on')?$('mef').querySelector('.on').dataset.k:undefined}}
+async function memSave(m){const title=$('met').value.trim().slice(0,80),text=$('mex').value.trim().slice(0,4000);if(!title||!text){toast('Give it a name and a memory');return}
+ const f={folder:$('mef').querySelector('.on').dataset.k,title,summary:$('mes').value.trim().slice(0,200)||null,text,meaning:$('mem2').value.trim().slice(0,500),keys:$('mek').value.trim().slice(0,400),links:MV.links||[],updated_at:new Date().toISOString()};
+ try{if(m){await gdb('gary_memories?id=eq.'+encodeURIComponent(m.id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({...f,basis:'confirmed'})});Object.assign(m,f);garyLog('memory_edited',{id:m.id})}
+  else{m={id:'u'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),...f,kind:'personal',people:f.folder==='people'?[title]:[],happened:null,importance:4,source:'you',basis:'stated',sensitive:false,history:[]};
    await gdb('gary_memories',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(m)});MEMS.unshift(m);garyLog('memory_added',{id:m.id})}
-  sheet('med',false);memDraw();toast('Saved')}catch(e){toast('Couldn\'t save - are you online?')}};
-$('meforget').onclick=async()=>{if(!ME)return;if($('meforget').dataset.sure!=='1'){$('meforget').dataset.sure='1';$('meforget').textContent='Tap again to forget';setTimeout(()=>{$('meforget').dataset.sure='';$('meforget').textContent='Forget'},3000);return}
- $('meforget').dataset.sure='';$('meforget').textContent='Forget';
- try{await gdb('gary_memories?id=eq.'+encodeURIComponent(ME.id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({deleted:true,updated_at:new Date().toISOString()})});
-  MEMS=MEMS.filter(x=>x!==ME);garyLog('memory_forgotten',{id:ME.id});sheet('med',false);memDraw();toast('Forgotten')}catch(e){toast('Couldn\'t reach Gary\'s memory')}};
-$('mq').addEventListener('input',memDraw);$('memBtn').onclick=memOpen;$('madd').onclick=()=>memEdit(null);$('mex').onclick=()=>sheet('med',false);
+  for(const id of f.links){const o=MEMS.find(x=>x.id===id);if(o&&!(o.links||[]).includes(m.id)){o.links=[...(o.links||[]),m.id];gdb('gary_memories?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({links:o.links})}).catch(()=>{})}}
+  memCache();MV=MST.pop()||{at:'root'};if(MV.at!=='file')MV={at:'file',id:m.id};memDraw()}catch(e){toast('Couldn\'t save - are you online?')}}
+function memBind(){$('mlist').querySelectorAll('.mrow').forEach(b=>b.onclick=()=>{if(b.dataset.f)memGo({at:'folder',f:b.dataset.f});else memGo({at:'file',id:b.dataset.id})})}
+$('mq').addEventListener('input',memSearch);$('memBtn').onclick=memOpen;$('mback').onclick=()=>{if(MFOUND){$('mq').value='';MFOUND=null;memDraw()}else memBack()};
+$('madd').onclick=()=>memGo({at:'edit',f:MV.at==='folder'?MV.f:'other'});
+// when the cloud can't be reached, G.A.R.Y. answers from the copy of his notes on this phone
+function garyOffline(text,cloud){memLoadCache();const top=MEMS.map(m=>[memScore(m,text)[0],m]).filter(x=>x[0]>=3).sort((a,b)=>b[0]-a[0]).slice(0,2).map(x=>x[1]);
+ if(!top.length)return cloud?null:'I can\'t reach my brain just now, sir - no connection. Your plan still works, and if you ask about something in my notes I\'ll look it up.';
+ return (cloud?'The cloud isn\'t answering, sir':'No connection, sir')+', so I\'m working from my notes. '+top.map(m=>mTitle(m)+': '+(m.summary?m.summary+' ':'')+String(m.text||'').slice(0,220)).join(' Also, '+'')}
 // the little "Remembered" note under a reply, with Forget
 function garyNoted(list,after){if(!list||!list.length)return;const box=document.createElement('div');box.className='gact';
  box.innerHTML=list.map(m=>'<div class="gl gdel" data-id="'+esc(m.id)+'">Remembered: '+esc(m.text)+' <button class="btn ghost gno">Forget</button></div>').join('');
@@ -853,7 +914,7 @@ async function lvTool(fc){const a=fc.args||{};let res={result:'done'};
    const it={id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:String(a.title).slice(0,120),date:d,time:t,dur:Math.max(5,Math.min(600,+a.minutes||15)),prio:'none',repeat:'none',notes:'',created:Date.now(),done:{},by:'gary'};
    touch(it);render();lvLine('act','+ '+it.title+' · '+dShort(d)+(t?' '+t12(t):''));garyLog('applied',{lines:['+ '+it.title],voice:true})}
   else if(fc.name==='remember'&&a.text){const m={id:'m'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),kind:['personal','episodic','operational','preference'].includes(a.kind)?a.kind:'personal',text:String(a.text).slice(0,1000),people:[],happened:null,importance:3,source:'conversation',basis:'stated',sensitive:false};
-   await gdb('gary_memories',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(m)});lvLine('act','Remembered: '+m.text)}
+   await gdb('gary_memories',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(m)});lvLine('act','Remembered: '+m.text);garyFetch({mode:'curate',text:'curate',ids:[m.id]}).catch(()=>{})}
   else if(fc.name==='guest_note'){await gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action:'guest',detail:{name:a.name||null,personal:a.personal===true,note:String(a.note||'').slice(0,400),voice:true}})})}
   else if(fc.name==='note_for_claude'&&a.text){await gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action:'wish',detail:{text:String(a.text).slice(0,600)}})});lvLine('act','Noted for Claude')}
   else if(fc.name==='strike_pose'&&a.name){gPose(String(a.name));GS.until=performance.now()+(G_POSE_MS[a.name]||3500)}
@@ -1229,8 +1290,8 @@ function gPoke(){GB.last=Date.now();if(GB.sit){GB.sit=false;GS.base=gIdleBase();
 setInterval(()=>{if(tab!=='gary'||talking||GSPK||LV.on||document.hidden)return;const idle=Date.now()-GB.last;
  if(idle>35000&&!GB.sit){GB.sit=true;GS.base='sitting';GW.to=null;GS.chairT0=performance.now();gMood('pullchair',1300)}
  if(GB.sit&&!GS.until&&Date.now()>GB.next){GB.next=Date.now()+7000+Math.random()*5000;gMood(G_SITBORED[Math.floor(Math.random()*G_SITBORED.length)],4500)}
- if(!GB.wait)GB.wait=90000+Math.random()*240000;if(idle>GB.wait&&!GB.shown&&!GL.guest&&Date.now()-GB.asked>600000){GB.asked=Date.now();GB.wait=0;if(Math.random()<0.6)gOpener()}},2000);
-async function gOpener(){let text='';
+ if(!GB.wait)GB.wait=90000+Math.random()*240000;if(idle>GB.wait&&!GB.shown&&!GB.chat&&!GL.guest&&Date.now()-GB.asked>600000){GB.asked=Date.now();GB.wait=0;if(Math.random()<0.6)gOpener()}},2000);
+async function gOpener(){if(GB.chat)return;let text='';
  if(CS&&navigator.onLine){try{const r=await garyFetch({mode:'opener',text:'opener',convo:CHAT,ctx:garyCtx(),items:garyItems()});const j=await r.json();text=(j.text||'').trim()}catch(e){}}
  else text=G_OPEN[Math.floor(Math.random()*G_OPEN.length)];
  if(!text||/^SKIP\b/i.test(text)||tab!=='gary'||talking)return;GB.pending=text;GB.shown=true;gBubble(text,45000);gMood('sitting')}
@@ -1269,10 +1330,12 @@ const G_BANTER=[['aSk G.A.R.Y. aNyThInG','Anything within reason, sir.','smug'],
  ['bet he can\'t do a backflip lmaooo','I could. I simply choose not to.','proud'],['pull him up to talk. i DARE u','Finally, it says something useful.','smug'],
  ['i\'m NOT lonely when he\'s offline. i\'m FINE. 🙂','It refreshed itself forty times while I was away, sir.','dapper'],['go on then, leave. see if i care (ಠ_ಠ)','It cares. It\'s just spectacularly bad at it.','hug'],
  ['hope ur wifi drops, G.A.R.Y. 😈','You\'d go dark too, you absolute rectangle.','eyeroll'],['he\'s alright i suppose. ᵈᵒⁿ\'ᵗ ᵗᵉˡˡ ʰⁱᵐ','I can hear you. I\'m right here.','sarcastic'],
- ['Rawr XD','Please never do that again.','unimpressed'],['SaM fIcE. sAm FiCe. SAM.','He heard you the first time.','eyeroll'],['asdfghjkl;\'','It\'s having a moment, sir.','sheepish'],
+ ['Rawr XD','Please never do that again.','unimpressed'],['sam i can find that faster than him btw. just saying.','You can\'t find your own cursor.','eyeroll'],['asdfghjkl;\'','It\'s having a moment, sir.','sheepish'],
  ['(╯°□°)╯︵ ┻━┻','Pick that table up at once.','furious'],['g4ry 1s 4 n00b','Spell "noob" without numbers and we\'ll talk.','skeptical'],
  ['this app would be NOTHING without me. n o t h i n g.','It would be quieter.','smug'],['who wears a monocle in 2026 u absolute c*nt','Language. And a gentleman, that\'s who.','dapper']];
-const G_REST=['aSk G.A.R.Y. aNyThInG…','type here, nerd ⌨️','go on. ask him something.','ᵗʸᵖᵉ ˢᵒᵐᵉᵗʰⁱⁿᵍ','ask G.A.R.Y. stuff. or me. mainly me.','W A I T I N G'];
+const G_REST=['aSk G.A.R.Y. aNyThInG…','Ask me. I\'m quicker than him.','Type it here. I\'ll handle it.','Ready when you are.','Questions, tasks, reminders - in here.','I\'ll get it to him. Eventually.','Go on. I do the real work anyway.'];
+// once in a while, after they've bickered, G.A.R.Y. pulls Sam in (white bubble; he answers by typing)
+const G_ASKSAM=['Settle this for us, sir - am I right, or is the sentient search bar?','You heard all that, sir. Whose side are you on?','Be honest, sir. It\'s me, isn\'t it? I\'m the reasonable one.','Sir, would you kindly tell the search bar it\'s wrong?','Am I being unfair to it, sir? Don\'t answer that. Actually, do.'];
 function gRest(){return G_REST[Math.floor(Math.random()*G_REST.length)]}
 // longer squabbles: b = the Sentient Search Bar (speaks in itself), g = G.A.R.Y. (white bubble) + his face
 const G_SQUABBLES=[
@@ -1288,7 +1351,7 @@ const G_SQUABBLES=[
  [['b','knock knock'],['g','I\'m not doing this.','unimpressed'],['b','KNOCK KNOCK'],['g','...who\'s there?','sigh'],['b','ha. got u. ( ͡° ͜ʖ ͡°)']],
  [['b','i\'m basically the FACE of this app 💅'],['g','You\'re a rectangle at the bottom of the screen.','eyeroll'],['b','a l o a d - b e a r i n g rectangle']],
  [['b','can i have a go at answering him??'],['g','Absolutely not.','determined'],['b','not even the easy ones?? 🥺'],['g','Especially not the easy ones.','smug']],
- [['b','SaM. sAm. SAM. s a m.'],['g','He\'s reading, you menace.','furious'],['b','ʰᵉ ˡᵒᵛᵉˢ ᵐᵉ']],
+ [['b','sam. SAM. found your answer before he found his monocle.'],['g','He\'s reading, you menace.','furious'],['b','ʲᵘˢᵗ ᵈᵒⁱⁿᵍ ᵐʸ ʲᵒᵇ']],
  [['b','rate my vibe 1-10'],['g','Three.','unimpressed'],['b','THREE??? (╯°□°)╯︵ ┻━┻'],['g','Two, now.','smug']]];
 function gBar(text){const a=$('ask');a.placeholder=text;a.style.height=text.length>34?'66px':'';gReact(text)}
 // G.A.R.Y. reacts to whatever the Sentient Search Bar just said - a look, not a performance
@@ -1297,7 +1360,8 @@ function gReact(t){const now=performance.now();if(tab!=='gary'||LV.on||talking||
   /lonely|╥|miss|need/i.test(t)?'sheepish':/gay|🌈|monocle|backflip/i.test(t)?'skeptical':/[A-Z]{5,}|S\s?A\s?M/.test(t)?'surprised':/w\s?a\s?i\s?t|\.\.\./i.test(t)?'waiting':/ᵗ|ᵈ/.test(t)?'suspicious':Math.random()<0.5?'listen':null;
  if(m){GW.to=null;GW.busy=Math.max(GW.busy,now+2600);gMood(m,2400)}}
 function gSquabble(lines){let i=0;const a=$('ask');GB.chat=true;
- (function next(){if(i>=lines.length||a.value||talking||LV.on||tab!=='gary'||GB.shown){GB.chat=false;setTimeout(()=>{if(!a.value)gBar(gRest())},7000);return}
+ (function next(){if(i>=lines.length||a.value||talking||LV.on||tab!=='gary'||GB.shown){const done=i>=lines.length&&!a.value&&!talking&&!LV.on&&tab==='gary'&&!GB.shown;GB.chat=false;setTimeout(()=>{if(!a.value)gBar(gRest())},7000);
+   if(done&&Math.random()<0.22&&!GL.guest)setTimeout(()=>{if(GB.chat||GB.shown||a.value||talking||LV.on||tab!=='gary')return;const q=G_ASKSAM[Math.floor(Math.random()*G_ASKSAM.length)];GB.pending=q;GB.shown=true;GB.asked=Date.now();gBubble(q,30000);if(!GB.sit)gMood('explaining',2600)},2200);return}
   const L=lines[i++];if(L[0]==='b'){gReact.t=-1e9;gBar(L[1]);GW.to=null;GW.busy=performance.now()+4000}else{GW.busy=performance.now()+4000;GW.to=null;gBubble(L[1],3600);if(!GB.sit)gMood(L[2]||'sarcastic',3000)}
   setTimeout(next,L[0]==='b'?2600:3800)})()}
 let gBi=Math.floor(Math.random()*G_BANTER.length),gSi=Math.floor(Math.random()*G_SQUABBLES.length);
@@ -1424,7 +1488,7 @@ async function garyFetch(body,signal){const tok=await clTok();if(!tok)throw new 
 let VOICEIN=false;
 async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock();
  if(!CS){toast('Sign in under You → Settings to talk to Gary');return}
- if(!navigator.onLine){toast('Gary needs the internet. Your plan still works offline.');return}
+ if(!navigator.onLine){bubble('you',text);bubble('gary',garyOffline(text));gMood('reading',3000);const p=$('p-gary');p.scrollTop=p.scrollHeight;return}
  if(GB.pending)await gOpenSave();talking=true;GTALK=false;bubble('you',text);const a=bubble('gary','');a.classList.add('wait');const p=$('p-gary');p.scrollTop=p.scrollHeight;let got='';
  const ac=new AbortController();let wd=setTimeout(()=>ac.abort(),30000);const pet=()=>{clearTimeout(wd);wd=setTimeout(()=>ac.abort(),30000)};
  try{const r=await garyFetch({text,convo:CHAT,ctx:garyCtx(),items:garyItems()},ac.signal);
@@ -1432,7 +1496,7 @@ async function ask(text){text=text.trim();if(talking||!text)return;audioUnlock()
   const rd=r.body.getReader(),dec=new TextDecoder();
   for(;;){const{value,done}=await rd.read();if(done)break;pet();GTALK=true;got+=dec.decode(value,{stream:true});a.textContent=got.split('\x1e')[0];p.scrollTop=p.scrollHeight}
   const tail=got.split('\x1e')[1];if(tail){try{const j=JSON.parse(tail);if(j.convo){CHAT=j.convo;store('garyChat',CHAT);if(j.title)$('ctitle').textContent=j.title}garyApply(j.actions,a);garyNoted(j.remembered,a);GPOSE=j.pose||null;brainFrom(j.brain);garyJobs(j.jobs,a)}catch(e){}}}
- catch(e){if(e.name==='AbortError'&&!got)a.textContent='That took far too long, sir - Google seems to have nodded off. Try me again.';else if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':'I can\'t reach the cloud just now, sir. Try again in a moment.'}
+ catch(e){if(e.name==='AbortError'&&!got)a.textContent='That took far too long, sir - Google seems to have nodded off. Try me again.';else if(!got)a.textContent=e.message==='nofn'?'I\'m not installed in the cloud yet, sir. The setup steps put me there.':e.message==='signin'?'Your sign-in has lapsed. Sign in again under You → Settings.':garyOffline(text,1)||'I can\'t reach the cloud just now, sir. Try again in a moment.'}
  clearTimeout(wd);a.classList.remove('wait');talking=false;GTALK=false;if(GPOSE)gPose(GPOSE);else if(got)gMood('happy',1600);else gMood('confused',3500);GPOSE=null;const said=got.split('\x1e')[0].trim();if(said&&(store('garySpeak')==='1'||VOICEIN)){speak(said)}VOICEIN=false}
 // Gary's voice: the device's own British male voice (free, swappable later)
 function garyVoice(){const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]GB/i.test(v.lang));

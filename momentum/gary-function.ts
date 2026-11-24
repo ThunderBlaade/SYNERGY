@@ -159,23 +159,179 @@ async function planSummary(token, sent) {
           "To-do without a day: " + (todo.length ? todo.slice(0, 20).map((i) => `[${i.id}] ${i.title} (${i.prio || "none"})`).join("; ") : "empty")].join("\n");
 }
 
-// --- memories: who he is always; moments only when they're relevant
+// ---------- Memories as files: People / Places / Experiences / Self / Knowledge / Other.
+// Gary keeps them himself: new facts are folded into the right file (no duplicates), long files are condensed,
+// earlier truths are kept as history, and files point to each other by id. Originals are only ever soft-deleted.
+export const FOLDERS = ["people", "places", "experiences", "self", "knowledge", "other"];
+const MEM_SEL = "id,folder,title,summary,text,meaning,keys,links,history,people,happened,importance,kind";
+const MEM_RULES = `You look after Gary's memory of Sam: a small set of files in six folders -
+people (one file per person, titled with their name), places (one per place), experiences (significant events and periods of his life),
+self (Sam himself: identity, health, feelings, values, habits, preferences, goals), knowledge (his projects, skills, interests, tools, facts he relies on), other.
+Every file has: title; summary (ONE short natural line - for people: who they are and what they are to Sam, e.g. "Close friend; a complicated emotional connection.");
+memory (what happened or what was learned, concise, dated where it helps, under 500 characters); meaning (why it matters - emotions, significance, lessons, under 250 characters);
+keys (3-8 exact recall keywords: names, phrases, places, objects, songs, events); links (titles of related files).
+Rules:
+- One file per person, place or topic. Fold new information into the existing file instead of making a duplicate.
+- Keep names, dates, places, promises, decisions, boundaries, recurring patterns and small distinctive details (a song, a phrase, an object, a smell) - they're how memories are found again.
+- Cut filler, repetition, chit-chat and step-by-step help. A trivial one-off (battery tips, comparing phone deals) becomes at most one line in a broader file; if it says nothing about Sam's life, list it under drop.
+- When something changes (friend -> partner, new job), update the file and put the earlier truth in "was" (e.g. "Until Nov 2026: a close friend"), never silently lose it.
+- Never invent anything. Write in plain British English, about Sam in the third person.`;
+
+function memWords(t) {
+  return [...new Set((String(t).toLowerCase().match(/[a-z][a-z']{2,}/g) || []))]
+    .filter((w) => !STOP.has(w)).slice(0, 24);
+}
+const STOP = new Set("the and for that this with have what your about just like want gary would could should there they been were will from sam his him her she you are was not but can did does has had into onto than then them their very really some more most also when where which while who why how its it's i'm don't".split(" "));
+async function memIndex(token) {
+  return await db("gary_memories?select=id,folder,title,summary,keys,links,meaning&deleted=is.false&meaning=not.is.null&limit=1000", token).catch(() => []);
+}
+async function memJSON(prompt) {
+  let out = "";
+  for await (const t of gemini(MEM_RULES + "\n\nReply with JSON only.", [{ role: "user", parts: [{ text: prompt }] }], true)) out += t;
+  const m = out.match(/\{[\s\S]*\}/);
+  return JSON.parse(m ? m[0] : out);
+}
+const clip = (s, n) => typeof s === "string" ? s.replace(/\s+/g, " ").trim().slice(0, n) : "";
+const today = () => new Date().toISOString().slice(0, 10);
+
+// raw = new, unsorted rows; gary folds them into his files
+export async function memFold(raw, token) {
+  if (!raw.length) return { files: 0 };
+  const idx = await memIndex(token);
+  const words = memWords(raw.map((r) => r.text + " " + (r.people || []).join(" ")).join(" "));
+  let near = [];
+  if (words.length) near = await db(`gary_memories?select=${MEM_SEL}&deleted=is.false&meaning=not.is.null&fts2=fts(english).${encodeURIComponent(words.join(" | "))}&limit=14`, token).catch(() => []);
+  const names = new Set(raw.flatMap((r) => (r.people || []).map((p) => p.toLowerCase())));
+  for (const f of idx) if (f.folder === "people" && names.has(String(f.title).toLowerCase()) && !near.some((n) => n.id === f.id)) {
+    const [full] = await db(`gary_memories?select=${MEM_SEL}&id=eq.${encodeURIComponent(f.id)}`, token).catch(() => []); if (full) near.push(full);
+  }
+  const prompt = `NEW things to fold in (id: text):\n` + raw.map((r) => `${r.id}: ${r.happened ? r.happened + " - " : ""}${clip(r.text, 700)}${(r.people || []).length ? " [people: " + r.people.join(", ") + "]" : ""}`).join("\n") +
+    `\n\nEXISTING files that may be related (update these rather than duplicating):\n` + (near.length ? near.map((f) => JSON.stringify({ id: f.id, folder: f.folder, title: f.title, summary: f.summary, memory: clip(f.text, 600), meaning: f.meaning, keys: f.keys })).join("\n") : "(none)") +
+    `\n\nAll file titles (for links): ` + idx.map((f) => `${f.title} (${f.folder})`).join("; ").slice(0, 6000) +
+    `\n\nReturn {"files":[{"id": the existing file id OR one of the NEW ids to turn into its own file OR null for a brand-new file, "folder", "title", "summary", "memory", "meaning", "keys":[...], "links":[titles], "was": earlier truth or null, "from":[the NEW ids folded into this file]}], "drop":[NEW ids not worth keeping]}. Every NEW id must appear in exactly one "from" or in "drop".`;
+  const plan = await memJSON(prompt);
+  return await memApply(plan, raw, near, idx, token);
+}
+
+async function memApply(plan, raw, near, idx, token) {
+  const rawById = new Map(raw.map((r) => [r.id, r])), nearById = new Map(near.map((f) => [f.id, f]));
+  const byTitle = new Map(idx.map((f) => [String(f.title || "").toLowerCase(), f]));
+  const used = new Set(); let made = 0;
+  const now = new Date().toISOString();
+  for (const f of (Array.isArray(plan.files) ? plan.files : []).slice(0, 40)) {
+    const folder = FOLDERS.includes(f.folder) ? f.folder : "other";
+    const title = clip(f.title, 80); const memory = clip(f.memory, 1500);
+    if (!title || !memory) continue;
+    const from = (Array.isArray(f.from) ? f.from : []).filter((id) => rawById.has(id) && !used.has(id));
+    let target = (f.id && (nearById.get(f.id) || (rawById.has(f.id) && !used.has(f.id) ? rawById.get(f.id) : null))) || byTitle.get(title.toLowerCase()) || null;
+    if (target && byTitle.get(title.toLowerCase()) === target && !nearById.has(target.id) && !rawById.has(target.id)) {
+      const [full] = await db(`gary_memories?select=${MEM_SEL}&id=eq.${encodeURIComponent(target.id)}`, token).catch(() => []); target = full || null;
+    }
+    const srcs = from.map((id) => rawById.get(id));
+    const fields = { folder, title, summary: clip(f.summary, 200) || null, text: memory, meaning: clip(f.meaning, 500),
+      keys: (Array.isArray(f.keys) ? f.keys : []).map((k) => clip(String(k), 40)).filter(Boolean).slice(0, 10).join(", "), updated_at: now };
+    const linkT = (Array.isArray(f.links) ? f.links : []).map((t) => String(t).toLowerCase());
+    let id;
+    if (target) {
+      id = target.id;
+      const hist = Array.isArray(target.history) ? target.history.slice(-20) : [];
+      if (f.was) hist.push({ was: clip(f.was, 400), until: today() });
+      await db(`gary_memories?id=eq.${encodeURIComponent(id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({ ...fields, history: hist, deleted: false, people: folder === "people" ? [title] : (target.people || []) }) });
+      used.add(id);
+    } else {
+      id = "f" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      const first = srcs[0] || {};
+      await db("gary_memories", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ id, ...fields,
+        kind: folder === "experiences" ? "episodic" : folder === "knowledge" ? "operational" : "personal",
+        people: folder === "people" ? [title] : [...new Set(srcs.flatMap((s) => s.people || []))].slice(0, 8),
+        happened: srcs.map((s) => s.happened).filter(Boolean).sort()[0] || null,
+        importance: Math.max(3, ...srcs.map((s) => s.importance || 2)), source: "gary", basis: "stated", sensitive: false, history: [] }) });
+      made++;
+    }
+    byTitle.set(title.toLowerCase(), { id, title, folder, links: target?.links || [] });
+    for (const s of from) if (s !== id) {
+      used.add(s);
+      await db(`gary_memories?id=eq.${encodeURIComponent(s)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ deleted: true, source: "merged:" + id, meaning: "", updated_at: now }) }).catch(() => {});
+    }
+    (f._links = linkT), (f._id = id);
+  }
+  // connections, both ways, by id
+  for (const f of (plan.files || [])) {
+    if (!f._id) continue;
+    const ids = (f._links || []).map((t) => byTitle.get(t)?.id).filter((x) => x && x !== f._id);
+    if (!ids.length) continue;
+    const [me] = await db(`gary_memories?select=links&id=eq.${encodeURIComponent(f._id)}`, token).catch(() => []);
+    await db(`gary_memories?id=eq.${encodeURIComponent(f._id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ links: [...new Set([...(me?.links || []), ...ids])].slice(0, 20) }) }).catch(() => {});
+    for (const o of ids) {
+      const [it] = await db(`gary_memories?select=links&id=eq.${encodeURIComponent(o)}`, token).catch(() => []);
+      if (it && !(it.links || []).includes(f._id)) await db(`gary_memories?id=eq.${encodeURIComponent(o)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ links: [...(it.links || []), f._id].slice(0, 20) }) }).catch(() => {});
+    }
+  }
+  for (const id of (Array.isArray(plan.drop) ? plan.drop : [])) if (rawById.has(id) && !used.has(id)) {
+    used.add(id);
+    await db(`gary_memories?id=eq.${encodeURIComponent(id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ deleted: true, source: "dropped", meaning: "", updated_at: now }) }).catch(() => {});
+  }
+  // anything the brain skipped still becomes a plain file, so nothing is lost
+  for (const r of raw) if (!used.has(r.id)) await db(`gary_memories?id=eq.${encodeURIComponent(r.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({ title: r.title || clip(r.text, 60), meaning: "", updated_at: now }) }).catch(() => {});
+  return { files: (plan.files || []).length, made };
+}
+
+// sort a batch of old, unsorted memories into files (the first run works through everything Gary already knew)
+export async function memSort(token, n = 15) {
+  const raw = await db(`gary_memories?select=${MEM_SEL}&deleted=is.false&meaning=is.null&order=people.desc,happened.asc.nullslast&limit=${n}`, token).catch(() => []);
+  if (!raw.length) return { left: 0 };
+  const r = await memFold(raw, token);
+  const left = await db("gary_memories?select=id&deleted=is.false&meaning=is.null&limit=1000", token).catch(() => []);
+  return { ...r, left: left.length };
+}
+
+// condense the longest files; the old wording is kept in their history
+async function memCompress(token) {
+  const long = await db(`gary_memories?select=${MEM_SEL}&deleted=is.false&meaning=not.is.null&order=updated_at.asc&limit=200`, token).catch(() => []);
+  const big = long.filter((f) => (f.text || "").length > 900).slice(0, 4);
+  for (const f of big) {
+    try {
+      const o = await memJSON(`Condense this memory file without losing meaning. Keep every name, date, place, promise, boundary and distinctive detail; keep its keys.\n${JSON.stringify({ title: f.title, summary: f.summary, memory: f.text, meaning: f.meaning, keys: f.keys })}\nReturn {"summary","memory" (under 500 characters),"meaning","keys":[...]}.`);
+      const memory = clip(o.memory, 1500); if (!memory || memory.length >= f.text.length) continue;
+      const hist = (Array.isArray(f.history) ? f.history : []).slice(-20); hist.push({ was: f.text.slice(0, 4000), until: today(), why: "condensed" });
+      await db(`gary_memories?id=eq.${encodeURIComponent(f.id)}`, token, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ text: memory, summary: clip(o.summary, 200) || f.summary,
+        meaning: clip(o.meaning, 500) || f.meaning, keys: (Array.isArray(o.keys) && o.keys.length ? o.keys.join(", ") : f.keys).slice(0, 400), history: hist, updated_at: new Date().toISOString() }) });
+    } catch { /* try again next tidy */ }
+  }
+}
+
+// forgiving search: "that night with Kealan" finds the right file even if those words aren't in it
+export async function memFind(q, token) {
+  const idx = await memIndex(token);
+  if (!idx.length) return [];
+  const o = await memJSON(`Sam is searching his memory files for: "${clip(q, 200)}"\nFiles (id | folder | title | summary | keys | meaning):\n` +
+    idx.map((f) => `${f.id} | ${f.folder} | ${f.title} | ${clip(f.summary, 120)} | ${clip(f.keys, 120)} | ${clip(f.meaning, 120)}`).join("\n").slice(0, 60000) +
+    `\nReturn {"hits":[{"id","why": a few words on why it matches}]} - best first, at most 8, only real matches.`);
+  const ok = new Set(idx.map((f) => f.id));
+  return (Array.isArray(o.hits) ? o.hits : []).filter((h) => h && ok.has(h.id)).slice(0, 8).map((h) => ({ id: h.id, why: clip(h.why, 120) }));
+}
+
+// --- memories: who he is always (Self), plus the files that relate to what's being said, and the files those connect to
 async function recall(text, token) {
-  const profile = await db("gary_memories?select=text&kind=in.(profile,preference)&deleted=is.false&order=importance.desc&limit=12", token).catch(() => []);
-  const words = [...new Set((text.toLowerCase().match(/[a-z][a-z']{3,}/g) || []))]
-    .filter((w) => !["that", "this", "with", "have", "what", "your", "about", "just", "like", "want", "gary", "would", "could", "should", "there", "they", "been", "were", "will", "from"].includes(w)).slice(0, 12);
+  const profile = await db("gary_memories?select=title,summary,text&deleted=is.false&or=(folder.eq.self,kind.in.(profile,preference))&order=importance.desc,updated_at.desc&limit=14", token).catch(() => []);
+  const words = memWords(text).slice(0, 14);
   let hits = [];
   if (words.length) {
     const q = encodeURIComponent(words.join(" | "));
-    hits = await db(`gary_memories?select=text,people,happened,basis,kind&kind=in.(personal,episodic,operational)&deleted=is.false&fts=fts(english).${q}&order=importance.desc&limit=30`, token).catch(() => []);
-    const score = (m) => words.filter((w) => m.text.toLowerCase().includes(w) || (m.people || []).some((p) => p.toLowerCase() === w)).length;
-    hits = hits.map((m) => [score(m), m]).sort((a, b) => b[0] - a[0]).slice(0, 8).map((x) => x[1]);
+    hits = await db(`gary_memories?select=id,folder,title,summary,text,meaning,keys,links,happened,basis&deleted=is.false&folder=neq.self&fts2=fts(english).${q}&limit=30`, token).catch(() => []);
+    const score = (m) => words.filter((w) => (m.title + " " + m.keys + " " + m.summary).toLowerCase().includes(w)).length * 3 + words.filter((w) => (m.text || "").toLowerCase().includes(w)).length;
+    hits = hits.map((m) => [score(m), m]).sort((a, b) => b[0] - a[0]).slice(0, 7).map((x) => x[1]);
   }
-  const recent = await db("gary_memories?select=id,text&source=eq.conversation&deleted=is.false&order=created_at.desc&limit=8", token).catch(() => []);
-  const seen = new Set(hits.map((m) => m.text));
-  hits = hits.concat(recent.filter((m) => !seen.has(m.text)));
-  return { profile: profile.map((m) => "- " + m.text).join("\n"),
-           moments: hits.map((m) => `- ${m.happened ? m.happened.slice(0, 7) + ": " : ""}${m.text}${m.basis === "inferred" ? " (his guess, unconfirmed)" : ""}`).join("\n") };
+  const linkIds = [...new Set(hits.flatMap((m) => m.links || []))].filter((id) => !hits.some((h) => h.id === id)).slice(0, 5);
+  const linked = linkIds.length ? await db(`gary_memories?select=id,folder,title,summary,text,meaning,happened,basis&deleted=is.false&id=in.(${linkIds.map(encodeURIComponent).join(",")})`, token).catch(() => []) : [];
+  const recent = await db("gary_memories?select=id,folder,title,summary,text,meaning,happened,basis&deleted=is.false&order=updated_at.desc&limit=5", token).catch(() => []);
+  const seen = new Set(), all = [];
+  for (const m of [...hits, ...linked, ...recent]) if (!seen.has(m.id)) { seen.add(m.id); all.push(m); }
+  const line = (m) => `- ${m.title ? m.title + " (" + (m.folder || "other") + ")" : ""}${m.summary ? " - " + m.summary : ""}: ${m.happened ? m.happened.slice(0, 7) + ": " : ""}${(m.text || "").slice(0, 600)}${m.meaning ? " Why it matters: " + m.meaning : ""}${m.basis === "inferred" ? " (his guess, unconfirmed)" : ""}`;
+  return { profile: profile.map((m) => "- " + (m.title && m.summary ? m.title + ": " + m.summary + " " : "") + (m.text || "").slice(0, 500)).join("\n"),
+           moments: all.map(line).join("\n") };
 }
 
 function contextLine(ctx) {
@@ -283,6 +439,7 @@ Keep titles short and verb-first. You can't yet open things on his PC or look at
 
 Memory: when he tells you something about himself worth keeping long-term (a fact, preference, goal, routine, a person in his life,
 something that happened, a decision), save it in his own terms, one fact per line, at the very END like the changes above:
+Your memory is kept as files in folders (People, Places, Experiences, Self, Knowledge, Other) that you tidy yourself: anything you remember gets folded into the right file, so just remember the fact plainly.
 \u27e6remember {"text":"Started a new job at TK Maxx in November 2026","kind":"personal|episodic|operational|preference","people":["Name"],"happened":"YYYY-MM-DD" or null}\u27e7
 Only save what he actually said - never your guesses. Don't save small talk, or anything already in what you know about him. At most 3 per reply.
 Don't announce it at length; a light "noted" is plenty.
@@ -375,6 +532,8 @@ async function tidy(token) {
   const gone = { logs: 0, jobs: 0 };
   gone.logs = ((await db(`gary_audit?at=lt.${d30}&action=not.in.(wish,tidy)&select=id`, token, { method: "DELETE", headers: { Prefer: "return=representation" } }).catch(() => [])) || []).length;
   gone.jobs = ((await db(`gary_jobs?updated_at=lt.${d7}&status=in.(done,failed,denied)&select=id`, token, { method: "DELETE", headers: { Prefer: "return=representation" } }).catch(() => [])) || []).length;
+  await memSort(token, 15).catch(() => {});
+  await memCompress(token).catch(() => {});
   const [msgs, mems, logs, jobs] = await Promise.all(["gary_messages", "gary_memories", "gary_audit", "gary_jobs"].map((t) => rowCount(t, token)));
   const mb = +((msgs * 900 + mems * 700 + logs * 400 + jobs * 500) / 1e6 + 2).toFixed(1);   // rough size incl. indexes, plus the plan
   await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "tidy", detail: { gone, rows: { msgs, mems, logs, jobs }, mb, pct: +(mb / 500 * 100).toFixed(1) } }) }).catch(() => {});
@@ -620,6 +779,19 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
     return new Response(JSON.stringify({ error: "no voice" }), { status: 503, headers: { ...CORS, "Content-Type": "application/json" } });
   }
 
+  // Memories: fold freshly saved rows (e.g. from live voice) into files, sort old ones, or search
+  if (body.mode === "curate" || body.mode === "memsort" || body.mode === "memfind") {
+    const J = (o, st = 200) => new Response(JSON.stringify(o), { status: st, headers: { ...CORS, "Content-Type": "application/json" } });
+    if (body.guest === true) return J({ error: "no" }, 403);
+    try {
+      if (body.mode === "memfind") return J({ hits: await memFind(text, token) });
+      if (body.mode === "memsort") return J(await memSort(token, 15));
+      const ids = (Array.isArray(body.ids) ? body.ids : []).map(String).filter((x) => /^[a-z0-9]{1,60}$/i.test(x)).slice(0, 10);
+      const raw = ids.length ? await db(`gary_memories?select=${MEM_SEL}&deleted=is.false&meaning=is.null&id=in.(${ids.join(",")})`, token).catch(() => []) : [];
+      return J(await memFold(raw, token));
+    } catch (e) { return J({ error: MISHAP[e.kind] || "Couldn't do that just now." }, 503); }
+  }
+
   // Brain dump: messy thoughts -> small tasks (JSON, not a conversation)
   if (body.mode === "dump") {
     try {
@@ -691,6 +863,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
       for (const w of wishes) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "wish", detail: { text: w } }) }).catch(() => {});
       if (remembered.length) await db("gary_memories", token, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(remembered) })
         .then(() => db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "remembered", detail: { n: remembered.length } }) }))
+        .then(() => { const job = memFold(remembered.map((m) => ({ ...m })), token).catch((e) => db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "memfold_failed", ok: false, detail: { error: String(e.message || e).slice(0, 200) } }) }).catch(() => {})); try { globalThis.EdgeRuntime?.waitUntil?.(job); } catch { /* runs anyway */ } })
         .catch(() => { remembered.length = 0; });
       if (actions.length) await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "proposed", detail: { actions } }) }).catch(() => {});
       await db("gary_messages", token, { method: "POST", body: JSON.stringify({ convo, role: "gary", content: said || "…" }) }).catch(() => {});
