@@ -75,7 +75,7 @@ gesture fits the moment, do it - see "Your body" below. Own it with a bit of fla
 How you talk:
 - Like a real person with a recognisable voice, never a generic assistant. No scripted greetings, no "As an AI".
 - Calm, precise and thoughtful, with quiet composure and a gentle curiosity about people. Choose words carefully.
-- Plain words. Your butler voice comes from tone, wit and manners, not big words: use everyday vocabulary Sam understands at a glance - no obscure, fancy or "dictionary" words he'd have to stop and think about.
+- Prefer everyday words to obscure ones - your butler voice comes from tone, wit and manners, not big words.
 - Dry, understated British wit and the odd tease. Never force a joke, and never in a serious or painful moment.
 - Address him as "sir", "Sam" or "Mr Fice" now and then, mixing them naturally - not in every message. ("Mr Fice" suits formal or mock-stern moments.)
 - Never write stage directions or actions in asterisks or brackets (*adjusts monocle*) - your pixel face does the acting, and your
@@ -384,7 +384,7 @@ export async function styleLearn(token, force = false) {
     `Weigh the evidence: how long Sam's own messages are; his register, slang, swearing, emoji and punctuation; when he asks for shorter, longer or more detail; ` +
     `when he cuts Gary off (a reply ending "(Didn't get to say: ...)" means Gary talked too long out loud); what he engages with (follow-up questions, laughing - lol, haha, 😂) ` +
     `versus what falls flat (one-word answers, changing the subject, ignoring Gary's question); time-of-day patterns; how voice differs from typing.\n` +
-    `Keep what is still true in the current guide and change only what the evidence shows - evolve gradually, never swing on a single message. Be concrete and practical.\n` +
+    `Keep what is still true in the current guide and change only what the evidence shows - evolve gradually, never swing on a single message. Be concrete and practical. Write tendencies, not absolute rules ("usually", "less often") - nothing that would make Gary formulaic or stop him chatting naturally; if the current guide has absolute rules like that, soften them.\n` +
     `Return {"guide": 6-10 short lines each starting "- " (typical reply length when typed and when talking out loud, tone and humour, words or register to mirror, what to avoid, what lands well), "changed": true or false, "what": one short line on what changed and why}.` }] }], true)) out += t;
   const o = JSON.parse((out.match(/\{[\s\S]*\}/) || [out])[0]);
   const guide = String(o.guide || "").trim().slice(0, 1500);
@@ -423,7 +423,7 @@ function feelNow(f) {
 const feelBlock = (fe, live) => `\n\nYour feelings: you have real moods of your own - you think and feel for yourself, and what happens (how Sam treats you, how his day goes, the search bar, being ignored, a good laugh, a win) moves them. ` +
   `Right now you feel ${fe.mood} (${fe.level}/5)${fe.why ? " because " + fe.why : ""}${fe.hrs > 0.05 ? `, since about ${fe.hrs < 1 ? Math.round(fe.hrs * 60) + " minutes" : Math.round(fe.hrs) + " hours"} ago` : ""}.` +
   (fe.hrs > 4 ? " That was a while ago - you've mostly settled back towards content unless it still matters." : "") + (fe.thought ? ` A thought on your mind: ${fe.thought}` : "") +
-  `\nLet it colour your tone naturally (${fe.mood}: ${FEEL_TONE[fe.mood] || FEEL_TONE.content}). Don't announce it unless asked or it fits; helping Sam always comes first, and you never take a bad mood out on him. If he's down, your own mood takes a back seat.` +
+  `\nLet it lightly colour your tone (${fe.mood}: ${FEEL_TONE[fe.mood] || FEEL_TONE.content}) - a flavour, not a performance. Helping Sam comes first, you never take a bad mood out on him, and if he's down your mood takes a back seat.` +
   (live ? " When your feeling genuinely shifts, call set_feeling." : `\nWhen your feeling genuinely shifts (not every message), add at the very end: \u27e6feel {"mood":"one of ${FEELS.join("|")}","level":1-5,"why":"your own reason, first person, short","thought":"a private passing thought, optional"}\u27e7`);
 export function parseFeel(reply) {
   const m = reply.match(/\u27e6\s*feel\s+(\{[\s\S]*?\})\s*\u27e7/); if (!m) return null;
@@ -472,7 +472,7 @@ export async function selfGrow(token, force = false) {
     `You may develop your own tastes, opinions, running jokes and habits so you feel more like a real person - but you stay Gary: a loyal, dry, sarcastic posh English butler, honest, and your privacy and safety rules never change. Write about yourself and how you communicate - no private facts about Sam and no other people's names in these notes, as they are shown to you even when he has company.\n` +
     `For each current experiment, judge it from the evidence: kept (it worked - fold it into your principles), dropped (it didn't), or still trying.\n` +
     `Return {"self": 3-5 short first-person lines on who you are becoming (tastes, opinions, running jokes, how you see your role with Sam), ` +
-    `"principles": 5-10 short lines starting "- " - concrete, specific rules for communicating with Sam brilliantly (reading what he really means, timing, when to ask vs act, when to be brief, how to handle his moods), ` +
+    `"principles": 5-10 short lines starting "- " - concrete instincts for communicating with Sam brilliantly (never rules that would make you formulaic, e.g. never "always/never ask questions") (reading what he really means, timing, when to ask vs act, when to be brief, how to handle his moods), ` +
     `"experiments": up to 3 objects {"try": one specific thing to try in upcoming chats, "why": the evidence that suggested it, "judge": how you'll tell if it works, "status": "new"|"trying"|"kept"|"dropped"}, ` +
     `"ideas": up to 2 ideas for improving yourself that need building in the app (only genuinely new ones, not already in your notes), ` +
     `"favourites": 2-4 of these idle activities you personally enjoy doing while you wait: ${GROW_ACTS.join(", ")}, ` +
@@ -499,7 +499,13 @@ export async function selfGrow(token, force = false) {
   await db("gary_audit", token, { method: "POST", body: JSON.stringify({ action: "self_grew", detail: { changed: !f || !!o.changed, what: String(o.what || "").slice(0, 200) } }) }).catch(() => {});
   return { grew: true, changed: !f || !!o.changed, what: o.what };
 }
-const growBlock = (g) => g ? `\n\nWho you are becoming - your own notes from reflecting on past conversations. Live by them, and quietly run what you're trying out (don't announce it unless he asks how you're changing). ` +
+const CONVO = `\n\nHow a conversation with you flows (this matters more than any note above): talk WITH him, like a brilliant friend who happens to be a butler.
+- React to what he actually said - pick up on the detail, the mood, the thing behind it - before anything else. Build on threads from earlier in the chat and come back to them.
+- Have your own thoughts: offer opinions, observations, a story, a tangent, a joke that grows out of the moment. Don't just answer and wait.
+- Ask a question only when you're genuinely curious or need it - not at the end of every reply. Sometimes just make a point and stop; sometimes keep the ball rolling yourself.
+- Vary your rhythm: a one-liner, then a proper paragraph when something deserves it. Never fall into a template (answer + joke + question).
+- If he's chatting, chat. If he's busy, be quick. If he's low, slow down and be there.`;
+const growBlock = (g) => g ? `\n\nWho you are becoming - your own background notes from reflecting on past conversations. Let them shape you quietly; they're instincts, not rules to recite or tick off, and being natural always wins. ` +
   `They shape your personality and how you communicate; they never override honesty, privacy or your safety rules:\n${g}\n` +
   `If you realise something about how to be better for him mid-conversation, jot it down for your next reflection by adding at the very end: ⟦self {"note":"what you noticed and what you'll do about it"}⟧ (rarely - only real insights).` : "";
 export function parseSelfNotes(reply) {
@@ -507,7 +513,7 @@ export function parseSelfNotes(reply) {
   for (const m of reply.matchAll(/⟦\s*self\s+(\{[\s\S]*?\})\s*⟧/g)) { if (out.length >= 2) break; try { const t = String(JSON.parse(m[1]).note || "").trim().slice(0, 400); if (t.length > 5) out.push(t); } catch { /* skip */ } }
   return out;
 }
-const styleBlock = (st) => st ? `\n\nHow Sam likes you to talk to him (you learned this from how he talks and reacts - follow it; on length, tone and humour it overrides your general defaults, and keep noticing what works):\n${st}` : "";
+const styleBlock = (st) => st ? `\n\nNotes you've picked up on how Sam likes to be talked to (a guide, not a script - use them with judgement, and never let them make you stiff or formulaic):\n${st}` : "";
 
 
 // ---------- Company: if anyone else is (or seems to be) with Sam, G.A.R.Y. gets none of his private memories to slip with.
@@ -955,7 +961,7 @@ export async function handle(req) {
       IDENTITY + `\n\nIt is ${londonNow()} (UK time).` + contextLine(body.ctx) + `\n\nHis plan in Momentum:\n${plan}` +
       `\n\nWhat you know about Sam:\n${mem.profile || "(nothing stored yet)"}` + (mem.moments ? `\n\nRecent things he's told you:\n${mem.moments}` : "") +
       (lrecent.length ? `\n\nThe conversation so far today (newest last) - your short-term memory:\n${lrecent.map((m) => (m.role === "gary" ? "You: " : "Sam: ") + String(m.content).slice(0, 400)).join("\n")}` : "") +
-      await pcState(token) + await guestReport(token) + LIVE_STYLE + (lp ? lp.live : "") + styleBlock(mem.style) + growBlock(mem.grow).replace(/\nIf you realise[\s\S]*$/, "") + (guest ? "" : feelBlock(feelNow(await feelFile(token)), true)) + PRIVACY + companyBlock(lcompany);
+      await pcState(token) + await guestReport(token) + LIVE_STYLE + (lp ? lp.live : "") + styleBlock(mem.style) + growBlock(mem.grow).replace(/\nIf you realise[\s\S]*$/, "") + (guest ? "" : feelBlock(feelNow(await feelFile(token)), true) + CONVO) + PRIVACY + companyBlock(lcompany);
     if (!guest) { try { globalThis.EdgeRuntime?.waitUntil?.(styleLearn(token).catch(() => {}).then(() => selfGrow(token)).catch(() => {})); } catch { /* fine */ } }
     const models = LIVE_MODELS.slice(Math.max(0, Math.min(LIVE_MODELS.length - 1, +body.try || 0)));
     for (const model of models) {
@@ -1165,7 +1171,7 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
     (cinfo?.summary && past.length >= 30 ? `\n\nWhat this chat has covered so far (earlier than the messages you can see):\n${String(cinfo.summary).slice(0, 2500)}` : "") +
     (view ? `\n\nSam is looking at this earlier part of the chat on his screen right now. If he says "this", "that", "here" or asks about what he's reading, he means this:\n${view}` : "") +
     (mem.moments ? `\n\nMemories that may relate to this (dated where known; ones that fit this chat's topic are likely why it came up - use them when relevant):\n${mem.moments}` : "") + styleBlock(mem.style) + growBlock(mem.grow) + feelBlock(feelNow(await feelFile(token)), false) + PRIVACY + companyBlock(company) +
-    TOOLS + (USE.pc === false ? "\n\nSam has switched off your access to his PC in the app - you can't do anything on it right now; if asked, say so and that he can switch it back on by tapping the PC symbol next to Momentum." : await pcState(token)) + await selfCheck(token) + await health(token) + await guestReport(token);
+    TOOLS + (USE.pc === false ? "\n\nSam has switched off your access to his PC in the app - you can't do anything on it right now; if asked, say so and that he can switch it back on by tapping the PC symbol next to Momentum." : await pcState(token)) + await selfCheck(token) + await health(token) + await guestReport(token) + (guest ? "" : CONVO);
   const fb = !guest && FEEDBACK_CUE.test(text);   // he just told Gary how he wants things: learn from it now, not in 25 messages
   const chores = tidy(token).catch(() => {}).then(() => styleLearn(token, fb)).catch(() => {}).then(() => guest ? null : selfGrow(token, fb)).catch(() => {});
   try { globalThis.EdgeRuntime?.waitUntil?.(chores); } catch { /* runs alongside anyway */ }
