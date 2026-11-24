@@ -832,7 +832,7 @@ async function liveStart(again){if(!gUse().live){toast('Live voice is switched o
  ws.onopen=()=>ws.send(JSON.stringify({setup:j.setup}));ws.onmessage=lvMsg;
  ws.onclose=e=>{if(LV.ws!==ws)return;if(LV.on&&!LV.ready&&LV.tries<2){LV.tries++;lvStop(true);liveStart(true);return}
   if(LV.on){lvSaveTurn();if(e.code===1000)lvStatus('Ended');else lvNoShow()}}
- (function meter(){if(!LV.on)return;const o=$('lvorb');o.style.transform='scale('+(1+LV.lvl*0.35).toFixed(3)+')';LV.lvl*=0.85;requestAnimationFrame(meter)})()}
+ }
 function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;try{ws&&ws.close(1000)}catch(e){}lvHush();
  try{LV.stream&&LV.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{LV.node&&LV.node.disconnect()}catch(e){}try{LV.ctx&&LV.ctx.close()}catch(e){}
  LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;$('live').classList.remove('on','speaking','mini');document.body.classList.remove('lvon');gFloatSync();brainDraw();lvSaveTurn()}}
@@ -847,7 +847,8 @@ happy happy n grin upR - bob
 wave open n grin wave - bob
 think up up flat chin dots still
 talk open n talk rest - still
-listen open up smile rest ear still
+listen open up smile rest - still
+listening open up smile cup ear nod
 confused open quirk wavy chin question still
 bow closed n flat bowR - still - bow
 pose wink n grin pose sparkle still
@@ -971,10 +972,12 @@ let GTALK=false,GPOSE=null,GSPK=false;
 function gMood(m,ms){if(!G_EX[m])return;GS.mood=m;GS.until=ms?performance.now()+ms:0}
 function gState(){const now=performance.now();if(GS.until&&now>GS.until){GS.mood=GS.base;GS.until=0}
  if(GS.until)return GS.mood;
- if(typeof LV!=='undefined'&&LV.on)return $('live').classList.contains('speaking')?'talk':'listen';
+ if(typeof LV!=='undefined'&&LV.on)return $('live').classList.contains('speaking')?'talk':(LV.ready&&!LV.muted&&LV.open>0?'listening':'listen');
  if(talking)return GTALK?'talk':'think';if(GSPK)return 'talk';return GS.mood}
 function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.tick,P=[];
  for(let y=0;y<32;y++)for(let i=0;i<32;i++){const c=G_BODY[y][i];if(c!=='.')P[y*32+i]=c}
+ [[13,18],[12,19],[12,20],[11,21],[11,22],[18,18],[19,19],[19,20],[20,21],[20,22]].forEach(([i,y])=>P[y*32+i]='G');
+ P[20*32+21]='W';P[20*32+22]='W';P[21*32+22]='W';P[25*32+16]='G';P[23*32+16]='G';P[30*32+10]='G';P[30*32+18]='G';
  const put=(i,y,c)=>{i=Math.round(i);y=Math.round(y);if(i>=0&&i<32&&y>=0&&y<32)P[y*32+i]=c},del=(i,y)=>{delete P[y*32+i]};
  const rect=(x0,y0,w,h,c)=>{for(let y=y0;y<y0+h;y++)for(let i=x0;i<x0+w;i++)put(i,y,c)};
  const clr=s=>{for(let y=24;y<26;y++)for(let i=s?5:25;i<(s?8:28);i++)del(i,y)};
@@ -992,13 +995,13 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'salute':arm(0,23,6,[[26,14]],null,4,2);break;
   case 'shrug':arm(0,29,19,[[27,22]]);arm(1,2,19,[[4,22]]);break;
   case 'facepalm':arm(1,12,9,[[7,15]],null,4,3);break; case 'peek':arm(1,12,9,[[7,15]],null,4,3);arm(0,20,9,[[24,15]],null,4,3);break;
-  case 'cross':clr(0);clr(1);rect(8,21,16,2,'G');rect(7,21,2,2,'W');rect(23,21,2,2,'W');break;
+  case 'cross':clr(0);clr(1);rect(8,20,13,2,'G');rect(21,20,2,2,'W');rect(11,22,13,2,'G');rect(8,22,3,2,'W');put(10,21,'K');put(21,23,'K');break;
   case 'clap':if(t%2){arm(0,17,20,null,'G',2,3);arm(1,14,20,null,'G',2,3)}else{arm(0,20,20,null,'G',2,3);arm(1,11,20,null,'G',2,3)}break;
   case 'clasp':arm(0,17,21,null,'G',2,3);arm(1,14,21,null,'G',2,3);break;
   case 'mouthcover':arm(0,16,14,[[22,20]],null,4,2);break;
   case 'point':arm(0,29,19,null,null,2,2);put(31,19,'W');break; case 'pointUp':arm(0,26,10,null,null,2,3);put(26,7,'W');put(26,8,'W');break;
   case 'spread':arm(0,29,17,null,null,2,3);arm(1,2,17,null,null,2,3);break;
-  case 'hug':arm(0,20,20,null,'G');arm(1,11,20,null,'G');break;
+  case 'hug':clr(0);clr(1);rect(9,21,14,2,'G');rect(21,19,3,2,'W');rect(8,19,3,2,'W');rect(13,21,6,1,'B');break;
   case 'heart':arm(0,19,20,null,'G',2,2);arm(1,12,20,null,'G',2,2);[[14,19],[15,20],[16,20],[17,19],[15,21],[16,21],[14,20],[17,20]].forEach(([i,y])=>put(i,y,'P'));break;
   case 'scratch':arm(0,22,3,[[27,12]]);break; case 'behind':clr(0);clr(1);break; case 'belly':arm(0,19,23,null,'G');break;
   case 'bowtie':arm(0,18,18,null,'G',2,2);arm(1,13,18,null,'G',2,2);break; case 'bowR':arm(0,15,22,null,'G');break;
@@ -1019,6 +1022,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'cake':arm(0,21,22,null,'G',2,2);arm(1,10,22,null,'G',2,2);rect(11,18,10,1,'P');rect(11,19,10,4,'W');rect(11,21,10,1,'P');put(15,16,'Y');put(15,17,'Y');put(15,15,odd?'F':'Y');break;
   case 'phone':arm(0,20,22,null,'G',2,2);rect(18,18,3,4,'K');rect(19,19,1,2,'L');break;
   case 'phoneEar':arm(0,24,12,[[27,18]],null,2,2);rect(23,8,2,5,'K');break;
+  case 'cup':arm(1,6,10,[[4,16]],null,2,3);put(8,9,'W');break;
   case 'walk':{const st=Math.floor((GW.step||0)/7)%2===0;clr(0);clr(1);rect(st?26:24,23,3,2,'W');rect(st?4:6,23,3,2,'W');if(st){del(10,30);del(11,30);put(10,29,'K')}else{del(20,30);del(21,30);put(21,29,'K')}break}
   case 'bike':{for(let y=28;y<31;y++)for(let i=8;i<24;i++)del(i,y);arm(0,24,21,null,'G',2,2);arm(1,21,22,[[11,22]],'G',2,2);
    const c=(cx)=>{for(let a=0;a<16;a++)put(cx+Math.round(Math.cos(a/16*6.283)*3.4),28+Math.round(Math.sin(a/16*6.283)*3.4),'C');put(cx,28,'K');const sa=(GW.step||t*3)/3.4;put(cx+Math.round(Math.cos(sa)*2),28+Math.round(Math.sin(sa)*2),'W');put(cx-Math.round(Math.cos(sa)*2),28-Math.round(Math.sin(sa)*2),'W')};
@@ -1097,7 +1101,7 @@ function gDraw(x,force){const name=force||gState(),X=G_EX[name]||G_EX.idle,t=GS.
   case 'rain':for(let j=0;j<5;j++)put(2+j*3,(t+j*3)%12+4,'Q');break;
   case 'snow':for(let j=0;j<5;j++)put(2+j*6,(t+j*5)%14+1,'W');break;
   case 'confetti':for(let j=0;j<8;j++)put((j*7+t)%32,(t*2+j*5)%14,['Y','P','Q','V','D'][j%5]);break;
-  case 'ear':if(t%10<5)Le([[4,9,'C'],[3,10,'C'],[4,11,'C']]);break;
+  case 'ear':{const w=t%6;if(w<4){put(3,8,'C');put(2,10,'C');put(3,12,'C')}if(w>1&&w<5){put(1,7,'C');put(0,10,'C');put(1,13,'C')}break}
   case 'puff':if(odd)Le([[9,15,'C'],[8,15,'C'],[8,16,'C']]);break;
   case 'glitch':for(let j=0;j<6;j++)put((t*13+j*11)%32,(t*7+j*5)%32,['Q','P','V'][j%3]);break;
   case 'zen':for(let j=0;j<6;j++){const a=t*0.4+j;put(16+Math.cos(a)*13,15+Math.sin(a)*13,'Y')}break;
