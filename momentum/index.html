@@ -446,9 +446,15 @@ body.guest #thread{padding-top:14px}
 .chrow{margin:6px 0}.chrow .chi{padding:8px 12px 7px}.chrow .chi b{font-size:14.5px;padding-bottom:5px;margin-bottom:5px}.chrow .chs{font-size:12.5px!important;line-height:1.4}.chrow .chi small{margin-top:3px}
 .chrow .chi.on{box-shadow:none}.ci.on b::before{content:none!important}.chrow:has(.chi.on)::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;z-index:2;background:linear-gradient(180deg,#7ec8ff,#b59cff 30%,#ff9ecf 55%,#ffd59e 78%,#9effd6)}
 #newChat{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--fg);background:none;color:var(--fg)}#newChat svg{width:20px;height:20px}
+
+/* one layout for everyone: no big heading or chat-name row; Chat history left, New chat right; Memory (or Face ID, without it) by the Wi-Fi symbol */
+#p-gary h1,#p-gary .gsub,#chead,#memBtn{display:none!important}#gnew{display:inline!important}
+#hmem{display:inline-grid;place-items:center;width:28px;height:28px;margin-left:8px;vertical-align:middle;background:none;border:0;color:var(--dim);padding:0}#hmem svg{width:19px;height:19px}body.guest #hmem{display:none}
+#thread{padding-top:14px}
+#hmem,#hfid{-webkit-tap-highlight-color:transparent}
 </style></head><body>
 <div id="app">
-<header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><button id="hfid" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
+<header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><button id="hmem" aria-label="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button><button id="hfid" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
 
 <section class="pane on" id="p-today">
  <div class="lab" id="tlab">Today</div><h1 id="tday"></h1>
@@ -565,7 +571,7 @@ const fmtMins=m=>m>=60?Math.floor(m/60)+'h'+(m%60?' '+m%60+'m':''):m+'m';
 const t12=t=>{if(!t)return'';let[h,m]=t.split(':').map(Number);const ap=h<12?'am':'pm';h=h%12||12;return h+(m?':'+pad(m):'')+ap};
 const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
 function toast(t){try{if(tab==='gary'&&!LV.on){gBar(t);clearTimeout(toast._t);toast._t=setTimeout(()=>{if(!$('ask').value)gBar(gRest())},6000)}else if($('gfloat').classList.contains('on'))gSay(t,'pointing')}catch(e){}}
-const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
+const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);if(k==='garyChat')sessionStorage.setItem('rodChat',v)}catch(e){return null}};
 
 // ---------- state: kept on this device, synced with the PC when it's reachable
 let S={items:{},moods:{},settings:{morning:'08:30',evening:'21:00',nudges:true,remind:5},stats:null,push:{},dirty:{items:{},moods:{},settings:false}};
@@ -869,7 +875,7 @@ async function pushOn(){if(!hasPC()){toast('Connect your PC first - it sends the
  catch(e){toast('Couldn\'t turn them on: '+(e.message||e))}}
 
 // ---------- GARY (chat): lives in the cloud, works with the PC off. One memory on every device.
-let CHAT=store('garyChat')||null,talking=false;
+let CHAT=(()=>{try{return sessionStorage.getItem('rodChat')||null}catch(e){return null}})(),talking=false;
 const GARY_HELLO='Good to see you, sir. What are we tackling?';
 function bubble(role,text){const e=document.createElement('p');e.className=role==='you'?'q':'a';e.textContent=text;$('thread').appendChild(e);return e}
 async function gdb(path,opt={}){const tok=await clTok();if(!tok)throw new Error('signin');
@@ -1842,7 +1848,7 @@ function gFloatInit(){const f=$('gfloat');gCanvas($('gfsp'));let sx,sy,ox,oy;
   else if(F&&GF.drag)GF.fling=null;requestAnimationFrame(fly)})();
  f.addEventListener('pointerup',end);f.addEventListener('pointercancel',end);
  addEventListener('resize',()=>{if(f.classList.contains('on'))gFloatPlace()});
- gCanvas($('gdock'),1);gCanvas($('lvorb'),1,1);$('gfid').onclick=()=>gGate();$('hfid').onclick=e=>{e.stopPropagation();gGate()};$('gnew').onclick=()=>{loadChat(null);setTimeout(()=>$('ask').focus(),300)};$('gfid2').onclick=()=>gGate();$('brain').onclick=e=>{e.stopPropagation();brainMenu()};$('bdlist').onclick=e=>{const t=e.target.closest('[data-bk]');if(t)brainToggle(t.dataset.bk)};$('bdx').onclick=brainClose;$('veil').addEventListener('click',brainClose);(function(){const d=$('bdrop');let y0=null;d.addEventListener('pointerdown',e=>{if(!e.target.closest('button'))y0=e.clientY});d.addEventListener('pointermove',e=>{if(y0!==null&&e.clientY-y0<-50){y0=null;brainClose()}});d.addEventListener('pointerup',()=>y0=null)})();brainDraw();
+ gCanvas($('gdock'),1);gCanvas($('lvorb'),1,1);$('gfid').onclick=()=>gGate();$('hfid').onclick=e=>{e.stopPropagation();gGate()};$('hmem').onclick=e=>{e.stopPropagation();$('memBtn').click()};$('gnew').onclick=()=>{loadChat(null);setTimeout(()=>$('ask').focus(),300)};$('gfid2').onclick=()=>gGate();$('brain').onclick=e=>{e.stopPropagation();brainMenu()};$('bdlist').onclick=e=>{const t=e.target.closest('[data-bk]');if(t)brainToggle(t.dataset.bk)};$('bdx').onclick=brainClose;$('veil').addEventListener('click',brainClose);(function(){const d=$('bdrop');let y0=null;d.addEventListener('pointerdown',e=>{if(!e.target.closest('button'))y0=e.clientY});d.addEventListener('pointermove',e=>{if(y0!==null&&e.clientY-y0<-50){y0=null;brainClose()}});d.addEventListener('pointerup',()=>y0=null)})();brainDraw();
  $('gsay').onclick=()=>$('ask').focus();$('gcut').onclick=()=>{speakStop();gMood('idle')};gFloatSync()}
 async function gNotesCopy(){if(!CS){toast('Sign in first');return}
  try{const since=new Date(Date.now()-14*864e5).toISOString();const rows=await gdb('gary_audit?select=action,detail,at&or=(ok.eq.false,action.eq.wish)&at=gte.'+since+'&order=at.desc&limit=40')||[];
@@ -2152,7 +2158,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124184911';let UPD=false;
+const BUILD='20261124185224';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
