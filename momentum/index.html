@@ -381,6 +381,14 @@ header{padding-top:calc(4px + var(--safeT))!important}header>.lab{font-size:12.5
 .chundo{display:flex!important;justify-content:space-between;align-items:center;color:var(--dim);font-size:14px}.chundo button{color:var(--fg)}#chlist .chi{position:relative;background:#000}
 
 #gdock .gpx.scene{transition:transform .35s var(--ease);transform-origin:25% 87.5%}#gdock.peek .gpx.scene{transform:rotate(24deg)}
+
+/* minimised call: the voice screen tucks away and the normal bar + search bar slide back in at the bottom, with mute / end beside G.A.R.Y. */
+#live.mini{display:none!important}
+body.lvon.lvmini #askbar{display:flex!important;animation:barback .35s var(--ease)}@keyframes barback{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+#gbcall{display:none;gap:8px;margin-top:6px;justify-content:flex-end}body.lvmini #gbcall{display:flex}
+#gbcall button{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);background:none;color:var(--fg);border-radius:50%}#gbcall svg{width:16px;height:16px}#gbcall #gbmute.on{background:var(--fg);color:#000}
+#live:not(.mini){animation:liveup .3s var(--ease)}@keyframes liveup{from{opacity:.4;transform:translateY(16px)}to{opacity:1;transform:none}}
+#p-gary{transition:padding-bottom .3s var(--ease)}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What G.A.R.Y. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -423,7 +431,7 @@ header{padding-top:calc(4px + var(--safeT))!important}header>.lab{font-size:12.5
 </section>
 
 <div id="askbar"><div id="gbar"><div id="gopen"><div id="gotx"></div><div class="goacts"><button class="btn fill" id="goyes">Reply</button><button class="btn ghost" id="gono">Not now</button></div></div>
- <div id="gsay"></div><button id="gdock" aria-label="G.A.R.Y."></button><div class="gbt"><b>G.A.R.Y.</b><span class="lab" id="gbs">Tap to talk</span></div></div>
+ <div id="gsay"></div><button id="gdock" aria-label="G.A.R.Y."></button><div class="gbt"><b>G.A.R.Y.</b><span class="lab" id="gbs">Tap to talk</span><div id="gbcall"><button id="gbmute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><button id="gbend" aria-label="End call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div></div>
  <textarea id="ask" rows="1" placeholder="aSk G.A.R.Y. aNyThInG…" spellcheck="true" autocorrect="on" autocapitalize="sentences" enterkeyhint="send"></textarea>
  <button class="mic" id="asksend" aria-label="Send" style="border-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
  <button class="mic" id="askmic" aria-label="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 19 7.5 6l5 13M4.4 14.5h6.2M19.5 4.5v15M17.5 4.5h4M17.5 19.5h4"/></svg></button></div>
@@ -906,7 +914,7 @@ async function chSearch(){const q=$('chq').value.trim();if(!q)return drawChats()
  R.sort((a,b)=>new Date(b.t)-new Date(a.t));
  $('chlist').innerHTML=R.length?'<div class="lab chg">'+R.length+(R.length>=80?'+':'')+' found · newest first</div>'+R.map(r=>'<button class="ci chi chr" data-id="'+esc(r.id)+'" data-at="'+(r.at||'')+'"><span class="chs" style="color:var(--fg)"><b style="display:inline;font:inherit;font-weight:600">'+r.who+':</b> '+snip(r.text)+'</span><small>'+esc((r.title||'Chat')+' · '+chWhen(r.t))+'</small></button>').join(''):'<p class="empty">Nothing found for "'+esc(q)+'".</p>';chOpenWire()}
 function chOpenWire(){$('chlist').querySelectorAll('.chr').forEach(b=>b.onclick=()=>{sheet('chl',false);const at=+b.dataset.at||0;if(tab!=='gary')go('gary');loadChatAt(b.dataset.id,at)})}
-$('chatsBtn').onclick=listChats;$('chnew').onclick=()=>{loadChat(null);setTimeout(()=>$('ask').focus(),300)};new MutationObserver(chHead).observe($('ctitle'),{childList:true,characterData:true,subtree:true});$('newChat').onclick=()=>{loadChat(null);sheet('chl',false);setTimeout(()=>$('ask').focus(),300)};
+$('gbmute').onclick=e=>{e.stopPropagation();$('lvmute').click();setTimeout(lvCallDraw,50)};$('gbend').onclick=e=>{e.stopPropagation();lvStop()};$('chatsBtn').onclick=listChats;$('chnew').onclick=()=>{loadChat(null);setTimeout(()=>$('ask').focus(),300)};new MutationObserver(chHead).observe($('ctitle'),{childList:true,characterData:true,subtree:true});$('newChat').onclick=()=>{loadChat(null);sheet('chl',false);setTimeout(()=>$('ask').focus(),300)};
 // What Gary can see of Momentum right now (no passwords, nothing hidden)
 function garyCtx(){const t=today(),its=Object.values(S.items).filter(i=>!i.deleted&&occurs(i,t));
  return{app:'Momentum',page:tab==='gary'?(store('garyFrom')||'gary'):tab,viewing_day:cur,device:wide()?'computer':(/iPhone|iPad/.test(navigator.userAgent)?'iPhone/iPad':'phone'),
@@ -1143,7 +1151,7 @@ function lvStop(keep){LV.ready=false;const ws=LV.ws;LV.ws=null;let handed=false;
  if(!keep&&(LV.srcs.length||LV.turnOpen)&&LV.outT.trim()){lvNoteCut();if(LV.unsaid||LV.turnOpen){handed=true;lvHandoff(ws)}}
  if(!handed)try{ws&&ws.close(1000)}catch(e){}lvHush();
  try{LV.stream&&LV.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{LV.node&&LV.node.disconnect()}catch(e){}try{LV.ctx&&LV.ctx.close()}catch(e){}
- LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;GS.nocoat=false;$('live').classList.remove('on','speaking','mini');document.body.classList.remove('lvon');gFloatSync();brainDraw();lvSaveTurn()}}
+ LV.stream=LV.node=LV.ctx=null;if(!keep){LV.on=false;GS.nocoat=false;$('live').classList.remove('on','speaking','mini');document.body.classList.remove('lvon','lvmini');lvCallDraw();gFloatSync();brainDraw();lvSaveTurn()}}
 $('lvcut').onclick=$('lvorb').onclick=e=>{if($('live').classList.contains('mini')){lvMini(false);return}if(!LV.srcs.length)return;lvNoteCut();lvHush();LV.drop=true;lvStatus('Listening… go ahead');gMood('listen',1200)};$('lvend').onclick=()=>{if(performance.now()-LV.t0<900)return;lvStop()};$('lvmin').onclick=()=>{if(performance.now()-LV.t0<900)return;lvMini(true)};$('lvmute').onclick=async()=>{if(LV.nomic){try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});LV.nomic=false;await lvMicWire()}catch(e){buzz(20);lvStatus('Microphone still unavailable - type to him');return}}LV.muted=!LV.muted;$('lvmute').classList.toggle('on',LV.muted);$('lvmute').setAttribute('aria-label',LV.muted?'Unmute':'Mute');lvStatus(LV.muted?'Muted':'Listening…')};
 
 // type to G.A.R.Y. during a call: he reads it and answers out loud
@@ -1719,7 +1727,7 @@ let GSCR=0;$('p-gary').addEventListener('scroll',()=>GSCR=Date.now(),{passive:tr
 (function(){const b=$('gbar');let y0=null,x0=0,moved=0,t0=0;
  b.addEventListener('pointerdown',e=>{if(e.target.closest('#gsay,#gopen'))return;y0=e.clientY;x0=e.clientX;moved=0;t0=Date.now()});
  b.addEventListener('pointermove',e=>{if(y0!==null)moved=Math.max(moved,Math.abs(e.clientY-y0)+Math.abs(e.clientX-x0))});
- b.addEventListener('pointerup',e=>{if(y0===null)return;y0=null;const mouse=e.pointerType==='mouse',tap=mouse?moved<14&&Date.now()-t0<1200:moved<8&&Date.now()-t0<500&&Date.now()-GSCR>600;if(tap&&Date.now()-(b._go||0)>1500){b._go=Date.now();gPoke();liveStart()}});
+ b.addEventListener('pointerup',e=>{if(y0===null)return;y0=null;const mouse=e.pointerType==='mouse',tap=mouse?moved<14&&Date.now()-t0<1200:moved<8&&Date.now()-t0<500&&Date.now()-GSCR>600;if(tap&&e.target.closest('#gbcall'))return;if(tap&&LV.on){lvMini(false);return}if(tap&&Date.now()-(b._go||0)>1500){b._go=Date.now();gPoke();liveStart()}});
  b.addEventListener('pointercancel',()=>{y0=null});
  const ro=()=>document.documentElement.style.setProperty('--askH',$('askbar').offsetHeight+'px');if(window.ResizeObserver)new ResizeObserver(ro).observe($('askbar'));ro()})();
 // the Sentient Search Bar has opinions (it talks in itself); G.A.R.Y. answers back
@@ -1839,7 +1847,8 @@ function brainToggle(k){const U=gUse();if(!U[k]){U[k]=true;store('garyUse',JSON.
  $('bctx').textContent='Turn off '+BR_NAME[k]+'?';$('bcbody').textContent=BR_OFF[k]+(both?' With both brains off, G.A.R.Y. can\'t reply at all.':'');
  $('bconf').classList.add('on');$('bcyes').onclick=()=>{U[k]=false;store('garyUse',JSON.stringify(U));$('bconf').classList.remove('on');brainDraw();brainMenu(true);toast('Switched off')};$('bcno').onclick=()=>$('bconf').classList.remove('on')}
 // voice screen: swipe it away (down, left or right) to hang up and go back to the search bar; it follows your finger and springs back if you let go early
-function lvMini(on){$('live').classList.toggle('mini',on)}
+function lvMini(on){$('live').classList.toggle('mini',on);document.body.classList.toggle('lvmini',!!on&&LV.on);lvCallDraw();setTimeout(garyBottom,320)}
+function lvCallDraw(){const m=$('gbmute');if(!m)return;m.classList.toggle('on',!!LV.muted);$('gbs').textContent=document.body.classList.contains('lvmini')?(LV.muted?'In a call · muted':'In a call · tap to open'):'Tap to talk'}
 (function(){const L=$('live');let x0=null,y0=0,dx=0,dy=0,ax=0;
  const put=(x,y,t)=>{L.style.transition=t||'none';L.style.transform=x||y?'translate('+x+'px,'+y+'px)':'';L.style.opacity=x||y?String(Math.max(.35,1-Math.hypot(x,y)/700)):''};
  L.addEventListener('pointerdown',e=>{if(e.target.closest('button,input,textarea,#lvtype')||L.classList.contains('mini')||!L.classList.contains('on'))return;x0=e.clientX;y0=e.clientY;dx=dy=0;ax=0});
@@ -2002,7 +2011,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124161436';let UPD=false;
+const BUILD='20261124161533';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
