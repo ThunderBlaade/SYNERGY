@@ -1607,13 +1607,16 @@ document.addEventListener('focusin',()=>{navKeep();setTimeout(navKeep,350)});doc
 function kbFit(){navKeep();const v=VV(),a=$('askbar'),t=$('ask');if(!v||!a)return;const open=document.activeElement===t&&tab==='gary'&&FULLH-v.height>120;
  if(open){if(window.scrollY)scrollTo(0,0);if(!v.offsetTop&&FULLH-v.height>150)store('kbH',String(FULLH-v.height));kbSlide(v.offsetTop+v.height);if(!kbFit.was){kbFit.was=true;setTimeout(garyBottom,280)}}
  else if(kbFit.was||document.body.classList.contains('kbup')){if(kbFit.pre&&document.activeElement===t&&Date.now()-(kbFit.t0||0)<900)return;kbFit.pre=false;kbSlide(null);kbFit.was=false}}
+// after the keyboard goes the page grows back (sometimes a moment later on iPhone): keep the newest message sitting on Rodger's head
+{const p=$('p-gary');let near=true;p.addEventListener('scroll',()=>{near=p.scrollHeight-p.scrollTop-p.clientHeight<90},{passive:true});
+ const fix=()=>{if(tab==='gary'&&near&&!document.body.classList.contains('kbup'))garyBottom()};addEventListener('resize',fix);{const v=VV();if(v)v.addEventListener('resize',()=>setTimeout(fix,60))}}
 // watchdog: if the keyboard has gone (or the box isn't focused any more) but the bar is still lifted, put everything back
 setInterval(()=>{if(!document.body.classList.contains('kbup')&&!kbFit.was)return;const t=$('ask'),v=VV();
  if(document.activeElement!==t||tab!=='gary'){kbWd.n=(kbWd.n||0)+1;if(kbWd.n>=2){kbWd.n=0;kbFit.pre=false;kbSlide(null);kbFit.was=false}return}kbWd.n=0;
  if(v&&FULLH-v.height<=120&&Date.now()-(kbFit.t0||0)>1200){kbFit.pre=false;kbSlide(null);kbFit.was=false}},400);function kbWd(){}
 // slide the bar (with transform, so it glides with the keyboard) so its bottom sits at y; null = back home
 function kbPad(){const a=$('askbar'),p=$('p-gary');if(!document.body.classList.contains('kbup')){p.style.removeProperty('padding-bottom');return}p.style.setProperty('padding-bottom',Math.max(40,Math.round(p.getBoundingClientRect().bottom-a.getBoundingClientRect().top-22))+'px','important');garyBottom()}
-function kbSlide(y){const a=$('askbar');clearTimeout(kbSlide.t);kbSlide.t=setTimeout(kbPad,320);if(y==null){a.style.transform='';document.body.classList.remove('kbup');document.documentElement.style.setProperty('--kb','0px');setTimeout(garyBottom,300);return}
+function kbSlide(y){const a=$('askbar');clearTimeout(kbSlide.t);kbSlide.t=setTimeout(kbPad,320);if(y==null){a.style.transform='';document.body.classList.remove('kbup');document.documentElement.style.setProperty('--kb','0px');[300,700,1200].forEach(t=>setTimeout(()=>{if(!document.body.classList.contains('kbup'))garyBottom()},t));return}
  document.body.classList.add('kbup');const home=a.offsetTop+a.offsetHeight,dy=Math.round(y-home);a.style.transform='translateY('+dy+'px)';document.documentElement.style.setProperty('--kb',Math.max(0,-dy)+'px')}
 {const vv=VV();if(vv){vv.addEventListener('resize',kbFit);vv.addEventListener('scroll',kbFit);vv.addEventListener('resize',()=>{lvKb();setTimeout(lvKb,300)})}}
 function kbPre(){kbFit.t0=Date.now();if(tab!=='gary'||!matchMedia('(pointer:coarse)').matches)return;const kb=+store('kbH')||Math.round(FULLH*0.42);kbSlide(FULLH-kb);kbFit.pre=true}
@@ -2473,7 +2476,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261124233914';let UPD=false;
+const BUILD='20261125002259';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
