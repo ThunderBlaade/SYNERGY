@@ -716,6 +716,11 @@ body.spon #gfloat{display:none!important}
 #spgrimb svg{width:20px;height:20px}#spgrimb{display:grid;place-items:center}.spin2{flex:none;font:500 12px var(--sans);color:rgba(236,232,242,.75);padding:4px 9px;border-radius:10px;background:rgba(255,255,255,.07)}
 .spcalx .spcal{padding:0 0 4px}.spcalx>summary small{display:none}.spcalx:not([open])>summary small{display:block}
 .spkw2{color:rgba(236,232,242,.8)!important;letter-spacing:.02em}
+.spday .spevi+.spevi{margin-top:14px}.spday .spevn{font-size:22px}.spday .spevi>p{font:400 14.5px/1.5 var(--serif);color:#e8e4ee}.spday details.spx{padding:0}
+.spdiv{height:1px;background:rgba(255,255,255,.12);margin:16px 0 14px}
+.spsugs{margin-top:6px}.spsug{display:flex;align-items:center;gap:12px;padding:8px 0}.spsug+.spsug{border-top:1px solid rgba(255,255,255,.06)}
+.spsug i{width:5px;height:5px;flex:none;border-radius:50%;background:rgba(236,232,242,.55)}.spsug span{flex:1;font:italic 400 15px/1.4 var(--serif);color:#ece8f2}
+.spacts .spsug{padding:9px 0}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><button id="hmem" aria-label="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button><button id="hfid" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -2544,7 +2549,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261125005944';let UPD=false;
+const BUILD='20261125010539';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
@@ -2838,19 +2843,19 @@ function spUpcoming(ds,n){const E=Object.values(spEvents()).filter(e=>e.date>=ds
 
 // ---------- grimoire content (built on Sam's Days of Significance)
 const SP_DAY={Monday:{kw:'Intuition · Emotions · Dreams',focus:'Slow down, notice your feelings and trust your gut.',purpose:'Reflection, emotional balance, intuition and self-care.',el:'Water',
-  acts:[['m1','Write down my dreams'],['m2','Have a self-love bath (jasmine or rose)'],['m3','Spend ten minutes reflecting'],['m4','Try a short meditation'],['m5','Drink a glass of moon-charged water']],reflect:'What am I feeling beneath the surface, and what does that part of me need?'},
+  acts:[["m1", "Give your feelings some room - a bath, a walk or a quiet half hour"], ["m2", "Jot down any dreams before you reach for your phone"], ["m3", "Go gentle on training - a stretch or a walk suits today"], ["m4", "Have an early night if you can"]],reflect:'What am I feeling beneath the surface, and what does that part of me need?'},
  Tuesday:{kw:'Strength · Courage · Action',focus:'Do the brave thing you have been putting off.',purpose:'Courage, drive, protection and getting things moving.',el:'Fire',
-  acts:[['t1','Do one task I have been avoiding'],['t2','Move my body hard - train or go for a run'],['t3','Say a courage affirmation out loud'],['t4','Make a protection charm (iron and red thread)']],reflect:'Where am I holding back, and what would courage look like there?'},
+  acts:[["t1", "Face something you have been putting off"], ["t2", "A hard session in the gym suits today"], ["t3", "Back yourself in a conversation"], ["t4", "Keep something protective close - red, iron or a word to yourself"]],reflect:'Where am I holding back, and what would courage look like there?'},
  Wednesday:{kw:'Wisdom · Communication · Clarity',focus:'Learn something, organise your thoughts and communicate clearly.',purpose:'Learning, clear thinking, honest conversations and new opportunities.',el:'Air',
-  acts:[['w1','Journal for five minutes'],['w2','Learn something new'],['w3','Set an intention'],['w4','Send the message I have been meaning to send']],reflect:'What do I need to say, and who needs to hear it?'},
+  acts:[["w1", "Learn something, even something small"], ["w2", "Get your thoughts out of your head - talk to Rodger or write them down"], ["w3", "Send the message you have been sitting on"], ["w4", "Tidy up your plans for the week"]],reflect:'What do I need to say, and who needs to hear it?'},
  Thursday:{kw:'Abundance · Growth · Luck',focus:'Think big and plant seeds for the long term.',purpose:'Prosperity, success, generosity and long-term planning.',el:'Fire',
-  acts:[['h1','Write three goals for the year ahead'],['h2','Do one thing for money or career'],['h3','Coin wealth spell - a coin, a green candle and a wish'],['h4','Give something away generously']],reflect:'What am I ready to grow into, and what is one step toward it?'},
+  acts:[["h1", "Think about the bigger picture and where you are heading"], ["h2", "Do one thing for your future - money, work or skills"], ["h3", "Be generous with someone"], ["h4", "Notice a bit of luck and be thankful for it"]],reflect:'What am I ready to grow into, and what is one step toward it?'},
  Friday:{kw:'Love · Beauty · Friendship',focus:'Look after yourself and the people you love.',purpose:'Love, beauty, pleasure, friendship and self-care.',el:'Water',
-  acts:[['f1','My grooming routine - take my time with it'],['f2','Self-love ritual with rose quartz'],['f3','Message or meet a friend'],['f4','Make something beautiful or treat myself'],['f5','Honey and cinnamon attraction spell']],reflect:'How can I show myself the same love I show others?'},
+  acts:[["f1", "Take your time with your grooming routine"], ["f2", "Do something that makes you feel good about yourself"], ["f3", "Reach out to a friend or someone you love"], ["f4", "Treat yourself to something beautiful"]],reflect:'How can I show myself the same love I show others?'},
  Saturday:{kw:'Discipline · Release · Protection',focus:'Clear out, set boundaries and get ready for the week.',purpose:'Cleansing, discipline, boundaries, releasing unhealthy patterns and preparing for the week ahead.',el:'Earth',
-  acts:[['s1','Deep-clean or declutter one space'],['s2','Black salt protection at the door'],['s3','Write down a habit to release'],['s4','Plan the week ahead'],['s5','Say no to something that drains me']],reflect:'What pattern is ready to end, and what boundary would protect my peace?'},
+  acts:[["s1", "Clear a space - a drawer, a room or your phone"], ["s2", "Let go of a habit that is not serving you"], ["s3", "Protect your peace - it is fine to say no"], ["s4", "Set yourself up for the week ahead"]],reflect:'What pattern is ready to end, and what boundary would protect my peace?'},
  Sunday:{kw:'Success · Vitality · Joy',focus:'Get outside, soak up light and celebrate your progress.',purpose:'Nature, sunlight, gratitude, renewal and celebrating how far you have come.',el:'Fire',
-  acts:[['u1','Spend time outside, in sunlight if there is any'],['u2','Write three things I am grateful for'],['u3','Celebrate one win from this week'],['u4','Solar blessing - light a gold or yellow candle'],['u5','Rest and recharge']],reflect:'What am I proud of this week, and how will I celebrate it?'}};
+  acts:[["u1", "Get outside and catch some daylight"], ["u2", "Look back at the week and notice what went well"], ["u3", "Rest properly and recharge"], ["u4", "Celebrate a win, however small"]],reflect:'What am I proud of this week, and how will I celebrate it?'}};
 const SP_PHASES=[['new','New moon','Beginnings, intentions, planting seeds. The sky is dark - a quiet time to dream and decide.',['Write intentions','Cleanse your space','Start something small']],
  ['wxc','Waxing crescent','Gathering, hope and first steps. Feed what you started.',['Take one small action','Gather what you need']],
  ['fq','First quarter','Action, decisions and pushing through resistance.',['Make a decision you have been avoiding','Push through one obstacle']],
@@ -2959,8 +2964,8 @@ function spDraw(dir){const v=spTop(),b=$('spbody');spRemember(v);
 function spDateLabel(ds){const d=parseISO(ds);return DNAMES[d.getDay()]+', '+d.getDate()+' '+MON[d.getMonth()]}
 function spCatTag(c){const k=SP_CAT[c]||['',''];return '<span class="spcat c-'+c+'"><i>'+TX(k[1])+'</i>'+k[0]+'</span>'}
 function spLinks(ids){return '<div class="spchips">'+ids.filter(id=>spRef()[id]).map(id=>'<button class="spchip" data-go="'+id+'">'+spE(spRef()[id].name)+'</button>').join('')+'</div>'}
-function spAct(ds,id,text,src){const u=spUser(),done=!!(u.done[ds]&&u.done[ds][id]);return '<div class="spact'+(done?' dn':'')+'" data-ds="'+ds+'" data-act="'+spE(id)+'" data-txt="'+spE(text)+'"><button class="spck" aria-label="Done"></button><span>'+spE(text)+'</span><button class="spmore" aria-label="More">⋯</button></div>'}
-function spActs(ds,list){const u=spUser(),n=list.filter(([id])=>u.done[ds]&&u.done[ds][id]).length;return '<div class="spprog"><span>'+n+' of '+list.length+' completed</span><i><b style="width:'+(list.length?Math.round(n/list.length*100):0)+'%"></b></i></div>'+list.map(([id,t])=>spAct(ds,id,t)).join('')}
+function spAct(ds,id,text){return '<div class="spsug" data-ds="'+ds+'" data-act="'+spE(id)+'" data-txt="'+spE(text)+'"><i></i><span>'+spE(text)+'</span><button class="spmore" aria-label="More">⋯</button></div>'}
+function spActs(ds,list){return list.map(([id,t])=>spAct(ds,id,t)).join('')}
 function spDayActs(dn,ds){const pr=Object.values(spUser().custom||{}).filter(p=>!p.days||!p.days.length||p.days.includes(dn)).map(p=>['p-'+p.id,p.name]);return SP_DAY[dn].acts.concat(pr)}
 // ----- home: today
 function spHome(){const t=today(),up=spUpcoming(addDays(t,1),5),u=spUser();
@@ -2981,19 +2986,18 @@ function spMonth(ym){const y=+ym.slice(0,4),mo=+ym.slice(5,7)-1,first=new Date(y
  return h+'</div><div class="spkey"><span><i class="mk-full"></i>Full moon</span><span><i class="mk-new"></i>New moon</span><span><i class="mk-sabbat"></i>Sabbat</span><span><i class="mk-eclipse"></i>Eclipse</span><span><i class="mk-culture"></i>Celebration</span><span><i class="mk-personal"></i>Personal</span></div>'}
 // ----- a date: everything relevant to that one day, in layers
 function spDate(ds){const d=parseISO(ds),dn=DNAMES[d.getDay()],m=moonOn(ds),ev=spOn(ds),u=spUser(),A=bkAI(ds);bkFetch(ds);
- let h='';
- for(const e of ev){const r=u.rem[e.id];h+='<div class="glass spevc"><div class="spevh">'+spCatTag(e.cat)+(e.time?'<span class="sptime">'+spE(e.time)+'</span>':'')+'</div><b class="spevn">'+spE(e.name)+'</b><p>'+spE(e.desc)+'</p>'+
-  (e.sig?'<details class="spx"><summary><span>Meaning & tradition</span></summary><p>'+spE(e.sig)+'</p>':'<details class="spx"><summary><span>About this date</span></summary>')+'<p class="spsrc">'+({calc:'Calculated',fixed:'Fixed date',approx:'Approximate'}[e.dtype]||'')+' · '+spE(e.src)+'</p></details>'+
-  (e.acts&&e.acts.length?'<details class="spx"><summary><span>Things to do <em>'+e.acts.length+'</em></span></summary>'+e.acts.map((a,i)=>spAct(ds,e.id+'#'+i,a)).join('')+'</details>':'')+
+ let eh='';
+ for(const e of ev){const r=u.rem[e.id];eh+='<div class="spevi"><div class="spevh">'+spCatTag(e.cat)+(e.time?'<span class="sptime">'+spE(e.time)+'</span>':'')+'</div><b class="spevn">'+spE(e.name)+'</b><p>'+spE(e.desc)+'</p>'+
+  '<details class="spx"><summary><span>'+(e.sig?'Meaning & tradition':'About this date')+'</span></summary>'+(e.sig?'<p>'+spE(e.sig)+'</p>':'')+'<p class="spsrc">'+({calc:'Calculated',fixed:'Fixed date',approx:'Approximate'}[e.dtype]||'')+' · '+spE(e.src)+'</p></details>'+
   '<div class="spevb"><button class="spbtn'+(r?' on':'')+'" data-rem="'+spE(e.id)+'">'+(r?(r.mode==='3'?'🔔 3 days before + on the day':'🔔 On the day'):'Remind me')+'</button>'+[...new Set(e.grim||[])].filter(g=>SP_SECTIONS.some(s=>s[0]===g)).map(g=>'<button class="spbtn" data-sec="'+g+'">'+spE(SP_SECTIONS.find(s=>s[0]===g)[1])+' ›</button>').join('')+'</div></div>'}
- h+=spDayBody(dn,ds,m);
- h+='<details class="glass spx"><summary><span>My notes'+(u.notes[ds]?' <em>1</em>':'')+'</span></summary><textarea class="spnotes" data-note="'+ds+'" placeholder="Anything about today - how the ritual went, what you noticed...">'+spE(u.notes[ds]||'')+'</textarea></details>';
+ let h=spDayBody(dn,ds,m,eh,ev);
+ h+='<details class="glass spx"><summary><span>My notes'+(u.notes[ds]?' <em>1</em>':'')+'</span></summary><textarea class="spnotes" data-note="'+ds+'" placeholder="Anything about today - what you did, what you noticed...">'+spE(u.notes[ds]||'')+'</textarea></details>';
  h+='<details class="glass spx"><summary><span>On this date in history'+(A&&A.pages&&A.pages.length?' <em>'+A.pages.length+'</em>':'')+'</span></summary>'+(A&&A.pages&&A.pages.length?A.pages.map(p=>'<p><b>'+spE(p.title)+'</b> - '+spE(p.text)+'</p>').join('')+'<p class="spsrc">Written by Rodger with AI - may contain mistakes.</p>':'<p class="spsrc">'+(navigator.onLine?'Rodger is looking this up - check back in a moment.':'Needs the internet the first time.')+'</p>')+'</details>';
  return h}
-function spDayBody(dn,ds,m){const D=DAYSIG[dn],X=SP_DAY[dn],R=spRef(),id='day:'+dn.toLowerCase(),L=R[id].links;
- let h='<div class="glass sphero"><div class="speye">Day of significance</div><div class="spdayrow"><span class="spglyph">'+TX(PGLYPH[D.planet])+'</span><div><b>'+dn+'</b><small>'+spE(D.title.replace(/^The Day of /,''))+'</small></div></div><div class="spmeta">Ruled by <button class="spin" data-go="planet:'+SP_SLUG(D.planet)+'">'+spE(D.planet)+'</button> · Element of '+spE(D.element)+(m?' · '+m.name+' ('+Math.round(m.ill*100)+'%)':'')+'</div>'+
-  '<div class="sph2">Today\'s purpose</div><p>'+spE(X.purpose)+'</p></div>';
- h+='<div class="sph">What can I do?</div><div class="glass spacts">'+spActs(ds,spDayActs(dn,ds))+'</div>';
+function spDayBody(dn,ds,m,eh,ev){const D=DAYSIG[dn],X=SP_DAY[dn],R=spRef(),id='day:'+dn.toLowerCase(),L=R[id].links;
+ let h='<div class="glass sphero spday">'+(eh?eh+'<div class="spdiv"></div>':'')+'<div class="speye">Day of significance</div><div class="spdayrow"><span class="spglyph">'+TX(PGLYPH[D.planet])+'</span><div><b>'+dn+'</b><small>'+spE(D.title.replace(/^The Day of /,''))+'</small></div></div><div class="spmeta">Ruled by <button class="spin" data-go="planet:'+SP_SLUG(D.planet)+'">'+spE(D.planet)+'</button> · Element of '+spE(D.element)+(m?' · '+m.name+' ('+Math.round(m.ill*100)+'%)':'')+'</div>'+
+  '<div class="sph2">Today\'s purpose</div><p>'+spE(X.purpose)+'</p>'+
+  '<div class="sph2">You could…</div><div class="spsugs">'+spActs(ds,[].concat(...(ev||[]).filter(e=>e.acts&&e.acts.length&&e.cat!=='numero').slice(0,2).map(e=>e.acts.slice(0,1).map((a,i)=>[e.id+'#'+i,a]))).concat(spDayActs(dn,ds)).slice(0,5))+'</div></div>';
  const grp=(label,count,preview,inner)=>'<details class="glass spx"><summary><span>'+label+(count!=null?' <em>'+count+'</em>':'')+'</span><small>'+spE(preview)+'</small></summary>'+inner+'</details>';
  h+='<div class="sph">Explore correspondences</div>';
  h+=grp('Deities',(L.Deities||[]).length,(L.Deities||[]).map(x=>R[x].name).join(', '),spLinks(L.Deities||[])+'<p class="spsrc">'+spE(D.deities)+'</p>');
@@ -3035,7 +3039,7 @@ function spEntry(id){const R=spRef(),e=R[id];if(!e)return '<p class="spsrc">This
   else h+='<div class="glass spacts">'+spActs(today(),[['rit-'+SP_SLUG(e.name),'Do this ritual']])+'</div>';
   if(e.need)h+='<div class="glass spacts">'+spActs(today(),[['rit-'+e.id,'Did this ritual today']])+'</div>'}
  else if(e.type==='moon'||e.type==='wheel'||e.type==='occasions'||e.type==='practices'){h+='<p>'+spE(e.text||'').replace(/\n/g,'<br>')+'</p></div>';if(e.trad)h+=grp('Tradition',null,'<p>'+spE(e.trad)+'</p>');
-  if(e.acts&&e.acts.length)h+='<div class="sph">What can I do?</div><div class="glass spacts">'+spActs(today(),e.acts.map((a,i)=>[e.id+'#'+i,a]))+'</div>';
+  if(e.acts&&e.acts.length)h+='<div class="sph">You could…</div><div class="glass spacts">'+spActs(today(),e.acts.map((a,i)=>[e.id+'#'+i,a]))+'</div>';
   if(e.type==='moon'){const up=Object.values(spEvents()).filter(x=>x.cat===(id==='moon:eclipses'?'eclipse':'lunar')&&x.date>=today()&&(id==='moon:super'?/Super/.test(x.name):id==='moon:blue'?/Blue/.test(x.name):id.startsWith('phase:')?x.kind===({new:'new',fq:'fq',full:'full',lq:'lq'}[id.slice(6)]):id==='moon:eclipses')).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4);
    if(up.length)h+=grp('Coming up',up.length,up.map(x=>'<button class="sprow" data-date="'+x.date+'"><div><b>'+spE(x.name)+'</b><small>'+spDateLabel(x.date)+' '+x.date.slice(0,4)+(x.time?' · '+x.time:'')+'</small></div><i>›</i></button>').join(''),true)}
   if(e.type==='practices')h+='<div class="spevb"><button class="spbtn" data-editprac="'+e.prac.id+'">Edit</button><button class="spbtn" data-delprac="'+e.prac.id+'">Delete</button></div>'}
@@ -3058,7 +3062,7 @@ function spWire(b,v){
  b.querySelectorAll('[data-marks]').forEach(x=>x.onclick=()=>spGo({v:'marks'}));
  b.querySelectorAll('[data-saved]').forEach(x=>x.onclick=()=>spGo({v:'saved'}));
  b.querySelectorAll('[data-ym]').forEach(x=>x.onclick=e=>{e.stopPropagation();SPV.ym=x.dataset.ym;const c=b.querySelector('.spcal');if(c){c.innerHTML=spMonth(SPV.ym);spWire(c,v)}const sm=b.querySelector('.spcalx summary small');if(sm)sm.textContent=MON[+SPV.ym.slice(5,7)-1]});const cx=b.querySelector('.spcalx');if(cx)cx.ontoggle=()=>{const u=spUser();u.calOpen=cx.open;spSaveUser(u)};
- b.querySelectorAll('.spact').forEach(r=>{r.querySelector('.spck').onclick=e=>{e.stopPropagation();const u=spUser(),ds=r.dataset.ds,id=r.dataset.act;u.done[ds]=u.done[ds]||{};if(u.done[ds][id])delete u.done[ds][id];else{u.done[ds][id]=Date.now();buzz([10,30,12])}spSaveUser(u);
+ b.querySelectorAll('.spsug').forEach(r=>{if(0)r.querySelector('.spck').onclick=e=>{e.stopPropagation();const u=spUser(),ds=r.dataset.ds,id=r.dataset.act;u.done[ds]=u.done[ds]||{};if(u.done[ds][id])delete u.done[ds][id];else{u.done[ds][id]=Date.now();buzz([10,30,12])}spSaveUser(u);
    r.classList.toggle('dn');const p=r.parentNode.querySelector('.spprog');if(p){const all=[...r.parentNode.querySelectorAll('.spact')],n=all.filter(a=>a.classList.contains('dn')).length;p.querySelector('span').textContent=n+' of '+all.length+' completed';p.querySelector('b').style.width=Math.round(n/all.length*100)+'%'}};
   r.querySelector('.spmore').onclick=e=>{e.stopPropagation();spMenu(r.querySelector('.spmore'),[['Save for later',()=>{const u=spUser();if(!u.saved.some(s=>s.txt===r.dataset.txt))u.saved.push({txt:r.dataset.txt,ds:r.dataset.ds});spSaveUser(u);spToast('Saved for later')}],
    ['Add to my calendar',()=>{const u=spUser(),k=r.dataset.ds+'|'+r.dataset.act;u.added=u.added||{};if(u.added[k]&&S.items[u.added[k]]&&!S.items[u.added[k]].deleted){spToast('Already in your calendar');return}
