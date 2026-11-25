@@ -151,17 +151,22 @@ async function planSummary(token, sent) {
     items = rows.map((r) => r.data).filter((i) => i && !i.deleted);
   }
   KNOWN = new Set(items.map((i) => String(i.id)));
+  const notes = items.filter((i) => i.note);
+  items = items.filter((i) => !i.note);
+  const nt = (i) => i.notes ? ` - notes: "${String(i.notes).replace(/\s+/g, " ").slice(0, 120)}"` : "";
   const fmt = (day, label) => {
     const its = items.filter((i) => occurs(i, day)).sort((a, b) => (a.time || "99").localeCompare(b.time || "99"));
     if (!its.length) return `${label}: nothing planned.`;
-    return `${label}: ` + its.map((i) => `[${i.id}] ${i.time || "anytime"} ${i.title} (${i.dur || 15}m${i.prio === "high" ? ", high priority" : ""})${(i.done || {})[day] ? " - done" : ""}`).join("; ");
+    return `${label}: ` + its.map((i) => `[${i.id}] ${i.time || "anytime"} ${i.title} (${i.dur || 15}m${i.prio === "high" ? ", high priority" : ""}${(i.repeat || "none") !== "none" ? ", repeats " + i.repeat : ""})${(i.done || {})[day] ? " - done" : ""}${nt(i)}`).join("; ");
   };
   const todo = items.filter((i) => !i.date && (i.repeat || "none") === "none" && !Object.keys(i.done || {}).length);
   const pr = { high: 0, med: 1, low: 2, none: 3 };
   todo.sort((a, b) => (pr[a.prio || "none"] - pr[b.prio || "none"]));
   const week = [2, 3, 4, 5, 6].map((n) => fmt(londonDate(n), new Date(Date.now() + n * 864e5).toLocaleDateString("en-GB", { timeZone: "Europe/London", weekday: "long" }) + " " + londonDate(n)));
   return [fmt(londonDate(0), "Today " + londonDate(0)), fmt(londonDate(1), "Tomorrow " + londonDate(1)), ...week,
-          "To-do without a day: " + (todo.length ? todo.slice(0, 20).map((i) => `[${i.id}] ${i.title} (${i.prio || "none"})`).join("; ") : "empty")].join("\n");
+          "To-do without a day: " + (todo.length ? todo.slice(0, 25).map((i) => `[${i.id}] ${i.title} (${i.prio || "none"})${nt(i)}`).join("; ") : "empty"),
+          "Later (next few weeks): " + (items.filter((i) => (i.repeat || "none") === "none" && i.date && i.date > londonDate(6)).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 25).map((i) => `[${i.id}] ${i.date} ${i.time || ""} ${i.title}`).join("; ") || "nothing"),
+          "Quick notes (unsorted jottings on his To-do page): " + (notes.length ? notes.slice(0, 20).map((i) => `[${i.id}] ${i.title}: "${String(i.body || "").replace(/\s+/g, " ").slice(0, 200)}"`).join("; ") : "none")].join("\n");
 }
 
 // ---------- Memories as files: People / Places / Experiences / Self / Knowledge / Other.
@@ -573,7 +578,7 @@ async function recall(text, token, extra = "") {
 
 function contextLine(ctx) {
   if (!ctx || typeof ctx !== "object") return "";
-  const c = JSON.stringify(ctx).slice(0, 1500);
+  const c = JSON.stringify(ctx).slice(0, 3500);
   return `\nWhat he's looking at in Momentum right now (only bring it up if it helps): ${c}`;
 }
 
@@ -681,6 +686,13 @@ e.g. "Done - gym's in for tomorrow at six."), then put each change on its own li
 ⟦delete {"id":"<id>"}⟧   (NOT deleted until he taps Delete under your reply: say e.g. 'Tap Delete to confirm' - never that it's gone or done)
 Rules: date null = to-do with no day; time null = anytime. prio high|med|low|none. repeat none|daily|weekdays|weekly. dur in minutes.
 Use only ids shown in [brackets] above. If it's unclear which task he means, ask instead of guessing. At most 8 changes.
+You can see and change EVERYTHING in Momentum: tasks, their notes, his quick notes, the focus timer, his mood log and his Grimoire notes.
+- Task notes: add "notes":"..." to add or edit (replaces the notes).
+- Quick notes: ⟦add {"note":1,"notes":"the full text","title":"3-7 word summary"}⟧. To sort one into a task: ⟦edit {"id":"<id>","note":0,"date":"YYYY-MM-DD" or null}⟧.
+- Focus timer: ⟦focus {"minutes":25,"id":"<task id, optional>"}⟧ starts it; ⟦focus {"stop":true}⟧ stops it.
+- Mood: ⟦mood {"value":0-4,"date":"YYYY-MM-DD","text":"optional why"}⟧ (0 rough, 1 low, 2 okay, 3 good, 4 great) - only when he tells you how he feels and wants it logged.
+- Grimoire notes for a day: ⟦gnote {"date":"YYYY-MM-DD","text":"..."}⟧ (adds to that day's notes).
+The "looking at" line above shows his moods, focus timer, Grimoire day and notes - use it when it helps.
 Keep titles short and verb-first. You can't yet open things on his PC or look at his files - say so plainly if asked.
 
 Memory: when he tells you something about himself worth keeping long-term (a fact, preference, goal, routine, a person in his life,
@@ -717,6 +729,8 @@ function cleanFields(a, into) {
   if ("dur" in a && Number.isFinite(+a.dur)) into.dur = Math.max(5, Math.min(600, Math.round(+a.dur)));
   if (["high", "med", "low", "none"].includes(a.prio)) into.prio = a.prio;
   if (["none", "daily", "weekdays", "weekly"].includes(a.repeat)) into.repeat = a.repeat;
+  if (typeof a.notes === "string") into.notes = a.notes.trim().slice(0, 1500);
+  if (a.note === 0 || a.note === 1 || a.note === true || a.note === false) into.note = a.note ? 1 : 0;
   return into;
 }
 // --- Rodger Local: the only things Rodger can ask the PC to do. risk 1 = waits for his OK in the app.
@@ -857,13 +871,16 @@ export function parseMemories(reply) {
 }
 export function parseActions(reply) {
   const out = [];
-  for (const m of reply.matchAll(/\u27e6\s*(add|edit|done|undone|delete)\s+(\{[\s\S]*?\})\s*\u27e7/g)) {
+  for (const m of reply.matchAll(/\u27e6\s*(add|edit|done|undone|delete|focus|gnote|mood)\s+(\{[\s\S]*?\})\s*\u27e7/g)) {
     if (out.length >= 8) break;
     let a; try { a = JSON.parse(m[2]); } catch { continue; }
     const op = m[1];
+    if (op === "focus") { if (a.stop) out.push({ op, stop: true }); else { const mins = Math.max(1, Math.min(180, Math.round(+a.minutes || 25))); out.push({ op, minutes: mins, ...(KNOWN.has(String(a.id || "")) ? { id: String(a.id) } : {}), start: a.start !== false }); } continue; }
+    if (op === "gnote") { if (typeof a.text === "string" && a.text.trim()) out.push({ op, date: ISO.test(a.date) ? a.date : londonDate(0), text: a.text.trim().slice(0, 2000), append: a.append !== false }); continue; }
+    if (op === "mood") { const v = Math.round(+a.value); if (v >= 0 && v <= 4) out.push({ op, date: ISO.test(a.date) ? a.date : londonDate(0), value: v, ...(typeof a.text === "string" ? { text: a.text.slice(0, 300) } : {}) }); continue; }
     if (op === "add") {
       const f = cleanFields(a, {});
-      if (f.title) out.push({ op, ...{ date: null, time: null, dur: 15, prio: "none", repeat: "none" }, ...f });
+      if (f.title || (f.note && f.notes)) out.push({ op, ...{ date: null, time: null, dur: 15, prio: "none", repeat: "none" }, ...f });
       continue;
     }
     const id = String(a.id || "");
@@ -1174,6 +1191,17 @@ a question you genuinely want answered, or a delightful little fact. Make it eas
   }
 
   // Brain dump: messy thoughts -> small tasks (JSON, not a conversation)
+  if (body.mode === "qnote") {
+    const J = (o, st = 200) => new Response(JSON.stringify(o), { status: st, headers: { ...CORS, "Content-Type": "application/json" } });
+    try {
+      let out = "";
+      for await (const t of gemini("You give short titles to quick notes in a planner. Reply with JSON only.",
+        [{ role: "user", parts: [{ text: 'Summarise this quick note the user jotted down. JSON: {"title":"3-7 plain words that say what it is about, no full stop","gist":"one short sentence, max 16 words, or empty if the title says it all"}. British spelling. Invent nothing.\n\n' + String(text).slice(0, 3000) }] }], true)) out += t;
+      const o = JSON.parse((out.match(/\{[\s\S]*\}/) || [out])[0]);
+      return J({ title: String(o.title || "").trim().replace(/\.$/, "").slice(0, 70), gist: String(o.gist || "").trim().slice(0, 160) });
+    } catch (e) { return J({ error: MISHAP?.[e?.kind] || "no" }, 503); }
+  }
+
   if (body.mode === "dump") {
     try {
       let out = "";

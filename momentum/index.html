@@ -757,6 +757,20 @@ body.spon #gfloat{display:none!important}
 .spdhead{text-align:center;margin:2px 0 18px}.spdhead span{display:block;font:600 10.5px var(--sans);letter-spacing:.26em;text-transform:uppercase;color:rgba(236,232,242,.6)}.spdhead b{display:block;font:400 24px/1.2 var(--serif);margin-top:6px}
 .spday .speye{margin-top:4px}.spday .sph2{margin-top:18px;margin-bottom:6px}.spday>p{font:400 16.5px/1.55 var(--serif)!important;color:#f3effa!important}.spday .spmeta{margin:8px 0 2px}.spday .spdayrow{margin:10px 0 6px}
 .spday .spevi{padding:2px 0 4px}.spday .spdiv{margin:20px 0 18px}
+#qn{position:fixed;inset:0;z-index:120;background:#000;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 10px) 18px 18px;transform:translateY(100%);transition:transform .38s cubic-bezier(.2,.8,.2,1);visibility:hidden}
+#qn.on{transform:none;visibility:visible}.qntop{display:flex;align-items:center;justify-content:space-between;height:46px}.qntop b{font:600 16px var(--sans)}
+.qntop button{background:rgba(255,255,255,.08);border:0;color:var(--fg);border-radius:999px;height:36px;min-width:36px;padding:0 14px;font:500 15px var(--sans)}#qnsave{background:#fff;color:#000}
+.qnhint{color:var(--faint);font-size:13px;margin:6px 2px 10px}#qntext{flex:1;background:none;border:0;outline:0;color:var(--fg);font:400 18px/1.55 var(--sans);resize:none;padding:4px 2px;min-height:0}
+.qnbtn{display:inline-flex;align-items:center;gap:8px}.qnbtn svg{width:17px;height:17px}
+#qnlist .qnrow{display:flex;align-items:center;gap:10px;padding:12px 4px 12px 14px;margin:6px 0;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);cursor:pointer}
+.qnrow .tx{flex:1;min-width:0}.qnrow b{display:block;font:500 15px/1.3 var(--sans)}.qnrow small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--faint);font-size:12.5px;margin-top:3px}
+.qnm{width:38px;height:38px;flex:none;background:none;border:0;color:var(--faint);display:grid;place-items:center}.qnm svg{width:20px;height:20px}
+.sprv{display:flex;gap:6px;margin:12px 0 4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.06)}.sprv button{flex:1;border:0;background:none;color:rgba(236,232,242,.65);font:500 13.5px var(--sans);padding:9px;border-radius:999px}.sprv button.on{background:rgba(255,255,255,.14);color:#fff}
+.spfold{margin-top:8px}.spfold summary span{display:flex;align-items:center;gap:10px}.spfg{font-style:normal;width:20px;text-align:center;opacity:.8}.spfold .splist{background:none;border:0;box-shadow:none;margin:0}
+#piclb{position:fixed;inset:0;z-index:260;background:rgba(0,0,0,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s}
+#piclb.on{opacity:1;pointer-events:auto}#piclb img{max-width:100%;max-height:72vh;border-radius:18px;object-fit:contain;transform:scale(.92);transition:transform .3s cubic-bezier(.2,.8,.2,1)}#piclb.on img{transform:none}
+#piclb b{color:#fff;font:400 22px var(--serif);margin-top:16px;text-align:center}#piclb small{color:rgba(255,255,255,.5);font-size:11px;margin-top:6px}#piclb button{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:16px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:16px}
+.ring.drag{cursor:grab;touch-action:none}#fknob{fill:#f4f2ee}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><button id="hmem" aria-label="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button><button id="hfid" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -773,13 +787,14 @@ body.spon #gfloat{display:none!important}
  <div class="ptools" data-p="todo"><button class="pt pmore" data-p="todo" aria-label="Options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r=".6"/><circle cx="12" cy="12" r=".6"/><circle cx="18" cy="12" r=".6"/></svg></button><button class="pt padd" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button></div>
  <div class="lab">Everything else</div><h1>To-do</h1>
  <p class="sub">Things without a day yet. Pick one, give it a day, or just do it.</p>
- <button class="btn" id="dumpBtn">Brain dump ›</button>
+ <button class="btn qnbtn" id="qnBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>Quick note</button>
+ <div id="qnlist"></div>
  <div id="olist"></div>
 </section>
 
 <section class="pane" id="p-focus">
  <div class="lab">One thing at a time</div><h1>Focus</h1>
- <div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" stroke="rgba(244,242,238,.12)"/><circle id="arc" cx="50" cy="50" r="47" stroke="#f4f2ee" stroke-linecap="round" stroke-dasharray="295.3" stroke-dashoffset="0"/></svg>
+ <div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" stroke="rgba(244,242,238,.12)"/><circle id="arc" cx="50" cy="50" r="47" stroke="#f4f2ee" stroke-linecap="round" stroke-dasharray="295.3" stroke-dashoffset="0"/><circle id="fknob" cx="97" cy="50" r="3.4"/></svg>
   <div class="t"><div><b id="fclock">25:00</b><span class="lab" id="fstate">Ready</span></div></div></div>
  <p class="glance" id="ftask" style="text-align:center;margin:10px 0 18px">Just focus</p>
  <div class="chips" id="fmins" style="justify-content:center"></div>
@@ -860,6 +875,8 @@ body.spon #gfloat{display:none!important}
 <div class="sheet" id="rsc"><div class="grab"></div><div class="rsct">Repeating task</div><p class="hint" id="rscs" style="margin:4px 0 14px"></p><div class="rscb"><button class="btn" data-s="one">Update this one only</button><button class="btn" data-s="future">Update this and all future</button><button class="btn" data-s="all">Update all</button><button class="btn ghost" data-s="cancel">Cancel</button></div></div>
 <div id="sp" aria-label="Spiritual calendar"><div id="spbg"></div><div class="sptop"><button id="spback">✕</button><b id="spttl"></b><span class="sptools"><button id="spgrimb" aria-label="Open the Grimoire"></button><button id="spfind" aria-label="Search">⌕</button><button id="spmark" aria-label="Bookmark">☆</button><button id="spidx" aria-label="Index">☰</button></span></div><div id="spbody"></div><div id="sptoast"></div></div>
 <div id="book" aria-label="Significance of the day"><button id="bkx" aria-label="Close">✕</button><div id="bkwrap"><div id="bkleaves"></div></div><div id="bkpos"></div></div>
+<div id="piclb"><button aria-label="Close">✕</button><img alt=""><b></b><small>Picture from Wikipedia</small></div>
+<div id="qn"><div class="qntop"><button id="qnx" aria-label="Close">✕</button><b>Quick note</b><button id="qnsave">Done</button></div><p class="qnhint">Write anything down. Sort it later.</p><textarea id="qntext" placeholder="What's on your mind…"></textarea></div>
 <div class="sheet" id="dump"><div class="grab"></div>
  <div class="lab">Brain dump</div><p class="glance" style="margin:10px 0 14px">Get it all out. Rodger will turn it into small steps.</p>
  <textarea id="dtext" placeholder="Everything on your mind..." style="min-height:150px"></textarea>
@@ -950,7 +967,7 @@ const partOf=it=>it.part&&PARTS.includes(it.part)&&!it.time?it.part:it.time?(+it
 const isDone=(it,day)=>!!(it.done&&it.done[day]);
 const ord=it=>it.order==null?(it.created||0)/1e13:it.order;
 const dayItems=day=>Object.values(S.items).filter(it=>occurs(it,day)).sort((a,b)=>PARTS.indexOf(partOf(a))-PARTS.indexOf(partOf(b))||(a.time||'99').localeCompare(b.time||'99')||ord(a)-ord(b));
-const looseItems=()=>Object.values(S.items).filter(it=>!it.deleted&&!it.date&&(it.repeat||'none')==='none');
+const looseItems=()=>Object.values(S.items).filter(it=>!it.deleted&&!it.note&&!it.date&&(it.repeat||'none')==='none');
 const looseDone=it=>it.done&&Object.keys(it.done).length>0;
 
 // ---------- icons: picked from the words, grey until done
@@ -1061,8 +1078,8 @@ function renderTodo(){const all=looseItems(),open=all.filter(it=>!looseDone(it))
  if(open.length)h+='<p class="hint">Hold and drag to change what matters most.</p>';
  const dn=all.filter(looseDone).sort((a,b)=>Math.max(...Object.values(b.done))-Math.max(...Object.values(a.done))).slice(0,8);
  if(dn.length)h+='<div class="sec"><span class="lab">Done lately<b>'+dn.length+'</b></span></div>'+dn.map(it=>rowHTML(it,null)).join('');
- if(!open.length&&!dn.length)h='<p class="empty">Nothing waiting. Tap + or use Brain dump to get it out of your head.</p>';
- $('olist').innerHTML=h;dragify($('olist'),'prio');$('olist').querySelectorAll('.row[data-id]').forEach(r=>{const it=S.items[r.dataset.id];r.onclick=()=>{if(dragged)return;openEd(it)};
+ if(!open.length&&!dn.length)h='<p class="empty">Nothing waiting. Tap + or write a quick note to get it out of your head.</p>';
+ qnDraw();$('olist').innerHTML=h;dragify($('olist'),'prio');$('olist').querySelectorAll('.row[data-id]').forEach(r=>{const it=S.items[r.dataset.id];r.onclick=()=>{if(dragged)return;openEd(it)};
   r.querySelector('.ck').onclick=e=>{e.stopPropagation();const k=looseDone(it)?Object.keys(it.done)[0]:today();toggle(it,k,r)}})}
 
 // ---------- editor sheet
@@ -1102,8 +1119,28 @@ $('edel').onclick=()=>{if(!confirm('Delete "'+E.title+'"?'))return;E.deleted=tru
 $('efocus').onclick=()=>{const raw=$('et').value.trim();if(raw&&!S.items[E.id])$('esave').click();sheet('ed',false);F.task=E.id;F.total=F.left=(+E.dur||25)*60;fsave();go('focus');renderFocus()};
 $('fab').onclick=()=>{buzz(8);openEd(null)};
 
+// ---------- quick notes: write now, Rodger gives it a short title, sort it later
+let QN=null;
+const qnList=()=>Object.values(S.items).filter(i=>i.note&&!i.deleted).sort((a,b)=>(b.created||0)-(a.created||0));
+const qnFirst=t=>{const w=t.replace(/\s+/g,' ').trim().split(' ');return w.slice(0,7).join(' ').replace(/[.,;:!?]+$/,'')+(w.length>7?'…':'')};
+function qnOpen(it){QN=it||null;$('qntext').value=it?(it.body||''):'';$('qn').classList.add('on');setTimeout(()=>$('qntext').focus(),280)}
+function qnClose(){$('qn').classList.remove('on');$('qntext').blur();QN=null}
+async function qnSum(it){const words=(it.body||'').trim().split(/\s+/).length;if(words<=7||!CS||!navigator.onLine)return;
+ try{const j=await (await garyFetch({mode:'qnote',text:it.body})).json();const cur=S.items[it.id];if(!cur||!cur.note||cur.body!==it.body||!j.title)return;cur.title=j.title;cur.gist=j.gist||'';touch(cur);render()}catch(e){}}
+$('qnBtn').onclick=()=>qnOpen(null);$('qnx').onclick=()=>{const t=$('qntext').value.trim();if(t&&!QN){$('qnsave').click();return}qnClose()};
+$('qnsave').onclick=()=>{const t=$('qntext').value.trim();if(!t){if(QN){QN.deleted=true;touch(QN);render()}qnClose();return}
+ let it=QN;if(it&&it.body===t){qnClose();return}
+ if(!it)it={id:'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),note:1,date:null,time:null,dur:15,prio:'none',repeat:'none',created:Date.now(),done:{}};
+ it.body=t;it.title=qnFirst(t);it.gist='';touch(it);qnClose();render();toast('Note saved');qnSum(it)};
+function qnMove(it,date){Object.assign(it,{note:0,date,prio:date?'none':'med',notes:it.body!==it.title?it.body:'',title:it.title.replace(/…$/,'')});touch(it);render();toast(date?(date===today()?'Moved to today':'Moved to '+dShort(date)):'Moved to your to-do')}
+function qnDraw(){const L=qnList(),b=$('qnlist');if(!b)return;if(!L.length){b.innerHTML='';return}
+ b.innerHTML='<div class="sec"><span class="lab">Quick notes<b>'+L.length+'</b></span></div>'+L.map(it=>'<div class="qnrow" data-id="'+it.id+'"><div class="tx"><b>'+esc(it.title)+'</b><small>'+esc(String(it.gist||(it.body!==it.title?it.body:'')).slice(0,140))+'</small></div><button class="qnm" aria-label="Move">'+
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="12" r=".5"/><circle cx="12" cy="12" r=".5"/><circle cx="18" cy="12" r=".5"/></svg></button></div>').join('');
+ b.querySelectorAll('.qnrow').forEach(r=>{const it=S.items[r.dataset.id];r.onclick=()=>qnOpen(it);r.querySelector('.qnm').onclick=e=>{e.stopPropagation();
+  spMenu(r.querySelector('.qnm'),[['Move to today',()=>qnMove(it,today())],['Move to tomorrow',()=>qnMove(it,addDays(today(),1))],['Move to a day…',()=>mcOpen(today(),d=>qnMove(it,d))],['Move to to-do',()=>qnMove(it,null)],['Delete note',()=>{it.deleted=true;touch(it);render();toast('Note deleted')}]])}})}
+
 // ---------- brain dump -> small steps (Rodger in the cloud)
-$('dumpBtn').onclick=()=>{$('dout').innerHTML='';sheet('dump',true);setTimeout(()=>$('dtext').focus(),350)};$('dclose').onclick=()=>sheet('dump',false);
+($('dumpBtn')||{}).onclick=()=>{$('dout').innerHTML='';sheet('dump',true);setTimeout(()=>$('dtext').focus(),350)};$('dclose').onclick=()=>sheet('dump',false);
 let DT=[];$('dgo').onclick=async()=>{if(DT.length&&$('dout').innerHTML){const t=today();DT.filter(x=>x.on).forEach(x=>{const d=x.when==='today'?t:x.when==='tomorrow'?addDays(t,1):null;
   touch({id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:x.title,date:d,time:/^\d\d:\d\d$/.test(x.time||'')?x.time:null,dur:+x.dur||15,prio:['high','med','low'].includes(x.prio)?x.prio:'none',repeat:'none',icon:x.icon||'',notes:'',created:Date.now(),done:{}})});
   toast(DT.filter(x=>x.on).length+' added');DT=[];$('dtext').value='';$('dgo').textContent='Sort it';sheet('dump',false);render();return}
@@ -1118,7 +1155,8 @@ let DT=[];$('dgo').onclick=async()=>{if(DT.length&&$('dout').innerHTML){const t=
 let F={total:1500,left:1500,end:0,task:null,run:false};try{Object.assign(F,JSON.parse(store('samFocus')||'{}'))}catch(e){}
 const fsave=()=>store('samFocus',JSON.stringify(F));
 function renderFocus(){if(F.run){F.left=Math.max(0,Math.round((F.end-Date.now())/1000));if(!F.left)focusDone()}
- $('fclock').textContent=pad(Math.floor(F.left/60))+':'+pad(F.left%60);$('arc').style.strokeDashoffset=(295.3*(1-F.left/F.total)).toFixed(1);
+ $('fclock').textContent=pad(Math.floor(F.left/60))+':'+pad(F.left%60);const fr=F.run||F.left<F.total?F.left/F.total:F.total/3600;$('arc').style.strokeDashoffset=(295.3*(1-fr)).toFixed(1);
+ const an=fr*2*Math.PI;$('fknob').setAttribute('cx',(50+47*Math.cos(an)).toFixed(2));$('fknob').setAttribute('cy',(50+47*Math.sin(an)).toFixed(2));$('fknob').style.display=F.run?'none':'';document.querySelector('#p-focus .ring').classList.toggle('drag',!F.run);
  $('fstate').textContent=F.run?'Focusing':F.left<F.total?'Paused':'Ready';$('fgo').textContent=F.run?'Pause':F.left<F.total?'Resume':'Start';
  const it=F.task&&S.items[F.task];$('ftask').textContent=it?it.title:'Just focus';$('fdone').style.display=it?'':'none';
  chips('fmins',[[5,'5'],[15,'15'],[25,'25'],[45,'45'],[60,'60']],F.run?'':Math.round(F.total/60),v=>{if(F.run)return;F.total=F.left=+v*60;fsave();renderFocus()})}
@@ -1133,6 +1171,11 @@ $('fpick').onclick=()=>{const opts=dayItems(today()).filter(it=>!isDone(it,today
  if(!opts.length){toast('Nothing to pick - add something first');return}const n=prompt('Which one?\n'+opts.map((it,i)=>(i+1)+'. '+it.title).join('\n'),'1');const it=opts[(+n||0)-1];
  if(it){F.task=it.id;F.total=F.left=(+it.dur||25)*60;F.run=false;fsave();renderFocus()}};
 setInterval(()=>{if(tab==='focus'||F.run)renderFocus()},1000);
+(function(){const R=document.querySelector('#p-focus .ring');let on=false,last=null;
+ const at=e=>{const b=R.getBoundingClientRect(),x=e.clientX-b.left-b.width/2,y=e.clientY-b.top-b.height/2;let a=Math.atan2(x,-y)/(2*Math.PI);if(a<0)a+=1;return a};
+ const set=e=>{let a=at(e);if(last!=null){if(last>.8&&a<.2)a=1;else if(last<.2&&a>.8)a=0}const m=Math.max(1,Math.min(60,Math.round(a*60)));if(m!==Math.round(F.total/60)){F.total=F.left=m*60;buzz(3);renderFocus()}last=a>=1?1:a<=0?0:a};
+ R.addEventListener('pointerdown',e=>{if(F.run)return;const b=R.getBoundingClientRect(),x=e.clientX-b.left-b.width/2,y=e.clientY-b.top-b.height/2,d=Math.hypot(x,y);if(d<b.width*.3)return;on=true;last=null;R.setPointerCapture(e.pointerId);set(e);e.preventDefault()});
+ R.addEventListener('pointermove',e=>{if(on)set(e)});const end=()=>{if(!on)return;on=false;F.left=F.total;fsave();renderFocus()};R.addEventListener('pointerup',end);R.addEventListener('pointercancel',end)})();
 
 // ---------- YOU
 $('yset').onclick=()=>{buzz(5);sheet('ysh',true);youPart('set',$('ysetb'))};$('yshx').onclick=()=>sheet('ysh',false);new MutationObserver(()=>{if(!$('ysh').classList.contains('on')&&GVP.v)gvStop()}).observe($('ysh'),{attributes:true,attributeFilter:['class']});
@@ -1363,32 +1406,46 @@ $('gbmute').onclick=e=>{e.stopPropagation();$('lvmute').click();setTimeout(lvCal
 function garyCtx(){const t=today(),its=Object.values(S.items).filter(i=>!i.deleted&&occurs(i,t));
  return{app:'Momentum',page:tab==='gary'?(store('garyFrom')||'gary'):tab,viewing_day:cur,device:wide()?'computer':(/iPhone|iPad/.test(navigator.userAgent)?'iPhone/iPad':'phone'),
   online:navigator.onLine,pc_connected:!!S.online,today_total:its.length,today_done:its.filter(i=>(i.done||{})[t]).length,
-  focus:F.run?{task:F.task&&(S.items[F.task]||{}).title||null,minutes_left:Math.round(F.left/60)}:null,local_time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}}
+  focus:F.run?{task:F.task&&(S.items[F.task]||{}).title||null,minutes_left:Math.round(F.left/60)}:{running:false,set_minutes:Math.round(F.total/60)},
+  moods_last_week:(()=>{const o={};for(let i=6;i>=0;i--){const d=addDays(t,-i),m=S.moods[d];if(m&&m.v!=null)o[d]=MOODS[m.v][0]+(m.note?' - '+String(m.note).slice(0,80):'')}return o})(),
+  grimoire:(()=>{try{const D=DAYSIG[DNAMES[parseISO(t).getDay()]],u=spUser(),ev=Object.values(spEvents()).filter(e=>e.date>=t&&e.date<=addDays(t,14)).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,6).map(e=>e.date+' '+e.name);
+   return{today:D.title+', ruled by '+D.planet,moon:(()=>{const m=moonOn&&moonOn(t);return m?m.name:''})(),coming_up:ev,notes_today:(u.notes||{})[t]||'',practices:Object.values(u.custom||{}).map(p=>p.name)}}catch(e){return null}})(),local_time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}}
 // ---------- Rodger acting on the plan: checked in the cloud, applied here, always undoable
-function garyItems(){const t=today(),end=addDays(t,7),out=[];
+function garyItems(){const t=today(),end=addDays(t,35),out=[];
  for(const i of Object.values(S.items)){if(i.deleted)continue;const r=i.repeat||'none';
-  if(r!=='none'||!i.date||(i.date>=addDays(t,-1)&&i.date<=end))out.push({id:i.id,title:i.title,date:i.date||null,time:i.time||null,dur:i.dur||15,prio:i.prio||'none',repeat:r,done:i.done||{}})}
- return out.slice(0,150)}
+  if(i.note){out.push({id:i.id,note:1,title:i.title,body:String(i.body||'').slice(0,400),date:null});continue}
+  if(r!=='none'||!i.date||(i.date>=addDays(t,-1)&&i.date<=end))out.push({id:i.id,title:i.title,date:i.date||null,time:i.time||null,dur:i.dur||15,prio:i.prio||'none',repeat:r,done:i.done||{},notes:i.notes?String(i.notes).slice(0,200):''})}
+ return out.slice(0,180)}
 const dShort=d=>!d?'to-do':d===today()?'today':d===addDays(today(),1)?'tomorrow':DAYS[parseISO(d).getDay()].slice(0,3)+' '+parseISO(d).getDate();
 function actLine(a,it){const name=(it&&it.title)||a.title||'task';
+ if(a.op==='focus')return a.stop?'■ Focus timer stopped':'▶ Focus '+a.minutes+' min'+(a.id&&S.items[a.id]?' · '+S.items[a.id].title:'');
+ if(a.op==='gnote')return'✎ Grimoire note · '+dShort(a.date);if(a.op==='mood')return'◐ Mood · '+MOODS[a.value][0]+' · '+dShort(a.date);
+ if(a.op==='add'&&a.note)return'✎ Quick note · '+(a.title||qnFirst(a.notes||''));
+ if(a.op==='edit'&&it&&it.note&&a.note===0)return'→ '+name+' · moved to '+dShort(a.date??null);
  if(a.op==='add')return'+ '+name+' · '+dShort(a.date)+(a.time?' '+t12(a.time):'');
  if(a.op==='done')return'✓ '+name;if(a.op==='undone')return'○ '+name+' not done';
  if(a.op==='delete')return'Delete “'+name+'”?';
  const ch=[];if('date' in a)ch.push(dShort(a.date));if('time' in a)ch.push(a.time?t12(a.time):'anytime');if(a.title&&it&&a.title!==it.title)ch.push('renamed');if(a.prio)ch.push(PRIO[a.prio].toLowerCase()+' priority');if(a.dur)ch.push(fmtMins(a.dur));if(a.repeat)ch.push(a.repeat==='none'?'no repeat':a.repeat);
  return'→ '+name+(ch.length?' · '+ch.join(', '):'')}
 function garyApply(actions,after){if(!actions||!actions.length)return;const undo=[],lines=[],dels=[];
- for(const a of actions){const old=a.id&&S.items[a.id];if(a.op!=='add'&&(!old||old.deleted))continue;
+ for(const a of actions){
+  if(a.op==='focus'){const prev=JSON.parse(JSON.stringify(F));if(a.stop){F.run=false;F.left=F.total}else{F.task=a.id||F.task&&null;F.total=F.left=a.minutes*60;F.run=a.start!==false;F.end=Date.now()+F.left*1000}fsave();lines.push(actLine(a));undo.push(['F',prev]);continue}
+  if(a.op==='gnote'){const u=spUser(),prev=(u.notes||{})[a.date]||'';u.notes=u.notes||{};u.notes[a.date]=prev&&a.append?prev+'\n'+a.text:a.text;spSaveUser(u);lines.push(actLine(a));undo.push(['G',[a.date,prev]]);continue}
+  if(a.op==='mood'){const prev=S.moods[a.date]?JSON.parse(JSON.stringify(S.moods[a.date])):null;S.moods[a.date]=Object.assign(S.moods[a.date]||{},{v:a.value,updated:Date.now()},a.text?{note:a.text}:{});S.dirty.moods[a.date]=1;S.cdirty.moods[a.date]=1;save();scheduleSync();lines.push(actLine(a));undo.push(['M',[a.date,prev]]);continue}
+  const old=a.id&&S.items[a.id];if(a.op!=='add'&&(!old||old.deleted))continue;
   if(a.op==='delete'){dels.push(a);continue}
-  if(a.op==='add'){const it={id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:a.title,date:a.date,time:a.time,dur:a.dur||15,prio:a.prio||'none',repeat:a.repeat||'none',notes:'',created:Date.now(),done:{},by:'gary'};
+  if(a.op==='add'){const it=a.note?{id:'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),note:1,body:a.notes||a.title,title:a.title||qnFirst(a.notes||''),gist:'',date:null,time:null,dur:15,prio:'none',repeat:'none',created:Date.now(),done:{},by:'gary'}:
+    {id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:a.title,date:a.date,time:a.time,dur:a.dur||15,prio:a.prio||'none',repeat:a.repeat||'none',notes:a.notes||'',created:Date.now(),done:{},by:'gary'};
    touch(it);undo.push([it.id,null]);lines.push(actLine(a));continue}
   undo.push([old.id,JSON.parse(JSON.stringify(old))]);const it=JSON.parse(JSON.stringify(old));
-  if(a.op==='edit'){['title','date','time','dur','prio','repeat'].forEach(k=>{if(k in a)it[k]=a[k]});if('time' in a)it.part=null}
+  if(a.op==='edit'){if(it.note&&a.note===0){it.notes=it.body&&it.body!==it.title?it.body:'';if(!('prio' in a))it.prio=a.date?'none':'med'}['title','date','time','dur','prio','repeat','notes','note'].forEach(k=>{if(k in a)it[k]=a[k]});if('time' in a)it.part=null}
   else if(a.op==='done'){it.done=Object.assign({},it.done,{[a.date]:Date.now()});it.undone=[]}
   else if(a.op==='undone'){it.done=Object.assign({},it.done);delete it.done[a.date];it.undone=[a.date]}
   lines.push(actLine(a,old));touch(it)}
  const box=document.createElement('div');box.className='gact';
  if(lines.length){box.innerHTML='<div class="gl">'+lines.map(esc).join('<br>')+'</div><button class="btn ghost gundo">Undo</button>';
-  box.querySelector('.gundo').onclick=e=>{for(const[id,prev]of undo.reverse()){if(prev)touch(Object.assign(prev,{undone:Object.keys(S.items[id].done||{}).filter(k=>!(prev.done||{})[k])}));else touch(Object.assign(S.items[id],{deleted:true}))}
+  box.querySelector('.gundo').onclick=e=>{for(const[id,prev]of undo.reverse()){if(id==='F'){Object.assign(F,prev);fsave();continue}if(id==='G'){const u=spUser();u.notes[prev[0]]=prev[1];if(!prev[1])delete u.notes[prev[0]];spSaveUser(u);continue}
+   if(id==='M'){if(prev)S.moods[prev[0]]=Object.assign(prev,{updated:Date.now()});else S.moods[prev[0]]={updated:Date.now()};S.dirty.moods[prev[0]]=1;S.cdirty.moods[prev[0]]=1;save();scheduleSync();continue}if(prev)touch(Object.assign(prev,{undone:Object.keys(S.items[id].done||{}).filter(k=>!(prev.done||{})[k])}));else touch(Object.assign(S.items[id],{deleted:true}))}
    e.target.outerHTML='<span class="lab">Undone</span>';garyLog('undo',{n:undo.length});render()};garyLog('applied',{lines})}
  for(const a of dels){const it=S.items[a.id];const row=document.createElement('div');row.className='gl gdel';row.innerHTML=esc(actLine(a,it))+' <button class="btn fill gyes">Delete</button> <button class="btn ghost gno">Keep</button>';
   row.querySelector('.gyes').onclick=()=>{touch(Object.assign(S.items[a.id],{deleted:true}));row.innerHTML='<span class="lab">Deleted “'+esc(it.title)+'”</span>';garyLog('deleted',{title:it.title});render()};
@@ -2585,7 +2642,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261125014420';let UPD=false;
+const BUILD='20261125015532';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
@@ -2906,6 +2963,9 @@ const SP_RITUALS=[['r-intent','New moon intentions','For beginnings','A pen and 
  ['r-charge','Charging water or crystals','For renewal','A clean glass of water or your crystals, a windowsill.',['Set them where the moonlight (or daylight) reaches.','Hold an intention for them as you set them down.','Collect them in the morning and use the water to drink, water plants or cleanse.']],
  ['r-cleanse','Cleansing your space','For a fresh start','Open windows, a broom or cloth, salt or incense (optional).',['Open the windows and declutter one surface.','Sweep or wipe from the back of the room toward the door.','Finish with a little salt at the doorway or a few minutes of incense.']],
  ['r-protect','Protection charm','For safety and boundaries','Red thread, a small iron nail or key, or black salt.',['Hold the item and picture a boundary of light around you.','Tie the red thread around it three times, saying what you are protecting.','Keep it by the door or in your bag.']]];
+const SP_RITDAYS={'r-intent':['monday','sunday'],'r-release':['saturday','monday'],'r-charge':['monday'],'r-cleanse':['saturday'],'r-protect':['tuesday','saturday']};
+const SP_SPTYPE=[['Love & self-love',/love|attraction|rose/i],['Protection',/protect|black salt|iron/i],['Courage & success',/courage|success|confidence|recognition/i],['Abundance & opportunity',/wealth|coins|road-opening|opportunit/i],
+ ['Words & clarity',/eloquence|conversation|words/i],['Dreams & intuition',/dream/i],['Letting go',/banish|release|let(ting)? go/i],['Cleansing & renewal',/cleans|charg|renew|blessing|vitality/i],['Beginnings',/intention|beginning/i]];
 const SP_ANGEL=[['11:11','Seen in modern numerology as a "wake-up call" - pay attention to your thoughts, they are becoming real. A moment to make a wish.'],['22:22','Linked in modern numerology with balance, partnerships and trusting that things are coming together.'],['Master numbers 11, 22, 33','In modern numerology these are treated as higher vibrations of 2, 4 and 6: intuition, building and compassion.']];
 const SP_SECTIONS=[['days','Days of Significance','The seven days of the week','✷'],['moon','Moon & Lunar Magic','Phases, cycles and eclipses','☽'],['wheel','Wheel of the Year','Sabbats and seasonal celebrations','✵'],
  ['occasions','Special Occasions','Lions Gate, Christmas and more','✦'],['planets','Planetary Correspondences','Planets, days and their meanings','☉'],['herbs','Herbs & Plants','Properties and traditional uses','⚘'],
@@ -2951,6 +3011,7 @@ function spRef(){if(spRef.c)return spRef.c;const R={},put=(id,o)=>{R[id]=Object.
   for(const t of D.tarot.split(/\),\s*/)){const mm=t.match(/^([^(]+)\(([^)]*)\)?/);if(!mm)continue;const n=mm[1].trim(),tid='tarot:'+SP_SLUG(n);const e=put(tid,{type:'tarot',name:n});e.mean=Object.assign(e.mean||{},{[dn]:mm[2].replace(/\)$/,'')});both(id,'Days',tid,'Tarot')}
   D.spells.split(/,\s+(?=a |an )/i).forEach((sp,i)=>{const n=sp.replace(/^./,c=>c.toUpperCase()).trim(),rid='ritual:'+SP_SLUG(dn+'-'+i);put(rid,{type:'rituals',name:n,sub:dn+' spell',day:dn});both(id,'Days',rid,'Rituals')})}
  for(const [k,n,f,need,steps] of SP_RITUALS)put('ritual:'+k,{type:'rituals',name:n,sub:f,need,steps});
+ for(const [k,ds] of Object.entries(SP_RITDAYS))for(const d of ds)both('day:'+d,'Days','ritual:'+k,'Rituals');
  both('ritual:r-intent','Rituals','phase:new','Moon');
  // moon
  SP_PHASES.forEach(([k,n,t,a])=>put('phase:'+k,{type:'moon',name:n,glyph:'☽',sub:t.split('.')[0],text:t,acts:a}));
@@ -3081,7 +3142,7 @@ function spNotesV(ds){const u=spUser();return '<div class="glass sphero"><div cl
 function spQuote(ds){return '<div class="glass spquote"><span>A moment to reflect</span>'+spE(SP_DAY[DNAMES[parseISO(ds).getDay()]].reflect)+'</div>'}
 function spDayBody(dn,ds,m,eh,ev,extra,dsl){const D=DAYSIG[dn],X=SP_DAY[dn],R=spRef(),id='day:'+dn.toLowerCase(),L=R[id].links;
  const rel=dsl?(()=>{const n=dayDiff(today(),dsl);return n===0?'Today':n===1?'Tomorrow':n===-1?'Yesterday':n>0?'In '+n+' days':Math.abs(n)+' days ago'})():'',dd=dsl?parseISO(dsl):null,ord=n=>n+(n%10===1&&n!==11?'st':n%10===2&&n!==12?'nd':n%10===3&&n!==13?'rd':'th');
- let h='<div class="glass sphero spday">'+(dsl?'<div class="spdhead"><span>'+rel+'</span><b>'+DNAMES[dd.getDay()]+', '+ord(dd.getDate())+' of '+MON[dd.getMonth()]+'</b></div>':'')+(eh?eh+'<div class="spdiv"></div>':'')+'<div class="speye">Day of significance</div><div class="spdayrow"><span class="spglyph">'+TX(PGLYPH[D.planet])+'</span><div><b>'+dn+'</b><small>'+spE(D.title.replace(/^The Day of /,''))+'</small></div></div><div class="spmeta">Ruled by <button class="spin" data-go="planet:'+SP_SLUG(D.planet)+'">'+spE(D.planet)+'</button> · Element of '+spE(D.element)+(m?' · '+m.name+' ('+Math.round(m.ill*100)+'%)':'')+'</div>'+
+ let h='<div class="glass sphero spday">'+(dsl?'<div class="spdhead"><span>'+rel+'</span></div>':'')+(eh?eh+'<div class="spdiv"></div>':'')+'<div class="speye">Day of significance</div><div class="spdayrow"><span class="spglyph">'+TX(PGLYPH[D.planet])+'</span><div><b>'+(dsl?ord(dd.getDate())+' of '+MON[dd.getMonth()]:dn)+'</b><small>'+spE(D.title.replace(/^The Day of /,''))+'</small></div></div><div class="spmeta">Ruled by <button class="spin" data-go="planet:'+SP_SLUG(D.planet)+'">'+spE(D.planet)+'</button> · Element of '+spE(D.element)+(m?' · '+m.name+' ('+Math.round(m.ill*100)+'%)':'')+'</div>'+
   '<div class="sph2">Today\'s purpose</div><p>'+spE(X.purpose)+'</p>'+
   '<div class="sph2">You could…</div><div class="spsugs">'+spActs(ds,[].concat(...(ev||[]).filter(e=>e.acts&&e.acts.length&&e.cat!=='numero').slice(0,2).map(e=>e.acts.slice(0,1).map((a,i)=>[e.id+'#'+i,a]))).concat(spDayActs(dn,ds)).slice(0,5))+'</div>';
  const grp=(label,count,preview,inner)=>'<details class="spx"><summary><span>'+label+(count!=null?' <em>'+count+'</em>':'')+'</span><small>'+spE(preview)+'</small></summary>'+inner+'</details>';
@@ -3108,7 +3169,15 @@ const SP_INTRO={days:'Each day of the week carries the energy of its ruling plan
  wheel:'Eight festivals mark the turning of the year - four solar (solstices and equinoxes) and four seasonal fire festivals.',occasions:'Modern observances, cultural celebrations and your personal dates.',planets:'The seven classical planets, each ruling a day of the week.',
  herbs:'Every herb and plant in your Days of Significance, with its traditional uses.',crystals:'Gemstones and the days they belong to.',rituals:'Spells from your Days of Significance and core practices for the moon and your space.',
  deities:'The gods and goddesses linked with each day, from Roman, Greek and Norse traditions.',tarot:'Tarot cards and numbers linked with each day, plus modern numerology.',practices:'Your own routines and rituals. Add one and choose which days it shows up on.'};
-function spSection(k){const L=Object.values(spRef()).filter(e=>e.type===k),s=SP_SECTIONS.find(x=>x[0]===k);
+function spSpells(L,s){const R=spRef(),rv=SPV.rv||'day',row=e=>'<button class="sprow" data-go="'+e.id+'"><div><b>'+spE(e.name)+'</b><small>'+spE(e.sub||'')+'</small></div><i>›</i></button>',
+  fold=(name,list,open,glyph)=>'<details class="glass spx spfold"'+(open?' open':'')+'><summary><span>'+(glyph?'<i class="spfg">'+TX(glyph)+'</i>':'')+spE(name)+' <em>'+list.length+'</em></span></summary><div class="splist">'+list.map(row).join('')+'</div></details>';
+ let h='<div class="glass spopen"><span class="spsg big">'+TX(s[3])+'</span><b>Spells</b><p>Every spell and ritual, sorted into folders.</p><small>'+L.length+' spells</small></div><div class="sprv"><button data-rv="day"'+(rv==='day'?' class="on"':'')+'>By day</button><button data-rv="type"'+(rv==='type'?' class="on"':'')+'>By kind</button></div>';
+ if(rv==='day'){const DN=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],td=DNAMES[parseISO(today()).getDay()],ord=DN.slice(DN.indexOf(td)).concat(DN.slice(0,DN.indexOf(td)));
+  h+=ord.map(dn=>{const ids=(R['day:'+dn.toLowerCase()].links.Rituals||[]);return fold((dn===td?'Today · ':'')+dn,ids.map(x=>R[x]).filter(Boolean),dn===td,PGLYPH[DAYSIG[dn].planet])}).join('');
+  const none=L.filter(e=>!(e.links.Days||[]).length);if(none.length)h+=fold('Any day',none,false)}
+ else{const used=new Set();h+=SP_SPTYPE.map(([n,re])=>{const l=L.filter(e=>!used.has(e.id)&&re.test(e.name+' '+(e.sub||'')));l.forEach(e=>used.add(e.id));return l.length?fold(n,l,false):''}).join('');const rest=L.filter(e=>!used.has(e.id));if(rest.length)h+=fold('Other',rest,false)}
+ return h}
+function spSection(k){const L=Object.values(spRef()).filter(e=>e.type===k),s=SP_SECTIONS.find(x=>x[0]===k);if(k==='rituals')return spSpells(L,s);
  const order=k==='days'?['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].map(x=>'day:'+x):null;
  const list=order?order.map(id=>spRef()[id]):['herbs','crystals','deities'].includes(k)?L.slice().sort((a,b)=>a.name.localeCompare(b.name)):L;
  let h='<div class="glass spopen"><span class="spsg big">'+TX(s[3])+'</span><b>'+spE(s[1])+'</b><p>'+spE(SP_INTRO[k]||s[2])+'</p><small>'+list.length+' entr'+(list.length===1?'y':'ies')+'</small></div>';
@@ -3148,7 +3217,9 @@ function spResults(q){q=q.trim().toLowerCase();if(!q)return '<p class="spsrc">Ty
 function spMarks(){const R=spRef(),u=spUser();return u.bm.length?'<div class="glass splist">'+u.bm.filter(id=>R[id]).map(id=>'<button class="sprow" data-go="'+id+'"><div><b>'+spE(R[id].name)+'</b><small>'+spE((SP_SECTIONS.find(s=>s[0]===R[id].type)||['',''])[1])+'</small></div><i>›</i></button>').join('')+'</div>':'<p class="spsrc">Tap ☆ on any page to bookmark it.</p>'}
 function spSaved(){const u=spUser();return u.saved.length?'<div class="glass splist">'+u.saved.map((s,i)=>'<div class="sprow"><div><b>'+spE(s.txt)+'</b><small>Saved from '+spDateLabel(s.ds)+'</small></div><button class="spbtn" data-unsave="'+i+'">Remove</button></div>').join('')+'</div>':'<p class="spsrc">Nothing saved yet. Use ⋯ on an activity to save it.</p>'}
 // ----- actions
-function spWire(b,v){spHydrate(b);b.querySelectorAll('details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)spHydrate(d)}));
+function picOpen(src,name){const L=$('piclb'),im=L.querySelector('img');im.src=src.replace(/\/\d+px-/,'/800px-');im.onerror=()=>{if(im.src!==src)im.src=src};L.querySelector('b').textContent=name||'';L.classList.add('on')}
+$('piclb').onclick=()=>$('piclb').classList.remove('on');
+function spWire(b,v){spHydrate(b);b.querySelectorAll('img.spwimg.big').forEach(im=>im.addEventListener('click',e=>{if(!im.classList.contains('ok'))return;e.stopPropagation();e.preventDefault();picOpen(im.currentSrc||im.src,(im.dataset.wk||'').split('|')[1]||'')},true));b.querySelectorAll('[data-rv]').forEach(x=>x.onclick=()=>{SPV.rv=x.dataset.rv;spDraw()});b.querySelectorAll('details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)spHydrate(d)}));
  b.querySelectorAll('[data-date]').forEach(x=>x.onclick=()=>{v.y=b.scrollTop;spGo({v:'date',ds:x.dataset.date})});
  b.querySelectorAll('[data-go]').forEach(x=>x.onclick=e=>{e.stopPropagation();v.y=b.scrollTop;spGo({v:'entry',id:x.dataset.go,day:x.dataset.day||null})});
  b.querySelectorAll('[data-sec]').forEach(x=>x.onclick=()=>{v.y=b.scrollTop;spGo({v:'section',s:x.dataset.sec})});
