@@ -649,6 +649,68 @@ body:has(.row.lift) .dslot{height:44px;border:1.5px dashed rgba(255,255,255,.08)
 .bkct{font:400 26px/1.25 var(--serif);color:#e6e1d4;text-align:center;letter-spacing:.04em}.bkcd{font:600 10.5px var(--sans);letter-spacing:.22em;text-transform:uppercase;color:#a9a397}
 #bkpos{margin-top:14px;font:600 10.5px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.55)}
 @media (min-width:760px){#book.open #bkwrap{transform:translateX(50%)}}
+
+/* ===== Spiritual calendar & grimoire: translucent glass over a quiet night sky ===== */
+#sp{position:fixed;inset:0;z-index:140;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .3s;color:#ece8f2}
+#sp.on{opacity:1;pointer-events:auto}
+#spbg{position:absolute;inset:0;background:radial-gradient(120% 70% at 85% -10%,rgba(120,110,190,.28),transparent 60%),radial-gradient(90% 60% at -10% 110%,rgba(70,90,150,.22),transparent 60%),#07070b;z-index:-1}
+#spbg::after{content:"";position:absolute;inset:0;opacity:.55;background-image:radial-gradient(1px 1px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 73% 9%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 41% 33%,#ccd 50%,transparent 51%),radial-gradient(1px 1px at 88% 41%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 22% 62%,#bbc 50%,transparent 51%),radial-gradient(1px 1px at 57% 74%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 9% 88%,#dde 50%,transparent 51%),radial-gradient(1px 1px at 81% 83%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 64% 52%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 33% 8%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 93% 66%,#eef 50%,transparent 51%)}
+.sptop{display:flex;align-items:center;gap:10px;padding:calc(10px + var(--safeT)) 14px 10px;background:rgba(14,14,20,.55);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);border-bottom:1px solid rgba(255,255,255,.08);position:relative;z-index:2}
+#spback{min-width:40px;height:36px;padding:0 12px;border-radius:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;font:500 13px var(--sans);letter-spacing:.04em}
+#spttl{flex:1;text-align:center;font:400 17px var(--serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sptools{display:flex;gap:6px;min-width:40px;justify-content:flex-end}.sptools button{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:16px}#spmark.on{background:#ece8f2;color:#111}
+#spbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(40px + var(--safeB));max-width:620px;width:100%;margin:0 auto}
+.glass{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1);border-radius:18px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 8px 30px rgba(0,0,0,.25)}
+#sp .glass+.glass,#sp .glass+.sph{margin-top:10px}
+.sphero{padding:16px}.sphero p{font:400 15.5px/1.5 var(--serif);color:#e8e4ee;margin-top:6px}
+.speye{font:600 10px var(--sans);letter-spacing:.22em;text-transform:uppercase;color:rgba(236,232,242,.55)}
+.spkw{font:600 11px var(--sans);letter-spacing:.16em;text-transform:uppercase;margin:10px 0 8px;color:#ece8f2}
+.spdayrow{display:flex;align-items:center;gap:12px;margin:8px 0 4px}.spdayrow b{display:block;font:400 26px/1.1 var(--serif)}.spdayrow small{display:block;color:rgba(236,232,242,.6);font-size:12.5px;margin-top:3px}
+.spglyph{width:46px;height:46px;flex:none;border-radius:50%;display:grid;place-items:center;font:28px/1 "Apple Symbols","Segoe UI Symbol",var(--serif);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14)}
+.spfocus{margin:10px 0 6px!important}.spmeta{font-size:13px;color:rgba(236,232,242,.7);margin:6px 0 4px}
+.spev{margin:10px 0 2px;font-size:14px;line-height:1.7}
+.sph{font:600 10.5px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:rgba(236,232,242,.55);margin:22px 4px 8px}.sph2{font:600 10px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:rgba(236,232,242,.5);margin-top:14px}
+.splink{margin-top:10px;font:500 13px var(--sans);color:#fff;opacity:.85}
+.splist{padding:2px 0;overflow:hidden}.sprow{display:flex;align-items:center;gap:12px;width:100%;padding:12px 16px;text-align:left;color:inherit}.splist .sprow+.sprow{border-top:1px solid rgba(255,255,255,.07)}
+.sprow>div{flex:1;min-width:0}.sprow b{display:block;font:400 16.5px/1.3 var(--serif)}.sprow small{display:block;color:rgba(236,232,242,.55);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sprow>i{font-style:normal;color:rgba(236,232,242,.5)}.sprow em{font-style:normal;font-size:12px;color:rgba(236,232,242,.5)}
+.spsg{width:30px;text-align:center;font:20px "Apple Symbols","Segoe UI Symbol",var(--serif);color:#ece8f2}.spsg.big{font-size:30px;display:block;width:auto;margin-bottom:6px}
+.spgrim{display:flex;align-items:center;gap:14px;width:100%;padding:16px;text-align:left;color:inherit;margin-top:14px}.spgrim b{display:block;font:400 19px var(--serif)}.spgrim small{color:rgba(236,232,242,.6);font-size:12.5px}.spgrim>div{flex:1}
+.spbook{width:52px;height:60px;flex:none;border-radius:8px 14px 14px 8px;background:rgba(20,20,28,.7);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center}.spbook svg{width:30px;height:30px}
+.spnote{padding:10px 14px;font-size:13.5px;margin-top:10px}
+.spacts{padding:6px 12px}.spact{display:flex;align-items:center;gap:12px;padding:9px 0}.spact+.spact{border-top:1px solid rgba(255,255,255,.06)}.spact span{flex:1;font-size:15px;line-height:1.35}
+.spck{width:22px;height:22px;flex:none;border-radius:50%;border:1.5px solid rgba(255,255,255,.45)}.spact.dn .spck{background:#ece8f2;border-color:#ece8f2;box-shadow:inset 0 0 0 4px #1a1a22}.spact.dn span{color:rgba(236,232,242,.45);text-decoration:line-through}
+.spmore{width:30px;height:30px;color:rgba(236,232,242,.6);font-size:18px}
+.spprog{display:flex;align-items:center;gap:10px;padding:8px 0 6px;font-size:12px;color:rgba(236,232,242,.6)}.spprog i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}.spprog b{display:block;height:100%;background:#ece8f2;transition:width .4s var(--ease)}
+details.spx{padding:0 14px}details.spx>summary{list-style:none;cursor:pointer;padding:13px 0;display:flex;flex-direction:column;gap:2px;position:relative;padding-right:26px}details.spx>summary::-webkit-details-marker{display:none}
+details.spx>summary>span,details.spx>summary{font:500 15px var(--sans)}details.spx>summary small{font:400 12px var(--sans);color:rgba(236,232,242,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+details.spx>summary::after{content:"+";position:absolute;right:2px;top:11px;font:300 22px/1 var(--sans);color:rgba(236,232,242,.6);transition:transform .25s}details.spx[open]>summary::after{transform:rotate(45deg)}
+details.spx em{font-style:normal;font-size:11px;padding:1px 7px;border-radius:9px;background:rgba(255,255,255,.1);margin-left:6px;color:rgba(236,232,242,.8)}
+details.spx[open]{padding-bottom:12px}details.spx p{font:400 14.5px/1.5 var(--serif);color:#e8e4ee;margin:0 0 7px}details.spx p b{font:600 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:rgba(236,232,242,.55);margin-right:6px}
+.spx .bksw{border-color:rgba(255,255,255,.3)}
+.spchips{display:flex;flex-wrap:wrap;gap:6px}.spchip{padding:6px 11px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;font:400 13.5px var(--sans)}
+.spin{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px;font:inherit;padding:0}
+.spul{list-style:none;padding:0;margin:0}.spul li{padding:5px 0;font:400 14px/1.4 var(--serif);color:#e8e4ee;border-bottom:1px solid rgba(255,255,255,.05)}.spol{padding-left:20px;font:400 14.5px/1.5 var(--serif)}.spol li{margin-bottom:6px}
+.sprefl{padding:16px;font:italic 400 16.5px/1.5 var(--serif);color:#efeaf6}
+.spsrc{font:400 11.5px/1.45 var(--sans)!important;color:rgba(236,232,242,.5)!important}
+.spevc{padding:14px 16px}.spevh{display:flex;justify-content:space-between;align-items:center}.spevn{display:block;font:400 21px/1.2 var(--serif);margin:8px 0 4px}.spevc>p{font:400 14.5px/1.5 var(--serif);color:#e8e4ee}.spevc details.spx{padding:0}
+.spcat{display:inline-flex;align-items:center;gap:5px;font:600 9.5px var(--sans);letter-spacing:.16em;text-transform:uppercase;padding:4px 9px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#ece8f2}.spcat i{font-style:normal;font-size:11px;letter-spacing:0}
+.sptime{font-size:12px;color:rgba(236,232,242,.6)}
+.spevb{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.spbtn{padding:8px 12px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;font:500 12.5px var(--sans)}.spbtn.on{background:#ece8f2;color:#111}.spbtn.wide{width:100%;margin-top:10px;padding:12px}
+.spcal{padding:12px}.spmh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.spmh b{font:400 18px var(--serif)}.spmh button{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.07);color:#fff;font-size:18px}
+.spmg{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}.spmg .w{font:600 9.5px var(--sans);letter-spacing:.12em;color:rgba(236,232,242,.45);padding:4px 0}
+.spmg button{height:42px;border-radius:10px;color:#ece8f2;font:400 15px var(--serif);position:relative}.spmg button.td{background:rgba(255,255,255,.14)}.spmg button:active{background:rgba(255,255,255,.1)}
+.spmk{position:absolute;left:0;right:0;bottom:4px;display:flex;justify-content:center;gap:2px}.spmk i,.spkey i{display:inline-block;width:5px;height:5px;border-radius:50%}
+.mk-full{background:#f2ecd8}.mk-new{border:1px solid #f2ecd8;box-sizing:border-box}.mk-lunar{background:#9a96b5}.mk-sabbat{background:#a99cf2;border-radius:1px!important;transform:rotate(45deg)}.mk-season{background:#e8c25a}.mk-eclipse{background:#e88a5a}.mk-culture{background:#8fc3ea}.mk-numero{background:#9ad0b0}.mk-personal{background:#e89ab4}
+.spkey{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:10px;font-size:11px;color:rgba(236,232,242,.55)}.spkey i{margin-right:5px;vertical-align:1px}
+.spsub{font:600 10.5px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:rgba(236,232,242,.55);text-align:center;margin:4px 0 14px}
+.spsearch{display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;color:rgba(236,232,242,.6);font:400 15px var(--sans);text-align:left}.spsearch span{font-size:18px}
+.spfilter{width:100%;padding:12px 16px;color:#fff;font:400 15px var(--sans);margin:10px 0}.spfilter::placeholder{color:rgba(236,232,242,.45)}
+.spopen{padding:18px;text-align:center}.spopen b{display:block;font:400 24px var(--serif)}.spopen p{font:400 14.5px/1.5 var(--serif);color:#e8e4ee;margin:8px 0}.spopen small{color:rgba(236,232,242,.5);font-size:12px}
+.spnotes{width:100%;min-height:90px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;padding:10px;font:400 15px/1.45 var(--serif)!important}
+#sptoast{position:absolute;left:50%;bottom:calc(24px + var(--safeB));transform:translate(-50%,20px);opacity:0;padding:10px 16px;border-radius:18px;background:rgba(236,232,242,.92);color:#111;font:500 13px var(--sans);transition:all .25s;pointer-events:none}#sptoast.on{opacity:1;transform:translate(-50%,0)}
+body.spon #gfloat{display:none!important}
+#pmenu{z-index:200!important}
+@media (prefers-reduced-motion:reduce){#sp,#sptoast,details.spx>summary::after{transition:none}}
 /* short chats sit at the bottom, right above Rodger, like a messaging app */
 #p-gary{display:flex;flex-direction:column}#p-gary>*{flex-shrink:0}#thread{margin-top:auto}
 </style></head><body>
@@ -752,6 +814,7 @@ body:has(.row.lift) .dslot{height:44px;border:1.5px dashed rgba(255,255,255,.08)
 <div id="pmenu" role="menu"></div>
 <div class="sheet" id="mcal"><div class="grab"></div><div class="mch"><button id="mcp" aria-label="Previous month">‹</button><b id="mct"></b><button id="mcn" aria-label="Next month">›</button></div><div id="mcg"></div><div id="mcsum"></div></div>
 <div class="sheet" id="rsc"><div class="grab"></div><div class="rsct">Repeating task</div><p class="hint" id="rscs" style="margin:4px 0 14px"></p><div class="rscb"><button class="btn" data-s="one">Update this one only</button><button class="btn" data-s="future">Update this and all future</button><button class="btn" data-s="all">Update all</button><button class="btn ghost" data-s="cancel">Cancel</button></div></div>
+<div id="sp" aria-label="Spiritual calendar"><div id="spbg"></div><div class="sptop"><button id="spback">✕</button><b id="spttl"></b><span class="sptools"><button id="spfind" aria-label="Search">⌕</button><button id="spmark" aria-label="Bookmark">☆</button><button id="spidx" aria-label="Index">☰</button></span></div><div id="spbody"></div><div id="sptoast"></div></div>
 <div id="book" aria-label="Significance of the day"><button id="bkx" aria-label="Close">✕</button><div id="bkwrap"><div id="bkleaves"></div></div><div id="bkpos"></div></div>
 <div class="sheet" id="dump"><div class="grab"></div>
  <div class="lab">Brain dump</div><p class="glance" style="margin:10px 0 14px">Get it all out. Rodger will turn it into small steps.</p>
@@ -2478,7 +2541,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261125004322';let UPD=false;
+const BUILD='20261125004541';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
@@ -2639,6 +2702,383 @@ function repScope(it,day,apply,after){const fin=()=>{after&&after();render()};
   buzz(8);fin()};
  $('rscs').textContent='"'+it.title+'" repeats '+({daily:'every day',weekdays:'on weekdays',weekly:'every week'}[it.repeat]||'')+'.';sheet('rsc',true)}
 document.querySelectorAll('#rsc [data-s]').forEach(b=>b.onclick=()=>RSC&&RSC(b.dataset.s));
+
+// ---------- astronomy (Jean Meeus, Astronomical Algorithms, 2nd ed.): moon phases ch.49, moon distance ch.47, equinoxes & solstices ch.27
+const AST={};
+AST.D2R=Math.PI/180;
+AST.jdToDate=jd=>new Date((jd-2440587.5)*864e5);
+AST.dT=y=>{const t=y-2000;return 62.92+0.32217*t+0.005589*t*t};   // seconds, Espenak-Meeus polynomial 2005-2050
+AST.tdToUT=(jde,y)=>jde-AST.dT(y)/86400;
+// moon phase q: 0 new, .25 first quarter, .5 full, .75 last quarter; k integer + q
+AST.phase=(k)=>{const r=AST.D2R,T=k/1236.85,q=((k%1)+1)%1;
+ let JDE=2451550.09766+29.530588861*k+0.00015437*T*T-0.000000150*T*T*T+0.00000000073*T*T*T*T;
+ const E=1-0.002516*T-0.0000074*T*T,M=(2.5534+29.10535670*k-0.0000014*T*T-0.00000011*T*T*T)*r,Mp=(201.5643+385.81693528*k+0.0107582*T*T+0.00001238*T*T*T-0.000000058*T*T*T*T)*r,
+  F=(160.7108+390.67050284*k-0.0016118*T*T-0.00000227*T*T*T+0.000000011*T*T*T*T)*r,Om=(124.7746-1.56375588*k+0.0020672*T*T+0.00000215*T*T*T)*r,S=Math.sin;
+ let c=0;
+ if(q===0||q===0.5){const nw=q===0;c=(nw?-0.40720:-0.40614)*S(Mp)+(nw?0.17241:0.17302)*E*S(M)+(nw?0.01608:0.01614)*S(2*Mp)+(nw?0.01039:0.01043)*S(2*F)+(nw?0.00739:0.00734)*E*S(Mp-M)+(nw?-0.00514:-0.00515)*E*S(Mp+M)+(nw?0.00208:0.00209)*E*E*S(2*M)
+  -0.00111*S(Mp-2*F)-0.00057*S(Mp+2*F)+0.00056*E*S(2*Mp+M)-0.00042*S(3*Mp)+0.00042*E*S(M+2*F)+0.00038*E*S(M-2*F)-0.00024*E*S(2*Mp-M)-0.00017*S(Om)-0.00007*S(Mp+2*M)+0.00004*S(2*Mp-2*F)+0.00004*S(3*M)+0.00003*S(Mp+M-2*F)+0.00003*S(2*Mp+2*F)-0.00003*S(Mp+M+2*F)+0.00003*S(Mp-M+2*F)-0.00002*S(Mp-M-2*F)-0.00002*S(3*Mp+M)+0.00002*S(4*Mp)}
+ else{c=-0.62801*S(Mp)+0.17172*E*S(M)-0.01183*E*S(Mp+M)+0.00862*S(2*Mp)+0.00804*S(2*F)+0.00454*E*S(Mp-M)+0.00204*E*E*S(2*M)-0.00180*S(Mp-2*F)-0.00070*S(Mp+2*F)-0.00040*S(3*Mp)-0.00034*E*S(2*Mp-M)+0.00032*E*S(M+2*F)+0.00032*E*S(M-2*F)-0.00028*E*E*S(Mp+2*M)+0.00027*E*S(2*Mp+M)-0.00017*S(Om)-0.00005*S(Mp-M-2*F)+0.00004*S(2*Mp+2*F)-0.00004*S(Mp+M+2*F)+0.00004*S(Mp-2*M)+0.00003*S(Mp+M-2*F)+0.00003*S(3*M)+0.00002*S(2*Mp-2*F)+0.00002*S(Mp-M+2*F)-0.00002*S(3*Mp+M);
+  const W=0.00306-0.00038*E*Math.cos(M)+0.00026*Math.cos(Mp)-0.00002*Math.cos(Mp-M)+0.00002*Math.cos(Mp+M)+0.00002*Math.cos(2*F);c+=q===0.25?W:-W}
+ const A=[299.77+0.107408*k-0.009173*T*T,251.88+0.016321*k,251.83+26.651886*k,349.42+36.412478*k,84.66+18.206239*k,141.74+53.303771*k,207.14+2.453732*k,154.84+7.306860*k,34.52+27.261239*k,207.19+0.121824*k,291.34+1.844379*k,161.72+24.198154*k,239.56+25.513099*k,331.55+3.592518*k];
+ const Ac=[0.000325,0.000165,0.000164,0.000126,0.000110,0.000062,0.000060,0.000056,0.000047,0.000042,0.000040,0.000037,0.000035,0.000023];
+ for(let i=0;i<14;i++)c+=Ac[i]*S(A[i]*r);
+ JDE+=c;return JDE};
+// geocentric moon distance (km) at a JDE - main periodic terms of Meeus table 47.A (accurate to a few hundred km)
+AST.moonDist=jde=>{const r=AST.D2R,T=(jde-2451545)/36525,D=(297.8501921+445267.1114034*T)*r,M=(357.5291092+35999.0502909*T)*r,Mp=(134.9633964+477198.8675055*T)*r,F=(93.2720950+483202.0175233*T)*r,E=1-0.002516*T,C=Math.cos;
+ const t=[[0,0,1,0,-20905355],[2,0,-1,0,-3699111],[2,0,0,0,-2955968],[0,0,2,0,-569925],[0,1,0,0,48888],[0,0,0,2,-3149],[2,0,-2,0,246158],[2,-1,-1,0,-152138],[2,0,1,0,-170733],[2,-1,0,0,-204586],[0,1,-1,0,-129620],[1,0,0,0,108743],[0,1,1,0,104755],[2,0,0,-2,10321],[0,0,1,2,0],[0,0,1,-2,79661],[4,0,-1,0,-34782],[0,0,3,0,-23210],[4,0,-2,0,-21636],[2,1,-1,0,24208],[2,1,0,0,30824],[1,0,-1,0,-8379],[1,1,0,0,-16675],[2,-1,1,0,-12831],[2,0,2,0,-10445],[4,0,0,0,-11650],[2,0,-3,0,14403],[0,1,-2,0,-7003],[2,-1,-2,0,10056],[1,0,1,0,6322],[2,-2,0,0,-9884],[0,1,2,0,5751],[2,-2,-1,0,-4950],[2,0,1,-2,4130],[4,-1,-1,0,-3958],[3,0,-1,0,3258],[2,1,1,0,2616],[4,-1,-2,0,-1897],[0,2,-1,0,-2117],[2,2,-1,0,2354],[2,1,-2,0,0],[2,-1,0,-2,0],[4,0,1,0,-1423],[0,0,4,0,-1117],[4,-1,0,0,-1571],[1,0,-2,0,-1739],[2,1,0,-2,0],[0,0,2,-2,-4421],[1,1,1,0,0],[3,0,-2,0,0],[4,0,-3,0,0],[2,-1,2,0,0],[0,2,1,0,1165],[1,1,-1,0,0],[2,0,3,0,0],[2,0,-1,-2,8752]];
+ let s=0;for(const [d,m,mp,f,c] of t){if(!c)continue;let x=c*C(d*D+m*M+mp*Mp+f*F);if(Math.abs(m)===1)x*=E;else if(Math.abs(m)===2)x*=E*E;s+=x}
+ return 385000.56+s/1000};
+// equinoxes and solstices: i 0 March, 1 June, 2 September, 3 December
+AST.season=(y,i)=>{const Y=(y-2000)/1000,P=[[2451623.80984,365242.37404,0.05169,-0.00411,-0.00057],[2451716.56767,365241.62603,0.00325,0.00888,-0.00030],[2451810.21715,365242.01767,-0.11575,0.00337,0.00078],[2451900.05952,365242.74049,-0.06223,-0.00823,0.00032]][i];
+ const J0=P[0]+P[1]*Y+P[2]*Y*Y+P[3]*Y*Y*Y+P[4]*Y*Y*Y*Y,T=(J0-2451545)/36525,W=(35999.373*T-2.47)*AST.D2R,dl=1+0.0334*Math.cos(W)+0.0007*Math.cos(2*W);
+ const A=[485,203,199,182,156,136,77,74,70,58,52,50,45,44,29,18,17,16,14,12,12,12,9,8],B=[324.96,337.23,342.08,27.85,73.14,171.52,222.54,296.72,243.58,119.81,297.17,21.02,247.54,325.15,60.93,155.12,288.79,198.04,199.76,95.39,287.11,320.81,227.73,15.45],C=[1934.136,32964.467,20.186,445267.112,45036.886,22518.443,65928.934,3034.906,9037.513,33718.147,150.678,2281.226,29929.562,31555.956,4443.417,67555.328,4562.452,62894.029,31436.921,14577.848,31931.756,34777.259,1222.114,16859.074];
+ let S=0;for(let k=0;k<24;k++)S+=A[k]*Math.cos((B[k]+C[k]*T)*AST.D2R);return J0+0.00001*S/dl};
+// every moon phase between two dates (UTC Date objects), with distance at full/new
+AST.phasesBetween=(a,b)=>{const out=[],y0=a.getUTCFullYear()+a.getUTCMonth()/12;let k=Math.floor((y0-2000)*12.3685)-2;
+ for(;;k+=0.25){const kk=Math.round(k*4)/4,jde=AST.phase(kk),y=AST.jdToDate(jde).getUTCFullYear(),d=AST.jdToDate(AST.tdToUT(jde,y));if(d>b)break;if(d>=a)out.push({q:((kk%1)+1)%1,date:d,dist:AST.moonDist(jde)})}return out};
+AST.seasonsOf=y=>[0,1,2,3].map(i=>{const jde=AST.season(y,i);return {i,date:AST.jdToDate(AST.tdToUT(jde,y))}});
+if(typeof module!=='undefined')module.exports=AST;
+
+// ---------- Spiritual calendar: event engine. Every event has a stable id, so a refresh updates rather than duplicates.
+const SP_CAT={lunar:['Lunar','☽'],eclipse:['Eclipse','◐'],sabbat:['Sabbat','✵'],season:['Season','☉'],numero:['Numerology','#'],culture:['Celebration','✦'],personal:['Personal','♥']};
+// NASA GSFC eclipse predictions (Fred Espenak), greatest eclipse in TD/UT - https://eclipse.gsfc.nasa.gov/OH/OH2026.html (2027, 2028, 2029)
+const SP_ECL=[['2026-02-17T12:13','Annular solar eclipse','solar'],['2026-03-03T11:35','Total lunar eclipse','lunar'],['2026-08-12T17:47','Total solar eclipse','solar'],['2026-08-28T04:14','Partial lunar eclipse','lunar'],
+ ['2027-02-06T16:01','Annular solar eclipse','solar'],['2027-02-20T23:14','Penumbral lunar eclipse','lunar'],['2027-07-18T16:04','Penumbral lunar eclipse','lunar'],['2027-08-02T10:08','Total solar eclipse','solar'],['2027-08-17T07:15','Penumbral lunar eclipse','lunar'],
+ ['2028-01-12T04:14','Partial lunar eclipse','lunar'],['2028-01-26T15:09','Annular solar eclipse','solar'],['2028-07-06T18:21','Partial lunar eclipse','lunar'],['2028-07-22T02:57','Total solar eclipse','solar'],['2028-12-31T16:53','Total lunar eclipse','lunar'],
+ ['2029-01-14T17:14','Partial solar eclipse','solar'],['2029-06-12T04:06','Partial solar eclipse','solar'],['2029-06-26T03:22','Total lunar eclipse','lunar'],['2029-07-11T15:37','Partial solar eclipse','solar'],['2029-12-05T15:03','Partial solar eclipse','solar'],['2029-12-20T22:42','Total lunar eclipse','lunar']];
+const SP_FULLNAMES=['Wolf Moon','Snow Moon','Worm Moon','Pink Moon','Flower Moon','Strawberry Moon','Buck Moon','Sturgeon Moon','Harvest or Corn Moon','Hunter\'s Moon','Beaver Moon','Cold Moon'];
+const SP_SABBAT={imbolc:['Imbolc','Brigid\'s festival of the first stirrings of spring - lambing, returning light, the hearth and the holy well.','In Gaelic tradition Imbolc falls on 1 February (some keep 1-2 February, or the first signs of spring). It sits roughly halfway between the winter solstice and the spring equinox.',['Light a candle for the returning sun','Spring-clean your space and your altar','Make a Brigid\'s cross or write a wish for the year'],'fixed'],
+ ostara:['Ostara (spring equinox)','Day and night stand equal and the light starts to win. A festival of balance, seeds and new growth.','A modern pagan name for the spring equinox, an astronomical moment worked out each year. In the Southern Hemisphere this is the autumn equinox.',['Plant seeds - real ones or intentions','Decorate eggs as symbols of new life','Bring balance to one area of your life'],'calc'],
+ beltane:['Beltane','The fire festival of May: fertility, passion, blossom and the full bloom of life.','Traditionally 1 May (beginning at sunset on 30 April) in Gaelic tradition; some observe it when the hawthorn blooms.',['Light a fire or candle and leap your worries away','Wear flowers or make a crown of greenery','Celebrate love, friendship and creativity'],'fixed'],
+ litha:['Litha (summer solstice)','The longest day: the sun at its peak, abundance, vitality and celebration.','The summer solstice is an astronomical moment calculated each year; Litha is the modern pagan name for it. Southern Hemisphere: winter solstice.',['Watch the sunrise or sunset','Gather herbs at their most potent','Celebrate what you have achieved this year'],'calc'],
+ lughnasadh:['Lughnasadh / Lammas','The first harvest: bread, gratitude and reaping what you have sown.','1 August in Gaelic (Lughnasadh) and Anglo-Saxon Christian (Lammas, "loaf-mass") tradition.',['Bake or share bread','List what has come to fruition this year','Give thanks for your work and its rewards'],'fixed'],
+ mabon:['Mabon (autumn equinox)','The second harvest and a second balance of day and night, tipping toward the dark half of the year.','A modern pagan name for the autumn equinox, calculated each year. Southern Hemisphere: spring equinox.',['Gratitude list for the harvest of your year','Share a meal with people you love','Let go of what no longer feeds you'],'calc'],
+ samhain:['Samhain','The end of the harvest and the start of the dark half of the year, when the veil between worlds is said to be thinnest. A time to honour ancestors.','In Gaelic tradition Samhain runs from sunset on 31 October to 1 November; some traditions mark it at the cross-quarter point (around 6-7 November).',['Light a candle for those you have lost','Set a place or leave an offering for ancestors','Reflect on what to release before winter'],'fixed'],
+ yule:['Yule (winter solstice)','The longest night and the rebirth of the sun. Rest, warmth, evergreens and hope.','The winter solstice is calculated each year; Yule is its traditional Germanic and modern pagan name. Southern Hemisphere: summer solstice.',['Stay up for the returning sun or light a candle at dusk','Bring evergreens indoors','Write what you want to grow in the new light']]};
+function spIso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function spLocal(dt){return spIso(dt)}   // a UTC instant shown on your phone's own date
+function spTime(dt){return dt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
+function spEaster(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,da)}
+function spNthSun(y,m,n){const d=new Date(y,m,1);d.setDate(1+((7-d.getDay())%7)+7*(n-1));return d}
+function spBuild(from,to){const E=[],now=new Date().toISOString().slice(0,10),add=e=>{if(e.date>=spIso(from)&&e.date<=spIso(to))E.push(Object.assign({verified:now,recurring:true,end:null},e))};
+ // moon phases (Meeus) - full moons get their traditional names, supermoons and blue moons flagged
+ const ph=AST.phasesBetween(new Date(from.getTime()-40*864e5),new Date(to.getTime()+40*864e5)),fulls=ph.filter(p=>p.q===0.5);
+ for(const p of ph){const ds=spLocal(p.date),t=spTime(p.date),nm=['New moon','First quarter moon','Full moon','Last quarter moon'][p.q*4],kind=['new','fq','full','lq'][p.q*4];
+  const sup=(p.q===0.5||p.q===0)&&p.dist<=363500;let blue='';
+  if(p.q===0.5){const sameMonth=fulls.filter(f=>spLocal(f.date).slice(0,7)===ds.slice(0,7));if(sameMonth.length===2&&sameMonth[1]===p)blue='monthly'}
+  const name=p.q===0.5?nm+' · '+SP_FULLNAMES[new Date(p.date).getMonth()]:nm;
+  add({id:'moon-'+kind+'-'+ds,name:(sup?'Super ':'')+name+(blue?' · Blue moon':''),cat:'lunar',date:ds,time:t,kind,
+   desc:{new:'The moon sits between Earth and the Sun, so its lit side faces away from us. The start of a new lunar cycle.',fq:'Half the moon is lit and the light is growing.',full:'The whole face of the moon is lit by the Sun - the brightest night of the cycle.',lq:'Half the moon is lit and the light is shrinking toward the next new moon.'}[kind]+(sup?' This one is a supermoon: the moon is unusually close to Earth ('+Math.round(p.dist).toLocaleString('en-GB')+' km), so it looks slightly bigger and brighter.':'')+(blue?' It is also a blue moon - the second full moon in one calendar month (the modern "monthly" definition).':''),
+   sig:{new:'In many modern pagan and witchcraft traditions, a time for intentions, beginnings and quiet planning.',fq:'Often linked with action, decisions and pushing through resistance.',full:'Widely linked with culmination, gratitude, clarity and release; the traditional time for full-moon rituals and charging crystals or water.',lq:'Often linked with letting go, forgiving and clearing space.'}[kind],
+   acts:{new:['Write three intentions for this cycle','Clear and reset your space','Start something small'],fq:['Take one brave step on an intention','Review and adjust your plans'],full:['Full moon release: write what to let go and safely burn or tear it','Charge water or crystals in the moonlight','Gratitude list'],lq:['Declutter one thing','Forgive yourself or someone else','Rest and reflect']}[kind],
+   grim:['moon'],src:'Calculated: Meeus, Astronomical Algorithms ch.49 (phase time) and ch.47 (distance)',dtype:'calc',recurring:false,dist:Math.round(p.dist)})}
+ // eclipses (NASA)
+ for(const [iso,name,kind] of SP_ECL){const dt=new Date(iso+'Z'),ds=spLocal(dt);add({id:'ecl-'+iso.slice(0,10),name,cat:'eclipse',date:ds,time:spTime(dt),
+  desc:kind==='solar'?'The moon passes in front of the Sun as seen from part of Earth. Only visible along a particular track - check whether it reaches the UK before looking (never look at the Sun without proper eclipse glasses).':'Earth\'s shadow falls across the full moon. Visible from anywhere the moon is above the horizon at the time.',
+  sig:'In astrology and many modern traditions eclipses are seen as wildcards: sudden endings, turning points and fated beginnings. Many practitioners rest rather than cast during an eclipse.',acts:['Journal: what is changing in my life?','Rest and observe rather than start new spells','If visible and safe, watch it'],grim:['moon'],src:'NASA GSFC eclipse predictions by Fred Espenak (greatest eclipse time)',dtype:'calc',recurring:false})}
+ // equinoxes & solstices (Meeus) and the eight sabbats
+ for(let y=from.getFullYear();y<=to.getFullYear();y++){
+  const S=AST.seasonsOf(y),keys=['ostara','litha','mabon','yule'],labels=['Spring equinox','Summer solstice','Autumn equinox','Winter solstice'];
+  S.forEach((s,i)=>{const ds=spLocal(s.date),k=keys[i],sb=SP_SABBAT[k];
+   add({id:'sabbat-'+k+'-'+y,name:sb[0],cat:'sabbat',date:ds,time:spTime(s.date),desc:sb[1]+' The astronomical '+labels[i].toLowerCase()+' is at '+spTime(s.date)+' UK time - '+['day and night roughly equal, light increasing','the longest day of the year','day and night roughly equal, nights lengthening','the shortest day and longest night'][i]+' in the Northern Hemisphere.',
+    sig:sb[2],acts:sb[3],grim:['wheel'],src:'Calculated: Meeus, Astronomical Algorithms ch.27 (equinox/solstice moment)',dtype:'calc'})});
+  [['imbolc','02-01'],['beltane','05-01'],['lughnasadh','08-01'],['samhain','10-31']].forEach(([k,md])=>{const sb=SP_SABBAT[k];add({id:'sabbat-'+k+'-'+y,name:sb[0],cat:'sabbat',date:y+'-'+md,desc:sb[1],sig:sb[2],acts:sb[3],grim:['wheel'],src:'Traditional fixed date (Gaelic / modern pagan wheel of the year)',dtype:'fixed'})});
+  // numerology - modern spiritual practice, not astronomy
+  for(let m=1;m<=12;m++)add({id:'num-mirror-'+y+'-'+m,name:m+'/'+m+(m===11?' portal':m===8?'':' mirror date'),cat:'numero',date:y+'-'+String(m).padStart(2,'0')+'-'+String(m).padStart(2,'0'),desc:'A "mirror" date where the day and month match.',
+   sig:m===11?'In modern numerology and New Age practice, 11/11 is seen as a "portal" for manifesting, synchronicity and spiritual awakening (11 is a "master number").':m===12?'In modern numerology 12/12 is linked with completion and reflection before the year ends.':'In modern numerology repeated numbers are read as a nudge to pay attention; this date carries the energy of '+m+'.',
+   acts:m===11?['Write 11 wishes or intentions','Notice repeating numbers today and note what you were thinking']:['Notice repeating numbers today','Set a small intention matching the number'],grim:['tarot'],src:'Modern numerology (not an astronomical event)',dtype:'fixed'});
+  add({id:'num-lionsgate-'+y,name:'8/8 Lions Gate',cat:'numero',date:y+'-08-08',end:y+'-08-12',desc:'A modern spiritual observance (from about 26 July to 12 August, peaking on 8 August) linked with the rising of Sirius and the Sun in Leo.',
+   sig:'In modern New Age and astrological circles, 8/8 is treated as a powerful day for manifesting abundance; 8 is associated with prosperity and infinity. It is not an astronomical event in itself.',acts:['Write abundance intentions','Meditate on what you want to grow','Light a gold or yellow candle'],grim:['tarot','rituals'],src:'Modern spiritual observance (fixed date)',dtype:'fixed'});
+  // celebrations (UK first)
+  const E2=spEaster(y),eo=n=>spIso(new Date(E2.getFullYear(),E2.getMonth(),E2.getDate()+n));
+  [['newyear',y+'-01-01','New Year\'s Day','A fresh calendar year.',['Write intentions for the year','Cleanse your space']],['burns',y+'-01-25','Burns Night','Scotland celebrates the poet Robert Burns with supper, poetry and song.',['Read a Burns poem','Share a meal']],
+   ['valentine',y+'-02-14','Valentine\'s Day','A day of love and affection, named after St Valentine.',['Self-love ritual','Tell someone you care']],['stdavid',y+'-03-01','St David\'s Day','The patron saint of Wales.',[]],['stpatrick',y+'-03-17','St Patrick\'s Day','The patron saint of Ireland.',[]],
+   ['stgeorge',y+'-04-23','St George\'s Day','The patron saint of England.',[]],['halloween',y+'-10-31','Halloween','All Hallows\' Eve - the night before All Saints\' Day, rooted in Samhain.',['Carve a lantern','Honour your ancestors','Tell stories by candlelight']],
+   ['bonfire',y+'-11-05','Bonfire Night','Guy Fawkes Night - fireworks and bonfires across the UK.',['Watch fireworks or light a candle for the fire season']],['standrew',y+'-11-30','St Andrew\'s Day','The patron saint of Scotland.',[]],
+   ['xmaseve',y+'-12-24','Christmas Eve','The night before Christmas.',['Light a candle','Prepare a cosy evening']],['xmas',y+'-12-25','Christmas Day','The Christian celebration of the birth of Jesus, and a day for family.',['Gratitude for the people around you']],['boxing',y+'-12-26','Boxing Day','A UK bank holiday, traditionally for giving to others.',['Give something away']],['nye',y+'-12-31','New Year\'s Eve','The last night of the year.',['Write what to leave behind','Reflect on the year\'s progress']],
+   ['pancake',eo(-47),'Shrove Tuesday (Pancake Day)','The day before Lent begins (moves with Easter).',[]],['mothering',eo(-21),'Mothering Sunday','UK Mother\'s Day - three weeks before Easter Sunday.',['Thank your mum or a mother figure']],['goodfri',eo(-2),'Good Friday','Christian day remembering the crucifixion; UK bank holiday.',[]],['easter',eo(0),'Easter Sunday','The Christian celebration of the resurrection; the date follows the moon (first Sunday after the spring full moon, by church rules).',['Decorate eggs','Celebrate renewal']],['eastermon',eo(1),'Easter Monday','UK bank holiday (not Scotland).',[]],
+   ['fathers',spIso(spNthSun(y,5,3)),'Father\'s Day','Third Sunday in June in the UK.',[]]].forEach(([k,ds,n,d,a])=>add({id:'cult-'+k+'-'+y,name:n,cat:'culture',date:ds,desc:d,sig:'',acts:a,grim:['occasions'],src:['pancake','mothering','goodfri','easter','eastermon'].includes(k)?'Calculated from the date of Easter (Gregorian computus)':k==='fathers'?'Third Sunday of June':'Fixed annual date',dtype:['pancake','mothering','goodfri','easter','eastermon','fathers'].includes(k)?'calc':'fixed'}));
+  // personal dates
+  for(const p of spUser().personal||[]){const ds=y+'-'+p.md;add({id:'pers-'+p.id+'-'+y,name:p.name+(p.year?' ('+(y-p.year)+')':''),cat:'personal',date:ds,time:p.time||'',desc:p.note||'',sig:'',acts:p.acts||[],grim:['occasions'],src:'Your personal date',dtype:'fixed'})}
+ }
+ return E}
+// ---------- storage, 30-day refresh, rolling 12+ month window. Personal notes, completions and bookmarks live separately and are never touched by a refresh.
+function spUser(){try{const u=JSON.parse(store('spUser')||'null');if(u)return u}catch(e){}return {personal:[{id:'bday',name:'Your birthday',md:'10-30',year:2000,time:'03:30',note:'Born 30 October 2000 at 3:30am - the day before Samhain.',acts:['Celebrate how far you have come','Write a letter to yourself for next year']}],done:{},saved:[],bm:[],notes:{},rem:{},last:null,custom:{}}}
+function spSaveUser(u){store('spUser',JSON.stringify(u))}
+function spEvents(){try{return JSON.parse(store('spEvents')||'{}')}catch(e){return {}}}
+function spRefresh(force){if(store('spVer')!=='2'){store('spVer','2');store('spEvents','{}');force=true}const meta=(()=>{try{return JSON.parse(store('spMeta')||'{}')}catch(e){return {}}})(),now=new Date(),need=force||!meta.at||Date.now()-meta.at>30*864e5||!meta.to||meta.to<spIso(new Date(now.getTime()+365*864e5));
+ if(!need)return {ran:false,meta};
+ const from=new Date(now.getFullYear(),now.getMonth()-1,1),to=new Date(now.getFullYear()+1,now.getMonth()+2,0);let built=[];
+ try{built=spBuild(from,to)}catch(e){try{if(CS)gdb('gary_audit',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({action:'warn_spcal',ok:false,detail:{msg:String(e&&e.message||e).slice(0,200)}})}).catch(()=>{})}catch(x){}return {ran:false,error:true,meta}}
+ const old=spEvents(),out={};let added=0,updated=0;
+ for(const e of built){if(old[e.id]){if(JSON.stringify(old[e.id])!==JSON.stringify(e))updated++}else added++;out[e.id]=e}
+ for(const id in old)if(!out[id]&&old[id].date>=spIso(new Date(now.getTime()-400*864e5)))out[id]=old[id];   // keep recent past events so history still shows offline
+ store('spEvents',JSON.stringify(out));const m={at:Date.now(),from:spIso(from),to:spIso(to),count:Object.keys(out).length,added,updated};store('spMeta',JSON.stringify(m));return {ran:true,meta:m}}
+function spOn(ds){const E=spEvents();return Object.values(E).filter(e=>e.date===ds||(e.end&&e.date<=ds&&ds<=e.end)).sort((a,b)=>Object.keys(SP_CAT).indexOf(a.cat)-Object.keys(SP_CAT).indexOf(b.cat))}
+function spUpcoming(ds,n){const E=Object.values(spEvents()).filter(e=>e.date>=ds&&e.cat!=='numero'||(e.cat==='numero'&&e.date>=ds&&/portal|Lions/.test(e.name))).filter(e=>!(e.cat==='lunar'&&/quarter/.test(e.name))).sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'').localeCompare(b.time||''));return E.slice(0,n||10)}
+
+// ---------- grimoire content (built on Sam's Days of Significance)
+const SP_DAY={Monday:{kw:'Intuition · Emotions · Dreams',focus:'Slow down, notice your feelings and trust your gut.',purpose:'Reflection, emotional balance, intuition and self-care.',el:'Water',
+  acts:[['m1','Write down my dreams'],['m2','Have a self-love bath (jasmine or rose)'],['m3','Spend ten minutes reflecting'],['m4','Try a short meditation'],['m5','Drink a glass of moon-charged water']],reflect:'What am I feeling beneath the surface, and what does that part of me need?'},
+ Tuesday:{kw:'Strength · Courage · Action',focus:'Do the brave thing you have been putting off.',purpose:'Courage, drive, protection and getting things moving.',el:'Fire',
+  acts:[['t1','Do one task I have been avoiding'],['t2','Move my body hard - train or go for a run'],['t3','Say a courage affirmation out loud'],['t4','Make a protection charm (iron and red thread)']],reflect:'Where am I holding back, and what would courage look like there?'},
+ Wednesday:{kw:'Wisdom · Communication · Clarity',focus:'Learn something, organise your thoughts and communicate clearly.',purpose:'Learning, clear thinking, honest conversations and new opportunities.',el:'Air',
+  acts:[['w1','Journal for five minutes'],['w2','Learn something new'],['w3','Set an intention'],['w4','Send the message I have been meaning to send']],reflect:'What do I need to say, and who needs to hear it?'},
+ Thursday:{kw:'Abundance · Growth · Luck',focus:'Think big and plant seeds for the long term.',purpose:'Prosperity, success, generosity and long-term planning.',el:'Fire',
+  acts:[['h1','Write three goals for the year ahead'],['h2','Do one thing for money or career'],['h3','Coin wealth spell - a coin, a green candle and a wish'],['h4','Give something away generously']],reflect:'What am I ready to grow into, and what is one step toward it?'},
+ Friday:{kw:'Love · Beauty · Friendship',focus:'Look after yourself and the people you love.',purpose:'Love, beauty, pleasure, friendship and self-care.',el:'Water',
+  acts:[['f1','My grooming routine - take my time with it'],['f2','Self-love ritual with rose quartz'],['f3','Message or meet a friend'],['f4','Make something beautiful or treat myself'],['f5','Honey and cinnamon attraction spell']],reflect:'How can I show myself the same love I show others?'},
+ Saturday:{kw:'Discipline · Release · Protection',focus:'Clear out, set boundaries and get ready for the week.',purpose:'Cleansing, discipline, boundaries, releasing unhealthy patterns and preparing for the week ahead.',el:'Earth',
+  acts:[['s1','Deep-clean or declutter one space'],['s2','Black salt protection at the door'],['s3','Write down a habit to release'],['s4','Plan the week ahead'],['s5','Say no to something that drains me']],reflect:'What pattern is ready to end, and what boundary would protect my peace?'},
+ Sunday:{kw:'Success · Vitality · Joy',focus:'Get outside, soak up light and celebrate your progress.',purpose:'Nature, sunlight, gratitude, renewal and celebrating how far you have come.',el:'Fire',
+  acts:[['u1','Spend time outside, in sunlight if there is any'],['u2','Write three things I am grateful for'],['u3','Celebrate one win from this week'],['u4','Solar blessing - light a gold or yellow candle'],['u5','Rest and recharge']],reflect:'What am I proud of this week, and how will I celebrate it?'}};
+const SP_PHASES=[['new','New moon','Beginnings, intentions, planting seeds. The sky is dark - a quiet time to dream and decide.',['Write intentions','Cleanse your space','Start something small']],
+ ['wxc','Waxing crescent','Gathering, hope and first steps. Feed what you started.',['Take one small action','Gather what you need']],
+ ['fq','First quarter','Action, decisions and pushing through resistance.',['Make a decision you have been avoiding','Push through one obstacle']],
+ ['wxg','Waxing gibbous','Refine, adjust and keep going - patience before the payoff.',['Review your progress','Tweak your plan']],
+ ['full','Full moon','Culmination, clarity, gratitude and release. The traditional time for rituals and charging crystals or water.',['Full moon release - write and safely burn or tear','Charge crystals or water','Gratitude list']],
+ ['wng','Waning gibbous','Gratitude and sharing what you have learned.',['Teach or share something','Thank someone']],
+ ['lq','Last quarter','Release, forgive and clear space.',['Declutter','Forgive yourself or someone else']],
+ ['wnc','Waning crescent','Rest, reflection and surrender before the new cycle.',['Rest','Journal about the cycle that is ending']]];
+const SP_PLANET={Sun:'Vitality, success, confidence and joy.',Moon:'Intuition, emotions, dreams and cycles.',Mars:'Courage, energy, conflict and drive.',Mercury:'Communication, intellect, travel and trade.',Jupiter:'Expansion, luck, wisdom and abundance.',Venus:'Love, beauty, pleasure and harmony.',Saturn:'Discipline, endings, structure and protection.'};
+const SP_RITUALS=[['r-intent','New moon intentions','For beginnings','A pen and paper, a candle (optional).',['Sit quietly and take five slow breaths.','Write three intentions as if they have already happened.','Read them aloud, fold the paper and keep it somewhere safe until the full moon.']],
+ ['r-release','Full moon release','For letting go','Paper, a pen, a heatproof bowl or a bin.',['Write what you are ready to let go of.','Read it once, then thank it for what it taught you.','Tear it up or burn it safely in a heatproof bowl (never leave a flame unattended).']],
+ ['r-charge','Charging water or crystals','For renewal','A clean glass of water or your crystals, a windowsill.',['Set them where the moonlight (or daylight) reaches.','Hold an intention for them as you set them down.','Collect them in the morning and use the water to drink, water plants or cleanse.']],
+ ['r-cleanse','Cleansing your space','For a fresh start','Open windows, a broom or cloth, salt or incense (optional).',['Open the windows and declutter one surface.','Sweep or wipe from the back of the room toward the door.','Finish with a little salt at the doorway or a few minutes of incense.']],
+ ['r-protect','Protection charm','For safety and boundaries','Red thread, a small iron nail or key, or black salt.',['Hold the item and picture a boundary of light around you.','Tie the red thread around it three times, saying what you are protecting.','Keep it by the door or in your bag.']]];
+const SP_ANGEL=[['11:11','Seen in modern numerology as a "wake-up call" - pay attention to your thoughts, they are becoming real. A moment to make a wish.'],['22:22','Linked in modern numerology with balance, partnerships and trusting that things are coming together.'],['Master numbers 11, 22, 33','In modern numerology these are treated as higher vibrations of 2, 4 and 6: intuition, building and compassion.']];
+const SP_SECTIONS=[['days','Days of Significance','The seven days of the week','✷'],['moon','Moon & Lunar Magic','Phases, cycles and eclipses','☽'],['wheel','Wheel of the Year','Sabbats and seasonal celebrations','✵'],
+ ['occasions','Special Occasions','Lions Gate, Christmas and more','✦'],['planets','Planetary Correspondences','Planets, days and their meanings','☉'],['herbs','Herbs & Plants','Properties and traditional uses','⚘'],
+ ['crystals','Crystals & Gemstones','Meanings and correspondences','◇'],['rituals','Rituals & Spellwork','Practices and intentions','♨'],['deities','Deities','Gods, goddesses and mythology','☩'],
+ ['tarot','Tarot & Divination','Cards, symbols and interpretation','♠'],['practices','My Practices','Your own routines and rituals','♥']];
+
+// ---------- the reference library: one entry per subject, everything else links to it
+const SP_DEITY={Luna:['Roman','The Roman goddess who is the moon itself, driving her chariot across the night sky.','Moon, night, cycles, silver light.'],
+ Selene:['Greek','Titan goddess of the moon, sister of Helios (Sun) and Eos (Dawn). She fell in love with the sleeping shepherd Endymion and visits him each night.','Moon, dreams, longing, crescent crown.'],
+ Artemis:['Greek','Olympian goddess of the hunt, wild places, the moon and young women; twin sister of Apollo.','Bow and arrows, deer, cypress, the crescent moon, independence.'],
+ Mani:['Norse','The Norse personification of the moon (Máni), brother of Sól, chased across the sky by the wolf Hati.','Moon, time-keeping, the passing of months.'],
+ Mars:['Roman','Roman god of war and protector of Rome, father of Romulus and Remus; also a guardian of farmland.','Spear, shield, wolf, woodpecker, the colour red.'],
+ Ares:['Greek','Greek god of war in its raw, violent form; lover of Aphrodite.','Spear, helmet, dogs, vultures, courage and conflict.'],
+ Tyr:['Norse','Norse god of law, justice and single combat, who sacrificed his hand to bind the wolf Fenrir. Tuesday ("Tiw\'s day") is named after him.','Sword, oath, justice, sacrifice.'],
+ Mercury:['Roman','Roman messenger god of trade, travel, communication and thieves.','Winged sandals and hat, caduceus, the purse.'],
+ Hermes:['Greek','Greek messenger of the gods, guide of souls to the underworld, god of travellers, trade and cunning.','Caduceus, winged sandals, crossroads, the tortoise-shell lyre.'],
+ Odin:['Norse','Chief of the Norse gods, seeker of wisdom who gave an eye for it and hung on Yggdrasil to win the runes. Wednesday ("Woden\'s day") is named after him.','Ravens Huginn and Muninn, spear Gungnir, runes, poetry.'],
+ Jupiter:['Roman','King of the Roman gods, god of the sky and thunder, guardian of oaths and the state.','Thunderbolt, eagle, oak.'],
+ Zeus:['Greek','King of the Olympian gods, ruler of sky and thunder, upholder of hospitality and justice.','Thunderbolt, eagle, oak, sceptre.'],
+ Thor:['Norse','Norse god of thunder, strength and protection of people. Thursday ("Thor\'s day") is named after him.','Hammer Mjölnir, goats, oak, lightning.'],
+ Venus:['Roman','Roman goddess of love, beauty, desire and fertility, mother of Aeneas.','Dove, rose, myrtle, scallop shell, mirror.'],
+ Aphrodite:['Greek','Greek goddess of love and beauty, born from the sea foam off Cyprus.','Dove, rose, myrtle, swan, scallop shell.'],
+ Freya:['Norse','Norse goddess of love, beauty, fertility, war and seiðr magic; she rides a chariot pulled by cats. Friday is often linked with her (and with Frigg).','Cats, falcon-feather cloak, the necklace Brísingamen, amber.'],
+ Saturn:['Roman','Roman god of agriculture, time and wealth; his festival Saturnalia was a midwinter time of feasting and role reversal. Saturday is named after him.','Sickle, harvest, time.'],
+ Cronus:['Greek','Titan father of Zeus who ruled during the Golden Age and swallowed his children to avoid being overthrown.','Sickle, time, harvest, endings.'],
+ Hel:['Norse','Norse ruler of the realm of the dead, half living and half dead; daughter of Loki.','The underworld, endings, ancestors, death and rebirth.'],
+ Sol:['Roman','Roman sun god (Sol Invictus, the "Unconquered Sun"), celebrated near the winter solstice. In Norse myth Sól drives the sun\'s chariot.','Sun, radiate crown, chariot.'],
+ Apollo:['Greek','Greek god of the sun, light, music, poetry, prophecy and healing; twin brother of Artemis.','Lyre, laurel, the Delphic oracle, sun.'],
+ Baldur:['Norse','Norse god of light, beauty and purity, son of Odin and Frigg, whose death foretells Ragnarök.','Light, mistletoe, innocence, rebirth.']};
+const SP_SLUG=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+function spRef(){if(spRef.c)return spRef.c;const R={},put=(id,o)=>{R[id]=Object.assign(R[id]||{id,links:{}},o);return R[id]},
+ link=(a,b,g)=>{if(!R[a]||!R[b])return;const L=R[a].links[g]=R[a].links[g]||[];if(!L.includes(b))L.push(b)},both=(a,ga,b,gb)=>{link(a,b,gb);link(b,a,ga)};
+ const DN=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+ // planets
+ for(const p in SP_PLANET)put('planet:'+SP_SLUG(p),{type:'planets',name:p,glyph:PGLYPH[p],sub:SP_PLANET[p]});
+ for(const dn of DN){const D=DAYSIG[dn],X=SP_DAY[dn],id='day:'+dn.toLowerCase();
+  put(id,{type:'days',name:dn,glyph:PGLYPH[D.planet],sub:D.title.replace(/^The Day of /,''),day:dn});
+  const pid='planet:'+SP_SLUG(D.planet);Object.assign(R[pid],{day:dn,el:D.element,metal:D.metals,colours:D.colours,dir:D.direction,chakra:D.chakra,number:D.number,freq:D.freq});both(id,'Days',pid,'Planet');
+  for(const m of D.deities.matchAll(/([^,(]+)\(([^)]+)\)/g))for(const n of m[1].split('/').map(x=>x.trim()).filter(Boolean)){const k=n==='Máni'?'Mani':n,inf=SP_DEITY[k]||[m[2],'',''];
+   const did='deity:'+SP_SLUG(k);put(did,{type:'deities',name:k==='Mani'?'Máni':k,sub:inf[0]+' · '+D.planet,culture:inf[0],myth:inf[1],sym:inf[2]});both(id,'Days',did,'Deities');both(pid,'Planets',did,'Deities')}
+  for(const h of D.plants){const mm=h.match(/^([^(]+)\((.*)\)$/),n=(mm?mm[1]:h).trim(),uses=mm?mm[2]:'';const hid='herb:'+SP_SLUG(n);const e=put(hid,{type:'herbs',name:n});e.uses=Object.assign(e.uses||{},{[dn]:uses});both(id,'Days',hid,'Herbs & Plants')}
+  for(const g of D.gems.split(',').map(x=>x.trim()).filter(Boolean)){const gid='gem:'+SP_SLUG(g);put(gid,{type:'crystals',name:g});both(id,'Days',gid,'Gemstones')}
+  for(const t of D.tarot.split(/\),\s*/)){const mm=t.match(/^([^(]+)\(([^)]*)\)?/);if(!mm)continue;const n=mm[1].trim(),tid='tarot:'+SP_SLUG(n);const e=put(tid,{type:'tarot',name:n});e.mean=Object.assign(e.mean||{},{[dn]:mm[2].replace(/\)$/,'')});both(id,'Days',tid,'Tarot')}
+  D.spells.split(/,\s+(?=a |an )/i).forEach((sp,i)=>{const n=sp.replace(/^./,c=>c.toUpperCase()).trim(),rid='ritual:'+SP_SLUG(dn+'-'+i);put(rid,{type:'rituals',name:n,sub:dn+' spell',day:dn});both(id,'Days',rid,'Rituals')})}
+ for(const [k,n,f,need,steps] of SP_RITUALS)put('ritual:'+k,{type:'rituals',name:n,sub:f,need,steps});
+ both('ritual:r-intent','Rituals','phase:new','Moon');
+ // moon
+ SP_PHASES.forEach(([k,n,t,a])=>put('phase:'+k,{type:'moon',name:n,glyph:'☽',sub:t.split('.')[0],text:t,acts:a}));
+ both('phase:full','Moon','ritual:r-release','Rituals');both('phase:full','Moon','ritual:r-charge','Rituals');both('phase:new','Moon','ritual:r-intent','Rituals');both('phase:lq','Moon','ritual:r-cleanse','Rituals');
+ put('moon:eclipses',{type:'moon',name:'Eclipses',sub:'When the Sun, Earth and Moon line up',text:'A solar eclipse happens at a new moon when the moon blocks the Sun for part of Earth; a lunar eclipse happens at a full moon when Earth\'s shadow falls on the moon. Dates come from NASA\'s published predictions. Many traditions treat eclipses as turning points and prefer rest and observation to spellwork.'});
+ put('moon:super',{type:'moon',name:'Supermoons',sub:'A full or new moon near its closest point',text:'A supermoon is a full or new moon that happens while the moon is near perigee (its closest approach). The calendar flags full and new moons closer than about 363,500 km, which matches Fred Espenak\'s published tables. It looks up to about 14% bigger than a far-away full moon.'});
+ put('moon:blue',{type:'moon',name:'Blue moons',sub:'An extra full moon',text:'The modern meaning is the second full moon in one calendar month. An older "seasonal" meaning is the third full moon in a season that has four. Neither makes the moon look blue.'});
+ put('moon:names',{type:'moon',name:'Full moon names',sub:'The traditional name for each month',text:SP_FULLNAMES.map((n,i)=>MON[i]+': '+n).join('\n')+'\n\nThese are the names popularised by the Old Farmer\'s Almanac from North American and European folk traditions.'});
+ // wheel of the year
+ for(const k of ['imbolc','ostara','beltane','litha','lughnasadh','mabon','samhain','yule']){const s=SP_SABBAT[k];put('sabbat:'+k,{type:'wheel',name:s[0],glyph:'✵',sub:s[1].split(/[.:]/)[0],text:s[1],trad:s[2],acts:s[3],key:k})}
+ // occasions
+ [['lionsgate','8/8 Lions Gate','A modern manifestation day','Observed from about 26 July to 12 August, peaking on 8 August, when Sirius rises before the Sun and the Sun is in Leo. In modern New Age and astrological practice it is treated as a powerful day for manifesting abundance. It is a modern observance, not an astronomical event.'],
+  ['1111','11/11 portal','Master-number day','In modern numerology 11 is a "master number" of intuition and awakening; 11 November (11/11) is treated as a portal for wishes and synchronicity.'],
+  ['mirror','Mirror dates','1/1, 2/2 ... 12/12','Dates where the day and month match. Modern numerology reads them as a nudge to notice the energy of that number.'],
+  ['halloween','Halloween','31 October','All Hallows\' Eve, the night before All Saints\' Day, with roots in the Gaelic festival of Samhain.'],
+  ['christmas','Christmas Eve & Day','24-25 December','The Christian celebration of the birth of Jesus; many customs (evergreens, candles, feasting) echo midwinter and Yule traditions.'],
+  ['newyear','New Year\'s Eve & Day','31 December - 1 January','The turn of the calendar year - a natural time for reflection and intentions.'],
+  ['birthday','Your birthday','30 October','Born 30 October 2000 at 3:30am - the eve of Samhain. A personal new year: a time to look back with pride and set intentions.']].forEach(([k,n,s,t])=>put('occ:'+k,{type:'occasions',name:n,sub:s,text:t}));
+ both('occ:halloween','Occasions','sabbat:samhain','Wheel of the Year');both('occ:christmas','Occasions','sabbat:yule','Wheel of the Year');both('occ:birthday','Occasions','sabbat:samhain','Wheel of the Year');
+ SP_ANGEL.forEach(([n,t])=>{const id='tarot:'+SP_SLUG(n);put(id,{type:'tarot',name:n,sub:'Modern numerology',text:t})});both('occ:1111','Occasions','tarot:11-11','Tarot & Divination');
+ // personal practices
+ const u=spUser();for(const p of Object.values(u.custom||{}))put('prac:'+p.id,{type:'practices',name:p.name,sub:(p.days||[]).join(', ')||'Any day',text:p.note||'',prac:p});
+ spRef.c=R;return R}
+function spRefReset(){spRef.c=null}
+
+// ---------- Spiritual calendar + grimoire UI: home (today) → calendar (what's coming) → grimoire (learn & explore)
+const SPV={stack:[],el:null};
+const spE=s=>esc(String(s==null?'':s));
+function spOpen(view){spRefresh();spNotice();SPV.stack=[view||{v:'home'}];$('sp').classList.add('on');document.body.classList.add('spon');spDraw(0);buzz(8)}
+function spClose(){$('sp').classList.remove('on');document.body.classList.remove('spon');render()}
+function spGo(v){SPV.stack.push(v);spDraw(1)}
+function spBack(){if(SPV.stack.length>1){SPV.stack.pop();spDraw(-1)}else spClose()}
+function spTop(){return SPV.stack[SPV.stack.length-1]}
+function spGrim(){const u=spUser(),last=u.last;SPV.stack.push({v:'index'});if(last&&last.v!=='index'&&(last.v!=='entry'||spRef()[last.id]))SPV.stack.push(last);spDraw(1)}
+function spRemember(v){if(['index','section','entry','search'].includes(v.v)){const u=spUser();u.last=v.v==='search'?{v:'index'}:v;spSaveUser(u)}}
+function spDraw(dir){const v=spTop(),b=$('spbody');spRemember(v);
+ const T={home:['','My spiritual calendar'],index:['','My Grimoire'],section:['Grimoire',''],entry:['',''],date:['Calendar',''],search:['Grimoire','Search'],marks:['Grimoire','Bookmarks'],saved:['Calendar','Saved for later']}[v.v]||['',''];
+ let h='',title=T[1];
+ if(v.v==='home')h=spHome();else if(v.v==='index')h=spIndex();else if(v.v==='section'){const s=SP_SECTIONS.find(x=>x[0]===v.s);title=s?s[1]:'';h=spSection(v.s)}
+ else if(v.v==='entry'){const e=spRef()[v.id];title=e?(SP_SECTIONS.find(x=>x[0]===e.type)||[])[1]||'':'';h=spEntry(v.id)}else if(v.v==='date'){title=spDateLabel(v.ds);h=spDate(v.ds)}else if(v.v==='search')h=spSearch(v.q||'');else if(v.v==='marks')h=spMarks();else if(v.v==='saved')h=spSaved();
+ $('spttl').textContent=title;$('spback').innerHTML=SPV.stack.length>1?'‹ Back':'✕';
+ const inGrim=['index','section','entry','search','marks'].includes(v.v);$('spidx').style.display=inGrim&&v.v!=='index'?'':'none';$('spfind').style.display=inGrim?'':'none';
+ const bm=$('spmark');bm.style.display=v.v==='entry'?'':'none';if(v.v==='entry')bm.classList.toggle('on',spUser().bm.includes(v.id));
+ b.innerHTML=h;b.scrollTop=v.y||0;
+ if(dir&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&b.animate)b.animate(dir>0?[{opacity:0,transform:'translateX(18px)'},{opacity:1,transform:'none'}]:[{opacity:0,transform:'translateX(-18px)'},{opacity:1,transform:'none'}],{duration:260,easing:'cubic-bezier(.2,.8,.2,1)'});
+ spWire(b,v)}
+function spDateLabel(ds){const d=parseISO(ds);return DNAMES[d.getDay()]+', '+d.getDate()+' '+MON[d.getMonth()]}
+function spCatTag(c){const k=SP_CAT[c]||['',''];return '<span class="spcat c-'+c+'"><i>'+TX(k[1])+'</i>'+k[0]+'</span>'}
+function spLinks(ids){return '<div class="spchips">'+ids.filter(id=>spRef()[id]).map(id=>'<button class="spchip" data-go="'+id+'">'+spE(spRef()[id].name)+'</button>').join('')+'</div>'}
+function spAct(ds,id,text,src){const u=spUser(),done=!!(u.done[ds]&&u.done[ds][id]);return '<div class="spact'+(done?' dn':'')+'" data-ds="'+ds+'" data-act="'+spE(id)+'" data-txt="'+spE(text)+'"><button class="spck" aria-label="Done"></button><span>'+spE(text)+'</span><button class="spmore" aria-label="More">⋯</button></div>'}
+function spActs(ds,list){const u=spUser(),n=list.filter(([id])=>u.done[ds]&&u.done[ds][id]).length;return '<div class="spprog"><span>'+n+' of '+list.length+' completed</span><i><b style="width:'+(list.length?Math.round(n/list.length*100):0)+'%"></b></i></div>'+list.map(([id,t])=>spAct(ds,id,t)).join('')}
+function spDayActs(dn,ds){const pr=Object.values(spUser().custom||{}).filter(p=>!p.days||!p.days.length||p.days.includes(dn)).map(p=>['p-'+p.id,p.name]);return SP_DAY[dn].acts.concat(pr)}
+// ----- home: today
+function spHome(){const t=today(),d=parseISO(t),dn=DNAMES[d.getDay()],D=DAYSIG[dn],X=SP_DAY[dn],m=moonOn(t),ev=spOn(t).filter(e=>!(e.cat==='lunar'&&/quarter/i.test(e.name))),up=spUpcoming(addDays(t,1),4),u=spUser();
+ let h='<div class="sphero glass"><div class="speye">Today · '+spDateLabel(t)+'</div><div class="spkw">'+spE(X.kw)+'</div><div class="spdayrow"><span class="spglyph">'+TX(PGLYPH[D.planet])+'</span><div><b>'+dn+'</b><small>'+spE(D.planet)+' · '+spE(D.element)+' · '+m.name+'</small></div></div>'+
+  (ev.length?'<div class="spev">'+ev.map(e=>spCatTag(e.cat)+' <b>'+spE(e.name)+'</b>').join('<br>')+'</div>':'')+
+  '<p class="spfocus">'+spE(X.focus)+'</p><div class="spacts">'+spDayActs(dn,t).slice(0,3).map(([id,tx])=>spAct(t,id,tx)).join('')+'</div><button class="splink" data-date="'+t+'">Open today\'s page ›</button></div>';
+ if(SPV.notice)h+='<div class="spnote glass">'+spE(SPV.notice)+'</div>';
+ h+='<div class="sph">Coming up</div><div class="glass splist">'+up.map(e=>'<button class="sprow" data-date="'+e.date+'"><div><b>'+spE(e.name)+'</b><small>'+spDateLabel(e.date)+(e.end?' - '+spDateLabel(e.end):'')+' · '+SP_CAT[e.cat][0]+'</small></div><i>'+TX(SP_CAT[e.cat][1])+'</i></button>').join('')+'</div>';
+ h+='<div class="sph">Calendar</div><div class="glass spcal">'+spMonth(SPV.ym||t.slice(0,7))+'</div>';
+ h+='<button class="spgrim glass" data-grim="1"><span class="spbook">'+SPBOOK+'</span><div><b>Your Grimoire</b><small>Your spiritual reference book, rituals and knowledge.</small></div><i>›</i></button>';
+ if(u.saved.length)h+='<button class="sprow glass spsaved" data-saved="1"><div><b>Saved for later</b><small>'+u.saved.length+' saved</small></div><i>›</i></button>';
+ return h}
+function spMonth(ym){const y=+ym.slice(0,4),mo=+ym.slice(5,7)-1,first=new Date(y,mo,1),off=(first.getDay()+6)%7,n=new Date(y,mo+1,0).getDate(),t=today();
+ let h='<div class="spmh"><button data-ym="'+spIso(new Date(y,mo-1,1)).slice(0,7)+'" aria-label="Previous month">‹</button><b>'+MON[mo]+' '+y+'</b><button data-ym="'+spIso(new Date(y,mo+1,1)).slice(0,7)+'" aria-label="Next month">›</button></div><div class="spmg">'+'MTWTFSS'.split('').map(c=>'<span class="w">'+c+'</span>').join('');
+ for(let i=0;i<off;i++)h+='<span></span>';
+ for(let k=1;k<=n;k++){const ds=ym+'-'+String(k).padStart(2,'0'),ev=spOn(ds).filter(e=>!(e.cat==='lunar'&&/quarter/i.test(e.name))&&!(e.cat==='numero'&&!/portal|Lions/.test(e.name)));
+  const marks=[...new Set(ev.map(e=>e.cat==='lunar'?(/Full/.test(e.name)?'full':/New/.test(e.name)?'new':'lunar'):e.cat))].slice(0,3);
+  h+='<button data-date="'+ds+'" class="'+(ds===t?'td':'')+'">'+k+'<span class="spmk">'+marks.map(c=>'<i class="mk-'+c+'"></i>').join('')+'</span></button>'}
+ return h+'</div><div class="spkey"><span><i class="mk-full"></i>Full moon</span><span><i class="mk-new"></i>New moon</span><span><i class="mk-sabbat"></i>Sabbat</span><span><i class="mk-eclipse"></i>Eclipse</span><span><i class="mk-culture"></i>Celebration</span><span><i class="mk-personal"></i>Personal</span></div>'}
+// ----- a date: everything relevant to that one day, in layers
+function spDate(ds){const d=parseISO(ds),dn=DNAMES[d.getDay()],m=moonOn(ds),ev=spOn(ds),u=spUser(),A=bkAI(ds);bkFetch(ds);
+ let h='';
+ for(const e of ev){const r=u.rem[e.id];h+='<div class="glass spevc"><div class="spevh">'+spCatTag(e.cat)+(e.time?'<span class="sptime">'+spE(e.time)+'</span>':'')+'</div><b class="spevn">'+spE(e.name)+'</b><p>'+spE(e.desc)+'</p>'+
+  '<details class="spx"><summary><span>Meaning & tradition</span></summary><p>'+spE(e.sig||'')+'</p><p class="spsrc">'+({calc:'Calculated',fixed:'Fixed date',approx:'Approximate'}[e.dtype]||'')+' · '+spE(e.src)+'</p></details>'+
+  (e.acts&&e.acts.length?'<details class="spx"><summary><span>Things to do <em>'+e.acts.length+'</em></span></summary>'+e.acts.map((a,i)=>spAct(ds,e.id+'#'+i,a)).join('')+'</details>':'')+
+  '<div class="spevb"><button class="spbtn'+(r?' on':'')+'" data-rem="'+spE(e.id)+'">'+(r?(r.mode==='3'?'🔔 3 days before + on the day':'🔔 On the day'):'Remind me')+'</button>'+[...new Set(e.grim||[])].filter(g=>SP_SECTIONS.some(s=>s[0]===g)).map(g=>'<button class="spbtn" data-sec="'+g+'">'+spE(SP_SECTIONS.find(s=>s[0]===g)[1])+' ›</button>').join('')+'</div></div>'}
+ h+=spDayBody(dn,ds,m);
+ h+='<details class="glass spx"><summary><span>My notes'+(u.notes[ds]?' <em>1</em>':'')+'</span></summary><textarea class="spnotes" data-note="'+ds+'" placeholder="Anything about today - how the ritual went, what you noticed...">'+spE(u.notes[ds]||'')+'</textarea></details>';
+ h+='<details class="glass spx"><summary><span>On this date in history'+(A&&A.pages&&A.pages.length?' <em>'+A.pages.length+'</em>':'')+'</span></summary>'+(A&&A.pages&&A.pages.length?A.pages.map(p=>'<p><b>'+spE(p.title)+'</b> - '+spE(p.text)+'</p>').join('')+'<p class="spsrc">Written by Rodger with AI - may contain mistakes.</p>':'<p class="spsrc">'+(navigator.onLine?'Rodger is looking this up - check back in a moment.':'Needs the internet the first time.')+'</p>')+'</details>';
+ return h}
+function spDayBody(dn,ds,m){const D=DAYSIG[dn],X=SP_DAY[dn],R=spRef(),id='day:'+dn.toLowerCase(),L=R[id].links;
+ let h='<div class="glass sphero"><div class="speye">Day of significance</div><div class="spdayrow"><span class="spglyph">'+TX(PGLYPH[D.planet])+'</span><div><b>'+dn+'</b><small>'+spE(D.title.replace(/^The Day of /,''))+'</small></div></div><div class="spmeta">Ruled by <button class="spin" data-go="planet:'+SP_SLUG(D.planet)+'">'+spE(D.planet)+'</button> · Element of '+spE(D.element)+(m?' · '+m.name+' ('+Math.round(m.ill*100)+'%)':'')+'</div>'+
+  '<div class="sph2">Today\'s purpose</div><p>'+spE(X.purpose)+'</p></div>';
+ h+='<div class="sph">What can I do?</div><div class="glass spacts">'+spActs(ds,spDayActs(dn,ds))+'</div>';
+ const grp=(label,count,preview,inner)=>'<details class="glass spx"><summary><span>'+label+(count!=null?' <em>'+count+'</em>':'')+'</span><small>'+spE(preview)+'</small></summary>'+inner+'</details>';
+ h+='<div class="sph">Explore correspondences</div>';
+ h+=grp('Deities',(L.Deities||[]).length,(L.Deities||[]).map(x=>R[x].name).join(', '),spLinks(L.Deities||[])+'<p class="spsrc">'+spE(D.deities)+'</p>');
+ h+=grp('Herbs & Plants',D.plants.length,D.plants.length+' traditional associations','<ul class="spul">'+D.plants.map(p=>{const mm=p.match(/^([^(]+)\((.*)\)$/),n=(mm?mm[1]:p).trim();return '<li><button class="spin" data-go="herb:'+SP_SLUG(n)+'">'+spE(n)+'</button>'+(mm?' - '+spE(mm[2]):'')+'</li>'}).join('')+'</ul>');
+ h+=grp('Gemstones',(L.Gemstones||[]).length,D.gems.split(',').slice(0,3).join(',')+' and more',spLinks(L.Gemstones||[]));
+ h+=grp('Tarot',(L.Tarot||[]).length,(L.Tarot||[]).map(x=>R[x].name).join(' and '),(L.Tarot||[]).map(x=>'<p><button class="spin" data-go="'+x+'">'+spE(R[x].name)+'</button> - '+spE(R[x].mean[dn]||'')+'</p>').join(''));
+ h+=grp('Colours, Metals & Elements',null,D.colours.toLowerCase()+' · '+D.element.toLowerCase(),'<p><b>Colours</b> '+D.colours.split(',').map(sw).join(' ')+'</p><p><b>Metals</b> '+spE(D.metals)+'</p><p><b>Element</b> '+elSVG(D.element)+' '+spE(D.element)+'</p><p><b>Direction</b> '+spE(D.direction)+'</p>');
+ h+=grp('More correspondences',6,'Energy, chakra, star signs, number, frequencies, spells','<p><b>Energy</b> '+spE(D.energy)+'</p><p><b>Chakra</b> '+spE(D.chakra)+'</p><p><b>Star signs</b> '+spE(D.signs)+'</p><p><b>Number</b> '+spE(D.number)+'</p><p><b>Frequencies</b> '+spE(D.freq)+'</p><p><b>Attributes</b> '+spE(D.attr)+'</p><p><b>Spells</b></p>'+spLinks(L.Rituals||[]));
+ h+='<div class="sph">A moment to reflect</div><div class="glass sprefl">'+spE(X.reflect)+'</div>';
+ return h}
+// ----- grimoire
+function spIndex(){const R=Object.values(spRef()),u=spUser(),last=u.last;
+ let h='<div class="spsub">Your personal spiritual reference</div><button class="spsearch glass" data-find="1"><span>⌕</span>Search the grimoire</button>';
+ if(u.bm.length)h+='<button class="sprow glass" data-marks="1"><div><b>Bookmarks</b><small>'+u.bm.length+' saved page'+(u.bm.length>1?'s':'')+'</small></div><i>☆</i></button>';
+ h+='<div class="glass splist">'+SP_SECTIONS.map(([k,n,s,g])=>{const c=R.filter(e=>e.type===k).length;return '<button class="sprow" data-sec="'+k+'"><span class="spsg">'+TX(g)+'</span><div><b>'+spE(n)+'</b><small>'+spE(s)+'</small></div><em>'+c+'</em></button>'}).join('')+'</div>';
+ return h}
+const SP_INTRO={days:'Each day of the week carries the energy of its ruling planet. Open a day to see what you can do and everything it corresponds to.',moon:'The moon\'s cycle shapes much of traditional practice. Upcoming phases are calculated for your calendar.',
+ wheel:'Eight festivals mark the turning of the year - four solar (solstices and equinoxes) and four seasonal fire festivals.',occasions:'Modern observances, cultural celebrations and your personal dates.',planets:'The seven classical planets, each ruling a day of the week.',
+ herbs:'Every herb and plant in your Days of Significance, with its traditional uses.',crystals:'Gemstones and the days they belong to.',rituals:'Spells from your Days of Significance and core practices for the moon and your space.',
+ deities:'The gods and goddesses linked with each day, from Roman, Greek and Norse traditions.',tarot:'Tarot cards and numbers linked with each day, plus modern numerology.',practices:'Your own routines and rituals. Add one and choose which days it shows up on.'};
+function spSection(k){const L=Object.values(spRef()).filter(e=>e.type===k),s=SP_SECTIONS.find(x=>x[0]===k);
+ const order=k==='days'?['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].map(x=>'day:'+x):null;
+ const list=order?order.map(id=>spRef()[id]):['herbs','crystals','deities'].includes(k)?L.slice().sort((a,b)=>a.name.localeCompare(b.name)):L;
+ let h='<div class="glass spopen"><span class="spsg big">'+TX(s[3])+'</span><b>'+spE(s[1])+'</b><p>'+spE(SP_INTRO[k]||s[2])+'</p><small>'+list.length+' entr'+(list.length===1?'y':'ies')+'</small></div>';
+ if(list.length>12)h+='<input class="spfilter glass" placeholder="Filter '+spE(s[1].toLowerCase())+'" data-filter="1">';
+ if(k==='practices')h+='<button class="spbtn wide" data-addprac="1">+ Add a practice</button>';
+ if(k==='wheel'){const t=today();const nx=e=>Object.values(spEvents()).filter(x=>x.id.startsWith('sabbat-'+e.key+'-')&&x.date>=t).sort((a,b)=>a.date.localeCompare(b.date))[0];list.sort((a,b)=>((nx(a)||{}).date||'9').localeCompare((nx(b)||{}).date||'9'));h+='<div class="glass splist">'+list.map(e=>{const ev=nx(e);return '<button class="sprow" data-go="'+e.id+'"><div><b>'+spE(e.name)+'</b><small>'+(ev?spDateLabel(ev.date)+' '+ev.date.slice(0,4):'')+'</small></div><i>›</i></button>'}).join('')+'</div>';return h}
+ h+='<div class="glass splist" data-list="1">'+list.map(e=>'<button class="sprow" data-go="'+e.id+'" data-n="'+spE(e.name.toLowerCase())+'"><div><b>'+spE(e.name)+'</b><small>'+spE(spSub(e))+'</small></div><i>›</i></button>').join('')+'</div>';
+ return h}
+function spSub(e){if(e.sub)return e.sub;if(e.type==='herbs')return Object.values(e.uses||{}).join('; ').slice(0,70);if(e.type==='crystals'||e.type==='tarot')return (e.links.Days||[]).map(x=>spRef()[x].name).join(', ');return ''}
+function spEntry(id){const R=spRef(),e=R[id];if(!e)return '<p class="spsrc">This entry has moved.</p>';if(e.type==='days')return spDayBody(e.day,today(),null).replace('<div class="speye">Day of significance</div>','<div class="speye">Day of significance</div>');
+ const s=SP_SECTIONS.find(x=>x[0]===e.type)||['','',''],grp=(label,count,inner,open)=>'<details class="glass spx"'+(open?' open':'')+'><summary><span>'+label+(count!=null?' <em>'+count+'</em>':'')+'</span></summary>'+inner+'</details>';
+ let h='<div class="glass sphero"><div class="speye">'+spE(s[1])+'</div><div class="spdayrow">'+(e.glyph?'<span class="spglyph">'+TX(e.glyph)+'</span>':'')+'<div><b>'+spE(e.name)+'</b><small>'+spE(e.sub||spSub(e))+'</small></div></div>';
+ if(e.type==='deities')h+='<p>'+spE(e.myth)+'</p></div>'+grp('Symbols',null,'<p>'+spE(e.sym)+'</p>',true);
+ else if(e.type==='herbs')h+='</div>'+grp('Traditional uses',Object.keys(e.uses).length,Object.entries(e.uses).map(([d,u])=>'<p><button class="spin" data-go="day:'+d.toLowerCase()+'">'+d+'</button> - '+spE(u)+'</p>').join(''),true);
+ else if(e.type==='tarot')h+=(e.text?'<p>'+spE(e.text)+'</p>':'')+'</div>'+(e.mean?grp('Meanings',Object.keys(e.mean).length,Object.entries(e.mean).map(([d,u])=>'<p><button class="spin" data-go="day:'+d.toLowerCase()+'">'+d+'</button> - '+spE(u)+'</p>').join(''),true):'');
+ else if(e.type==='planets')h+='<p>'+spE(e.sub)+'</p></div>'+grp('Correspondences',6,'<p><b>Day</b> <button class="spin" data-go="day:'+e.day.toLowerCase()+'">'+e.day+'</button></p><p><b>Element</b> '+spE(e.el)+'</p><p><b>Metal</b> '+spE(e.metal)+'</p><p><b>Colours</b> '+e.colours.split(',').map(sw).join(' ')+'</p><p><b>Direction</b> '+spE(e.dir)+'</p><p><b>Chakra</b> '+spE(e.chakra)+'</p><p><b>Number</b> '+spE(e.number)+'</p><p><b>Frequencies</b> '+spE(e.freq)+'</p>',true);
+ else if(e.type==='rituals'){h+='</div>';if(e.need)h+=grp('You will need',null,'<p>'+spE(e.need)+'</p>',true)+grp('Steps',e.steps.length,'<ol class="spol">'+e.steps.map(x=>'<li>'+spE(x)+'</li>').join('')+'</ol>',true);
+  else h+='<div class="glass spacts">'+spActs(today(),[['rit-'+SP_SLUG(e.name),'Do this ritual']])+'</div>';
+  if(e.need)h+='<div class="glass spacts">'+spActs(today(),[['rit-'+e.id,'Did this ritual today']])+'</div>'}
+ else if(e.type==='moon'||e.type==='wheel'||e.type==='occasions'||e.type==='practices'){h+='<p>'+spE(e.text||'').replace(/\n/g,'<br>')+'</p></div>';if(e.trad)h+=grp('Tradition',null,'<p>'+spE(e.trad)+'</p>');
+  if(e.acts&&e.acts.length)h+='<div class="sph">What can I do?</div><div class="glass spacts">'+spActs(today(),e.acts.map((a,i)=>[e.id+'#'+i,a]))+'</div>';
+  if(e.type==='moon'){const up=Object.values(spEvents()).filter(x=>x.cat===(id==='moon:eclipses'?'eclipse':'lunar')&&x.date>=today()&&(id==='moon:super'?/Super/.test(x.name):id==='moon:blue'?/Blue/.test(x.name):id.startsWith('phase:')?x.kind===({new:'new',fq:'fq',full:'full',lq:'lq'}[id.slice(6)]):id==='moon:eclipses')).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4);
+   if(up.length)h+=grp('Coming up',up.length,up.map(x=>'<button class="sprow" data-date="'+x.date+'"><div><b>'+spE(x.name)+'</b><small>'+spDateLabel(x.date)+' '+x.date.slice(0,4)+(x.time?' · '+x.time:'')+'</small></div><i>›</i></button>').join(''),true)}
+  if(e.type==='practices')h+='<div class="spevb"><button class="spbtn" data-editprac="'+e.prac.id+'">Edit</button><button class="spbtn" data-delprac="'+e.prac.id+'">Delete</button></div>'}
+ else h+='</div>';
+ for(const g in e.links){const ids=e.links[g].filter(x=>R[x]);if(ids.length)h+=grp(g,ids.length,spLinks(ids),g==='Days')}
+ return h}
+function spSearchIx(){const R=spRef();return Object.values(R).map(e=>({id:e.id,t:(e.name+' '+(e.sub||'')+' '+(e.text||'')+' '+(e.myth||'')+' '+(e.sym||'')+' '+Object.values(e.uses||{}).join(' ')+' '+Object.values(e.mean||{}).join(' ')+(e.type==='days'?' '+Object.values(DAYSIG[e.day]).join(' ')+' '+Object.values(SP_DAY[e.day]).join(' '):'')).toLowerCase()}))}
+function spSearch(q){return '<input class="spfilter glass" id="spq" placeholder="Search herbs, deities, crystals, rituals..." value="'+spE(q)+'" autocomplete="off" spellcheck="false"><div id="spres">'+spResults(q)+'</div>'}
+function spResults(q){q=q.trim().toLowerCase();if(!q)return '<p class="spsrc">Type to search every entry.</p>';const R=spRef(),hits=spSearchIx().filter(x=>q.split(/\s+/).every(w=>x.t.includes(w))).map(x=>R[x.id]).sort((a,b)=>(b.name.toLowerCase().startsWith(q)?1:0)-(a.name.toLowerCase().startsWith(q)?1:0)).slice(0,40);
+ return hits.length?'<div class="glass splist">'+hits.map(e=>'<button class="sprow" data-go="'+e.id+'"><div><b>'+spE(e.name)+'</b><small>'+spE((SP_SECTIONS.find(s=>s[0]===e.type)||['',''])[1])+' · '+spE(spSub(e))+'</small></div><i>›</i></button>').join('')+'</div>':'<p class="spsrc">Nothing found for "'+spE(q)+'".</p>'}
+function spMarks(){const R=spRef(),u=spUser();return u.bm.length?'<div class="glass splist">'+u.bm.filter(id=>R[id]).map(id=>'<button class="sprow" data-go="'+id+'"><div><b>'+spE(R[id].name)+'</b><small>'+spE((SP_SECTIONS.find(s=>s[0]===R[id].type)||['',''])[1])+'</small></div><i>›</i></button>').join('')+'</div>':'<p class="spsrc">Tap ☆ on any page to bookmark it.</p>'}
+function spSaved(){const u=spUser();return u.saved.length?'<div class="glass splist">'+u.saved.map((s,i)=>'<div class="sprow"><div><b>'+spE(s.txt)+'</b><small>Saved from '+spDateLabel(s.ds)+'</small></div><button class="spbtn" data-unsave="'+i+'">Remove</button></div>').join('')+'</div>':'<p class="spsrc">Nothing saved yet. Use ⋯ on an activity to save it.</p>'}
+// ----- actions
+function spWire(b,v){
+ b.querySelectorAll('[data-date]').forEach(x=>x.onclick=()=>{v.y=b.scrollTop;spGo({v:'date',ds:x.dataset.date})});
+ b.querySelectorAll('[data-go]').forEach(x=>x.onclick=e=>{e.stopPropagation();v.y=b.scrollTop;spGo({v:'entry',id:x.dataset.go})});
+ b.querySelectorAll('[data-sec]').forEach(x=>x.onclick=()=>{v.y=b.scrollTop;spGo({v:'section',s:x.dataset.sec})});
+ b.querySelectorAll('[data-grim]').forEach(x=>x.onclick=()=>{v.y=b.scrollTop;spGrim()});
+ b.querySelectorAll('[data-find]').forEach(x=>x.onclick=()=>spGo({v:'search',q:''}));
+ b.querySelectorAll('[data-marks]').forEach(x=>x.onclick=()=>spGo({v:'marks'}));
+ b.querySelectorAll('[data-saved]').forEach(x=>x.onclick=()=>spGo({v:'saved'}));
+ b.querySelectorAll('[data-ym]').forEach(x=>x.onclick=e=>{e.stopPropagation();SPV.ym=x.dataset.ym;const c=b.querySelector('.spcal');if(c){c.innerHTML=spMonth(SPV.ym);spWire(c,v)}});
+ b.querySelectorAll('.spact').forEach(r=>{r.querySelector('.spck').onclick=e=>{e.stopPropagation();const u=spUser(),ds=r.dataset.ds,id=r.dataset.act;u.done[ds]=u.done[ds]||{};if(u.done[ds][id])delete u.done[ds][id];else{u.done[ds][id]=Date.now();buzz([10,30,12])}spSaveUser(u);
+   r.classList.toggle('dn');const p=r.parentNode.querySelector('.spprog');if(p){const all=[...r.parentNode.querySelectorAll('.spact')],n=all.filter(a=>a.classList.contains('dn')).length;p.querySelector('span').textContent=n+' of '+all.length+' completed';p.querySelector('b').style.width=Math.round(n/all.length*100)+'%'}};
+  r.querySelector('.spmore').onclick=e=>{e.stopPropagation();spMenu(r.querySelector('.spmore'),[['Save for later',()=>{const u=spUser();if(!u.saved.some(s=>s.txt===r.dataset.txt))u.saved.push({txt:r.dataset.txt,ds:r.dataset.ds});spSaveUser(u);spToast('Saved for later')}],
+   ['Add to my calendar',()=>{const u=spUser(),k=r.dataset.ds+'|'+r.dataset.act;u.added=u.added||{};if(u.added[k]&&S.items[u.added[k]]&&!S.items[u.added[k]].deleted){spToast('Already in your calendar');return}
+    const id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);touch({id,title:r.dataset.txt,date:r.dataset.ds,time:null,dur:15,prio:'none',repeat:'none',notes:'From your spiritual calendar',created:Date.now(),done:{}});u.added[k]=id;spSaveUser(u);spToast('Added to '+(r.dataset.ds===today()?'today':spDateLabel(r.dataset.ds)))}]])}});
+ b.querySelectorAll('[data-rem]').forEach(x=>x.onclick=()=>spRemind(x.dataset.rem,()=>spDraw(0)));
+ b.querySelectorAll('[data-note]').forEach(x=>x.oninput=()=>{const u=spUser();if(x.value.trim())u.notes[x.dataset.note]=x.value;else delete u.notes[x.dataset.note];spSaveUser(u)});
+ const f=b.querySelector('[data-filter]');if(f)f.oninput=()=>{const q=f.value.trim().toLowerCase();b.querySelectorAll('[data-list] .sprow').forEach(r=>r.style.display=!q||r.dataset.n.includes(q)?'':'none')};
+ const q=b.querySelector('#spq');if(q){q.oninput=()=>{v.q=q.value;const r=$('spres');r.innerHTML=spResults(q.value);spWire(r,v)};if(!v.q)setTimeout(()=>q.focus(),250)}
+ b.querySelectorAll('[data-unsave]').forEach(x=>x.onclick=()=>{const u=spUser();u.saved.splice(+x.dataset.unsave,1);spSaveUser(u);spDraw(0)});
+ b.querySelectorAll('[data-addprac],[data-editprac]').forEach(x=>x.onclick=()=>spPracEdit(x.dataset.editprac));
+ b.querySelectorAll('[data-delprac]').forEach(x=>x.onclick=()=>{if(!confirm('Delete this practice?'))return;const u=spUser();delete u.custom[x.dataset.delprac];spSaveUser(u);spRefReset();spBack()})}
+function spMenu(anchor,items){const M=$('pmenu');M.innerHTML=items.map((x,i)=>'<button data-i="'+i+'">'+spE(x[0])+'</button>').join('');M.querySelectorAll('button').forEach(b=>b.onclick=e=>{e.stopPropagation();M.classList.remove('on');items[+b.dataset.i][1]()});
+ const r=anchor.getBoundingClientRect();M.style.top=Math.min(innerHeight-140,r.bottom+6)+'px';M.style.right=Math.max(12,innerWidth-r.right)+'px';M.classList.add('on');
+ setTimeout(()=>document.addEventListener('pointerdown',function h(e){if(!e.target.closest('#pmenu')){M.classList.remove('on');document.removeEventListener('pointerdown',h,true)}},true),0)}
+function spToast(t){const n=$('sptoast');n.textContent=t;n.classList.add('on');clearTimeout(spToast.t);spToast.t=setTimeout(()=>n.classList.remove('on'),1800)}
+// reminders: optional, per event. They become small tasks on the right days, so Momentum's normal reminders/notifications cover them.
+function spRemind(eid,cb){const u=spUser(),e=spEvents()[eid];if(!e)return;const cur=u.rem[eid],next=!cur?'0':cur.mode==='0'?'3':null;
+ if(cur)(cur.items||[]).forEach(id=>{const it=S.items[id];if(it){it.deleted=true;touch(it)}});
+ if(next){const mk=(ds,title)=>{const id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);touch({id,title,date:ds,time:'09:00',dur:5,prio:'none',repeat:'none',notes:'Reminder from your spiritual calendar',created:Date.now(),done:{}});return id};
+  const items=[mk(e.date,TX(SP_CAT[e.cat][1])+' '+e.name)];if(next==='3'&&addDays(e.date,-3)>=today())items.push(mk(addDays(e.date,-3),e.name+' in 3 days'));u.rem[eid]={mode:next,items};spToast(next==='3'?'Reminders: 3 days before and on the day':'Reminder set for the day')}
+ else{delete u.rem[eid];spToast('Reminder off')}
+ spSaveUser(u);cb&&cb()}
+function spPracEdit(pid){const u=spUser(),p=pid?u.custom[pid]:{id:'c'+Date.now().toString(36),name:'',days:[],note:''};const n=prompt('Name of the practice (e.g. My grooming routine):',p.name);if(n==null||!n.trim())return;
+ const d=prompt('Which days? (e.g. Friday, Sunday - leave empty for every day)',(p.days||[]).join(', '));const note=prompt('Notes or steps (optional):',p.note||'');
+ p.name=n.trim();p.days=(d||'').split(/[,\s]+/).map(x=>DNAMES.find(D=>D.toLowerCase().startsWith(x.toLowerCase().slice(0,3)))).filter(Boolean);p.note=note||'';u.custom=u.custom||{};u.custom[p.id]=p;spSaveUser(u);spRefReset();spDraw(0)}
+// quiet notices: only when something meaningful is new or close
+function spNotice(){const u=spUser(),t=today(),seen=u.seen||{},E=Object.values(spEvents()),soon=E.filter(e=>e.date>=t&&e.date<=addDays(t,3)&&(e.cat==='sabbat'||e.cat==='eclipse'||(e.cat==='lunar'&&/Full|New/.test(e.name))||e.cat==='personal')&&!seen[e.id]);
+ SPV.notice='';if(soon.length){const e=soon.sort((a,b)=>a.date.localeCompare(b.date))[0],n=dayDiff(t,e.date);SPV.notice=TX(SP_CAT[e.cat][1])+' '+e.name+(n===0?' is today':n===1?' is tomorrow':' is in '+n+' days');seen[e.id]=1;u.seen=seen;spSaveUser(u)}
+ const m=(()=>{try{return JSON.parse(store('spMeta')||'{}')}catch(e){return {}}})();if(!SPV.notice&&m.added&&m.at&&Date.now()-m.at<6e4&&m.count!==m.added)SPV.notice='Calendar refreshed: '+m.added+' new event'+(m.added>1?'s':'')+' added ahead.'}
+const SPBOOK='<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5h16a2 2 0 0 1 2 2v20H9a2 2 0 0 1-2-2z"/><path d="M7 25a2 2 0 0 1 2-2h16"/><path d="M18.5 10a4.5 4.5 0 1 0 0 8a3.6 3.6 0 1 1 0-8z" fill="currentColor" stroke="none"/></svg>';
+$('spback').onclick=spBack;$('spidx').onclick=()=>{SPV.stack=SPV.stack.filter(x=>x.v==='home');SPV.stack.push({v:'index'});spDraw(-1)};$('spfind').onclick=()=>spGo({v:'search',q:''});
+$('spmark').onclick=()=>{const v=spTop();if(v.v!=='entry')return;const u=spUser(),i=u.bm.indexOf(v.id);if(i>=0)u.bm.splice(i,1);else u.bm.push(v.id);spSaveUser(u);$('spmark').classList.toggle('on',i<0);spToast(i<0?'Bookmarked':'Bookmark removed');buzz(6)};
+(function(){const p=$('sp');let x0=null,y0=0;p.addEventListener('touchstart',e=>{const t=e.touches[0];x0=t.clientX<28?t.clientX:null;y0=t.clientY},{passive:true});p.addEventListener('touchend',e=>{if(x0==null)return;const t=e.changedTouches[0];if(t.clientX-x0>70&&Math.abs(t.clientY-y0)<60)spBack();x0=null},{passive:true});
+ addEventListener('keydown',e=>{if(p.classList.contains('on')&&e.key==='Escape')spBack()})})();
+$('sigbook').onclick=()=>spOpen({v:'home'});
+// refresh quietly: on launch, when the app comes back, and once a day while open
+spRefresh();document.addEventListener('visibilitychange',()=>{if(!document.hidden)spRefresh()});setInterval(()=>spRefresh(),864e5);
+
 
 render();sync();gFloatInit();
 </script></body></html>
