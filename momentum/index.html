@@ -721,6 +721,11 @@ body.spon #gfloat{display:none!important}
 .spsugs{margin-top:6px}.spsug{display:flex;align-items:center;gap:12px;padding:8px 0}.spsug+.spsug{border-top:1px solid rgba(255,255,255,.06)}
 .spsug i{width:5px;height:5px;flex:none;border-radius:50%;background:rgba(236,232,242,.55)}.spsug span{flex:1;font:italic 400 15px/1.4 var(--serif);color:#ece8f2}
 .spacts .spsug{padding:9px 0}
+.spday>details.spx{padding:0}.spday>details.spx+details.spx{border-top:1px solid rgba(255,255,255,.06)}.spday .sprefl{padding:8px 0 4px}.spdate{color:rgba(236,232,242,.8)!important;margin-bottom:12px}
+.spquote{padding:16px 18px;font:italic 400 18px/1.45 var(--serif);color:#f1edf7;text-align:center}.spquote span{display:block;font:600 9.5px var(--sans);font-style:normal;letter-spacing:.22em;text-transform:uppercase;color:rgba(236,232,242,.5);margin-bottom:8px}
+.sp3{display:flex;gap:8px;margin-bottom:10px}.sp3 button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 4px;border-radius:16px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#ece8f2;font:500 12px var(--sans)}
+.sp3 i{font-style:normal;font-size:17px;line-height:1;font-family:"Apple Symbols","Segoe UI Symbol",var(--sans);color:rgba(236,232,242,.8)}
+.sphero .spnotes{min-height:260px;margin-top:10px}
 </style></head><body>
 <div id="app">
 <header><span class="lab" style="color:var(--fg);letter-spacing:.42em">Momentum<button id="brain" aria-label="What R.O.D.G.E.R. is running on"><i id="bwifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 15.9a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.3" fill="currentColor" stroke="none"/></svg></i><i id="bgo"></i><i id="bgq"></i><i id="bpc"></i><i id="bsrc"></i></button><button id="hmem" aria-label="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button><button id="hfid" aria-label="Use Face ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 0 0 5 0"/></svg></button><i id="sync"></i></span><span class="lab" id="hdate"></span></header>
@@ -2549,7 +2554,7 @@ async function poll(){if(!hasPC())return setTimeout(poll,20000);try{const j=awai
 setTimeout(poll,4000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.)/.test(location.hostname)))navigator.serviceWorker.register(STATIC?'./sw.js':'/sw.js').catch(()=>{});
 // stay up to date: when a newer Momentum is published, switch to it by itself at a quiet moment (never mid-call or mid-typing)
-const BUILD='20261125010539';let UPD=false;
+const BUILD='20261125011020';let UPD=false;
 async function updCheck(){if(!STATIC||BUILD.startsWith('__')||!navigator.onLine)return;try{const t=await (await fetch('sw.js?'+Date.now(),{cache:'no-store'})).text();const m=t.match(/momentum-(\d+)/);if(m&&m[1]!==BUILD)UPD=true}catch(e){}updApply()}
 function updApply(){if(!UPD)return;const busy=(typeof LV!=='undefined'&&LV.on)||talking||($('ask')&&$('ask').value)||document.querySelector('.sheet.on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));
  if(busy){setTimeout(updApply,15000);return}UPD=false;try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})}catch(e){}setTimeout(()=>location.reload(),400)}
@@ -2951,10 +2956,10 @@ function spTop(){return SPV.stack[SPV.stack.length-1]}
 function spGrim(){const u=spUser(),last=u.last;SPV.stack.push({v:'index'});if(last&&last.v!=='index'&&(last.v!=='entry'||spRef()[last.id]))SPV.stack.push(last);spDraw(1)}
 function spRemember(v){if(['index','section','entry','search'].includes(v.v)){const u=spUser();u.last=v.v==='search'?{v:'index'}:v;spSaveUser(u)}}
 function spDraw(dir){const v=spTop(),b=$('spbody');spRemember(v);
- const T={home:['','Days of Significance'],index:['','My Grimoire'],section:['Grimoire',''],entry:['',''],date:['Calendar',''],search:['Grimoire','Search'],marks:['Grimoire','Bookmarks'],saved:['Calendar','Saved for later']}[v.v]||['',''];
+ const T={home:['','Grimoire'],index:['','My Grimoire'],section:['Grimoire',''],entry:['',''],date:['Calendar',''],search:['Grimoire','Search'],marks:['Grimoire','Bookmarks'],saved:['Calendar','Saved for later']}[v.v]||['',''];
  let h='',title=T[1];
  if(v.v==='home')h=spHome();else if(v.v==='index')h=spIndex();else if(v.v==='section'){const s=SP_SECTIONS.find(x=>x[0]===v.s);title=s?s[1]:'';h=spSection(v.s)}
- else if(v.v==='entry'){const e=spRef()[v.id];title=e?(SP_SECTIONS.find(x=>x[0]===e.type)||[])[1]||'':'';h=spEntry(v.id)}else if(v.v==='date'){title=spDateLabel(v.ds);h=spDate(v.ds)}else if(v.v==='search')h=spSearch(v.q||'');else if(v.v==='marks')h=spMarks();else if(v.v==='saved')h=spSaved();
+ else if(v.v==='entry'){const e=spRef()[v.id];title=e?(SP_SECTIONS.find(x=>x[0]===e.type)||[])[1]||'':'';h=spEntry(v.id)}else if(v.v==='date'){title=spDateLabel(v.ds);h=spDate(v.ds)}else if(v.v==='search')h=spSearch(v.q||'');else if(v.v==='marks')h=spMarks();else if(v.v==='hist'){title='On this day';h=spHist(v.ds)}else if(v.v==='notes'){title='Notes';h=spNotesV(v.ds)}else if(v.v==='saved')h=spSaved();
  $('spttl').textContent=title;$('spback').innerHTML=SPV.stack.length>1?'‹ Back':'✕';
  const inGrim=['index','section','entry','search','marks'].includes(v.v);$('spgrimb').style.display=(v.v==='home'||v.v==='date'||v.v==='saved'||(v.v==='section'&&v.s==='rituals'))?'':'none';$('spidx').style.display=inGrim&&v.v!=='index'?'':'none';$('spfind').style.display=inGrim?'':'none';
  const bm=$('spmark');bm.style.display=v.v==='entry'?'':'none';if(v.v==='entry')bm.classList.toggle('on',spUser().bm.includes(v.id));
@@ -2969,12 +2974,11 @@ function spActs(ds,list){return list.map(([id,t])=>spAct(ds,id,t)).join('')}
 function spDayActs(dn,ds){const pr=Object.values(spUser().custom||{}).filter(p=>!p.days||!p.days.length||p.days.includes(dn)).map(p=>['p-'+p.id,p.name]);return SP_DAY[dn].acts.concat(pr)}
 // ----- home: today
 function spHome(){const t=today(),up=spUpcoming(addDays(t,1),5),u=spUser();
- let h='';if(SPV.notice)h+='<div class="spnote glass">'+spE(SPV.notice)+'</div>';
+ let h=spBar(t)+spQuote(t);if(SPV.notice)h+='<div class="spnote glass">'+spE(SPV.notice)+'</div>';
  h+='<details class="glass spx spcalx"'+(u.calOpen===false?'':' open')+'><summary><span>Calendar</span><small>'+MON[(SPV.ym?+SPV.ym.slice(5,7):parseISO(t).getMonth()+1)-1]+'</small></summary><div class="spcal">'+spMonth(SPV.ym||t.slice(0,7))+'</div></details>';
  h+='<div class="sph">Coming up</div><div class="glass splist">'+up.map(e=>{const n=dayDiff(t,e.date);return '<button class="sprow" data-date="'+e.date+'"><div><b>'+spE(e.name)+'</b><small>'+spDateLabel(e.date)+'</small>'+(e.kw?'<small class="spkw2">'+spE(e.kw)+'</small>':'')+'</div><span class="spin2">'+(n===1?'tomorrow':'in '+n+' days')+'</span></button>'}).join('')+'</div>';
- h+='<div class="sph">Today · '+spDateLabel(t)+'</div>'+spDate(t);
- h+='<button class="spgrim glass" data-sec="rituals"><span class="spbook">'+SPSPELL+'</span><div><b>Spells</b><small>Rituals and spellwork for every day, the moon and your space.</small></div><i>›</i></button>';
- if(u.saved.length)h+='<button class="sprow glass spsaved" data-saved="1"><div><b>Saved for later</b><small>'+u.saved.length+' saved</small></div><i>›</i></button>';
+ spDate.noq=1;h+=spDate(t);spDate.noq=0;
+  if(u.saved.length)h+='<button class="sprow glass spsaved" data-saved="1"><div><b>Saved for later</b><small>'+u.saved.length+' saved</small></div><i>›</i></button>';
  return h}
 const SPSPELL='<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 27h8M13 27V14h6v13"/><path d="M16 4c3 3.4 3 6.4 0 8-3-1.6-3-4.6 0-8z"/></svg>';
 function spMonth(ym){const y=+ym.slice(0,4),mo=+ym.slice(5,7)-1,first=new Date(y,mo,1),off=(first.getDay()+6)%7,n=new Date(y,mo+1,0).getDate(),t=today();
@@ -2990,23 +2994,26 @@ function spDate(ds){const d=parseISO(ds),dn=DNAMES[d.getDay()],m=moonOn(ds),ev=s
  for(const e of ev){const r=u.rem[e.id];eh+='<div class="spevi"><div class="spevh">'+spCatTag(e.cat)+(e.time?'<span class="sptime">'+spE(e.time)+'</span>':'')+'</div><b class="spevn">'+spE(e.name)+'</b><p>'+spE(e.desc)+'</p>'+
   '<details class="spx"><summary><span>'+(e.sig?'Meaning & tradition':'About this date')+'</span></summary>'+(e.sig?'<p>'+spE(e.sig)+'</p>':'')+'<p class="spsrc">'+({calc:'Calculated',fixed:'Fixed date',approx:'Approximate'}[e.dtype]||'')+' · '+spE(e.src)+'</p></details>'+
   '<div class="spevb"><button class="spbtn'+(r?' on':'')+'" data-rem="'+spE(e.id)+'">'+(r?(r.mode==='3'?'🔔 3 days before + on the day':'🔔 On the day'):'Remind me')+'</button>'+[...new Set(e.grim||[])].filter(g=>SP_SECTIONS.some(s=>s[0]===g)).map(g=>'<button class="spbtn" data-sec="'+g+'">'+spE(SP_SECTIONS.find(s=>s[0]===g)[1])+' ›</button>').join('')+'</div></div>'}
- let h=spDayBody(dn,ds,m,eh,ev);
- h+='<details class="glass spx"><summary><span>My notes'+(u.notes[ds]?' <em>1</em>':'')+'</span></summary><textarea class="spnotes" data-note="'+ds+'" placeholder="Anything about today - what you did, what you noticed...">'+spE(u.notes[ds]||'')+'</textarea></details>';
- h+='<details class="glass spx"><summary><span>On this date in history'+(A&&A.pages&&A.pages.length?' <em>'+A.pages.length+'</em>':'')+'</span></summary>'+(A&&A.pages&&A.pages.length?A.pages.map(p=>'<p><b>'+spE(p.title)+'</b> - '+spE(p.text)+'</p>').join('')+'<p class="spsrc">Written by Rodger with AI - may contain mistakes.</p>':'<p class="spsrc">'+(navigator.onLine?'Rodger is looking this up - check back in a moment.':'Needs the internet the first time.')+'</p>')+'</details>';
- return h}
-function spDayBody(dn,ds,m,eh,ev){const D=DAYSIG[dn],X=SP_DAY[dn],R=spRef(),id='day:'+dn.toLowerCase(),L=R[id].links;
- let h='<div class="glass sphero spday">'+(eh?eh+'<div class="spdiv"></div>':'')+'<div class="speye">Day of significance</div><div class="spdayrow"><span class="spglyph">'+TX(PGLYPH[D.planet])+'</span><div><b>'+dn+'</b><small>'+spE(D.title.replace(/^The Day of /,''))+'</small></div></div><div class="spmeta">Ruled by <button class="spin" data-go="planet:'+SP_SLUG(D.planet)+'">'+spE(D.planet)+'</button> · Element of '+spE(D.element)+(m?' · '+m.name+' ('+Math.round(m.ill*100)+'%)':'')+'</div>'+
+ let x='<details class="spx"><summary><span>My notes'+(u.notes[ds]?' <em>1</em>':'')+'</span></summary><textarea class="spnotes" data-note="'+ds+'" placeholder="Anything about today - what you did, what you noticed...">'+spE(u.notes[ds]||'')+'</textarea></details>';
+ x+='<details class="spx"><summary><span>On this date in history'+(A&&A.pages&&A.pages.length?' <em>'+A.pages.length+'</em>':'')+'</span></summary>'+(A&&A.pages&&A.pages.length?A.pages.map(p=>'<p><b>'+spE(p.title)+'</b> - '+spE(p.text)+'</p>').join('')+'<p class="spsrc">Written by Rodger with AI - may contain mistakes.</p>':'<p class="spsrc">'+(navigator.onLine?'Rodger is looking this up - check back in a moment.':'Needs the internet the first time.')+'</p>')+'</details>';
+ return (spDate.noq?'':spBar(ds)+spQuote(ds))+'<div class="sph">Days of Significance</div>'+spDayBody(dn,ds,m,eh,ev,'',ds)}
+function spBar(ds){const u=spUser(),A=bkAI(ds);return '<div class="sp3"><button data-hist="'+ds+'"><i>'+TX('\u2318')+'</i>On this day'+(A&&A.pages&&A.pages.length?'':'')+'</button><button data-notes="'+ds+'"><i>'+TX('\u270E')+'</i>Notes'+(u.notes[ds]?' ·':'')+'</button><button data-sec="rituals"><i>'+TX('\u2668')+'</i>Spells</button></div>'}
+function spHist(ds){const A=bkAI(ds);bkFetch(ds);return A&&A.pages&&A.pages.length?A.pages.map(p=>'<div class="glass sphero"><div class="speye">'+spE(p.title)+'</div><p>'+spE(p.text)+'</p></div>').join('')+'<p class="spsrc" style="margin:12px 4px">Written by Rodger with AI - may contain mistakes.</p>':'<div class="glass sphero"><p class="spsrc">'+(navigator.onLine?'Rodger is looking this up - come back in a moment.':'Needs the internet the first time.')+'</p></div>'}
+function spNotesV(ds){const u=spUser();return '<div class="glass sphero"><div class="speye">'+spDateLabel(ds)+'</div><textarea class="spnotes" data-note="'+ds+'" placeholder="Anything about today - what you did, what you noticed...">'+spE(u.notes[ds]||'')+'</textarea></div>'}
+function spQuote(ds){return '<div class="glass spquote"><span>A moment to reflect</span>'+spE(SP_DAY[DNAMES[parseISO(ds).getDay()]].reflect)+'</div>'}
+function spDayBody(dn,ds,m,eh,ev,extra,dsl){const D=DAYSIG[dn],X=SP_DAY[dn],R=spRef(),id='day:'+dn.toLowerCase(),L=R[id].links;
+ let h='<div class="glass sphero spday">'+(dsl?'<div class="speye spdate">'+(dsl===today()?'Today · ':'')+spDateLabel(dsl)+'</div>':'')+(eh?eh+'<div class="spdiv"></div>':'')+'<div class="speye">Day of significance</div><div class="spdayrow"><span class="spglyph">'+TX(PGLYPH[D.planet])+'</span><div><b>'+dn+'</b><small>'+spE(D.title.replace(/^The Day of /,''))+'</small></div></div><div class="spmeta">Ruled by <button class="spin" data-go="planet:'+SP_SLUG(D.planet)+'">'+spE(D.planet)+'</button> · Element of '+spE(D.element)+(m?' · '+m.name+' ('+Math.round(m.ill*100)+'%)':'')+'</div>'+
   '<div class="sph2">Today\'s purpose</div><p>'+spE(X.purpose)+'</p>'+
-  '<div class="sph2">You could…</div><div class="spsugs">'+spActs(ds,[].concat(...(ev||[]).filter(e=>e.acts&&e.acts.length&&e.cat!=='numero').slice(0,2).map(e=>e.acts.slice(0,1).map((a,i)=>[e.id+'#'+i,a]))).concat(spDayActs(dn,ds)).slice(0,5))+'</div></div>';
- const grp=(label,count,preview,inner)=>'<details class="glass spx"><summary><span>'+label+(count!=null?' <em>'+count+'</em>':'')+'</span><small>'+spE(preview)+'</small></summary>'+inner+'</details>';
- h+='<div class="sph">Explore correspondences</div>';
+  '<div class="sph2">You could…</div><div class="spsugs">'+spActs(ds,[].concat(...(ev||[]).filter(e=>e.acts&&e.acts.length&&e.cat!=='numero').slice(0,2).map(e=>e.acts.slice(0,1).map((a,i)=>[e.id+'#'+i,a]))).concat(spDayActs(dn,ds)).slice(0,5))+'</div>';
+ const grp=(label,count,preview,inner)=>'<details class="spx"><summary><span>'+label+(count!=null?' <em>'+count+'</em>':'')+'</span><small>'+spE(preview)+'</small></summary>'+inner+'</details>';
+ h+='<div class="spdiv"></div><div class="sph2">Explore correspondences</div>';
  h+=grp('Deities',(L.Deities||[]).length,(L.Deities||[]).map(x=>R[x].name).join(', '),spLinks(L.Deities||[])+'<p class="spsrc">'+spE(D.deities)+'</p>');
  h+=grp('Herbs & Plants',D.plants.length,D.plants.length+' traditional associations','<ul class="spul">'+D.plants.map(p=>{const mm=p.match(/^([^(]+)\((.*)\)$/),n=(mm?mm[1]:p).trim();return '<li><button class="spin" data-go="herb:'+SP_SLUG(n)+'">'+spE(n)+'</button>'+(mm?' - '+spE(mm[2]):'')+'</li>'}).join('')+'</ul>');
  h+=grp('Gemstones',(L.Gemstones||[]).length,D.gems.split(',').slice(0,3).join(',')+' and more',spLinks(L.Gemstones||[]));
  h+=grp('Tarot',(L.Tarot||[]).length,(L.Tarot||[]).map(x=>R[x].name).join(' and '),(L.Tarot||[]).map(x=>'<p><button class="spin" data-go="'+x+'">'+spE(R[x].name)+'</button> - '+spE(R[x].mean[dn]||'')+'</p>').join(''));
  h+=grp('Colours, Metals & Elements',null,D.colours.toLowerCase()+' · '+D.element.toLowerCase(),'<p><b>Colours</b> '+D.colours.split(',').map(sw).join(' ')+'</p><p><b>Metals</b> '+spE(D.metals)+'</p><p><b>Element</b> '+elSVG(D.element)+' '+spE(D.element)+'</p><p><b>Direction</b> '+spE(D.direction)+'</p>');
  h+=grp('More correspondences',6,'Energy, chakra, star signs, number, frequencies, spells','<p><b>Energy</b> '+spE(D.energy)+'</p><p><b>Chakra</b> '+spE(D.chakra)+'</p><p><b>Star signs</b> '+spE(D.signs)+'</p><p><b>Number</b> '+spE(D.number)+'</p><p><b>Frequencies</b> '+spE(D.freq)+'</p><p><b>Attributes</b> '+spE(D.attr)+'</p><p><b>Spells</b></p>'+spLinks(L.Rituals||[]));
- h+='<div class="sph">A moment to reflect</div><div class="glass sprefl">'+spE(X.reflect)+'</div>';
+ h+=(extra?'<div class="spdiv"></div>'+extra:'')+'</div>';
  return h}
 // ----- grimoire
 function spIndex(){const R=Object.values(spRef()),u=spUser(),last=u.last;
@@ -3059,7 +3066,7 @@ function spWire(b,v){
  b.querySelectorAll('[data-sec]').forEach(x=>x.onclick=()=>{v.y=b.scrollTop;spGo({v:'section',s:x.dataset.sec})});
  b.querySelectorAll('[data-grim]').forEach(x=>x.onclick=()=>{v.y=b.scrollTop;spGrim()});
  b.querySelectorAll('[data-find]').forEach(x=>x.onclick=()=>spGo({v:'search',q:''}));
- b.querySelectorAll('[data-marks]').forEach(x=>x.onclick=()=>spGo({v:'marks'}));
+ b.querySelectorAll('[data-marks]').forEach(x=>x.onclick=()=>spGo({v:'marks'}));b.querySelectorAll('[data-hist]').forEach(x=>x.onclick=()=>{v.y=b.scrollTop;spGo({v:'hist',ds:x.dataset.hist})});b.querySelectorAll('[data-notes]').forEach(x=>x.onclick=()=>{v.y=b.scrollTop;spGo({v:'notes',ds:x.dataset.notes})});
  b.querySelectorAll('[data-saved]').forEach(x=>x.onclick=()=>spGo({v:'saved'}));
  b.querySelectorAll('[data-ym]').forEach(x=>x.onclick=e=>{e.stopPropagation();SPV.ym=x.dataset.ym;const c=b.querySelector('.spcal');if(c){c.innerHTML=spMonth(SPV.ym);spWire(c,v)}const sm=b.querySelector('.spcalx summary small');if(sm)sm.textContent=MON[+SPV.ym.slice(5,7)-1]});const cx=b.querySelector('.spcalx');if(cx)cx.ontoggle=()=>{const u=spUser();u.calOpen=cx.open;spSaveUser(u)};
  b.querySelectorAll('.spsug').forEach(r=>{if(0)r.querySelector('.spck').onclick=e=>{e.stopPropagation();const u=spUser(),ds=r.dataset.ds,id=r.dataset.act;u.done[ds]=u.done[ds]||{};if(u.done[ds][id])delete u.done[ds][id];else{u.done[ds][id]=Date.now();buzz([10,30,12])}spSaveUser(u);
